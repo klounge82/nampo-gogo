@@ -15,6 +15,20 @@
 </head>
 <body>
 
+  <!-- In-app Notification Banner for New Reviews (Sleek Toast style) -->
+  <div id="merchant-notification-banner" class="notification-banner hidden">
+    <div class="notif-content">
+      <i data-lucide="bell-ring" class="notif-icon"></i>
+      <div class="notif-text">
+        <strong>리뷰 알림</strong>
+        <span>새로운 고객 리뷰가 등록되었습니다! <strong id="notif-review-count">0</strong>건 대기 중</span>
+      </div>
+    </div>
+    <button class="notif-close-btn" onclick="document.getElementById('merchant-notification-banner').classList.add('hidden')">
+      <i data-lucide="x"></i>
+    </button>
+  </div>
+
   <!-- Mobile Frame Container -->
   <div class="mobile-frame">
     
@@ -67,8 +81,8 @@
         </div>
         
         <div class="header-controls">
-          <!-- Mode Switch Button (No 'Mode' text, icon only) -->
-          <button id="btn-quick-mode-switch" class="btn-mode-switch-pill" style="padding: 6px 8px;">
+          <!-- Mode Switch Button (Now functions as location.reload() 새로고침) -->
+          <button id="btn-quick-mode-switch" class="btn-mode-switch-pill" style="padding: 6px 8px;" title="새로고침">
             <i data-lucide="refresh-cw"></i>
           </button>
 
@@ -298,34 +312,70 @@
 
         <!-- MERCHANT TAB 1: Business Registration / Verification -->
         <section id="tab-merchant-auth" class="tab-panel">
+          
+          <!-- Mini Logout Button for logged-in Merchants before partnership approval -->
+          <div class="merchant-profile-mini-bar hidden" id="merchant-mini-profile-header">
+            <span>로그인 계정: <strong id="merchant-mini-username">owner</strong></span>
+            <button class="btn btn-sm btn-outline text-accent" id="btn-merchant-logout-auth">로그아웃</button>
+          </div>
+
           <div class="section-title">
             <h2>제휴 사업자 계정 관리</h2>
             <p>매장 정보를 등록하고 제휴 승인을 요청하여 파트너로 노출되세요.</p>
           </div>
 
-          <!-- Step 1: Join / Login form -->
-          <div class="glass-box" id="merchant-login-card">
-            <h4 data-trans="loginTitle">사업자 로그인 / 3초 회원가입</h4>
-            <form id="merchant-join-form" onsubmit="event.preventDefault();" style="margin-top: 12px;">
-              <input type="hidden" name="auth-role-merchant" value="merchant">
-              
+          <!-- Step 1-A: Choose Register or Login welcome screen -->
+          <div class="glass-box text-center" id="merchant-welcome-auth-card">
+            <h4 style="font-weight:900; font-size:16px; margin-bottom:12px;">사장님 전용 가입 & 로그인</h4>
+            <p class="auth-desc" style="margin-bottom:20px;">회원가입 후 제휴 등록 신청을 마쳐야 매장 노출 및 상세 올리기가 열립니다.</p>
+            <div style="display:flex; gap:12px;">
+              <button class="btn btn-primary flex-1" id="btn-show-merchant-register">회원가입 하기</button>
+              <button class="btn btn-secondary flex-1" id="btn-show-merchant-login">로그인 하기</button>
+            </div>
+          </div>
+
+          <!-- Step 1-B: Real Register Form (Join) -->
+          <div class="glass-box hidden" id="merchant-register-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+              <h4 style="font-weight:800; font-size:14px;">사장님 회원가입</h4>
+              <button class="btn btn-sm btn-outline" id="btn-back-to-welcome-r">이전으로</button>
+            </div>
+            <form id="merchant-join-form" onsubmit="event.preventDefault();">
               <div class="input-group">
-                <i data-lucide="user"></i>
-                <input type="text" id="m-auth-username" required placeholder="사업자 아이디 입력">
+                <i data-lucide="user-plus"></i>
+                <input type="text" id="m-register-username" required placeholder="신규 사업자 아이디(영어/숫자)">
               </div>
-              
               <div class="input-group">
                 <i data-lucide="lock"></i>
-                <input type="password" id="m-auth-password" required placeholder="비밀번호 입력">
+                <input type="password" id="m-register-password" required placeholder="비밀번호 입력">
               </div>
-
               <div class="input-group">
                 <i data-lucide="lock-keyhole"></i>
-                <input type="password" id="m-auth-password-confirm" required placeholder="비밀번호 확인 입력">
+                <input type="password" id="m-register-password-confirm" required placeholder="비밀번호 확인">
               </div>
-
               <button type="submit" class="btn btn-primary btn-block">
-                <i data-lucide="key"></i> 가입 및 로그인 완료
+                <i data-lucide="user-check"></i> 가입 완료 (자동 로그인)
+              </button>
+            </form>
+          </div>
+
+          <!-- Step 1-C: Real Login Form (Login) -->
+          <div class="glass-box hidden" id="merchant-login-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+              <h4 style="font-weight:800; font-size:14px;">사장님 로그인</h4>
+              <button class="btn btn-sm btn-outline" id="btn-back-to-welcome-l">이전으로</button>
+            </div>
+            <form id="merchant-login-form-submit" onsubmit="event.preventDefault();">
+              <div class="input-group">
+                <i data-lucide="user"></i>
+                <input type="text" id="m-login-username" required placeholder="아이디 입력">
+              </div>
+              <div class="input-group">
+                <i data-lucide="lock"></i>
+                <input type="password" id="m-login-password" required placeholder="비밀번호 입력">
+              </div>
+              <button type="submit" class="btn btn-primary btn-block">
+                <i data-lucide="log-in"></i> 로그인 완료
               </button>
             </form>
           </div>
@@ -361,7 +411,7 @@
                   <option value="korean">전통한식 (Traditional)</option>
                   <option value="chinese">중식/요리 (Chinese)</option>
                   <option value="japanese">일식/돈까스 (Sushi/Katsu)</option>
-                  <option value="massage">마사지/뷰티 (Massage)</option>
+                  <option value="massage">미용/피부/마사지 (Beauty/Massage)</option>
                   <option value="cafe">디저트/카페 (Dessert/Cafe)</option>
                 </select>
               </div>
@@ -371,176 +421,341 @@
                 <input type="tel" id="apply-phone" required placeholder="예: +82-51-245-1111 (국제전화 규격)" class="nampo-input">
               </div>
 
-              <button type="submit" class="btn btn-primary btn-block" id="btn-submit-partnership">
-                <i data-lucide="check-square"></i> 공식 제휴 승인 신청하기
-              </button>
+              <!-- Sleek Rounded Centered Submit Button -->
+              <div style="display:flex; justify-content:center; margin-top:20px;">
+                <button type="submit" class="btn btn-primary btn-round-centered" id="btn-submit-partnership">
+                  제휴 신청서 전송하기 ➔
+                </button>
+              </div>
             </form>
           </div>
 
-          <!-- Step 3: Application Status / Approved Info Box -->
-          <div class="glass-box approved-state-banner hidden" id="merchant-approved-status-card">
-            <div class="success-icon-check">✓</div>
-            <h4>Nampo GoGo 공식 제휴 상인 승인 완료</h4>
-            <p>축하합니다! 공식 제휴 매장 인증이 완료되었습니다. 이제 상세 메뉴와 매장 미디어를 편집하여 실시간 갱신할 수 있습니다.</p>
+          <!-- Step 3: PENDING/심사중 Banner with Simulator Toggle -->
+          <div class="glass-box approved-state-banner pending-state hidden" id="merchant-pending-status-card">
+            <div class="pending-icon-clock">⌛</div>
+            <h4>현재 서류 심사 진행 중입니다.</h4>
+            <p class="auth-desc" style="margin-top: 6px;">제출하신 사업자등록증 및 매장 인증에 대한 심사가 진행 중입니다. 승인이 나면 매장 정보 올리기가 자동 오픈됩니다.</p>
+            
+            <!-- Admin simulator tool -->
+            <div class="admin-simulator-panel" style="margin-top:20px; border-top:1.5px dashed rgba(49, 130, 246, 0.2); padding-top:15px;">
+              <span style="font-size:10px; font-weight:800; color:var(--primary); display:block; margin-bottom:8px;">🛠️ 개발자/어드민 시뮬레이션 키</span>
+              <button class="btn btn-primary btn-sm btn-block" id="btn-demo-approve-instantly" style="border-radius: var(--radius-pill); font-size:11px;">
+                개발자 즉시 승인하기 (테스트용)
+              </button>
+            </div>
           </div>
         </section>
 
-        <!-- MERCHANT TAB 2: Shop Details, Required Images verification & Menu Register -->
+        <!-- MERCHANT TAB 2: 매장 관리 (대시보드 통계 & 월간 그래프 & 리뷰 관리 및 답글) -->
         <section id="tab-merchant-manage" class="tab-panel">
-          <div class="section-title">
-            <h2 data-trans="merchantTitle">내 매장 관리 대시보드</h2>
-            <p>매장 사진(필수 조건 만족), 동영상 및 음식점 상세 메뉴(가격, 주차, 결제 수단)를 올려 업데이트하세요.</p>
+          
+          <div class="merchant-profile-mini-bar" id="merchant-dashboard-profile-header">
+            <span>제휴 파트너: <strong id="merchant-dashboard-username">owner</strong></span>
+            <button class="btn btn-sm btn-outline text-accent" id="btn-merchant-logout-dashboard">로그아웃</button>
           </div>
 
-          <!-- Quick stats -->
+          <div class="section-title">
+            <h2 data-trans="merchantTitle">내 매장 관리 대시보드</h2>
+            <p>매장의 실시간 유동 분석, 월간 통계 수치 및 고객 방문 리뷰를 통합 관리합니다.</p>
+          </div>
+
+          <!-- Quick Metrics (Today Visitor, Stamp counts) -->
           <div class="merchant-metrics-grid">
             <div class="metric-card bg-primary-soft">
               <span class="metric-title" data-trans="visitorToday">오늘 방문자 수</span>
-              <span class="metric-value">18명</span>
+              <span class="metric-value" id="dashboard-metric-visitor-today">12명</span>
             </div>
             <div class="metric-card bg-success-soft">
               <span class="metric-title" data-trans="qrStampsIssued">QR 인증 횟수</span>
-              <span class="metric-value" id="merchant-stamps-val">24건</span>
+              <span class="metric-value" id="merchant-stamps-val">0건</span>
             </div>
           </div>
 
-          <!-- Strict Media Upload Form -->
-          <div class="glass-box">
-            <h4 style="font-size:14px; font-weight:800; margin-bottom:10px;">매장 다중 미디어 업로드 (필수 규격 체크)</h4>
+          <!-- Monthly Visitors & Stamps Trend Line Graph (SVG rendering area) -->
+          <div class="glass-box dashboard-graph-box">
+            <h4 style="font-size:12px; font-weight:900; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+              <span>📈 월별 방문 및 QR 인증 추이 (최근 6개월)</span>
+              <span style="font-size:9px; font-weight:normal; color:var(--text-muted);">Toss Style SVG Chart</span>
+            </h4>
             
-            <form id="merchant-media-upload-form" onsubmit="event.preventDefault();">
-              <div class="upload-guide-info">
-                📸 <strong>매장 사진 파일 규격 가이드라인:</strong><br>
-                - 모바일 화면 최적화 권장 비율: <strong>800x600 픽셀 (4:3 비율)</strong><br>
-                - 파일 확장자: <strong>JPG, PNG, WEBP</strong>만 업로드 가능 (장당 5MB 이하)<br>
-                🎥 <strong>동영상 파일 규격 가이드라인:</strong><br>
-                - 모바일 세로/가로 권장 비율: <strong>1280x720 픽셀</strong> / 확장자: <strong>MP4, WEBM</strong> (최대 3개)
-              </div>
-
-              <div class="form-group-nampo">
-                <label>미디어 파일 다중 선택 (사진 최대 10장, 동영상 최대 3개)</label>
-                <input type="file" id="merchant-media-files" multiple accept="image/png, image/jpeg, image/webp, video/mp4, video/webm" class="nampo-input" style="padding: 6px;">
-              </div>
-
-              <!-- Required Pictures Checklist Verification -->
-              <div class="required-media-checklist">
-                <h5>매장 노출을 위한 필수 사진 체크리스트</h5>
-                <p>업로드한 파일들 중 아래 요건에 해당하는 사진이 있는지 스스로 체크해 주세요.</p>
-                
-                <label class="checkbox-row-verif">
-                  <input type="checkbox" id="check-media-signboard" required>
-                  <span>1. 매장 대문 또는 간판 사진 (매장 이름이 선명하게 노출됨) <strong>[필수]</strong></span>
-                </label>
-                <label class="checkbox-row-verif">
-                  <input type="checkbox" id="check-media-menu" required>
-                  <span>2. 매장 메뉴판 또는 대표 메뉴판 사진 <strong>[필수]</strong></span>
-                </label>
-                <label class="checkbox-row-verif">
-                  <input type="checkbox" id="check-media-inside" required>
-                  <span>3. 매장 내부 모습 사진 (2장 이상 포함) <strong>[필수]</strong></span>
-                </label>
-                <label class="checkbox-row-verif">
-                  <input type="checkbox" id="check-media-outside" required>
-                  <span>4. 매장 외부 전경 사진 (2장 이상 포함) <strong>[필수]</strong></span>
-                </label>
-              </div>
-
-              <!-- Thumbnail selector preview -->
-              <div style="margin-top:14px; font-size:11px; font-weight:800; color:var(--primary);">💡 썸네일(대표 커버 사진) 라디오 선택</div>
-              <div class="media-thumb-selector-grid" id="merchant-media-previews">
-                <!-- Base64 previews populated here -->
-              </div>
-            </form>
+            <div class="chart-canvas-wrapper">
+              <svg id="merchant-monthly-chart-svg" viewBox="0 0 400 180" width="100%" height="180">
+                <!-- SVG Draw elements -->
+              </svg>
+            </div>
+            
+            <div class="chart-legend-row" style="display:flex; justify-content:center; gap:16px; margin-top:10px; font-size:9px; font-weight:800;">
+              <span style="color:var(--primary);">● 월별 방문객 수 (명)</span>
+              <span style="color:var(--secondary);">● QR 스탬프 인증 수 (건)</span>
+            </div>
           </div>
 
-          <!-- Restaurant Menu / Payment / Parking Form -->
-          <div class="glass-box" style="margin-top: 20px;">
-            <h4 style="font-size:14px; font-weight:800; margin-bottom:12px;">음식점 상세 메뉴 및 이용 환경 등록</h4>
+          <!-- Reviews management & Owner Reply area -->
+          <div class="glass-box dashboard-reviews-box" style="margin-top:20px;">
+            <h4 style="font-size:13px; font-weight:900; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+              <span>💬 매장 리뷰 통합 관리</span>
+              <span class="badge-blue" id="dashboard-review-count-badge" style="font-size:9px; padding:2px 8px; border-radius:10px;">0건</span>
+            </h4>
             
-            <form id="merchant-menu-details-form" onsubmit="event.preventDefault();">
-              <!-- Benefits -->
-              <div class="form-group-nampo">
-                <label>관광객 제공 제휴 혜택 내용</label>
-                <input type="text" id="edit-benefit-input" required class="nampo-input" placeholder="예: 메인 메뉴 주문시 탄산음료 1캔 무료 제공">
-              </div>
+            <div id="merchant-reviews-manager-list" class="dashboard-reviews-list-wrap">
+              <!-- Dynamically populated customer reviews with ratings, photos and reply options -->
+            </div>
+          </div>
+        </section>
 
-              <!-- Sched Hours & Phone -->
-              <div class="form-group-nampo">
-                <label>영업 시간</label>
-                <input type="text" id="edit-hours-input" required class="nampo-input" value="11:00 - 22:00">
-              </div>
-              <div class="form-group-nampo">
-                <label>연락처 (국제전화 형식 권장)</label>
-                <input type="tel" id="edit-phone-input" required class="nampo-input" value="+82-51-245-1234">
-              </div>
+        <!-- MERCHANT TAB 3: 매장 정보 올리기 / 수정 (폼 전면 개편) -->
+        <section id="tab-merchant-upload" class="tab-panel">
+          
+          <div class="merchant-profile-mini-bar" id="merchant-upload-profile-header">
+            <span>제휴 파트너: <strong id="merchant-upload-username">owner</strong></span>
+            <button class="btn btn-sm btn-outline text-accent" id="btn-merchant-logout-upload">로그아웃</button>
+          </div>
 
-              <!-- Menu classifications -->
-              <div class="menu-classification-block">
-                <h5>1. 추천 메뉴 등록 (Signature Menu)</h5>
-                <div class="input-inline-row">
-                  <input type="text" id="menu-sig-name" placeholder="메뉴 이름" class="nampo-input">
-                  <input type="text" id="menu-sig-price" placeholder="가격 (예: 15,000 KRW)" class="nampo-input">
+          <div class="section-title">
+            <h2>매장 상세 정보 올리기 / 수정</h2>
+            <p>사진 크기 규격, 영업 요일별 선택, 사장님 연락처 및 메뉴 사진 등 상세 정보를 엄격하게 기입하세요.</p>
+          </div>
+
+          <!-- Auto draft notice -->
+          <div class="glass-box draft-recovery-alert" id="draft-recovery-alert-box" style="display:none; background:var(--primary-soft); border:1.5px solid var(--primary); padding:10px; margin-bottom:15px; border-radius:var(--radius-sm);">
+            <p style="font-size:10px; font-weight:700; color:var(--text-main); display:flex; align-items:center; gap:6px;">
+              <i data-lucide="history" style="width:14px; height:14px; color:var(--primary);"></i>
+              작성 중이던 임시 저장(Draft) 데이터를 감지하여 복원했습니다! (24시간 보관)
+            </p>
+          </div>
+
+          <!-- Strictly Regulated Media Uploader -->
+          <div class="glass-box">
+            <h4 style="font-size:13px; font-weight:800; margin-bottom:10px;">1. 매장 다중 미디어 업로드 (규격 검사)</h4>
+            
+            <div class="upload-guide-info" style="border-color:var(--primary); background:var(--primary-soft); color:var(--text-main); margin-bottom:14px;">
+              📸 <strong>사진 파일 필수 규격 안내:</strong><br>
+              - <strong>간판 사진 [필수 1장]</strong>: 외부 전경/간판/문입구 노출 (1순위)<br>
+              - <strong>내부 모습 사진 [최소 2장 ~ 최대 10장]</strong>: 10장 초과 시 경고창 팝업 및 차단<br>
+              🎥 <strong>동영상 파일 규격 안내:</strong><br>
+              - <strong>동영상 [최대 3개]</strong>: 3개 초과 시 경고창 팝업 및 차단 (MP4/WEBM)
+            </div>
+
+            <!-- Signboard photo upload -->
+            <div class="form-group-nampo" style="border-bottom:1px dashed var(--border-medium); padding-bottom:12px; margin-bottom:12px;">
+              <label>📁 간판/대문 사진 등록 (1장 필수)</label>
+              <input type="file" id="merchant-file-signboard" accept="image/png, image/jpeg, image/webp" class="nampo-input" style="padding: 6px;">
+              <div class="media-thumb-selector-grid" id="signboard-preview-area"></div>
+            </div>
+
+            <!-- Inside photo upload -->
+            <div class="form-group-nampo" style="border-bottom:1px dashed var(--border-medium); padding-bottom:12px; margin-bottom:12px;">
+              <label>📁 매장 내부/기타 사진 등록 (최소 2장 ~ 최대 10장)</label>
+              <input type="file" id="merchant-files-inside" multiple accept="image/png, image/jpeg, image/webp" class="nampo-input" style="padding: 6px;">
+              <div class="media-thumb-selector-grid" id="inside-preview-area"></div>
+            </div>
+
+            <!-- Video upload -->
+            <div class="form-group-nampo">
+              <label>📁 매장 동영상 등록 (최대 3개)</label>
+              <input type="file" id="merchant-files-video" multiple accept="video/mp4, video/webm" class="nampo-input" style="padding: 6px;">
+              <div class="media-thumb-selector-grid" id="video-preview-area"></div>
+            </div>
+          </div>
+
+          <!-- Basic store form -->
+          <div class="glass-box" style="margin-top: 20px;">
+            <h4 style="font-size:13px; font-weight:800; margin-bottom:12px;">2. 매장 이용 환경 및 연락망 등록</h4>
+            
+            <form id="merchant-detail-profile-form" onsubmit="event.preventDefault();">
+              
+              <!-- Business Category selector (Exactly 3 categories) -->
+              <div class="form-group-nampo">
+                <label>업종 선택</label>
+                <div class="parking-radio-row" style="flex-wrap:wrap; gap:8px;">
+                  <label class="radio-pill flex-1" style="min-width:90px;">
+                    <input type="radio" name="m-upload-category" value="food" checked>
+                    <span>음식점</span>
+                  </label>
+                  <label class="radio-pill flex-1" style="min-width:90px;">
+                    <input type="radio" name="m-upload-category" value="karaoke">
+                    <span>노래방/노래연습장</span>
+                  </label>
+                  <label class="radio-pill flex-1" style="min-width:90px;">
+                    <input type="radio" name="m-upload-category" value="massage">
+                    <span>미용/피부/마사지</span>
+                  </label>
                 </div>
               </div>
 
-              <div class="menu-classification-block">
-                <h5>2. 기본 메뉴 등록 (Standard Menu)</h5>
-                <div class="input-inline-row">
-                  <input type="text" id="menu-std-name" placeholder="메뉴 이름" class="nampo-input">
-                  <input type="text" id="menu-std-price" placeholder="가격" class="nampo-input">
-                </div>
-              </div>
-
-              <div class="menu-classification-block">
-                <h5>3. 계절별 특선 메뉴 등록 (Seasonal Menu - 선택)</h5>
-                <div class="input-inline-row">
-                  <input type="text" id="menu-sea-name" placeholder="계절 특선 메뉴 이름" class="nampo-input">
-                  <input type="text" id="menu-sea-price" placeholder="가격" class="nampo-input">
-                </div>
-              </div>
-
-              <!-- Parking status -->
+              <!-- Exclusive tourist benefit -->
               <div class="form-group-nampo">
+                <label>관광객 제공 제휴 혜택 내용 (예시)</label>
+                <input type="text" id="m-upload-benefit" required class="nampo-input" placeholder="예: 메인 메뉴 주문 시 탄산음료 1캔 무료 제공 (체크인 완료 한정)">
+              </div>
+
+              <!-- Contact with global guide -->
+              <div class="form-group-nampo">
+                <label>매장 대표 전화번호 (국제전화 형식 기준 82+...)</label>
+                <input type="text" id="m-upload-phone" required class="nampo-input" placeholder="예: +82-51-123-4567">
+              </div>
+
+              <!-- Owner personal messenger (4 options, at least 1 required) -->
+              <div class="form-group-nampo" style="border: 1.5px solid var(--border-medium); padding: 12px; border-radius: var(--radius-sm);">
+                <label style="color:var(--primary); font-weight:900;">💬 사장님 개인 연락망 (위챗/왓츠앱/라인/카톡 중 1개 필수)</label>
+                <p style="font-size:8px; color:var(--text-muted); margin-bottom:8px; line-height:1.3;">
+                  - 왓츠앱(WhatsApp): 영어권 관광객이 선호합니다.<br>
+                  - 라인(Line): 일본/대만 관광객이 선호합니다.<br>
+                  - 위챗(WeChat): 중국어권 관광객이 선호합니다.
+                </p>
+                <div class="form-group-nampo" style="margin-bottom:8px;">
+                  <label style="font-weight:normal; font-size:9px;">위챗 (WeChat) ID</label>
+                  <input type="text" id="messenger-wechat" class="nampo-input messenger-field" placeholder="위챗 아이디 입력">
+                </div>
+                <div class="form-group-nampo" style="margin-bottom:8px;">
+                  <label style="font-weight:normal; font-size:9px;">왓츠앱 (WhatsApp) 번호</label>
+                  <input type="text" id="messenger-whatsapp" class="nampo-input messenger-field" placeholder="왓츠앱 번호 입력">
+                </div>
+                <div class="form-group-nampo" style="margin-bottom:8px;">
+                  <label style="font-weight:normal; font-size:9px;">라인 (Line) ID</label>
+                  <input type="text" id="messenger-line" class="nampo-input messenger-field" placeholder="라인 아이디 입력">
+                </div>
+                <div class="form-group-nampo" style="margin-bottom:0;">
+                  <label style="font-weight:normal; font-size:9px;">카카오톡 (KakaoTalk) ID</label>
+                  <input type="text" id="messenger-kakao" class="nampo-input messenger-field" placeholder="카카오톡 아이디 입력">
+                </div>
+              </div>
+
+              <!-- Business Hours dynamic format selection -->
+              <div class="form-group-nampo" style="margin-top:14px;">
+                <label>영업시간 등록 방식</label>
+                <div class="parking-radio-row" style="margin-bottom:10px;">
+                  <label class="radio-pill flex-1">
+                    <input type="radio" name="hours-input-type" value="same" checked>
+                    <span>매일 동일 시간 적용</span>
+                  </label>
+                  <label class="radio-pill flex-1">
+                    <input type="radio" name="hours-input-type" value="each">
+                    <span>요일별 개별 시간 입력</span>
+                  </label>
+                </div>
+
+                <!-- Unified time input -->
+                <div id="hours-block-same" class="hours-input-sub-panel">
+                  <input type="text" id="hours-input-same-val" class="nampo-input" value="11:00 - 22:00" placeholder="예: 11:00 - 22:00">
+                </div>
+
+                <!-- Day-by-day time input -->
+                <div id="hours-block-each" class="hours-input-sub-panel hidden" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                  <div class="form-group-nampo" style="margin-bottom:6px;"><label>월요일</label><input type="text" id="h-mon" class="nampo-input h-day-field" value="11:00 - 22:00"></div>
+                  <div class="form-group-nampo" style="margin-bottom:6px;"><label>화요일</label><input type="text" id="h-tue" class="nampo-input h-day-field" value="11:00 - 22:00"></div>
+                  <div class="form-group-nampo" style="margin-bottom:6px;"><label>수요일</label><input type="text" id="h-wed" class="nampo-input h-day-field" value="11:00 - 22:00"></div>
+                  <div class="form-group-nampo" style="margin-bottom:6px;"><label>목요일</label><input type="text" id="h-thu" class="nampo-input h-day-field" value="11:00 - 22:00"></div>
+                  <div class="form-group-nampo" style="margin-bottom:6px;"><label>금요일</label><input type="text" id="h-fri" class="nampo-input h-day-field" value="11:00 - 22:00"></div>
+                  <div class="form-group-nampo" style="margin-bottom:6px;"><label>토요일</label><input type="text" id="h-sat" class="nampo-input h-day-field" value="11:00 - 23:00"></div>
+                  <div class="form-group-nampo" style="margin-bottom:6px; grid-column: span 2;"><label>일요일</label><input type="text" id="h-sun" class="nampo-input h-day-field" value="11:00 - 22:00"></div>
+                </div>
+              </div>
+
+              <!-- Menu Items with Photo Upload (Supports 3 items) -->
+              <div class="form-group-nampo" style="border:1.5px solid var(--border-medium); padding:12px; border-radius:var(--radius-sm); margin-top:14px;">
+                <label style="color:var(--primary); font-weight:900;">🍔 매장 메뉴/서비스 등록 (사진 필수 첨부)</label>
+                <p style="font-size:8px; color:var(--text-muted); margin-bottom:8px; line-height:1.2;">
+                  ※ 무형 서비스(뷰티/마사지/에스테틱 등)일 경우, 시연 및 한눈에 어떤 혜택인지 알 수 있는 테라피 내용 사진을 첨부해 주세요.
+                </p>
+
+                <!-- Menu Item 1 -->
+                <div class="menu-upload-row" style="margin-bottom:12px; border-bottom:1px dashed var(--border-medium); padding-bottom:12px;">
+                  <span style="font-size:9px; font-weight:800; color:var(--text-main); display:block; margin-bottom:4px;">대표 추천 메뉴 1</span>
+                  <div class="input-inline-row" style="margin-bottom:6px;">
+                    <input type="text" id="m-menu1-name" class="nampo-input flex-1" placeholder="메뉴 이름">
+                    <input type="text" id="m-menu1-price" class="nampo-input flex-1" placeholder="가격(예: 15,000 KRW)">
+                  </div>
+                  <input type="file" id="m-menu1-file" accept="image/*" class="nampo-input" style="padding:4px;">
+                  <div id="m-menu1-preview" class="media-thumb-selector-grid" style="margin-top:6px;"></div>
+                </div>
+
+                <!-- Menu Item 2 -->
+                <div class="menu-upload-row" style="margin-bottom:12px; border-bottom:1px dashed var(--border-medium); padding-bottom:12px;">
+                  <span style="font-size:9px; font-weight:800; color:var(--text-main); display:block; margin-bottom:4px;">기본 메뉴 2</span>
+                  <div class="input-inline-row" style="margin-bottom:6px;">
+                    <input type="text" id="m-menu2-name" class="nampo-input flex-1" placeholder="메뉴 이름">
+                    <input type="text" id="m-menu2-price" class="nampo-input flex-1" placeholder="가격">
+                  </div>
+                  <input type="file" id="m-menu2-file" accept="image/*" class="nampo-input" style="padding:4px;">
+                  <div id="m-menu2-preview" class="media-thumb-selector-grid" style="margin-top:6px;"></div>
+                </div>
+
+                <!-- Menu Item 3 -->
+                <div class="menu-upload-row" style="margin-bottom:0;">
+                  <span style="font-size:9px; font-weight:800; color:var(--text-main); display:block; margin-bottom:4px;">계절/기타 메뉴 3</span>
+                  <div class="input-inline-row" style="margin-bottom:6px;">
+                    <input type="text" id="m-menu3-name" class="nampo-input flex-1" placeholder="메뉴 이름">
+                    <input type="text" id="m-menu3-price" class="nampo-input flex-1" placeholder="가격">
+                  </div>
+                  <input type="file" id="m-menu3-file" accept="image/*" class="nampo-input" style="padding:4px;">
+                  <div id="m-menu3-preview" class="media-thumb-selector-grid" style="margin-top:6px;"></div>
+                </div>
+              </div>
+
+              <!-- Parking Options -->
+              <div class="form-group-nampo" style="margin-top:14px;">
                 <label>주차 가능 여부 (Parking Space)</label>
                 <div class="parking-radio-row">
-                  <label class="radio-pill">
-                    <input type="radio" name="m-parking-status" value="유" checked>
+                  <label class="radio-pill flex-1">
+                    <input type="radio" name="m-upload-parking" value="유" checked>
                     <span>주차 가능 (Parking Available)</span>
                   </label>
-                  <label class="radio-pill">
-                    <input type="radio" name="m-parking-status" value="무">
+                  <label class="radio-pill flex-1">
+                    <input type="radio" name="m-upload-parking" value="무">
                     <span>주차 불가 (No Parking)</span>
                   </label>
                 </div>
               </div>
 
-              <!-- Payment methods multi-check -->
+              <!-- Payment options multi-check -->
               <div class="form-group-nampo">
                 <label>결제 가능 수단 (결제 수단 중복 선택 가능)</label>
                 <div class="checkbox-group-grid">
                   <label class="check-pill">
-                    <input type="checkbox" name="m-payment-methods" value="신용카드" checked>
+                    <input type="checkbox" name="m-upload-payment" value="신용카드" checked>
                     <span>신용카드</span>
                   </label>
                   <label class="check-pill">
-                    <input type="checkbox" name="m-payment-methods" value="삼성페이" checked>
+                    <input type="checkbox" name="m-upload-payment" value="삼성페이" checked>
                     <span>삼성페이</span>
                   </label>
                   <label class="check-pill">
-                    <input type="checkbox" name="m-payment-methods" value="알리페이">
+                    <input type="checkbox" name="m-upload-payment" value="알리페이">
                     <span>Alipay (알리페이)</span>
                   </label>
                   <label class="check-pill">
-                    <input type="checkbox" name="m-payment-methods" value="위챗페이">
+                    <input type="checkbox" name="m-upload-payment" value="위챗페이">
                     <span>WeChat Pay (위챗페이)</span>
                   </label>
                 </div>
               </div>
 
-              <!-- Final Submit Update button -->
-              <button type="submit" class="btn btn-primary btn-block" id="btn-save-store-complete" style="margin-top:20px;">
-                <i data-lucide="cloud-lightning"></i> 매장 정보 및 미디어 올리기
-              </button>
+              <!-- Store Communication Languages -->
+              <div class="form-group-nampo">
+                <label>매장 내 지원 가능 외국어 (다중 선택 가능)</label>
+                <div class="checkbox-group-grid">
+                  <label class="check-pill">
+                    <input type="checkbox" name="m-upload-languages" value="영어" checked>
+                    <span>영어 (English)</span>
+                  </label>
+                  <label class="check-pill">
+                    <input type="checkbox" name="m-upload-languages" value="일어">
+                    <span>일어 (Japanese)</span>
+                  </label>
+                  <label class="check-pill">
+                    <input type="checkbox" name="m-upload-languages" value="중국어">
+                    <span>중국어 (Chinese)</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Sleek Rounded Centered Submission Button -->
+              <div style="display:flex; justify-content:center; margin-top:28px; margin-bottom:10px;">
+                <button type="submit" class="btn btn-primary btn-round-centered" id="btn-save-merchant-form">
+                  매장 정보 및 미디어 올리기 ⚡
+                </button>
+              </div>
             </form>
           </div>
         </section>

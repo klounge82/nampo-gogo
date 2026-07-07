@@ -22,8 +22,10 @@ let activeSubcatFilter = 'all';
 let filterPartnerOnly = false;
 
 // Media Upload Temporary Arrays (Holds Base64 strings)
-let tempUploadedMedia = [];
-let selectedThumbnailBase64 = "";
+let tempSignboardBase64 = "";
+let tempInsideBase64List = [];
+let tempVideosBase64List = [];
+let tempMenuImagesBase64 = ["", "", ""]; // 3 menu item images
 
 // Multi-Language Reference
 let translations = {};
@@ -48,8 +50,14 @@ window.handleModeSelect = function(mode) {
   if (mode === 'tourist') {
     switchTabPanel('tourist-explore');
   } else {
+    // Merchant flow redirection based on approval status
     if (currentUser && currentUserRole === 'merchant') {
-      switchTabPanel('merchant-manage');
+      const isApproved = localStorage.getItem(`nampogogo_merchant_approved_${currentUser}`) === 'true';
+      if (isApproved) {
+        switchTabPanel('merchant-manage');
+      } else {
+        switchTabPanel('merchant-auth');
+      }
     } else {
       switchTabPanel('merchant-auth');
     }
@@ -144,6 +152,7 @@ function setupCrossTabSync() {
       renderPartnersList();
       renderUpdateLogs();
       if (appMode === 'merchant') {
+        renderMerchantDashboard();
         renderMerchantManagementForm();
       }
       console.log("🔄 Data updated from another browser tab! UI refreshed.");
@@ -192,15 +201,16 @@ function setupIntroModeSelection() {
     });
   }
 
-  if (quickModeSwitchBtn && introScreen && appWorkspace) {
+  // Quick mode button is now 브라우저 새로고침
+  if (quickModeSwitchBtn) {
     quickModeSwitchBtn.addEventListener('click', () => {
-      introScreen.classList.remove('hidden');
-      appWorkspace.classList.add('hidden');
+      console.log("🔄 브라우저 새로고침 실행!");
+      location.reload();
     });
   }
 }
 
-// 4. Render Dynamic Top Navigation
+// 4. Render Dynamic Top Navigation for Tourists and Approved Merchants
 function renderDynamicNavigationDock() {
   const navDock = document.getElementById('dynamic-nav-dock');
   if (!navDock) return;
@@ -222,34 +232,34 @@ function renderDynamicNavigationDock() {
       </button>
     `;
   } else {
-    navDock.innerHTML = `
-      <button class="nav-btn active" data-tab="merchant-auth">
-        <i data-lucide="user-check"></i>
-        <span>계정 및 제휴신청</span>
-      </button>
-      <button class="nav-btn" data-tab="merchant-manage" id="nav-btn-merchant-manage-lock">
-        <i data-lucide="edit-3"></i>
-        <span>매장 정보 올리기</span>
-      </button>
-    `;
+    // Merchant mode tabs based on approval
+    const isApproved = currentUser && localStorage.getItem(`nampogogo_merchant_approved_${currentUser}`) === 'true';
+    if (!isApproved) {
+      navDock.innerHTML = `
+        <button class="nav-btn active" data-tab="merchant-auth">
+          <i data-lucide="user-check"></i>
+          <span>계정 및 제휴신청</span>
+        </button>
+      `;
+    } else {
+      // Approved Merchants get Dashboard & Upload tabs (Apply tab completely hidden)
+      navDock.innerHTML = `
+        <button class="nav-btn active" data-tab="merchant-manage">
+          <i data-lucide="bar-chart-2"></i>
+          <span>매장 관리 (대시보드)</span>
+        </button>
+        <button class="nav-btn" data-tab="merchant-upload">
+          <i data-lucide="edit-3"></i>
+          <span>매장 정보 올리기/수정</span>
+        </button>
+      `;
+    }
   }
 
   const navButtons = navDock.querySelectorAll('.nav-btn');
   navButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       const targetTab = btn.getAttribute('data-tab');
-
-      if (targetTab === 'merchant-manage') {
-        if (!currentUser || currentUserRole !== 'merchant') {
-          alert("⚠️ 사업자 회원가입 및 로그인 완료 후 매장 관리가 가능합니다!");
-          return;
-        }
-        const isApproved = localStorage.getItem(`nampogogo_merchant_approved_${currentUser}`) === 'true';
-        if (!isApproved) {
-          alert("⚠️ 아직 공식 제휴 승인이 나지 않았습니다. [계정 및 제휴신청] 탭에서 제휴 신청을 완료해 주세요!");
-          return;
-        }
-      }
 
       navButtons.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
@@ -277,6 +287,8 @@ function switchTabPanel(panelId) {
   } else if (panelId === 'tourist-log') {
     renderTravelLog();
   } else if (panelId === 'merchant-manage') {
+    renderMerchantDashboard();
+  } else if (panelId === 'merchant-upload') {
     renderMerchantManagementForm();
   } else if (panelId === 'merchant-auth') {
     updateMerchantAuthUI();
@@ -317,6 +329,7 @@ function updateLanguageTexts() {
   
   if (appMode === 'merchant') {
     updateMerchantAuthUI();
+    renderMerchantDashboard();
     renderMerchantManagementForm();
   }
 }
@@ -621,7 +634,7 @@ function setupSubcatGridClickHandlers() {
   });
 }
 
-// 9. Partner Detail Modal
+// 9. Partner Detail Modal (Equipped with Owner reply box render)
 function openPartnerDetail(id) {
   const p = partnersList.find(item => item.id === id);
   if (!p) return;
@@ -648,9 +661,10 @@ function openPartnerDetail(id) {
   let pricingRows = '';
   if (p.priceList && Array.isArray(p.priceList)) {
     p.priceList.forEach(item => {
+      const menuImgStr = item.image ? `<br><img src="${item.image}" style="width:60px; height:45px; border-radius:4px; margin-top:4px; object-fit:cover;">` : '';
       pricingRows += `
         <tr>
-          <td>${item.name[currentLang] || item.name['en']}</td>
+          <td>${item.name[currentLang] || item.name['en']}${menuImgStr}</td>
           <td class="price-col">${item.price}</td>
         </tr>
       `;
@@ -672,13 +686,35 @@ function openPartnerDetail(id) {
     reviewsMarkup = `<p class="empty-state text-center">${getTranslation(currentLang, 'noReviews') || 'No reviews yet.'}</p>`;
   } else {
     p.reviews.forEach(rev => {
+      let revPhotosStr = '';
+      if (rev.photos && Array.isArray(rev.photos) && rev.photos.length > 0) {
+        revPhotosStr += `<div class="review-photos-scroller">`;
+        rev.photos.forEach(ph => {
+          revPhotosStr += `<img src="${ph}" class="review-mini-img">`;
+        });
+        revPhotosStr += `</div>`;
+      }
+
+      // Check if there is an owner reply
+      let replyStr = '';
+      if (rev.reply) {
+        replyStr = `
+          <div class="owner-reply-box">
+            <span class="owner-reply-title">🏢 ${getTranslation(currentLang, 'ownerReply') || 'Owner Reply'}</span>
+            <p class="owner-reply-text">${rev.reply}</p>
+          </div>
+        `;
+      }
+
       reviewsMarkup += `
-        <div class="review-item">
+        <div class="review-item" style="border-bottom:1px dashed var(--border-medium); padding-bottom:12px; margin-bottom:12px;">
           <div class="review-user-row">
             <span>👤 ${rev.username}</span>
             <span class="text-warning">★ ${rev.rating.toFixed(1)}</span>
           </div>
           <p>${rev.content[currentLang] || rev.content['en']}</p>
+          ${revPhotosStr}
+          ${replyStr}
         </div>
       `;
     });
@@ -700,6 +736,13 @@ function openPartnerDetail(id) {
               <option value="1">★ 1.0</option>
             </select>
           </div>
+          
+          <div class="form-group-nampo" style="margin-top:6px;">
+            <label style="font-size:9px;">리뷰 사진 첨부 (선택)</label>
+            <input type="file" id="review-upload-files" multiple accept="image/*" class="nampo-input" style="padding:4px;">
+            <div id="review-photo-preview-wrap" class="media-thumb-selector-grid" style="margin-top:6px;"></div>
+          </div>
+
           <textarea id="review-comment-textarea" class="writer-textarea" rows="2" placeholder="${getTranslation(currentLang, 'reviewInputPlaceholder') || 'Write review here...'}"></textarea>
           <button class="btn btn-primary btn-sm btn-block" id="btn-submit-review-act">${getTranslation(currentLang, 'reviewBtn') || 'Submit'}</button>
         </div>
@@ -756,7 +799,7 @@ function openPartnerDetail(id) {
 
     <!-- Accordion detailed rating -->
     <div class="rating-accordion-header" id="btn-rating-accordion-toggle">
-      <span>📊 Google-style 세부 항목 평점 요약</span>
+      <span>📊 Google-style 세부 평점 요약</span>
       <i data-lucide="chevron-down"></i>
     </div>
     <div class="rating-accordion-content">
@@ -807,8 +850,8 @@ function openPartnerDetail(id) {
         </table>
         
         <div style="border-top:1px dashed rgba(0,0,0,0.06); margin-top:10px; padding-top:8px;">
-          <span style="font-size:8px; font-weight:800; color:var(--primary); text-transform:uppercase;">🌐 Foreign Language Menu (외국어 메뉴판)</span>
-          <p style="font-size:10px; color:var(--text-body); margin-top:4px; font-style:italic;">"${p.menuForeign[currentLang] || p.menuForeign['en']}"</p>
+          <span style="font-size:8px; font-weight:800; color:var(--primary); text-transform:uppercase;">🌐 Foreign Language Menu</span>
+          <p style="font-size:10px; color:var(--text-body); margin-top:4px; font-style:italic;">"${(p.menuForeign && p.menuForeign[currentLang]) ? p.menuForeign[currentLang] : (p.menuForeign ? p.menuForeign['en'] : 'Supported')}"</p>
         </div>
       </div>
     </div>
@@ -816,7 +859,7 @@ function openPartnerDetail(id) {
     <!-- TAB PANEL 3: SEO -->
     <div class="modal-tab-panel" id="modal-panel-seo">
       <div class="seo-info-box" style="background:var(--primary-soft); padding:12px; border-radius:6px; font-size:10px;">
-        <div class="seo-tag-item"><strong>&lt;title&gt;</strong> ${p.name[currentLang] || p.name['en']} | Nampo GoGo Busan</div>
+        <div class="seo-tag-item"><strong>&lt;title&gt;</strong> ${p.name[currentLang] || p.name['en']} | Nampo GoGo</div>
         <div class="seo-tag-item" style="margin-top:6px;"><strong>&lt;meta name="description"&gt;</strong> ${p.seoDescription}</div>
         <div class="seo-tag-item" style="margin-top:6px;"><strong>&lt;meta name="keywords"&gt;</strong> ${p.seoKeywords}</div>
       </div>
@@ -841,6 +884,7 @@ function openPartnerDetail(id) {
   }
   initLucide();
 
+  // Accordion toggle
   const accordionHeader = document.getElementById('btn-rating-accordion-toggle');
   if (accordionHeader) {
     accordionHeader.addEventListener('click', () => {
@@ -849,6 +893,29 @@ function openPartnerDetail(id) {
   }
 
   setupModalTabs();
+
+  // Review Photo attachment previews
+  let reviewBase64Photos = [];
+  const reviewFileInput = document.getElementById('review-upload-files');
+  const reviewPhotoPreviewWrap = document.getElementById('review-photo-preview-wrap');
+  if (reviewFileInput && reviewPhotoPreviewWrap) {
+    reviewFileInput.addEventListener('change', (e) => {
+      reviewPhotoPreviewWrap.innerHTML = '';
+      reviewBase64Photos = [];
+      const files = e.target.files;
+      Array.from(files).forEach(f => {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          reviewBase64Photos.push(ev.target.result);
+          const previewDiv = document.createElement('div');
+          previewDiv.className = 'preview-thumb-box';
+          previewDiv.style.backgroundImage = `url('${ev.target.result}')`;
+          reviewPhotoPreviewWrap.appendChild(previewDiv);
+        };
+        reader.readAsDataURL(f);
+      });
+    });
+  }
 
   const qrBtn = document.getElementById('btn-trigger-qr-scan');
   if (qrBtn) {
@@ -879,7 +946,8 @@ function openPartnerDetail(id) {
       const reviewObj = {
         username: currentUser,
         rating: rating,
-        content: { kr: text, en: text, ch: text, jp: text }
+        content: { kr: text, en: text, ch: text, jp: text },
+        photos: reviewBase64Photos
       };
 
       if (!p.reviews) p.reviews = [];
@@ -1128,54 +1196,174 @@ function openSNSCardModal() {
   }
 }
 
-// 12. Merchant Control System
+// 12. Merchant Refactored Control System
 function setupMerchantSystem() {
-  const joinForm = document.getElementById('merchant-join-form');
-  const applyForm = document.getElementById('merchant-apply-form');
-  const mediaFileInput = document.getElementById('merchant-media-files');
-  const storeSaveBtn = document.getElementById('btn-save-store-complete');
+  // Bind Welcome elements
+  const btnShowRegister = document.getElementById('btn-show-merchant-register');
+  const btnShowLogin = document.getElementById('btn-show-merchant-login');
+  const btnBackWelcomeR = document.getElementById('btn-back-to-welcome-r');
+  const btnBackWelcomeL = document.getElementById('btn-back-to-welcome-l');
 
+  const welcomeAuthCard = document.getElementById('merchant-welcome-auth-card');
+  const registerCard = document.getElementById('merchant-register-card');
+  const loginCard = document.getElementById('merchant-login-card');
+
+  // Welcome sub-screens switcher
+  if (btnShowRegister && registerCard && welcomeAuthCard) {
+    btnShowRegister.addEventListener('click', () => {
+      welcomeAuthCard.classList.add('hidden');
+      registerCard.classList.remove('hidden');
+    });
+  }
+  if (btnShowLogin && loginCard && welcomeAuthCard) {
+    btnShowLogin.addEventListener('click', () => {
+      welcomeAuthCard.classList.add('hidden');
+      loginCard.classList.remove('hidden');
+    });
+  }
+  if (btnBackWelcomeR && registerCard && welcomeAuthCard) {
+    btnBackWelcomeR.addEventListener('click', () => {
+      registerCard.classList.add('hidden');
+      welcomeAuthCard.classList.remove('hidden');
+    });
+  }
+  if (btnBackWelcomeL && loginCard && welcomeAuthCard) {
+    btnBackWelcomeL.addEventListener('click', () => {
+      loginCard.classList.add('hidden');
+      welcomeAuthCard.classList.remove('hidden');
+    });
+  }
+
+  // Bind register & login forms
+  const joinForm = document.getElementById('merchant-join-form');
+  const loginFormSubmit = document.getElementById('merchant-login-form-submit');
+  const applyForm = document.getElementById('merchant-apply-form');
+
+  // Business Hours input switcher
+  const hourRadios = document.querySelectorAll('input[name="hours-input-type"]');
+  const hoursSameBlock = document.getElementById('hours-block-same');
+  const hoursEachBlock = document.getElementById('hours-block-each');
+
+  if (hourRadios) {
+    hourRadios.forEach(radio => {
+      radio.addEventListener('change', () => {
+        if (radio.value === 'same') {
+          hoursSameBlock.classList.remove('hidden');
+          hoursEachBlock.classList.add('hidden');
+        } else {
+          hoursSameBlock.classList.add('hidden');
+          hoursEachBlock.classList.remove('hidden');
+        }
+      });
+    });
+  }
+
+  // Register Handler
   if (joinForm) {
     joinForm.addEventListener('submit', (e) => {
       e.preventDefault();
-      const usernameInput = document.getElementById('m-auth-username').value.trim();
-      const passwordInput = document.getElementById('m-auth-password').value;
-      const confirmInput = document.getElementById('m-auth-password-confirm').value;
+      const usernameInput = document.getElementById('m-register-username').value.trim();
+      const passwordInput = document.getElementById('m-register-password').value;
+      const confirmInput = document.getElementById('m-register-password-confirm').value;
 
       if (!usernameInput) return;
-
       if (passwordInput !== confirmInput) {
-        alert("❌ 비밀번호와 비밀번호 확인이 서로 다릅니다!");
+        alert("❌ 비밀번호가 서로 다릅니다!");
         return;
       }
 
       let registeredUsers = JSON.parse(localStorage.getItem('nampogogo_users')) || [];
-      let matchedUser = registeredUsers.find(u => u.id === usernameInput);
-      
-      if (matchedUser) {
-        if (matchedUser.pw !== passwordInput) {
-          alert("❌ 비밀번호가 올바르지 않습니다!");
-          return;
-        }
-        currentUser = matchedUser.id;
-        currentUserRole = matchedUser.role;
-      } else {
-        const newUser = { id: usernameInput, pw: passwordInput, role: 'merchant' };
-        registeredUsers.push(newUser);
-        localStorage.setItem('nampogogo_users', JSON.stringify(registeredUsers));
-        
-        currentUser = usernameInput;
-        currentUserRole = 'merchant';
+      if (registeredUsers.some(u => u.id === usernameInput)) {
+        alert("⚠️ 이미 존재하는 아이디입니다!");
+        return;
       }
 
+      // Add user & auto login
+      const newUser = { id: usernameInput, pw: passwordInput, role: 'merchant' };
+      registeredUsers.push(newUser);
+      localStorage.setItem('nampogogo_users', JSON.stringify(registeredUsers));
+
+      currentUser = usernameInput;
+      currentUserRole = 'merchant';
       localStorage.setItem('nampogogo_user', currentUser);
       localStorage.setItem('nampogogo_user_role', currentUserRole);
+
+      alert(`🎉 회원가입 및 로그인 완료!\n환영합니다, ${currentUser} 사장님!`);
       
+      joinForm.reset();
       updateMerchantAuthUI();
-      alert(`💼 사업자 모드 가입/로그인 완료!\nID: ${currentUser}`);
+      renderDynamicNavigationDock();
+      switchTabPanel('merchant-auth');
     });
   }
 
+  // Login Handler (strictly forbids logging in if not registered)
+  if (loginFormSubmit) {
+    loginFormSubmit.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const usernameInput = document.getElementById('m-login-username').value.trim();
+      const passwordInput = document.getElementById('m-login-password').value;
+
+      let registeredUsers = JSON.parse(localStorage.getItem('nampogogo_users')) || [];
+      const matched = registeredUsers.find(u => u.id === usernameInput && u.role === 'merchant');
+
+      if (!matched) {
+        alert("❌ 등록되지 않은 사업자 계정입니다. 먼저 회원가입을 진행해 주세요!");
+        return;
+      }
+      if (matched.pw !== passwordInput) {
+        alert("❌ 비밀번호가 일체하지 않습니다!");
+        return;
+      }
+
+      currentUser = matched.id;
+      currentUserRole = matched.role;
+      localStorage.setItem('nampogogo_user', currentUser);
+      localStorage.setItem('nampogogo_user_role', currentUserRole);
+
+      alert(`👋 사장님 로그인 성공! 반갑습니다, ${currentUser} 사장님!`);
+      
+      loginFormSubmit.reset();
+      updateMerchantAuthUI();
+      renderDynamicNavigationDock();
+
+      const isApproved = localStorage.getItem(`nampogogo_merchant_approved_${currentUser}`) === 'true';
+      if (isApproved) {
+        switchTabPanel('merchant-manage');
+      } else {
+        switchTabPanel('merchant-auth');
+      }
+    });
+  }
+
+  // Mini logout button actions for all tabs
+  const authLogoutBtn = document.getElementById('btn-merchant-logout-auth');
+  const dashLogoutBtn = document.getElementById('btn-merchant-logout-dashboard');
+  const uploadLogoutBtn = document.getElementById('btn-merchant-logout-upload');
+
+  const performMerchantLogout = () => {
+    currentUser = null;
+    currentUserRole = 'visitor';
+    localStorage.removeItem('nampogogo_user');
+    localStorage.removeItem('nampogogo_user_role');
+    
+    // Reset temporary uploader cache
+    tempSignboardBase64 = "";
+    tempInsideBase64List = [];
+    tempVideosBase64List = [];
+    tempMenuImagesBase64 = ["", "", ""];
+
+    alert("로그아웃 되었습니다.");
+    updateMerchantAuthUI();
+    renderDynamicNavigationDock();
+    switchTabPanel('merchant-auth');
+  };
+
+  if (authLogoutBtn) authLogoutBtn.addEventListener('click', performMerchantLogout);
+  if (dashLogoutBtn) dashLogoutBtn.addEventListener('click', performMerchantLogout);
+  if (uploadLogoutBtn) uploadLogoutBtn.addEventListener('click', performMerchantLogout);
+
+  // Partnership Apply submit
   if (applyForm) {
     applyForm.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -1185,11 +1373,31 @@ function setupMerchantSystem() {
       const subcat = document.getElementById('apply-subcategory').value;
       const phoneVal = document.getElementById('apply-phone').value.trim();
 
-      localStorage.setItem(`nampogogo_merchant_approved_${currentUser}`, 'true');
+      // Put to pending state
+      localStorage.setItem(`nampogogo_merchant_status_${currentUser}`, 'pending');
       localStorage.setItem(`nampogogo_merchant_addr_${currentUser}`, addr);
       localStorage.setItem(`nampogogo_merchant_subcat_${currentUser}`, subcat);
       localStorage.setItem(`nampogogo_merchant_phone_${currentUser}`, phoneVal);
 
+      alert("📄 제휴 신청서가 안전하게 전송되었습니다. 관리자 심사 대기 상태로 이행합니다.");
+      updateMerchantAuthUI();
+    });
+  }
+
+  // Admin instant approval simulator button
+  const simApproveBtn = document.getElementById('btn-demo-approve-instantly');
+  if (simApproveBtn) {
+    simApproveBtn.addEventListener('click', () => {
+      if (!currentUser) return;
+      
+      const addr = localStorage.getItem(`nampogogo_merchant_addr_${currentUser}`) || "부산 중구 남포길 18";
+      const subcat = localStorage.getItem(`nampogogo_merchant_subcat_${currentUser}`) || "food";
+      const phoneVal = localStorage.getItem(`nampogogo_merchant_phone_${currentUser}`) || "+82-51-245-1111";
+
+      localStorage.setItem(`nampogogo_merchant_status_${currentUser}`, 'approved');
+      localStorage.setItem(`nampogogo_merchant_approved_${currentUser}`, 'true');
+
+      // Create Store details object dynamically if it doesn't exist
       const storeId = currentUser.toLowerCase().replace('owner_', 'partner_');
       let storeObj = partnersList.find(p => p.id === storeId);
       
@@ -1217,7 +1425,9 @@ function setupMerchantSystem() {
           benefits: { kr: "제휴 혜택 제공", en: "Exclusive benefit", ch: "合作福利", jp: "提携特典" },
           seoDescription: `${currentUser} 제휴 매장`,
           seoKeywords: `남포동 ${currentUser}`,
-          reviews: [],
+          reviews: [
+            { username: "TouristJ", rating: 5.0, content: { kr: "여기는 정말 숨겨진 맛집입니다! 강추!", en: "Super clean and wonderful service.", ch: "这里的老板非常热情，价格也很划算！", jp: "スタッフが丁寧で非常に良かったです。" }, reply: "" }
+          ],
           payments: ["신용카드", "삼성페이"],
           parking: "유"
         };
@@ -1225,134 +1435,660 @@ function setupMerchantSystem() {
         savePartnersToStorage();
       }
 
-      alert("🎉 서류 심사 즉시 통과! Nampo GoGo 공식 제휴 매장으로 승인되었습니다!");
-      
+      alert("🎉 [어드민 승인 완료]\n공식 승인 처리되었습니다! 매장 관리 대시보드로 이동합니다.");
       renderDynamicNavigationDock();
-      updateMerchantAuthUI();
       switchTabPanel('merchant-manage');
     });
   }
 
-  if (mediaFileInput) {
-    mediaFileInput.addEventListener('change', (e) => {
-      const files = e.target.files;
-      const previewContainer = document.getElementById('merchant-media-previews');
-      if (!previewContainer) return;
+  // Strictly Regulated File upload verification bindings
+  setupFormUploadValidators();
 
-      previewContainer.innerHTML = '';
-      tempUploadedMedia = [];
+  // Save merchant uploader form complete
+  const saveStoreBtn = document.getElementById('btn-save-merchant-form');
+  if (saveStoreBtn) {
+    saveStoreBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      saveStoreDetailsComplete();
+    });
+  }
+}
 
-      Array.from(files).forEach((file, index) => {
+// Strictly Regulated Media inputs and verification checks
+function setupFormUploadValidators() {
+  const signboardInput = document.getElementById('merchant-file-signboard');
+  const insideInput = document.getElementById('merchant-files-inside');
+  const videoInput = document.getElementById('merchant-files-video');
+
+  const signboardArea = document.getElementById('signboard-preview-area');
+  const insideArea = document.getElementById('inside-preview-area');
+  const videoArea = document.getElementById('video-preview-area');
+
+  // 3 Menu File Uploaders
+  for (let i = 1; i <= 3; i++) {
+    const mInput = document.getElementById(`m-menu${i}-file`);
+    const mPreview = document.getElementById(`m-menu${i}-preview`);
+    if (mInput && mPreview) {
+      mInput.addEventListener('change', (e) => {
+        mPreview.innerHTML = '';
+        const file = e.target.files[0];
+        if (!file) return;
+
         const reader = new FileReader();
-        reader.onload = (event) => {
-          const base64Data = event.target.result;
-          const isVideo = file.type.startsWith('video/');
+        reader.onload = (ev) => {
+          tempMenuImagesBase64[i-1] = ev.target.result;
+          const box = document.createElement('div');
+          box.className = 'preview-thumb-box';
+          box.style.backgroundImage = `url('${ev.target.result}')`;
+          mPreview.appendChild(box);
+          triggerDraftAutoSave();
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  }
 
-          tempUploadedMedia.push({
-            type: isVideo ? 'video' : 'image',
-            data: base64Data
-          });
+  // Signboard (Exactly 1 photo required)
+  if (signboardInput && signboardArea) {
+    signboardInput.addEventListener('change', (e) => {
+      signboardArea.innerHTML = '';
+      tempSignboardBase64 = "";
+      const file = e.target.files[0];
+      if (!file) return;
 
-          const pBox = document.createElement('div');
-          pBox.className = `preview-thumb-box ${isVideo ? 'video' : ''}`;
-          pBox.style.backgroundImage = isVideo ? 'none' : `url('${base64Data}')`;
-          
-          const radio = document.createElement('input');
-          radio.type = 'radio';
-          radio.name = 'merchant-thumb-select';
-          radio.value = index;
-          if (index === 0) {
-            radio.checked = true;
-            selectedThumbnailBase64 = base64Data;
-          }
-          
-          radio.addEventListener('change', () => {
-            selectedThumbnailBase64 = base64Data;
-          });
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        tempSignboardBase64 = ev.target.result;
+        const box = document.createElement('div');
+        box.className = 'preview-thumb-box';
+        box.style.backgroundImage = `url('${ev.target.result}')`;
+        signboardArea.appendChild(box);
+        triggerDraftAutoSave();
+      };
+      reader.readAsDataURL(file);
+    });
+  }
 
-          pBox.appendChild(radio);
-          previewContainer.appendChild(pBox);
+  // Inside images (Min 2, Max 10. block 11+)
+  if (insideInput && insideArea) {
+    insideInput.addEventListener('change', (e) => {
+      const files = e.target.files;
+      if (files.length > 10) {
+        alert("⚠️ [업로드 초과 알림]\n내부 및 기타 매장 사진은 최대 10장까지만 업로드할 수 있습니다.");
+        insideInput.value = ""; // clear input
+        insideArea.innerHTML = "";
+        tempInsideBase64List = [];
+        return;
+      }
+
+      insideArea.innerHTML = '';
+      tempInsideBase64List = [];
+      Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          tempInsideBase64List.push(ev.target.result);
+          const box = document.createElement('div');
+          box.className = 'preview-thumb-box';
+          box.style.backgroundImage = `url('${ev.target.result}')`;
+          insideArea.appendChild(box);
+          triggerDraftAutoSave();
         };
         reader.readAsDataURL(file);
       });
     });
   }
 
-  if (storeSaveBtn) {
-    storeSaveBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      
-      const hasSignboard = document.getElementById('check-media-signboard').checked;
-      const hasMenu = document.getElementById('check-media-menu').checked;
-      const hasInside = document.getElementById('check-media-inside').checked;
-      const hasOutside = document.getElementById('check-media-outside').checked;
-
-      if (!hasSignboard || !hasMenu || !hasInside || !hasOutside) {
-        alert("⚠️ [업로드 필수 조건 미달]\n대문(간판) 사진, 메뉴판 사진, 내부 사진 2장 이상, 외부 전경 사진 2장 이상이 모두 포함되어 있는지 확인하시고 체크박스에 체크해 주셔야 최종 올리기가 가능합니다!");
+  // Videos (Max 3, block 4+)
+  if (videoInput && videoArea) {
+    videoInput.addEventListener('change', (e) => {
+      const files = e.target.files;
+      if (files.length > 3) {
+        alert("⚠️ [동영상 업로드 초과 알림]\n매장 홍보 동영상은 최대 3개까지만 업로드할 수 있습니다.");
+        videoInput.value = "";
+        videoArea.innerHTML = "";
+        tempVideosBase64List = [];
         return;
       }
 
-      const store = findMerchantStore();
-      if (!store) {
-        alert("오류: 매장 정보를 찾을 수 없습니다.");
-        return;
-      }
+      videoArea.innerHTML = '';
+      tempVideosBase64List = [];
+      Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          tempVideosBase64List.push(ev.target.result);
+          const box = document.createElement('div');
+          box.className = 'preview-thumb-box video';
+          box.innerHTML = '▶';
+          videoArea.appendChild(box);
+          triggerDraftAutoSave();
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+  }
 
-      store.benefits[currentLang] = document.getElementById('edit-benefit-input').value.trim();
-      store.hours = document.getElementById('edit-hours-input').value.trim();
-      store.phone = document.getElementById('edit-phone-input').value.trim();
-      
-      const sigName = document.getElementById('menu-sig-name').value.trim();
-      const sigPrice = document.getElementById('menu-sig-price').value.trim();
-      const stdName = document.getElementById('menu-std-name').value.trim();
-      const stdPrice = document.getElementById('menu-std-price').value.trim();
-      const seaName = document.getElementById('menu-sea-name').value.trim();
-      const seaPrice = document.getElementById('menu-sea-price').value.trim();
-
-      store.priceList = [];
-      if (sigName) store.priceList.push({ name: { kr: sigName, en: sigName, ch: sigName, jp: sigName }, price: sigPrice });
-      if (stdName) store.priceList.push({ name: { kr: stdName, en: stdName, ch: stdName, jp: stdName }, price: stdPrice });
-      if (seaName) store.priceList.push({ name: { kr: seaName, en: seaName, ch: seaName, jp: seaName }, price: seaPrice });
-
-      store.parking = document.querySelector('input[name="m-parking-status"]:checked').value;
-
-      const selectedPayments = Array.from(document.querySelectorAll('input[name="m-payment-methods"]:checked')).map(el => el.value);
-      store.payments = selectedPayments;
-
-      if (tempUploadedMedia.length > 0) {
-        store.gallery = tempUploadedMedia;
-        if (selectedThumbnailBase64) {
-          store.image = selectedThumbnailBase64;
-        }
-      }
-
-      savePartnersToStorage();
-      alert("🎉 매장 상세 메뉴 및 미디어가 성공적으로 플랫폼에 게시 및 노출 순위 갱신 완료되었습니다!");
-      
-      appMode = 'tourist';
-      renderDynamicNavigationDock();
-      switchTabPanel('tourist-explore');
+  // Bind change events to form elements for Auto Save Draft
+  const profileForm = document.getElementById('merchant-detail-profile-form');
+  if (profileForm) {
+    profileForm.querySelectorAll('input, select, textarea').forEach(el => {
+      el.addEventListener('input', triggerDraftAutoSave);
+      el.addEventListener('change', triggerDraftAutoSave);
     });
   }
 }
 
+// Auto Save draft system (Active for 24 hours)
+function triggerDraftAutoSave() {
+  if (!currentUser || currentUserRole !== 'merchant') return;
+
+  const hoursType = document.querySelector('input[name="hours-input-type"]:checked')?.value || 'same';
+  let hoursVal = "";
+  if (hoursType === 'same') {
+    hoursVal = document.getElementById('hours-input-same-val')?.value || "";
+  } else {
+    const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+    hoursVal = days.map(d => document.getElementById(`h-${d}`)?.value || "").join('|');
+  }
+
+  const draftObj = {
+    category: document.querySelector('input[name="m-upload-category"]:checked')?.value || 'food',
+    benefit: document.getElementById('m-upload-benefit')?.value || "",
+    phone: document.getElementById('m-upload-phone')?.value || "",
+    wechat: document.getElementById('messenger-wechat')?.value || "",
+    whatsapp: document.getElementById('messenger-whatsapp')?.value || "",
+    line: document.getElementById('messenger-line')?.value || "",
+    kakao: document.getElementById('messenger-kakao')?.value || "",
+    hoursType: hoursType,
+    hoursVal: hoursVal,
+    
+    // Menu names/prices
+    menu1Name: document.getElementById('m-menu1-name')?.value || "",
+    menu1Price: document.getElementById('m-menu1-price')?.value || "",
+    menu2Name: document.getElementById('m-menu2-name')?.value || "",
+    menu2Price: document.getElementById('m-menu2-price')?.value || "",
+    menu3Name: document.getElementById('m-menu3-name')?.value || "",
+    menu3Price: document.getElementById('m-menu3-price')?.value || "",
+
+    parking: document.querySelector('input[name="m-upload-parking"]:checked')?.value || '유',
+    payments: Array.from(document.querySelectorAll('input[name="m-upload-payment"]:checked')).map(el => el.value),
+    languages: Array.from(document.querySelectorAll('input[name="m-upload-languages"]:checked')).map(el => el.value),
+
+    // Base64 photos backup
+    signboard: tempSignboardBase64,
+    inside: tempInsideBase64List,
+    videos: tempVideosBase64List,
+    menuImages: tempMenuImagesBase64
+  };
+
+  const wrap = {
+    data: draftObj,
+    timestamp: Date.now()
+  };
+
+  localStorage.setItem(`nampogogo_draft_store_${currentUser}`, JSON.stringify(wrap));
+}
+
+// Recover draft on form render
+function loadDraftRecovery() {
+  const alertBox = document.getElementById('draft-recovery-alert-box');
+  const raw = localStorage.getItem(`nampogogo_draft_store_${currentUser}`);
+  if (!raw) {
+    if (alertBox) alertBox.style.display = 'none';
+    return;
+  }
+
+  const wrap = JSON.parse(raw);
+  const now = Date.now();
+  // Check if expired (24 hours)
+  if (now - wrap.timestamp > 24 * 60 * 60 * 1000) {
+    localStorage.removeItem(`nampogogo_draft_store_${currentUser}`);
+    if (alertBox) alertBox.style.display = 'none';
+    return;
+  }
+
+  const draft = wrap.data;
+  if (!draft) return;
+
+  // Restore Text Inputs
+  const benefitInput = document.getElementById('m-upload-benefit');
+  const phoneInput = document.getElementById('m-upload-phone');
+  const wechatInput = document.getElementById('messenger-wechat');
+  const whatsappInput = document.getElementById('messenger-whatsapp');
+  const lineInput = document.getElementById('messenger-line');
+  const kakaoInput = document.getElementById('messenger-kakao');
+
+  if (benefitInput) benefitInput.value = draft.benefit || "";
+  if (phoneInput) phoneInput.value = draft.phone || "";
+  if (wechatInput) wechatInput.value = draft.wechat || "";
+  if (whatsappInput) whatsappInput.value = draft.whatsapp || "";
+  if (lineInput) lineInput.value = draft.line || "";
+  if (kakaoInput) kakaoInput.value = draft.kakao || "";
+
+  // Restore Radios
+  document.querySelectorAll('input[name="m-upload-category"]').forEach(r => {
+    r.checked = r.value === draft.category;
+  });
+  document.querySelectorAll('input[name="m-upload-parking"]').forEach(r => {
+    r.checked = r.value === draft.parking;
+  });
+
+  // Hours
+  document.querySelectorAll('input[name="hours-input-type"]').forEach(r => {
+    r.checked = r.value === draft.hoursType;
+  });
+  const hoursSameBlock = document.getElementById('hours-block-same');
+  const hoursEachBlock = document.getElementById('hours-block-each');
+
+  if (draft.hoursType === 'same') {
+    if (hoursSameBlock) hoursSameBlock.classList.remove('hidden');
+    if (hoursEachBlock) hoursEachBlock.classList.add('hidden');
+    const sameInp = document.getElementById('hours-input-same-val');
+    if (sameInp) sameInp.value = draft.hoursVal || "11:00 - 22:00";
+  } else {
+    if (hoursSameBlock) hoursSameBlock.classList.add('hidden');
+    if (hoursEachBlock) hoursEachBlock.classList.remove('hidden');
+    const splitVals = (draft.hoursVal || "").split('|');
+    const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+    days.forEach((day, idx) => {
+      const field = document.getElementById(`h-${day}`);
+      if (field) field.value = splitVals[idx] || "11:00 - 22:00";
+    });
+  }
+
+  // Restore Menu inputs
+  for (let i = 1; i <= 3; i++) {
+    const nameField = document.getElementById(`m-menu${i}-name`);
+    const priceField = document.getElementById(`m-menu${i}-price`);
+    if (nameField) nameField.value = draft[`menu${i}Name`] || "";
+    if (priceField) priceField.value = draft[`menu${i}Price`] || "";
+  }
+
+  // Payments & Languages checkboxes
+  document.querySelectorAll('input[name="m-upload-payment"]').forEach(box => {
+    box.checked = (draft.payments || []).includes(box.value);
+  });
+  document.querySelectorAll('input[name="m-upload-languages"]').forEach(box => {
+    box.checked = (draft.languages || []).includes(box.value);
+  });
+
+  // Restore Media Base64 values
+  tempSignboardBase64 = draft.signboard || "";
+  tempInsideBase64List = draft.inside || [];
+  tempVideosBase64List = draft.videos || [];
+  tempMenuImagesBase64 = draft.menuImages || ["", "", ""];
+
+  // Re-render Preview areas
+  const signboardArea = document.getElementById('signboard-preview-area');
+  const insideArea = document.getElementById('inside-preview-area');
+  const videoArea = document.getElementById('video-preview-area');
+
+  if (signboardArea && tempSignboardBase64) {
+    signboardArea.innerHTML = `<div class="preview-thumb-box" style="background-image: url('${tempSignboardBase64}')"></div>`;
+  }
+  if (insideArea && tempInsideBase64List.length > 0) {
+    insideArea.innerHTML = '';
+    tempInsideBase64List.forEach(data => {
+      const box = document.createElement('div');
+      box.className = 'preview-thumb-box';
+      box.style.backgroundImage = `url('${data}')`;
+      insideArea.appendChild(box);
+    });
+  }
+  if (videoArea && tempVideosBase64List.length > 0) {
+    videoArea.innerHTML = '';
+    tempVideosBase64List.forEach(() => {
+      const box = document.createElement('div');
+      box.className = 'preview-thumb-box video';
+      box.innerHTML = '▶';
+      videoArea.appendChild(box);
+    });
+  }
+  for (let i = 1; i <= 3; i++) {
+    const mPrev = document.getElementById(`m-menu${i}-preview`);
+    if (mPrev && tempMenuImagesBase64[i-1]) {
+      mPrev.innerHTML = `<div class="preview-thumb-box" style="background-image: url('${tempMenuImagesBase64[i-1]}')"></div>`;
+    }
+  }
+
+  // Show recovery notice
+  if (alertBox) {
+    alertBox.style.display = 'block';
+    setTimeout(() => {
+      alertBox.style.display = 'none';
+    }, 4500);
+  }
+}
+
+// Final Save Store Details Submission
+function saveStoreDetailsComplete() {
+  const store = findMerchantStore();
+  if (!store) {
+    alert("오류: 제휴 상점을 찾을 수 없습니다.");
+    return;
+  }
+
+  // Strict Media check
+  if (!tempSignboardBase64) {
+    alert("⚠️ [사진 등록 누락]\n간판/대문 사진(1장 필수)을 등록해 주세요.");
+    return;
+  }
+  if (tempInsideBase64List.length < 2) {
+    alert("⚠️ [사진 등록 누락]\n매장 내부 사진을 최소 2장 이상 업로드해 주세요.");
+    return;
+  }
+
+  // Messenger validation (At least 1 must be filled)
+  const wechat = document.getElementById('messenger-wechat').value.trim();
+  const whatsapp = document.getElementById('messenger-whatsapp').value.trim();
+  const line = document.getElementById('messenger-line').value.trim();
+  const kakao = document.getElementById('messenger-kakao').value.trim();
+
+  if (!wechat && !whatsapp && !line && !kakao) {
+    alert("⚠️ [사장님 개인 연락망 누락]\n위챗, 왓츠앱, 라인, 카카오톡 중 최소 1개 이상의 연락처를 반드시 기입해 주세요!");
+    return;
+  }
+
+  // Hours parsing
+  const hoursType = document.querySelector('input[name="hours-input-type"]:checked').value;
+  let finalHours = "";
+  if (hoursType === 'same') {
+    finalHours = document.getElementById('hours-input-same-val').value.trim();
+  } else {
+    const mon = document.getElementById('h-mon').value.trim();
+    const tue = document.getElementById('h-tue').value.trim();
+    const wed = document.getElementById('h-wed').value.trim();
+    const thu = document.getElementById('h-thu').value.trim();
+    const fri = document.getElementById('h-fri').value.trim();
+    const sat = document.getElementById('h-sat').value.trim();
+    const sun = document.getElementById('h-sun').value.trim();
+    finalHours = `월: ${mon}, 화: ${tue}, 수: ${wed}, 목: ${thu}, 금: ${fri}, 토: ${sat}, 일: ${sun}`;
+  }
+
+  // Apply inputs to store object
+  const categoryVal = document.querySelector('input[name="m-upload-category"]:checked').value;
+  store.subCategory = categoryVal;
+  store.category = (categoryVal === 'massage' || categoryVal === 'cafe') ? categoryVal : 'food';
+
+  store.benefits[currentLang] = document.getElementById('m-upload-benefit').value.trim();
+  store.phone = document.getElementById('m-upload-phone').value.trim();
+  store.hours = finalHours;
+
+  // Personal messengers lists
+  store.messenger = { wechat, whatsapp, line, kakao };
+
+  // Menu items list mapping
+  store.priceList = [];
+  for (let i = 1; i <= 3; i++) {
+    const nameVal = document.getElementById(`m-menu${i}-name`).value.trim();
+    const priceVal = document.getElementById(`m-menu${i}-price`).value.trim();
+    const imgBase64 = tempMenuImagesBase64[i-1];
+    
+    if (nameVal && priceVal) {
+      store.priceList.push({
+        name: { kr: nameVal, en: nameVal, ch: nameVal, jp: nameVal },
+        price: priceVal,
+        image: imgBase64 || ""
+      });
+    }
+  }
+
+  store.parking = document.querySelector('input[name="m-upload-parking"]:checked').value;
+  store.payments = Array.from(document.querySelectorAll('input[name="m-upload-payment"]:checked')).map(el => el.value);
+
+  // Signboard as cover image
+  store.image = tempSignboardBase64;
+
+  // Inside files & Videos mapped to gallery array
+  store.gallery = [];
+  tempInsideBase64List.forEach(data => {
+    store.gallery.push({ type: 'image', data: data });
+  });
+  tempVideosBase64List.forEach(data => {
+    store.gallery.push({ type: 'video', data: data });
+  });
+
+  savePartnersToStorage();
+
+  // Clear draft
+  localStorage.removeItem(`nampogogo_draft_store_${currentUser}`);
+
+  alert("🎉 매장 상세 메뉴 및 미디어가 성공적으로 게시되었습니다!");
+  
+  // Back to Dashboard
+  switchTabPanel('merchant-manage');
+}
+
+// Render dynamic elements for merchant dashboard tab
+function renderMerchantDashboard() {
+  const store = findMerchantStore();
+  if (!store) return;
+
+  const dashboardUsername = document.getElementById('merchant-dashboard-username');
+  if (dashboardUsername) dashboardUsername.textContent = currentUser;
+
+  // Stats calculate
+  let stampCount = 0;
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith('nampogogo_stamps_')) {
+      const stamps = JSON.parse(localStorage.getItem(key)) || [];
+      stamps.forEach(s => {
+        if (s.partnerId === store.id) stampCount += s.count;
+      });
+    }
+  }
+
+  const stampCountEl = document.getElementById('merchant-stamps-val');
+  if (stampCountEl) stampCountEl.textContent = `${stampCount}건`;
+
+  // Draw monthly SVG Trend line chart (Toss Style)
+  drawMonthlyTrendChart(stampCount);
+
+  // Review list rendering with owner reply feature
+  renderMerchantReviewsManager(store);
+}
+
+// Toss Style dynamic SVG line chart drawer
+function drawMonthlyTrendChart(stampCount) {
+  const svg = document.getElementById('merchant-monthly-chart-svg');
+  if (!svg) return;
+
+  // Months label
+  const months = ["2월", "3월", "4월", "5월", "6월", "7월"];
+  // Mock monthly metrics + real current stamp count
+  const visitorsData = [45, 62, 85, 92, 110, 120 + stampCount];
+  const stampsData = [8, 12, 18, 22, 28, stampCount];
+
+  const maxVal = 160;
+
+  // Clear previous SVG
+  svg.innerHTML = '';
+
+  // Draw grid lines
+  for (let i = 0; i <= 4; i++) {
+    const y = 20 + i * 30;
+    const gridVal = Math.round(maxVal - (i * maxVal / 4));
+    svg.innerHTML += `
+      <line x1="40" y1="${y}" x2="380" y2="${y}" class="chart-grid-line"></line>
+      <text x="12" y="${y + 3}" class="chart-label-text">${gridVal}</text>
+    `;
+  }
+
+  // Draw months axis text
+  months.forEach((m, idx) => {
+    const x = 50 + idx * 60;
+    svg.innerHTML += `
+      <text x="${x - 10}" y="160" class="chart-label-text" style="font-weight: 800;">${m}</text>
+      <line x1="${x}" y1="140" x2="${x}" y2="145" class="chart-axis"></line>
+    `;
+  });
+
+  // Calculate coordinates
+  const getCoords = (data) => {
+    return data.map((val, idx) => {
+      const x = 50 + idx * 60;
+      const y = 140 - (val * 120 / maxVal);
+      return { x, y, val };
+    });
+  };
+
+  const vCoords = getCoords(visitorsData);
+  const sCoords = getCoords(stampsData);
+
+  // Draw Visitors Path
+  let vPathD = `M ${vCoords[0].x} ${vCoords[0].y}`;
+  for (let i = 1; i < vCoords.length; i++) {
+    vPathD += ` L ${vCoords[i].x} ${vCoords[i].y}`;
+  }
+  svg.innerHTML += `<path d="${vPathD}" class="chart-line-visitor"></path>`;
+
+  // Draw Stamps Path
+  let sPathD = `M ${sCoords[0].x} ${sCoords[0].y}`;
+  for (let i = 1; i < sCoords.length; i++) {
+    sPathD += ` L ${sCoords[i].x} ${sCoords[i].y}`;
+  }
+  svg.innerHTML += `<path d="${sPathD}" class="chart-line-stamps"></path>`;
+
+  // Draw points
+  vCoords.forEach(pt => {
+    svg.innerHTML += `<circle cx="${pt.x}" cy="${pt.y}" class="chart-point-visitor" title="방문객: ${pt.val}명"></circle>`;
+  });
+  sCoords.forEach(pt => {
+    svg.innerHTML += `<circle cx="${pt.x}" cy="${pt.y}" class="chart-point-stamps" title="QR스탬프: ${pt.val}건"></circle>`;
+  });
+}
+
+// Render review manager items with reply submission
+function renderMerchantReviewsManager(store) {
+  const listContainer = document.getElementById('merchant-reviews-manager-list');
+  const countBadge = document.getElementById('dashboard-review-count-badge');
+  const notifBanner = document.getElementById('merchant-notification-banner');
+  const notifCount = document.getElementById('notif-review-count');
+
+  if (!listContainer) return;
+  listContainer.innerHTML = '';
+
+  const reviews = store.reviews || [];
+  if (countBadge) countBadge.textContent = `${reviews.length}건`;
+
+  if (reviews.length === 0) {
+    listContainer.innerHTML = `<p class="empty-state text-center" style="font-size:11px; padding:20px; color:var(--text-muted);">아직 등록된 고객 리뷰가 없습니다.</p>`;
+    if (notifBanner) notifBanner.classList.add('hidden');
+    return;
+  }
+
+  let unansweredCount = 0;
+
+  reviews.forEach((rev, idx) => {
+    if (!rev.reply) unansweredCount++;
+
+    let revPhotosMarkup = '';
+    if (rev.photos && Array.isArray(rev.photos) && rev.photos.length > 0) {
+      revPhotosMarkup += `<div class="review-photos-scroller">`;
+      rev.photos.forEach(ph => {
+        revPhotosMarkup += `<img src="${ph}" class="review-mini-img">`;
+      });
+      revPhotosMarkup += `</div>`;
+    }
+
+    let replyMarkup = '';
+    if (rev.reply) {
+      replyMarkup = `
+        <div class="owner-reply-box">
+          <span class="owner-reply-title">🏢 사장님 답글</span>
+          <p class="owner-reply-text">${rev.reply}</p>
+        </div>
+      `;
+    } else {
+      replyMarkup = `
+        <div class="reply-input-row" id="reply-input-row-${idx}">
+          <textarea id="reply-textarea-${idx}" rows="2" placeholder="고객 감사 답글을 입력하세요..."></textarea>
+          <button class="btn btn-primary btn-sm btn-save-reply" data-idx="${idx}">답글 등록하기 ➔</button>
+        </div>
+      `;
+    }
+
+    const item = document.createElement('div');
+    item.className = 'dashboard-review-card';
+    item.innerHTML = `
+      <div class="dashboard-review-header">
+        <span>👤 <strong>${rev.username}</strong> 고객님</span>
+        <span class="text-warning">★ ${rev.rating.toFixed(1)}</span>
+      </div>
+      <p style="font-size:11px; color:var(--text-body); line-height:1.4;">${rev.content[currentLang] || rev.content['en']}</p>
+      ${revPhotosMarkup}
+      ${replyMarkup}
+    `;
+
+    listContainer.appendChild(item);
+  });
+
+  // Show notification banner if there are unanswered reviews
+  if (unansweredCount > 0) {
+    if (notifBanner && notifCount) {
+      notifCount.textContent = unansweredCount;
+      notifBanner.classList.remove('hidden');
+    }
+  } else {
+    if (notifBanner) notifBanner.classList.add('hidden');
+  }
+
+  // Bind reply submit buttons
+  document.querySelectorAll('.btn-save-reply').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const index = parseInt(e.currentTarget.getAttribute('data-idx'));
+      const txt = document.getElementById(`reply-textarea-${index}`).value.trim();
+
+      if (!txt) {
+        alert("답글 내용을 입력해 주세요!");
+        return;
+      }
+
+      reviews[index].reply = txt;
+      savePartnersToStorage();
+      alert("💾 사장님 답글이 등록 및 동기화 완료되었습니다!");
+      renderMerchantDashboard();
+    });
+  });
+}
+
 function updateMerchantAuthUI() {
+  const welcomeAuthCard = document.getElementById('merchant-welcome-auth-card');
+  const registerCard = document.getElementById('merchant-register-card');
   const loginCard = document.getElementById('merchant-login-card');
   const applyCard = document.getElementById('merchant-apply-card');
-  const approvedCard = document.getElementById('merchant-approved-status-card');
+  const pendingCard = document.getElementById('merchant-pending-status-card');
 
+  const miniProfileBar = document.getElementById('merchant-mini-profile-header');
+  const miniUsername = document.getElementById('merchant-mini-username');
+
+  // Hide all initially
+  if (welcomeAuthCard) welcomeAuthCard.classList.add('hidden');
+  if (registerCard) registerCard.classList.add('hidden');
   if (loginCard) loginCard.classList.add('hidden');
   if (applyCard) applyCard.classList.add('hidden');
-  if (approvedCard) approvedCard.classList.add('hidden');
+  if (pendingCard) pendingCard.classList.add('hidden');
+  if (miniProfileBar) miniProfileBar.classList.add('hidden');
 
   if (!currentUser || currentUserRole !== 'merchant') {
-    if (loginCard) loginCard.classList.remove('hidden');
+    if (welcomeAuthCard) welcomeAuthCard.classList.remove('hidden');
   } else {
+    // Logged in
+    if (miniProfileBar && miniUsername) {
+      miniUsername.textContent = currentUser;
+      miniProfileBar.classList.remove('hidden');
+    }
+
     const isApproved = localStorage.getItem(`nampogogo_merchant_approved_${currentUser}`) === 'true';
     if (isApproved) {
-      if (approvedCard) approvedCard.classList.remove('hidden');
+      // Handled by dynamic navigations, hide apply components
     } else {
-      if (applyCard) applyCard.classList.remove('hidden');
+      const status = localStorage.getItem(`nampogogo_merchant_status_${currentUser}`);
+      if (status === 'pending') {
+        if (pendingCard) pendingCard.classList.remove('hidden');
+      } else {
+        if (applyCard) applyCard.classList.remove('hidden');
+      }
     }
   }
 }
@@ -1367,154 +2103,11 @@ function renderMerchantManagementForm() {
   const store = findMerchantStore();
   if (!store) return;
 
-  const benefitInput = document.getElementById('edit-benefit-input');
-  const hoursInput = document.getElementById('edit-hours-input');
-  const phoneInput = document.getElementById('edit-phone-input');
+  const uploadUsername = document.getElementById('merchant-upload-username');
+  if (uploadUsername) uploadUsername.textContent = currentUser;
 
-  if (benefitInput) benefitInput.value = store.benefits[currentLang] || store.benefits['en'] || '';
-  if (hoursInput) hoursInput.value = store.hours || '11:00 - 22:00';
-  if (phoneInput) phoneInput.value = store.phone || '+82-51-111-2222';
-
-  const sigNameInput = document.getElementById('menu-sig-name');
-  const sigPriceInput = document.getElementById('menu-sig-price');
-  const stdNameInput = document.getElementById('menu-std-name');
-  const stdPriceInput = document.getElementById('menu-std-price');
-  const seaNameInput = document.getElementById('menu-sea-name');
-  const seaPriceInput = document.getElementById('menu-sea-price');
-
-  if (sigNameInput && sigPriceInput) {
-    if (store.priceList && store.priceList[0]) {
-      sigNameInput.value = store.priceList[0].name[currentLang] || store.priceList[0].name['en'];
-      sigPriceInput.value = store.priceList[0].price;
-    } else {
-      sigNameInput.value = ''; sigPriceInput.value = '';
-    }
-  }
-
-  if (stdNameInput && stdPriceInput) {
-    if (store.priceList && store.priceList[1]) {
-      stdNameInput.value = store.priceList[1].name[currentLang] || store.priceList[1].name['en'];
-      stdPriceInput.value = store.priceList[1].price;
-    } else {
-      stdNameInput.value = ''; stdPriceInput.value = '';
-    }
-  }
-
-  if (seaNameInput && seaPriceInput) {
-    if (store.priceList && store.priceList[2]) {
-      seaNameInput.value = store.priceList[2].name[currentLang] || store.priceList[2].name['en'];
-      seaPriceInput.value = store.priceList[2].price;
-    } else {
-      seaNameInput.value = ''; seaPriceInput.value = '';
-    }
-  }
-
-  const parkVal = store.parking || '유';
-  document.querySelectorAll('input[name="m-parking-status"]').forEach(radio => {
-    radio.checked = radio.value === parkVal;
-  });
-
-  const pays = store.payments || ["신용카드", "삼성페이"];
-  document.querySelectorAll('input[name="m-payment-methods"]').forEach(box => {
-    box.checked = pays.includes(box.value);
-  });
-
-  let stampCount = 0;
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key.startsWith('nampogogo_stamps_')) {
-      const stamps = JSON.parse(localStorage.getItem(key)) || [];
-      stamps.forEach(s => {
-        if (s.partnerId === store.id) stampCount += s.count;
-      });
-    }
-  }
-  const stampCountEl = document.getElementById('merchant-stamps-val');
-  if (stampCountEl) stampCountEl.textContent = `${stampCount}건`;
-}
-
-// AI Course Planner Logic
-function setupAIPlanner() {
-  const btnPlanner = document.getElementById('btn-run-ai-recommend');
-  const outputArea = document.getElementById('ai-course-output-area');
-  const shortcutBtn = document.getElementById('btn-shortcut-ai-planner');
-  const plannerForm = document.getElementById('ai-planner-modal-content-area');
-
-  if (shortcutBtn) {
-    shortcutBtn.addEventListener('click', () => {
-      if (plannerForm) plannerForm.classList.toggle('hidden');
-    });
-  }
-
-  if (btnPlanner && outputArea) {
-    btnPlanner.addEventListener('click', () => {
-      const selectedActs = Array.from(document.querySelectorAll('input[name="ai-activities"]:checked')).map(el => el.value);
-      const budgetVal = parseInt(document.getElementById('ai-budget-select').value);
-
-      if (selectedActs.length === 0) {
-        alert("하고 싶은 활동을 최소 1개 이상 선택해 주세요!");
-        return;
-      }
-
-      outputArea.innerHTML = '';
-      outputArea.classList.remove('hidden');
-
-      let courseRoutes = [];
-
-      const kLounge = partnersList.find(p => p.id === 'partner_klounge');
-      if (kLounge) {
-        courseRoutes.push(kLounge);
-      }
-
-      const restShops = partnersList.filter(p => p.id !== 'partner_klounge');
-      const matched = restShops.filter(p => {
-        const catMatch = selectedActs.includes(p.category) || selectedActs.includes(p.subCategory);
-        let priceVal = 0;
-        if (p.priceList && p.priceList[0]) {
-          const rawStr = p.priceList[0].price;
-          priceVal = parseInt(rawStr.replace(/[^0-9]/g, '')) || 0;
-        }
-        const budgetMatch = priceVal <= budgetVal;
-        return catMatch && budgetMatch;
-      });
-
-      const extraNodes = matched.slice(0, 2);
-      courseRoutes = courseRoutes.concat(extraNodes);
-
-      const titleEl = document.createElement('h4');
-      titleEl.innerHTML = `<i data-lucide="compass" style="width:14px; height:14px; display:inline-block; vertical-align:middle; margin-right:4px;"></i> AI 추천 남포 상생 힐링 코스 (${courseRoutes.length}개 발견)`;
-      outputArea.appendChild(titleEl);
-
-      courseRoutes.forEach((route, idx) => {
-        const isKorean = currentLang === 'kr';
-        const directionLink = isKorean ? route.mapLinkNaver : route.mapLinkGoogle;
-        
-        const card = document.createElement('div');
-        card.className = 'ai-route-timeline-card';
-        
-        card.innerHTML = `
-          <div class="ai-card-dot"></div>
-          <div class="ai-route-box">
-            <h5>Step ${idx + 1}: ${route.name[currentLang] || route.name['en']}</h5>
-            <p>🎁 혜택: ${route.benefits[currentLang] || route.benefits['en']}</p>
-            <div style="font-size: 9px; color: var(--text-muted); margin-bottom: 6px;">
-              📞 Tel: ${route.phone} | 🕒 Hours: ${route.hours}
-            </div>
-            <div class="ai-route-media" style="background-image: url('${route.image}')"></div>
-            
-            <button class="btn btn-primary btn-sm btn-nav-map" onclick="window.open('${directionLink}', '_blank')">
-              <i data-lucide="navigation" style="width:10px; height:10px;"></i> 실시간 도보 길안내
-            </button>
-          </div>
-        `;
-
-        outputArea.appendChild(card);
-      });
-
-      initLucide();
-      outputArea.scrollIntoView({ behavior: 'smooth' });
-    });
-  }
+  // Try recovering draft first
+  loadDraftRecovery();
 }
 
 // Setup Modal Close Actions Safely

@@ -41,8 +41,9 @@ window.NampoGoGoData = {
       subKorean: "전통한식",
       subChinese: "중식/요리",
       subJapanese: "일식/돈까스",
-      subMassage: "마사지/뷰티",
+      subMassage: "미용/피부/마사지",
       subCafe: "디저트/카페",
+      subKaraoke: "노래방/노래연습장",
 
       // Actions & Labels
       benefitTitle: "🎁 제휴 관광객 전용 단독 혜택",
@@ -56,6 +57,10 @@ window.NampoGoGoData = {
       reviewInputPlaceholder: "매장 이용 후 한 줄 리뷰를 남겨주세요 (체크인 완료 고객 전용)",
       reviewBtn: "리뷰 등록 완료",
       reviewAuthError: "⚠️ 이 매장의 QR 인증(체크인)을 마친 고객만 리뷰를 남길 수 있습니다.",
+      ownerReply: "사장님 답글",
+      writeReply: "답글 달기",
+      replyPlaceholder: "고객님의 소중한 리뷰에 답글을 입력해 주세요...",
+      replySaveSuccess: "💾 사장님의 감사 답글이 등록되었습니다!",
       
       // Travel Log page
       logTitle: "나의 여행 로그 카드",
@@ -142,8 +147,9 @@ window.NampoGoGoData = {
       subKorean: "Traditional",
       subChinese: "Chinese",
       subJapanese: "Sushi/Katsu",
-      subMassage: "Massage",
+      subMassage: "Beauty/Massage",
       subCafe: "Dessert/Cafe",
+      subKaraoke: "Karaoke/Music Room",
 
       benefitTitle: "🎁 Tourist Exclusive Benefit",
       getDirection: "Get Route 📍",
@@ -156,6 +162,10 @@ window.NampoGoGoData = {
       reviewInputPlaceholder: "Leave your one-line review here (Stamped customers only)",
       reviewBtn: "Post Review",
       reviewAuthError: "⚠️ Only users who completed QR check-in here can write a review.",
+      ownerReply: "Owner's Reply",
+      writeReply: "Write Reply",
+      replyPlaceholder: "Enter your reply message here...",
+      replySaveSuccess: "💾 Owner reply saved successfully!",
       
       logTitle: "My Travel Log Card",
       logDesc: "Your unique Nampodong route report collected via QR scans.",
@@ -238,8 +248,9 @@ window.NampoGoGoData = {
       subKorean: "传统韩餐",
       subChinese: "中华料理",
       subJapanese: "日式猪排",
-      subMassage: "美容按摩",
+      subMassage: "美容/按摩",
       subCafe: "甜点咖啡",
+      subKaraoke: "歌厅/KTV",
 
       benefitTitle: "🎁 游客专属合作优惠",
       getDirection: "步行导航 📍",
@@ -252,6 +263,10 @@ window.NampoGoGoData = {
       reviewInputPlaceholder: "留下您的一句话评价（仅限完成扫码认证的顾客）",
       reviewBtn: "发布评价",
       reviewAuthError: "⚠️ 只有在此商户完成过QR认证扫码的顾客才能撰写评价。",
+      ownerReply: "商家答复",
+      writeReply: "回复评价",
+      replyPlaceholder: "输入您的答复内容...",
+      replySaveSuccess: "💾 商家答复已成功发布！",
       
       logTitle: "我的旅行卡片",
       logDesc: "通过QR认证收集的南浦洞特色旅游足迹报告。",
@@ -328,19 +343,20 @@ window.NampoGoGoData = {
       catShopping: "ショッピング",
       catSightseeing: "観光スポット",
       
-      subPork: "クッパ/韓国食",
+      subPork: "クッ파/韓国食",
       subSeafood: "海鮮/刺身",
       subPizza: "ピザ/洋食",
       subKorean: "伝統韓国食",
       subChinese: "中華料理",
       subJapanese: "和食/トンカツ",
-      subMassage: "エステマッサージ",
+      subMassage: "エステ/マッサージ",
       subCafe: "デザートカフェ",
+      subKaraoke: "カラオケ/練習場",
 
       benefitTitle: "🎁 観光客提携限定特典",
       getDirection: "徒歩ルート案内 📍",
       distance: "現在位置からの距離",
-      alreadyStamped: "認証完了 ✓",
+      alreadyStamped: "공식 인증 완료 ✓",
       scanBtnText: "店舗QRコード読み取り",
       reviewTitle: "訪問者レビュー",
       noReviews: "レビューはまだありません。",
@@ -348,6 +364,10 @@ window.NampoGoGoData = {
       reviewInputPlaceholder: "一行レビューを残してください（チェックイン完了顧客専用）",
       reviewBtn: "レビューを登録する",
       reviewAuthError: "⚠️ 店舗でQRチェックインを完了したお客様のみレビューを書くことができます。",
+      ownerReply: "店主の返信",
+      writeReply: "返信を書く",
+      replyPlaceholder: "感謝の返信内容を入力してください...",
+      replySaveSuccess: "💾 店主の返信が登録されました！",
       
       logTitle: "マイ・トラベル・ログカード",
       logDesc: "QRチェックインで収集された南浦洞での足跡ルートレポート。",
@@ -382,7 +402,7 @@ window.NampoGoGoData = {
       saveStoreSuccess: "💾 店舗情報と追加メディアが正常にアップデートされました！",
       
       adminTitle: "Nampo GoGo 統合アドミン",
-      adminDesc: "新規提携加盟店の登録、お知らせ更新、全体レビューの管理を行います。",
+      adminDesc: "新規提携加盟店の登録、お知らせ更新、全体レビュー의 관리を行います。",
       addStoreBtn: "➕ 新規提携店を登録する",
       storeNameLabel: "店舗名",
       storeCategoryLabel: "カテゴリー",
@@ -404,7 +424,7 @@ window.NampoGoGoData = {
         kr: "K-Lounge 스포츠 아로마 테라피",
         en: "K-Lounge Sports & Aroma Therapy",
         ch: "K-Lounge 运动精油指压理疗",
-        jp: "K-Lounge スポーツアロマセラピー"
+        jp: "K-Lounge 스포츠アロマセラピー"
       },
       category: "massage",
       subCategory: "massage",
@@ -477,7 +497,7 @@ window.NampoGoGoData = {
       phone: "+82-51-245-7890",
       hours: "24 Hours (연중무휴)",
       priceList: [
-        { name: { kr: "따로 돼지국밥", en: "Pork Soup (Rice separate)", ch: "招牌猪肉汤饭", jp: "デジクッパ (スープとご飯別)" }, price: "9,000 KRW" },
+        { name: { kr: "따로 돼지국밥", en: "Pork Soup (Rice separate)", ch: "招牌猪肉汤饭", jp: "デジクッパ (スープとご飯别)" }, price: "9,000 KRW" },
         { name: { kr: "모듬 수육 (소)", en: "Assorted Sliced Pork (S)", ch: "精选白切肉 (小)", jp: "ゆで豚肉スライス (小)" }, price: "28,000 KRW" }
       ],
       menuForeign: {
@@ -531,7 +551,7 @@ window.NampoGoGoData = {
       menuForeign: {
         en: "Multilingual staff and menu options are fully supported.",
         ch: "店内配有中文翻译职员及中英日对照图文菜单。",
-        jp: "外国人向けセットメニュー及び外国語対応スタッフ常駐。"
+        jp: "外国人向けセットメニュー及び外国語対応スタッフ常驻。"
       },
       benefits: {
         kr: "모듬회 이상 주문시 매운탕 무료 제공 및 소주 1병 서비스",
@@ -644,8 +664,8 @@ window.NampoGoGoData = {
 
   // Default notices
   updateHistory: [
+    { date: "2026-07-08", content: "사업자 전용 탭 회원가입/로그인 분리 및 어드민 승인 시뮬레이션 고도화 완료! 🔒" },
     { date: "2026-07-07", content: "배달 어플리케이션(배민/요기요) 스타일의 카테고리/매장 리스트 디자인 개편 완료! 🛵" },
-    { date: "2026-07-06", content: "사업자 제휴 승인 조건 검증 및 음식점 메뉴(결제수단, 주차여부) 등록 폼 셋업 완료!" },
-    { date: "2026-07-05", content: "모바일 최적화 다국어 구글/네이버 도보 길찾기 지도 정밀 맵 매핑 개통!" }
+    { date: "2026-07-06", content: "사업자 제휴 승인 조건 검증 및 음식점 메뉴(결제수단, 주차여부) 등록 폼 셋업 완료!" }
   ]
 };
