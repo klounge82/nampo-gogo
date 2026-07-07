@@ -1,7 +1,6 @@
-// app.js - Nampo GoGo Platform Advanced Logic with Tab Sync, Media Upload, Google Ratings & AI Planner
+// app.js - Nampo GoGo Platform Advanced Logic with Lang Codes (KR, EN, CH, JP) & UI Bugfixes
 
 // Global Seed Load and Local Storage Initialization
-let appData = null;
 initLocalStorageSeed();
 
 function initLocalStorageSeed() {
@@ -40,7 +39,7 @@ function loadApplicationState() {
 
 // App Variables
 const translations = window.NampoGoGoData.translations;
-let currentLang = 'ko';
+let currentLang = 'kr'; // Corrected default code: kr
 let activeTab = 'dashboard';
 let currentUser = localStorage.getItem('nampogogo_user') || null;
 let currentUserRole = localStorage.getItem('nampogogo_user_role') || 'visitor';
@@ -182,25 +181,30 @@ function setupTabNavigation() {
   });
 }
 
-// 5. Quick Dashboard 7 Menu Router
+// 5. Quick Dashboard 7 Menu Router (Bug Fixed: Tab Transitioning and Rerendering)
 function setupQuickDashboardMenu() {
   document.querySelectorAll('.menu-item-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const menuAction = btn.getAttribute('data-menu');
       
       if (menuAction === 'log') {
-        document.querySelector('[data-tab="travel-log"]').click();
+        // Switch to Travel Log Tab
+        const logNavBtn = document.querySelector('.nav-btn[data-tab="travel-log"]');
+        if (logNavBtn) logNavBtn.click();
       } else if (menuAction === 'benefit') {
         filterPartnerOnly = true;
         activeCategoryFilter = 'all';
         setActiveCategoryPill('all');
-        document.querySelector('[data-tab="explore"]').click();
+        
+        // Switch to Explore Tab and refresh
+        const exploreNavBtn = document.querySelector('.nav-btn[data-tab="explore"]');
+        if (exploreNavBtn) exploreNavBtn.click();
         renderPartnersList();
       } else if (menuAction === 'course') {
-        // Scroll directly to AI course planner form on dashboard
-        const plannerEl = document.querySelector('.ai-planner-box-layout');
-        if (plannerEl) {
-          plannerEl.scrollIntoView({ behavior: 'smooth' });
+        // Scroll to AI Planner Box
+        const plannerBox = document.querySelector('.ai-planner-box-layout');
+        if (plannerBox) {
+          plannerBox.scrollIntoView({ behavior: 'smooth' });
         }
       } else {
         filterPartnerOnly = false;
@@ -212,7 +216,10 @@ function setupQuickDashboardMenu() {
 
         activeCategoryFilter = targetCat;
         setActiveCategoryPill(targetCat);
-        document.querySelector('[data-tab="explore"]').click();
+        
+        // Switch to Explore Tab and refresh
+        const exploreNavBtn = document.querySelector('.nav-btn[data-tab="explore"]');
+        if (exploreNavBtn) exploreNavBtn.click();
         renderPartnersList();
       }
     });
@@ -286,13 +293,10 @@ function setupAuthSystem() {
       return;
     }
 
-    // Load registered users list
     let registeredUsers = JSON.parse(localStorage.getItem('nampogogo_users')) || [];
     
-    // Check if user exists
     let matchedUser = registeredUsers.find(u => u.id === usernameInput);
     if (matchedUser) {
-      // Login attempt
       if (matchedUser.pw !== passwordInput) {
         alert("❌ 비밀번호가 올바르지 않습니다!");
         return;
@@ -300,7 +304,6 @@ function setupAuthSystem() {
       currentUser = matchedUser.id;
       currentUserRole = matchedUser.role;
     } else {
-      // Auto Sign-up
       const newUser = {
         id: usernameInput,
         pw: passwordInput,
@@ -428,7 +431,7 @@ function renderPartnersList() {
     const isKLounge = p.id === 'partner_klounge';
     card.className = `partner-card ${isKLounge ? 'priority-card' : ''}`;
     
-    const isKorean = currentLang === 'ko';
+    const isKorean = currentLang === 'kr';
     const directionLink = isKorean ? p.mapLinkNaver : p.mapLinkGoogle;
     
     card.innerHTML = `
@@ -484,7 +487,7 @@ function openPartnerDetail(id) {
 
   const contentWrap = document.getElementById('partner-modal-body-content');
   const isStamped = userStamps.some(s => s.partnerId === p.id);
-  const isKorean = currentLang === 'ko';
+  const isKorean = currentLang === 'kr';
   const directionLink = isKorean ? p.mapLinkNaver : p.mapLinkGoogle;
 
   // Build Pricing rows
@@ -500,7 +503,6 @@ function openPartnerDetail(id) {
 
   // Build Media Gallery slides (Images & Videos)
   let mediaGallerySlides = '';
-  // Prepend default main image
   mediaGallerySlides += `<div class="detail-gallery-img" style="background-image: url('${p.image}')"></div>`;
   
   if (p.gallery && p.gallery.length > 0) {
@@ -567,11 +569,10 @@ function openPartnerDetail(id) {
     `;
   }
 
-  // Calculate Google-style metrics (Default scores or computed ones)
   const sc = p.scores || { hygiene: 4.8, taste: 4.8, service: 4.8, cleanliness: 4.8 };
 
   contentWrap.innerHTML = `
-    <!-- Media Scroll Gallery instead of single cover -->
+    <!-- Media Scroll Gallery -->
     <div class="modal-detail-media-scroller">
       ${mediaGallerySlides}
     </div>
@@ -727,25 +728,22 @@ function openPartnerDetail(id) {
         return;
       }
 
-      // Add to reviews list
       const reviewObj = {
         username: currentUser,
         rating: rating,
         content: {
-          ko: text,
+          kr: text,
           en: text,
-          zh: text,
-          ja: text
+          ch: text,
+          jp: text
         }
       };
 
       p.reviews.unshift(reviewObj);
 
-      // Recalculate average rating
       const sum = p.reviews.reduce((acc, cur) => acc + cur.rating, 0);
       p.rating = sum / p.reviews.length;
 
-      // Update partners array
       savePartnersToStorage();
       alert("Verified review posted successfully!");
       openPartnerDetail(p.id); // reload modal
@@ -825,7 +823,7 @@ function setupInteractiveScans() {
     } else {
       userStamps.push({
         partnerId: p.id,
-        partnerName: p.name['ko'],
+        partnerName: p.name['kr'], // seed key kr
         timestamp: timeStr,
         date: dateStr,
         count: 1,
@@ -976,7 +974,6 @@ function setupMerchantSystem() {
   const editForm = document.getElementById('merchant-store-edit-form');
   const fileInput = document.getElementById('merchant-media-files');
 
-  // File Change event -> Base64 reader for Merchant
   fileInput.addEventListener('change', (e) => {
     const files = e.target.files;
     const previewContainer = document.getElementById('merchant-media-previews');
@@ -994,12 +991,10 @@ function setupMerchantSystem() {
           data: base64Data
         });
 
-        // Previews block
         const pBox = document.createElement('div');
         pBox.className = `preview-thumb-box ${isVideo ? 'video' : ''}`;
         pBox.style.backgroundImage = isVideo ? 'none' : `url('${base64Data}')`;
         
-        // Radio selector
         const radio = document.createElement('input');
         radio.type = 'radio';
         radio.name = 'merchant-thumb-select';
@@ -1029,7 +1024,6 @@ function setupMerchantSystem() {
     store.hours = document.getElementById('edit-hours-input').value.trim();
     store.phone = document.getElementById('edit-phone-input').value.trim();
 
-    // If new files uploaded, save them
     if (tempUploadedMedia.length > 0) {
       store.gallery = tempUploadedMedia;
       if (selectedThumbnailBase64) {
@@ -1039,16 +1033,12 @@ function setupMerchantSystem() {
 
     savePartnersToStorage();
     alert(getTranslation(currentLang, 'saveStoreSuccess'));
-    
-    // Broadcast trigger
-    localStorage.setItem('nampogogo_partners_v3', JSON.stringify(partnersList));
     renderPartnersList();
   });
 }
 
 function findMerchantStore() {
   if (currentUserRole !== 'merchant') return null;
-  // Match owner_klounge or general ID (fallback K-Lounge)
   const storeId = currentUser.toLowerCase().replace('owner_', 'partner_');
   return partnersList.find(p => p.id === storeId) || partnersList[0];
 }
@@ -1102,13 +1092,12 @@ function renderMerchantStats() {
   }
 }
 
-// 13. ADMIN Console logic with File Upload & Tab Sync trigger
+// 13. ADMIN Console logic
 function setupAdminSystem() {
   const storeForm = document.getElementById('admin-add-store-form');
   const noticeForm = document.getElementById('admin-add-notice-form');
   const fileInput = document.getElementById('admin-media-files');
 
-  // File Change event -> Base64 reader for Admin
   fileInput.addEventListener('change', (e) => {
     const files = e.target.files;
     const previewContainer = document.getElementById('admin-media-previews');
@@ -1160,17 +1149,15 @@ function setupAdminSystem() {
     const isPartnerChecked = document.getElementById('admin-store-ispartner').checked;
 
     const newId = 'partner_' + Date.now();
-
-    // Default main image, or use selected thumbnail base64
     const finalCoverImg = selectedThumbnailBase64 || imgVal;
 
     const newStoreObj = {
       id: newId,
-      name: { ko: nameVal, en: nameVal, zh: nameVal, ja: nameVal },
+      name: { kr: nameVal, en: nameVal, ch: nameVal, jp: nameVal },
       category: catVal,
       isPartner: isPartnerChecked,
       image: finalCoverImg,
-      gallery: tempUploadedMedia, // include multiple base64 uploads
+      gallery: tempUploadedMedia,
       rating: 5.0,
       scores: { hygiene: 5.0, taste: 5.0, service: 5.0, cleanliness: 5.0 },
       posX: 50,
@@ -1178,18 +1165,18 @@ function setupAdminSystem() {
       mapLinkNaver: `https://map.naver.com/v5/directions/14363294,35.097489,내위치,,/14363310,35.098222,목적지,,/walk`,
       mapLinkGoogle: `https://www.google.com/maps/dir/?api=1&origin=35.097489,129.034789&destination=35.098222,129.035789&travelmode=walking`,
       distanceValue: "350m",
-      address: { ko: "부산 중구 남포동 일대", en: "Nampodong, Jung-gu, Busan", zh: "釜山中区南浦洞", ja: "釜山中区南浦洞" },
+      address: { kr: "부산 중구 남포동 일대", en: "Nampodong, Jung-gu, Busan", ch: "釜山中区南浦洞", jp: "釜山中区南浦洞" },
       phone: "+82-51-111-2222",
       hours: "11:00 - 22:00",
       priceList: [
-        { name: { ko: "대표 패키지 코스", en: "Signature Package", zh: "招牌主打套餐", ja: "代表コース" }, price: priceVal }
+        { name: { kr: "대표 패키지 코스", en: "Signature Package", ch: "招牌主打套餐", jp: "代表コース" }, price: priceVal }
       ],
       menuForeign: {
         en: `Signature Course - ${priceVal}`,
-        zh: `招牌套餐 - ${priceVal}`,
-        ja: `代表メニュー - ${priceVal}`
+        ch: `招牌套餐 - ${priceVal}`,
+        jp: `代表メニュー - ${priceVal}`
       },
-      benefits: { ko: benefitVal, en: benefitVal, zh: benefitVal, ja: benefitVal },
+      benefits: { kr: benefitVal, en: benefitVal, ch: benefitVal, jp: benefitVal },
       seoDescription: `${nameVal} - 남포동에 위치한 제휴매장 정보.`,
       seoKeywords: `남포동 ${nameVal}, 부산 ${nameVal}`,
       reviews: []
@@ -1227,9 +1214,6 @@ function setupAdminSystem() {
     localStorage.setItem('nampogogo_notices', JSON.stringify(updateHistoryList));
     alert("Notice posted successfully!");
     
-    // Broadcast trigger
-    localStorage.setItem('nampogogo_notices', JSON.stringify(updateHistoryList));
-
     document.getElementById('admin-notice-textarea').value = '';
     renderUpdateLogs();
   });
@@ -1262,13 +1246,12 @@ function renderAdminReviews() {
   }
 }
 
-// 14. AI Course Planner Logic (with K-Lounge enforced priority first)
+// 14. AI Course Planner Logic
 function setupAIPlanner() {
   const btnPlanner = document.getElementById('btn-run-ai-recommend');
   const outputArea = document.getElementById('ai-course-output-area');
 
   btnPlanner.addEventListener('click', () => {
-    // Retrieve checks and budget selector
     const selectedActs = Array.from(document.querySelectorAll('input[name="ai-activities"]:checked')).map(el => el.value);
     const budgetVal = parseInt(document.getElementById('ai-budget-select').value);
 
@@ -1280,23 +1263,17 @@ function setupAIPlanner() {
     outputArea.innerHTML = '';
     outputArea.classList.remove('hidden');
 
-    // Filtering algorithm
     let courseRoutes = [];
 
-    // Enforce 1st Spot: K-Lounge Massage & Head Spa
     const kLounge = partnersList.find(p => p.id === 'partner_klounge');
     if (kLounge) {
       courseRoutes.push(kLounge);
     }
 
-    // Filter other matching partners based on category & price budget
     const restShops = partnersList.filter(p => p.id !== 'partner_klounge');
     const matched = restShops.filter(p => {
-      // check category match
       const catMatch = selectedActs.includes(p.category);
       
-      // parse price to integer for comparison
-      // e.g. "40,000 KRW" -> 40000, "6,500 KRW" -> 6500
       let priceVal = 0;
       if (p.priceList && p.priceList[0]) {
         const rawStr = p.priceList[0].price;
@@ -1307,17 +1284,15 @@ function setupAIPlanner() {
       return catMatch && budgetMatch;
     });
 
-    // Pick top 2 matched to make 3-step course (K-Lounge + 2 matched)
     const extraNodes = matched.slice(0, 2);
     courseRoutes = courseRoutes.concat(extraNodes);
 
-    // Render Course Timeline Cards
     const titleEl = document.createElement('h4');
     titleEl.innerHTML = `<i data-lucide="compass" style="width:14px; height:14px; display:inline-block; vertical-align:middle; margin-right:4px;"></i> AI 추천 남포 상생 힐링 코스 (${courseRoutes.length}개 발견)`;
     outputArea.appendChild(titleEl);
 
     courseRoutes.forEach((route, idx) => {
-      const isKorean = currentLang === 'ko';
+      const isKorean = currentLang === 'kr';
       const directionLink = isKorean ? route.mapLinkNaver : route.mapLinkGoogle;
       
       const card = document.createElement('div');
@@ -1343,7 +1318,6 @@ function setupAIPlanner() {
     });
 
     initLucide();
-    // Scroll smoothly to output
     outputArea.scrollIntoView({ behavior: 'smooth' });
   });
 }
