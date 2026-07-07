@@ -28,9 +28,11 @@ let selectedThumbnailBase64 = "";
 // Multi-Language Reference
 let translations = {};
 
-// Safe Initialization Hook
+// Safe Initialization Hook (Robust try-catch sandbox isolation)
 document.addEventListener('DOMContentLoaded', () => {
-  // Bind DOM Elements
+  console.log("🚀 Nampo GoGo App Initialization Starting...");
+  
+  // Bind core DOM Elements
   partnerDetailModal = document.getElementById('partner-detail-modal');
   qrScannerModal = document.getElementById('qr-scanner-modal');
   logSnsModal = document.getElementById('log-sns-modal');
@@ -39,27 +41,38 @@ document.addEventListener('DOMContentLoaded', () => {
   const seed = window.NampoGoGoData || { translations: {}, partners: [], updateHistory: [] };
   translations = seed.translations || {};
 
-  initLocalStorageSeed(seed);
-  loadApplicationState();
-  loadUserStamps();
+  // Safe isolated module executor helper to prevent single-point failures from stopping the app
+  function runSafe(moduleName, fn) {
+    try {
+      console.log(`[Module Init] Loading: ${moduleName}`);
+      fn();
+      console.log(`[Module Init] Success: ${moduleName}`);
+    } catch (err) {
+      console.error(`🚨 [Module Error] Module "${moduleName}" failed to execute!`, err);
+    }
+  }
 
-  initLucide();
-  setupLanguage();
-  setupIntroModeSelection();
-  setupUpdatePanel();
-  setupAIPlanner();
-  setupCrossTabSync();
-  
-  // Bind Auth & Merchant Logic
-  setupAuthSystem();
-  setupMerchantSystem();
+  runSafe('LocalStorage Seed', () => initLocalStorageSeed(seed));
+  runSafe('Application State Load', () => loadApplicationState());
+  runSafe('User Stamps Load', () => loadUserStamps());
+  runSafe('Lucide Icons', () => initLucide());
+  runSafe('Language Manager', () => setupLanguage());
+  runSafe('Intro Mode Switcher', () => setupIntroModeSelection());
+  runSafe('Updates Notices Panel', () => setupUpdatePanel());
+  runSafe('AI Planner System', () => setupAIPlanner());
+  runSafe('Cross-tab Sync', () => setupCrossTabSync());
+  runSafe('Tourist Auth System', () => setupAuthSystem());
+  runSafe('Merchant Control System', () => setupMerchantSystem());
+  runSafe('Interactive QR Checkin Scanner', () => setupInteractiveScans());
 
   // Render initial views
-  renderPartnersList();
-  renderTravelLog();
+  runSafe('Render Partners Board', () => renderPartnersList());
+  runSafe('Render Travel Log Timeline', () => renderTravelLog());
 
   // Setup modal close actions
-  setupModalCloseButtons();
+  runSafe('Modal Buttons Bind', () => setupModalCloseButtons());
+  
+  console.log("🎉 Nampo GoGo App Fully Initialized!");
 });
 
 function initLocalStorageSeed(seed) {
@@ -455,7 +468,12 @@ function updateAuthUIs() {
   const logoutCard = document.getElementById('logout-card');
 
   if (currentUser) {
-    const roleTxt = getTranslation(currentLang, 'role' + currentUserRole.charAt(0).toUpperCase() + currentUserRole.slice(1)) || currentUserRole;
+    // Prevent charAt error if currentUserRole is missing/invalid
+    let roleTextKey = 'visitor';
+    if (currentUserRole && typeof currentUserRole === 'string' && currentUserRole.length > 0) {
+      roleTextKey = 'role' + currentUserRole.charAt(0).toUpperCase() + currentUserRole.slice(1);
+    }
+    const roleTxt = getTranslation(currentLang, roleTextKey) || currentUserRole || 'Visitor';
     
     if (dashboardHeading) dashboardHeading.textContent = currentUser;
     if (dashboardDesc) dashboardDesc.textContent = `${getTranslation(currentLang, 'welcomeUser') || 'Welcome!'}`;
@@ -487,7 +505,10 @@ function updateAuthUIs() {
   }
 
   const stampCountEl = document.getElementById('dashboard-stamp-count');
-  if (stampCountEl) stampCountEl.textContent = `${userStamps.length} / 5`;
+  if (stampCountEl) {
+    const listLen = userStamps ? userStamps.length : 0;
+    stampCountEl.textContent = `${listLen} / 5`;
+  }
 }
 
 // 8. Tourist Food Board category filtering & sorting
@@ -501,7 +522,7 @@ function renderPartnersList() {
     filtered = filtered.filter(p => p.subCategory === activeSubcatFilter);
   }
 
-  // Multi-sorting algorithm
+  // Multi-sorting algorithm with full array/gallery checks to prevent list crashes
   filtered.sort((a, b) => {
     const partnerA = a.isPartner ? 1 : 0;
     const partnerB = b.isPartner ? 1 : 0;
@@ -510,21 +531,21 @@ function renderPartnersList() {
     }
 
     if (a.isPartner && b.isPartner) {
-      const mediaCountA = (a.gallery ? a.gallery.length : 0) + 1;
-      const mediaCountB = (b.gallery ? b.gallery.length : 0) + 1;
+      const mediaCountA = (a.gallery && Array.isArray(a.gallery) ? a.gallery.length : 0) + 1;
+      const mediaCountB = (b.gallery && Array.isArray(b.gallery) ? b.gallery.length : 0) + 1;
       if (mediaCountA !== mediaCountB) {
         return mediaCountB - mediaCountA;
       }
       if (a.rating !== b.rating) {
         return b.rating - a.rating;
       }
-      const videoCountA = a.gallery ? a.gallery.filter(g => g.type === 'video').length : 0;
-      const videoCountB = b.gallery ? b.gallery.filter(g => g.type === 'video').length : 0;
+      const videoCountA = (a.gallery && Array.isArray(a.gallery)) ? a.gallery.filter(g => g.type === 'video').length : 0;
+      const videoCountB = (b.gallery && Array.isArray(b.gallery)) ? b.gallery.filter(g => g.type === 'video').length : 0;
       if (videoCountA !== videoCountB) {
         return videoCountB - videoCountA;
       }
-      const imgCountA = a.gallery ? a.gallery.filter(g => g.type === 'image').length : 0;
-      const imgCountB = b.gallery ? b.gallery.filter(g => g.type === 'image').length : 0;
+      const imgCountA = (a.gallery && Array.isArray(a.gallery)) ? a.gallery.filter(g => g.type === 'image').length : 0;
+      const imgCountB = (b.gallery && Array.isArray(b.gallery)) ? b.gallery.filter(g => g.type === 'image').length : 0;
       return imgCountB - imgCountA;
     } else {
       return b.rating - a.rating;
@@ -540,9 +561,7 @@ function renderPartnersList() {
     const card = document.createElement('div');
     card.className = `delivery-partner-card ${p.isPartner ? 'is-partner-gold' : ''}`;
     
-    const isKorean = currentLang === 'kr';
-    const directionLink = isKorean ? p.mapLinkNaver : p.mapLinkGoogle;
-    const mediaTotal = (p.gallery ? p.gallery.length : 0) + 1;
+    const mediaTotal = (p.gallery && Array.isArray(p.gallery) ? p.gallery.length : 0) + 1;
 
     card.innerHTML = `
       <div class="delivery-card-thumb" style="background-image: url('${p.image}')">
@@ -595,13 +614,13 @@ function openPartnerDetail(id) {
   const contentWrap = document.getElementById('partner-modal-body-content');
   if (!contentWrap) return;
 
-  const isStamped = userStamps.some(s => s.partnerId === p.id);
+  const isStamped = userStamps ? userStamps.some(s => s.partnerId === p.id) : false;
   const isKorean = currentLang === 'kr';
   const directionLink = isKorean ? p.mapLinkNaver : p.mapLinkGoogle;
 
   let mediaSwiperMarkup = '';
   mediaSwiperMarkup += `<div class="detail-gallery-img" style="background-image: url('${p.image}')"></div>`;
-  if (p.gallery && p.gallery.length > 0) {
+  if (p.gallery && Array.isArray(p.gallery) && p.gallery.length > 0) {
     p.gallery.forEach(file => {
       if (file.type === 'video' || file.data.startsWith('data:video/')) {
         mediaSwiperMarkup += `<video class="detail-gallery-video" controls src="${file.data}"></video>`;
@@ -612,27 +631,29 @@ function openPartnerDetail(id) {
   }
 
   let pricingRows = '';
-  p.priceList.forEach(item => {
-    pricingRows += `
-      <tr>
-        <td>${item.name[currentLang] || item.name['en']}</td>
-        <td class="price-col">${item.price}</td>
-      </tr>
-    `;
-  });
+  if (p.priceList && Array.isArray(p.priceList)) {
+    p.priceList.forEach(item => {
+      pricingRows += `
+        <tr>
+          <td>${item.name[currentLang] || item.name['en']}</td>
+          <td class="price-col">${item.price}</td>
+        </tr>
+      `;
+    });
+  }
 
   const langBadgeStr = (p.menuForeign && p.menuForeign[currentLang]) ? `<span class="characteristic-badge badge-blue">다국어 대응</span>` : '';
   const parkingStr = p.parking ? `<span class="characteristic-badge badge-secondary">🚗 주차: ${p.parking}</span>` : '';
   
   let paymentBadgeStr = '';
-  if (p.payments && p.payments.length > 0) {
+  if (p.payments && Array.isArray(p.payments) && p.payments.length > 0) {
     p.payments.forEach(pay => {
       paymentBadgeStr += `<span class="characteristic-badge badge-warning">💳 ${pay}</span>`;
     });
   }
 
   let reviewsMarkup = '';
-  if (p.reviews.length === 0) {
+  if (!p.reviews || !Array.isArray(p.reviews) || p.reviews.length === 0) {
     reviewsMarkup = `<p class="empty-state text-center">${getTranslation(currentLang, 'noReviews') || 'No reviews yet.'}</p>`;
   } else {
     p.reviews.forEach(rev => {
@@ -846,6 +867,7 @@ function openPartnerDetail(id) {
         content: { kr: text, en: text, ch: text, jp: text }
       };
 
+      if (!p.reviews) p.reviews = [];
       p.reviews.unshift(reviewObj);
 
       const sum = p.reviews.reduce((acc, cur) => acc + cur.rating, 0);
@@ -927,6 +949,7 @@ function setupInteractiveScans() {
       const dateStr = now.toLocaleDateString();
       const timeStr = now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
 
+      if (!userStamps) userStamps = [];
       const index = userStamps.findIndex(s => s.partnerId === p.id);
       let visitCount = 1;
       
@@ -974,7 +997,7 @@ function renderTravelLog() {
   for (let i = 0; i < 5; i++) {
     const node = document.createElement('div');
     node.className = 'stamp-node';
-    if (userStamps[i]) {
+    if (userStamps && userStamps[i]) {
       node.classList.add('active');
       node.innerHTML = '👣';
     } else {
@@ -983,12 +1006,12 @@ function renderTravelLog() {
     stampGrid.appendChild(node);
   }
 
-  if (logCountNum) logCountNum.textContent = userStamps.length;
+  if (logCountNum) logCountNum.textContent = userStamps ? userStamps.length : 0;
 
   const oldNodes = timeline.querySelectorAll('.timeline-node');
   oldNodes.forEach(n => n.remove());
 
-  if (userStamps.length === 0) {
+  if (!userStamps || userStamps.length === 0) {
     if (emptyMsg) emptyMsg.classList.remove('hidden');
     if (actionsBar) actionsBar.classList.add('hidden');
     timeline.classList.remove('active');
@@ -1048,7 +1071,7 @@ function openSNSCardModal() {
   const storyUserTag = document.getElementById('story-user-tag');
   
   if (storyUserTag) storyUserTag.textContent = `@${currentUser || 'Explorer'}`;
-  if (storyStampList) {
+  if (storyStampList && userStamps) {
     storyStampList.innerHTML = '';
     userStamps.forEach((stamp, idx) => {
       const p = partnersList.find(item => item.id === stamp.partnerId);
@@ -1067,6 +1090,7 @@ function openSNSCardModal() {
   const btnCopyCaption = document.getElementById('btn-copy-sns-caption');
   if (btnCopyCaption) {
     btnCopyCaption.onclick = () => {
+      if (!userStamps) return;
       const routeText = userStamps.map((stamp, idx) => {
         const p = partnersList.find(item => item.id === stamp.partnerId);
         const memoText = stamp.memo ? ` (${stamp.memo})` : '';
