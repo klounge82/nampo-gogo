@@ -1,4 +1,9 @@
-// app.js - Nampo GoGo Platform Advanced Logic with Lang Codes (KR, EN, CH, JP) & UI Bugfixes
+// app.js - Nampo GoGo Platform Advanced Logic with Strict DOM Bindings
+
+// DOM Element Variable Declarations to Prevent Browser Undefined Variable Crashes
+let partnerDetailModal = null;
+let qrScannerModal = null;
+let logSnsModal = null;
 
 // Global Seed Load and Local Storage Initialization
 initLocalStorageSeed();
@@ -39,7 +44,7 @@ function loadApplicationState() {
 
 // App Variables
 const translations = window.NampoGoGoData.translations;
-let currentLang = 'kr'; // Corrected default code: kr
+let currentLang = 'kr';
 let activeTab = 'dashboard';
 let currentUser = localStorage.getItem('nampogogo_user') || null;
 let currentUserRole = localStorage.getItem('nampogogo_user_role') || 'visitor';
@@ -53,6 +58,11 @@ let selectedThumbnailBase64 = "";
 
 // Document Load Hook
 document.addEventListener('DOMContentLoaded', () => {
+  // Bind DOM Elements
+  partnerDetailModal = document.getElementById('partner-detail-modal');
+  qrScannerModal = document.getElementById('qr-scanner-modal');
+  logSnsModal = document.getElementById('log-sns-modal');
+
   initLucide();
   loadUserStamps();
   setupLanguage();
@@ -72,6 +82,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-hero-quick-link').addEventListener('click', () => {
     openPartnerDetail('partner_klounge');
   });
+
+  // Setup modal close buttons to avoid undefined issues
+  setupModalCloseButtons();
 });
 
 function initLucide() {
@@ -690,8 +703,9 @@ function openPartnerDetail(id) {
     </div>
   `;
 
-  const partnerDetailModal = document.getElementById('partner-detail-modal');
-  partnerDetailModal.classList.add('active');
+  if (partnerDetailModal) {
+    partnerDetailModal.classList.add('active');
+  }
   initLucide();
 
   // Setup Detailed rating accordion toggle
@@ -709,11 +723,11 @@ function openPartnerDetail(id) {
   qrBtn.addEventListener('click', () => {
     if (!currentUser) {
       alert("Please login first to check-in.");
-      partnerDetailModal.classList.remove('active');
-      document.querySelector('[data-tab="profile"]').click();
+      if (partnerDetailModal) partnerDetailModal.classList.remove('active');
+      document.querySelector('.nav-btn[data-tab="profile"]').click();
       return;
     }
-    partnerDetailModal.classList.remove('active');
+    if (partnerDetailModal) partnerDetailModal.classList.remove('active');
     triggerQRScanner(p.id);
   });
 
@@ -792,8 +806,9 @@ function triggerQRScanner(partnerId) {
   document.getElementById('qr-reward-text').textContent = p.benefits[currentLang] || p.benefits['en'];
   
   document.getElementById('qr-success-screen').classList.add('hidden');
-  const qrScannerModal = document.getElementById('qr-scanner-modal');
-  qrScannerModal.classList.add('active');
+  if (qrScannerModal) {
+    qrScannerModal.classList.add('active');
+  }
 
   setTimeout(() => {
     document.getElementById('qr-success-screen').classList.remove('hidden');
@@ -801,7 +816,6 @@ function triggerQRScanner(partnerId) {
 }
 
 function setupInteractiveScans() {
-  const qrScannerModal = document.getElementById('qr-scanner-modal');
   document.getElementById('btn-claim-stamp-confirm').addEventListener('click', () => {
     if (!targetQrPartnerId) return;
 
@@ -823,7 +837,7 @@ function setupInteractiveScans() {
     } else {
       userStamps.push({
         partnerId: p.id,
-        partnerName: p.name['kr'], // seed key kr
+        partnerName: p.name['kr'],
         timestamp: timeStr,
         date: dateStr,
         count: 1,
@@ -839,7 +853,7 @@ function setupInteractiveScans() {
     updateAuthUIs();
     renderTravelLog();
 
-    qrScannerModal.classList.remove('active');
+    if (qrScannerModal) qrScannerModal.classList.remove('active');
     alert(`👣 Visit Stamp Saved!\nStore: ${p.name[currentLang] || p.name['en']}\nBenefit Status: Certified ✔`);
   });
 }
@@ -929,7 +943,6 @@ function renderTravelLog() {
 function openSNSCardModal() {
   const storyStampList = document.getElementById('story-stamp-list');
   const storyUserTag = document.getElementById('story-user-tag');
-  const logSnsModal = document.getElementById('log-sns-modal');
   
   storyUserTag.textContent = `@${currentUser || 'Explorer'}`;
   storyStampList.innerHTML = '';
@@ -947,7 +960,7 @@ function openSNSCardModal() {
     storyStampList.appendChild(node);
   });
 
-  logSnsModal.classList.add('active');
+  if (logSnsModal) logSnsModal.classList.add('active');
 
   // Copy Caption Share Text
   document.getElementById('btn-copy-sns-caption').onclick = () => {
@@ -974,67 +987,71 @@ function setupMerchantSystem() {
   const editForm = document.getElementById('merchant-store-edit-form');
   const fileInput = document.getElementById('merchant-media-files');
 
-  fileInput.addEventListener('change', (e) => {
-    const files = e.target.files;
-    const previewContainer = document.getElementById('merchant-media-previews');
-    previewContainer.innerHTML = '';
-    tempUploadedMedia = [];
+  if (fileInput) {
+    fileInput.addEventListener('change', (e) => {
+      const files = e.target.files;
+      const previewContainer = document.getElementById('merchant-media-previews');
+      previewContainer.innerHTML = '';
+      tempUploadedMedia = [];
 
-    Array.from(files).forEach((file, index) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const base64Data = event.target.result;
-        const isVideo = file.type.startsWith('video/');
+      Array.from(files).forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const base64Data = event.target.result;
+          const isVideo = file.type.startsWith('video/');
 
-        tempUploadedMedia.push({
-          type: isVideo ? 'video' : 'image',
-          data: base64Data
-        });
+          tempUploadedMedia.push({
+            type: isVideo ? 'video' : 'image',
+            data: base64Data
+          });
 
-        const pBox = document.createElement('div');
-        pBox.className = `preview-thumb-box ${isVideo ? 'video' : ''}`;
-        pBox.style.backgroundImage = isVideo ? 'none' : `url('${base64Data}')`;
-        
-        const radio = document.createElement('input');
-        radio.type = 'radio';
-        radio.name = 'merchant-thumb-select';
-        radio.value = index;
-        if (index === 0) {
-          radio.checked = true;
-          selectedThumbnailBase64 = base64Data;
-        }
-        
-        radio.addEventListener('change', () => {
-          selectedThumbnailBase64 = base64Data;
-        });
+          const pBox = document.createElement('div');
+          pBox.className = `preview-thumb-box ${isVideo ? 'video' : ''}`;
+          pBox.style.backgroundImage = isVideo ? 'none' : `url('${base64Data}')`;
+          
+          const radio = document.createElement('input');
+          radio.type = 'radio';
+          radio.name = 'merchant-thumb-select';
+          radio.value = index;
+          if (index === 0) {
+            radio.checked = true;
+            selectedThumbnailBase64 = base64Data;
+          }
+          
+          radio.addEventListener('change', () => {
+            selectedThumbnailBase64 = base64Data;
+          });
 
-        pBox.appendChild(radio);
-        previewContainer.appendChild(pBox);
-      };
-      reader.readAsDataURL(file);
+          pBox.appendChild(radio);
+          previewContainer.appendChild(pBox);
+        };
+        reader.readAsDataURL(file);
+      });
     });
-  });
+  }
 
-  editForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const store = findMerchantStore();
-    if (!store) return;
+  if (editForm) {
+    editForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const store = findMerchantStore();
+      if (!store) return;
 
-    store.benefits[currentLang] = document.getElementById('edit-benefit-input').value.trim();
-    store.hours = document.getElementById('edit-hours-input').value.trim();
-    store.phone = document.getElementById('edit-phone-input').value.trim();
+      store.benefits[currentLang] = document.getElementById('edit-benefit-input').value.trim();
+      store.hours = document.getElementById('edit-hours-input').value.trim();
+      store.phone = document.getElementById('edit-phone-input').value.trim();
 
-    if (tempUploadedMedia.length > 0) {
-      store.gallery = tempUploadedMedia;
-      if (selectedThumbnailBase64) {
-        store.image = selectedThumbnailBase64;
+      if (tempUploadedMedia.length > 0) {
+        store.gallery = tempUploadedMedia;
+        if (selectedThumbnailBase64) {
+          store.image = selectedThumbnailBase64;
+        }
       }
-    }
 
-    savePartnersToStorage();
-    alert(getTranslation(currentLang, 'saveStoreSuccess'));
-    renderPartnersList();
-  });
+      savePartnersToStorage();
+      alert(getTranslation(currentLang, 'saveStoreSuccess'));
+      renderPartnersList();
+    });
+  }
 }
 
 function findMerchantStore() {
@@ -1056,6 +1073,7 @@ function renderMerchantStats() {
   document.getElementById('merchant-review-count').textContent = `${store.reviews.length}개`;
   
   const tbody = document.querySelector('#merchant-visit-logs-table tbody');
+  if (!tbody) return;
   tbody.innerHTML = '';
 
   const visitLogs = [];
@@ -1098,125 +1116,131 @@ function setupAdminSystem() {
   const noticeForm = document.getElementById('admin-add-notice-form');
   const fileInput = document.getElementById('admin-media-files');
 
-  fileInput.addEventListener('change', (e) => {
-    const files = e.target.files;
-    const previewContainer = document.getElementById('admin-media-previews');
-    previewContainer.innerHTML = '';
-    tempUploadedMedia = [];
+  if (fileInput) {
+    fileInput.addEventListener('change', (e) => {
+      const files = e.target.files;
+      const previewContainer = document.getElementById('admin-media-previews');
+      previewContainer.innerHTML = '';
+      tempUploadedMedia = [];
 
-    Array.from(files).forEach((file, index) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const base64Data = event.target.result;
-        const isVideo = file.type.startsWith('video/');
+      Array.from(files).forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const base64Data = event.target.result;
+          const isVideo = file.type.startsWith('video/');
 
-        tempUploadedMedia.push({
-          type: isVideo ? 'video' : 'image',
-          data: base64Data
-        });
+          tempUploadedMedia.push({
+            type: isVideo ? 'video' : 'image',
+            data: base64Data
+          });
 
-        const pBox = document.createElement('div');
-        pBox.className = `preview-thumb-box ${isVideo ? 'video' : ''}`;
-        pBox.style.backgroundImage = isVideo ? 'none' : `url('${base64Data}')`;
-        
-        const radio = document.createElement('input');
-        radio.type = 'radio';
-        radio.name = 'admin-thumb-select';
-        radio.value = index;
-        if (index === 0) {
-          radio.checked = true;
-          selectedThumbnailBase64 = base64Data;
-        }
-        
-        radio.addEventListener('change', () => {
-          selectedThumbnailBase64 = base64Data;
-        });
+          const pBox = document.createElement('div');
+          pBox.className = `preview-thumb-box ${isVideo ? 'video' : ''}`;
+          pBox.style.backgroundImage = isVideo ? 'none' : `url('${base64Data}')`;
+          
+          const radio = document.createElement('input');
+          radio.type = 'radio';
+          radio.name = 'admin-thumb-select';
+          radio.value = index;
+          if (index === 0) {
+            radio.checked = true;
+            selectedThumbnailBase64 = base64Data;
+          }
+          
+          radio.addEventListener('change', () => {
+            selectedThumbnailBase64 = base64Data;
+          });
 
-        pBox.appendChild(radio);
-        previewContainer.appendChild(pBox);
+          pBox.appendChild(radio);
+          previewContainer.appendChild(pBox);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+  }
+
+  if (storeForm) {
+    storeForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const nameVal = document.getElementById('admin-store-name').value.trim();
+      const catVal = document.getElementById('admin-store-cat').value;
+      const imgVal = document.getElementById('admin-store-img').value.trim();
+      const benefitVal = document.getElementById('admin-store-benefit').value.trim();
+      const priceVal = document.getElementById('admin-store-price').value.trim();
+      const isPartnerChecked = document.getElementById('admin-store-ispartner').checked;
+
+      const newId = 'partner_' + Date.now();
+      const finalCoverImg = selectedThumbnailBase64 || imgVal;
+
+      const newStoreObj = {
+        id: newId,
+        name: { kr: nameVal, en: nameVal, ch: nameVal, jp: nameVal },
+        category: catVal,
+        isPartner: isPartnerChecked,
+        image: finalCoverImg,
+        gallery: tempUploadedMedia,
+        rating: 5.0,
+        scores: { hygiene: 5.0, taste: 5.0, service: 5.0, cleanliness: 5.0 },
+        posX: 50,
+        posY: 50,
+        mapLinkNaver: `https://map.naver.com/v5/directions/14363294,35.097489,내위치,,/14363310,35.098222,목적지,,/walk`,
+        mapLinkGoogle: `https://www.google.com/maps/dir/?api=1&origin=35.097489,129.034789&destination=35.098222,129.035789&travelmode=walking`,
+        distanceValue: "350m",
+        address: { kr: "부산 중구 남포동 일대", en: "Nampodong, Jung-gu, Busan", ch: "釜山中区南浦洞", jp: "釜山中区南浦洞" },
+        phone: "+82-51-111-2222",
+        hours: "11:00 - 22:00",
+        priceList: [
+          { name: { kr: "대표 패키지 코스", en: "Signature Package", ch: "招牌主打套餐", jp: "代表コース" }, price: priceVal }
+        ],
+        menuForeign: {
+          en: `Signature Course - ${priceVal}`,
+          ch: `招牌套餐 - ${priceVal}`,
+          jp: `代表メニュー - ${priceVal}`
+        },
+        benefits: { kr: benefitVal, en: benefitVal, ch: benefitVal, jp: benefitVal },
+        seoDescription: `${nameVal} - 남포동에 위치한 제휴매장 정보.`,
+        seoKeywords: `남포동 ${nameVal}, 부산 ${nameVal}`,
+        reviews: []
       };
-      reader.readAsDataURL(file);
+
+      partnersList.unshift(newStoreObj);
+      savePartnersToStorage();
+      alert(getTranslation(currentLang, 'addStoreSuccess'));
+      
+      localStorage.setItem('nampogogo_partners_v3', JSON.stringify(partnersList));
+
+      storeForm.reset();
+      const adminPreviews = document.getElementById('admin-media-previews');
+      if (adminPreviews) adminPreviews.innerHTML = '';
+      tempUploadedMedia = [];
+      selectedThumbnailBase64 = "";
+
+      renderPartnersList();
+      document.querySelector('.nav-btn[data-tab="explore"]').click();
     });
-  });
+  }
 
-  storeForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const nameVal = document.getElementById('admin-store-name').value.trim();
-    const catVal = document.getElementById('admin-store-cat').value;
-    const imgVal = document.getElementById('admin-store-img').value.trim();
-    const benefitVal = document.getElementById('admin-store-benefit').value.trim();
-    const priceVal = document.getElementById('admin-store-price').value.trim();
-    const isPartnerChecked = document.getElementById('admin-store-ispartner').checked;
+  if (noticeForm) {
+    noticeForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const noticeText = document.getElementById('admin-notice-textarea').value.trim();
+      if (!noticeText) return;
 
-    const newId = 'partner_' + Date.now();
-    const finalCoverImg = selectedThumbnailBase64 || imgVal;
+      const now = new Date();
+      const dateStr = now.toISOString().split('T')[0];
 
-    const newStoreObj = {
-      id: newId,
-      name: { kr: nameVal, en: nameVal, ch: nameVal, jp: nameVal },
-      category: catVal,
-      isPartner: isPartnerChecked,
-      image: finalCoverImg,
-      gallery: tempUploadedMedia,
-      rating: 5.0,
-      scores: { hygiene: 5.0, taste: 5.0, service: 5.0, cleanliness: 5.0 },
-      posX: 50,
-      posY: 50,
-      mapLinkNaver: `https://map.naver.com/v5/directions/14363294,35.097489,내위치,,/14363310,35.098222,목적지,,/walk`,
-      mapLinkGoogle: `https://www.google.com/maps/dir/?api=1&origin=35.097489,129.034789&destination=35.098222,129.035789&travelmode=walking`,
-      distanceValue: "350m",
-      address: { kr: "부산 중구 남포동 일대", en: "Nampodong, Jung-gu, Busan", ch: "釜山中区南浦洞", jp: "釜山中区南浦洞" },
-      phone: "+82-51-111-2222",
-      hours: "11:00 - 22:00",
-      priceList: [
-        { name: { kr: "대표 패키지 코스", en: "Signature Package", ch: "招牌主打套餐", jp: "代表コース" }, price: priceVal }
-      ],
-      menuForeign: {
-        en: `Signature Course - ${priceVal}`,
-        ch: `招牌套餐 - ${priceVal}`,
-        jp: `代表メニュー - ${priceVal}`
-      },
-      benefits: { kr: benefitVal, en: benefitVal, ch: benefitVal, jp: benefitVal },
-      seoDescription: `${nameVal} - 남포동에 위치한 제휴매장 정보.`,
-      seoKeywords: `남포동 ${nameVal}, 부산 ${nameVal}`,
-      reviews: []
-    };
+      updateHistoryList.unshift({
+        date: dateStr,
+        content: noticeText
+      });
 
-    partnersList.unshift(newStoreObj);
-    savePartnersToStorage();
-    alert(getTranslation(currentLang, 'addStoreSuccess'));
-    
-    // Broadcast trigger
-    localStorage.setItem('nampogogo_partners_v3', JSON.stringify(partnersList));
-
-    storeForm.reset();
-    document.getElementById('admin-media-previews').innerHTML = '';
-    tempUploadedMedia = [];
-    selectedThumbnailBase64 = "";
-
-    renderPartnersList();
-    document.querySelector('[data-tab="explore"]').click();
-  });
-
-  noticeForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const noticeText = document.getElementById('admin-notice-textarea').value.trim();
-    if (!noticeText) return;
-
-    const now = new Date();
-    const dateStr = now.toISOString().split('T')[0];
-
-    updateHistoryList.unshift({
-      date: dateStr,
-      content: noticeText
+      localStorage.setItem('nampogogo_notices', JSON.stringify(updateHistoryList));
+      alert("Notice posted successfully!");
+      
+      document.getElementById('admin-notice-textarea').value = '';
+      renderUpdateLogs();
     });
-
-    localStorage.setItem('nampogogo_notices', JSON.stringify(updateHistoryList));
-    alert("Notice posted successfully!");
-    
-    document.getElementById('admin-notice-textarea').value = '';
-    renderUpdateLogs();
-  });
+  }
 }
 
 function renderAdminReviews() {
@@ -1251,86 +1275,90 @@ function setupAIPlanner() {
   const btnPlanner = document.getElementById('btn-run-ai-recommend');
   const outputArea = document.getElementById('ai-course-output-area');
 
-  btnPlanner.addEventListener('click', () => {
-    const selectedActs = Array.from(document.querySelectorAll('input[name="ai-activities"]:checked')).map(el => el.value);
-    const budgetVal = parseInt(document.getElementById('ai-budget-select').value);
+  if (btnPlanner) {
+    btnPlanner.addEventListener('click', () => {
+      const selectedActs = Array.from(document.querySelectorAll('input[name="ai-activities"]:checked')).map(el => el.value);
+      const budgetVal = parseInt(document.getElementById('ai-budget-select').value);
 
-    if (selectedActs.length === 0) {
-      alert("하고 싶은 활동을 최소 1개 이상 선택해 주세요!");
-      return;
-    }
-
-    outputArea.innerHTML = '';
-    outputArea.classList.remove('hidden');
-
-    let courseRoutes = [];
-
-    const kLounge = partnersList.find(p => p.id === 'partner_klounge');
-    if (kLounge) {
-      courseRoutes.push(kLounge);
-    }
-
-    const restShops = partnersList.filter(p => p.id !== 'partner_klounge');
-    const matched = restShops.filter(p => {
-      const catMatch = selectedActs.includes(p.category);
-      
-      let priceVal = 0;
-      if (p.priceList && p.priceList[0]) {
-        const rawStr = p.priceList[0].price;
-        priceVal = parseInt(rawStr.replace(/[^0-9]/g, '')) || 0;
+      if (selectedActs.length === 0) {
+        alert("하고 싶은 활동을 최소 1개 이상 선택해 주세요!");
+        return;
       }
 
-      const budgetMatch = priceVal <= budgetVal;
-      return catMatch && budgetMatch;
-    });
+      outputArea.innerHTML = '';
+      outputArea.classList.remove('hidden');
 
-    const extraNodes = matched.slice(0, 2);
-    courseRoutes = courseRoutes.concat(extraNodes);
+      let courseRoutes = [];
 
-    const titleEl = document.createElement('h4');
-    titleEl.innerHTML = `<i data-lucide="compass" style="width:14px; height:14px; display:inline-block; vertical-align:middle; margin-right:4px;"></i> AI 추천 남포 상생 힐링 코스 (${courseRoutes.length}개 발견)`;
-    outputArea.appendChild(titleEl);
+      const kLounge = partnersList.find(p => p.id === 'partner_klounge');
+      if (kLounge) {
+        courseRoutes.push(kLounge);
+      }
 
-    courseRoutes.forEach((route, idx) => {
-      const isKorean = currentLang === 'kr';
-      const directionLink = isKorean ? route.mapLinkNaver : route.mapLinkGoogle;
-      
-      const card = document.createElement('div');
-      card.className = 'ai-route-timeline-card';
-      
-      card.innerHTML = `
-        <div class="ai-card-dot"></div>
-        <div class="ai-route-box">
-          <h5>Step ${idx + 1}: ${route.name[currentLang] || route.name['en']}</h5>
-          <p>🎁 혜택: ${route.benefits[currentLang] || route.benefits['en']}</p>
-          <div style="font-size: 9px; color: var(--text-muted); margin-bottom: 6px;">
-            📞 Tel: ${route.phone} | 🕒 Hours: ${route.hours}
+      const restShops = partnersList.filter(p => p.id !== 'partner_klounge');
+      const matched = restShops.filter(p => {
+        const catMatch = selectedActs.includes(p.category);
+        
+        let priceVal = 0;
+        if (p.priceList && p.priceList[0]) {
+          const rawStr = p.priceList[0].price;
+          priceVal = parseInt(rawStr.replace(/[^0-9]/g, '')) || 0;
+        }
+
+        const budgetMatch = priceVal <= budgetVal;
+        return catMatch && budgetMatch;
+      });
+
+      const extraNodes = matched.slice(0, 2);
+      courseRoutes = courseRoutes.concat(extraNodes);
+
+      const titleEl = document.createElement('h4');
+      titleEl.innerHTML = `<i data-lucide="compass" style="width:14px; height:14px; display:inline-block; vertical-align:middle; margin-right:4px;"></i> AI 추천 남포 상생 힐링 코스 (${courseRoutes.length}개 발견)`;
+      outputArea.appendChild(titleEl);
+
+      courseRoutes.forEach((route, idx) => {
+        const isKorean = currentLang === 'kr';
+        const directionLink = isKorean ? route.mapLinkNaver : route.mapLinkGoogle;
+        
+        const card = document.createElement('div');
+        card.className = 'ai-route-timeline-card';
+        
+        card.innerHTML = `
+          <div class="ai-card-dot"></div>
+          <div class="ai-route-box">
+            <h5>Step ${idx + 1}: ${route.name[currentLang] || route.name['en']}</h5>
+            <p>🎁 혜택: ${route.benefits[currentLang] || route.benefits['en']}</p>
+            <div style="font-size: 9px; color: var(--text-muted); margin-bottom: 6px;">
+              📞 Tel: ${route.phone} | 🕒 Hours: ${route.hours}
+            </div>
+            <div class="ai-route-media" style="background-image: url('${route.image}')"></div>
+            
+            <button class="btn btn-primary btn-sm btn-nav-map" onclick="window.open('${directionLink}', '_blank')">
+              <i data-lucide="navigation" style="width:10px; height:10px;"></i> 실시간 도보 길안내
+            </button>
           </div>
-          <div class="ai-route-media" style="background-image: url('${route.image}')"></div>
-          
-          <button class="btn btn-primary btn-sm btn-nav-map" onclick="window.open('${directionLink}', '_blank')">
-            <i data-lucide="navigation" style="width:10px; height:10px;"></i> 실시간 도보 길안내
-          </button>
-        </div>
-      `;
+        `;
 
-      outputArea.appendChild(card);
+        outputArea.appendChild(card);
+      });
+
+      initLucide();
+      outputArea.scrollIntoView({ behavior: 'smooth' });
     });
-
-    initLucide();
-    outputArea.scrollIntoView({ behavior: 'smooth' });
-  });
+  }
 }
 
-// Modal closing hooks
-document.querySelectorAll('.modal').forEach(modal => {
-  const closeBtn = modal.querySelector('.modal-close');
-  const backdrop = modal.querySelector('.modal-backdrop');
+// Setup Modal Close Actions Safely
+function setupModalCloseButtons() {
+  document.querySelectorAll('.modal').forEach(modal => {
+    const closeBtn = modal.querySelector('.modal-close');
+    const backdrop = modal.querySelector('.modal-backdrop');
 
-  const closeModal = () => {
-    modal.classList.remove('active');
-  };
+    const closeModal = () => {
+      modal.classList.remove('active');
+    };
 
-  if (closeBtn) closeBtn.addEventListener('click', closeModal);
-  if (backdrop) backdrop.addEventListener('click', closeModal);
-});
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (backdrop) backdrop.addEventListener('click', closeModal);
+  });
+}
