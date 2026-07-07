@@ -28,6 +28,34 @@ let selectedThumbnailBase64 = "";
 // Multi-Language Reference
 let translations = {};
 
+// Direct Global Touch Handler for Mobile Compatibility (Ensures 100% click/touch reliability)
+window.handleModeSelect = function(mode) {
+  console.log(`🎯 handleModeSelect triggered with mode: ${mode}`);
+  const introScreen = document.getElementById('intro-screen');
+  const appWorkspace = document.getElementById('app-workspace');
+
+  if (!introScreen || !appWorkspace) {
+    console.error("🚨 Missing core workspaces to switch screens!");
+    return;
+  }
+
+  appMode = mode;
+  introScreen.classList.add('hidden');
+  appWorkspace.classList.remove('hidden');
+
+  renderDynamicNavigationDock();
+
+  if (mode === 'tourist') {
+    switchTabPanel('tourist-explore');
+  } else {
+    if (currentUser && currentUserRole === 'merchant') {
+      switchTabPanel('merchant-manage');
+    } else {
+      switchTabPanel('merchant-auth');
+    }
+  }
+};
+
 // Safe Initialization Hook (Robust try-catch sandbox isolation)
 document.addEventListener('DOMContentLoaded', () => {
   console.log("🚀 Nampo GoGo App Initialization Starting...");
@@ -149,30 +177,18 @@ function setupIntroModeSelection() {
     });
   }
 
-  if (enterTouristModeBtn && introScreen && appWorkspace) {
-    enterTouristModeBtn.addEventListener('click', () => {
-      appMode = 'tourist';
-      introScreen.classList.add('hidden');
-      appWorkspace.classList.remove('hidden');
-      
-      renderDynamicNavigationDock();
-      switchTabPanel('tourist-explore');
+  // Add click listeners as secondary backup for event bubbling
+  if (enterTouristModeBtn) {
+    enterTouristModeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      window.handleModeSelect('tourist');
     });
   }
 
-  if (enterMerchantModeBtn && introScreen && appWorkspace) {
-    enterMerchantModeBtn.addEventListener('click', () => {
-      appMode = 'merchant';
-      introScreen.classList.add('hidden');
-      appWorkspace.classList.remove('hidden');
-      
-      renderDynamicNavigationDock();
-      
-      if (currentUser && currentUserRole === 'merchant') {
-        switchTabPanel('merchant-manage');
-      } else {
-        switchTabPanel('merchant-auth');
-      }
+  if (enterMerchantModeBtn) {
+    enterMerchantModeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      window.handleModeSelect('merchant');
     });
   }
 
@@ -468,7 +484,6 @@ function updateAuthUIs() {
   const logoutCard = document.getElementById('logout-card');
 
   if (currentUser) {
-    // Prevent charAt error if currentUserRole is missing/invalid
     let roleTextKey = 'visitor';
     if (currentUserRole && typeof currentUserRole === 'string' && currentUserRole.length > 0) {
       roleTextKey = 'role' + currentUserRole.charAt(0).toUpperCase() + currentUserRole.slice(1);
@@ -522,7 +537,7 @@ function renderPartnersList() {
     filtered = filtered.filter(p => p.subCategory === activeSubcatFilter);
   }
 
-  // Multi-sorting algorithm with full array/gallery checks to prevent list crashes
+  // Multi-sorting algorithm
   filtered.sort((a, b) => {
     const partnerA = a.isPartner ? 1 : 0;
     const partnerB = b.isPartner ? 1 : 0;

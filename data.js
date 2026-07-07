@@ -305,13 +305,13 @@ window.NampoGoGoData = {
       travelLog: "トラベルログ",
       profile: "マイページ",
       tagline: "南浦洞スマートローカル旅行プラットフォーム",
-      pleaseLogin: "ログインしてQR認証とトラベルログを記録しましょう。",
+      pleaseLogin: "ログインしてQRコードをスキャンし、旅行ログを記録してください。",
       welcomeUser: "釜山・南浦洞へようこそ！",
       roleVisitor: "観光客",
       roleMerchant: "提携加盟店",
       roleAdmin: "管理者",
       updateBtn: "更新ログ",
-      updateTitle: "最近の更新情報",
+      updateTitle: "최근 업데이트 소식",
       
       // Intro translation keys
       introTouristTitle: "旅行者専用",
@@ -322,7 +322,7 @@ window.NampoGoGoData = {
       introMerchantBtn: "管理ページ ➔",
 
       allCategories: "全カテゴリー",
-      catMassage: "エステ & 마ッサージ",
+      catMassage: "エステ & マッサージ",
       catFood: "南浦グルメ",
       catCafe: "カフェ",
       catShopping: "ショッピング",
@@ -356,7 +356,7 @@ window.NampoGoGoData = {
       snsExport: "SNS共有用カード作成 📸",
       snsCopyText: "共有用文言をコピー",
       snsDownloadImg: "ストーリーカードを保存",
-      snsSuccess: "📋 インスタグラム共有用のテキストがクリップボードにコピーされました！画像と一緒に共有してください。",
+      snsSuccess: "📋 インスタグラム共有用のテキスト가 복사되었습니다! 이미지와 함께 공유해주세요.",
       memoLabel: "旅行の一行メモ",
       memoPlaceholder: "ここでどんな思い出がありましたか？メモを入力してください。",
       memoSaveBtn: "メモを保存",
@@ -391,7 +391,7 @@ window.NampoGoGoData = {
       storePriceLabel: "価格情報",
       isPartnerLabel: "公式提携加盟店として登録",
       addStoreSuccess: "🎉 新規店舗が正常に登録されました！",
-      writeNoticeBtn: "📢 加盟店お知らせ・機能更新を追加",
+      writeNoticeBtn: "📢 加盟店お知らせ・기능 업데이트를 추가",
       noticePlaceholder: "お知らせする内容を入力してください。"
     }
   },
@@ -489,7 +489,7 @@ window.NampoGoGoData = {
         kr: "국밥 주문 시 수제 맛보기 순대 1인 2점 무료 제공",
         en: "Order soup and get 2 free slices of handmade sausage per person.",
         ch: "凡点汤饭，即赠送手工血肠（每人2块）。",
-        jp: "クッパご注文で、自家製スン데お一人様2切れサービス"
+        jp: "クッ파ご注文で、自家製スン데お一人様2切れサービス"
       },
       seoDescription: "Traditional Busan Pork Rice Soup restaurant near Gwangbok-ro, Busan.",
       seoKeywords: "Busan pork soup, Nampodong food, pork rice soup",
