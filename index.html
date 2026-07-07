@@ -1,1753 +1,652 @@
-/* style.css - Nampo GoGo Premium Minimalist Design System with Sticky Top Navigation */
-
-:root {
-  /* Colors */
-  --bg-dark: #0c0d14;         /* Rich dark blue-black desktop backdrop */
-  --bg-frame: #ffffff;        /* Pure white mobile device screen */
-  --bg-gray-soft: #f2f4f6;    /* Toss slate light grey */
-  --bg-gray-hover: #e5e8eb;
-  --bg-card: #ffffff;
-  
-  --primary: #3182f6;         /* Indigo Blue */
-  --primary-soft: rgba(49, 130, 246, 0.06);
-  --primary-glow: rgba(49, 130, 246, 0.15);
-  
-  --secondary: #00bcd4;       /* Calm Cyan/Teal */
-  --accent: #ff4c62;          /* Coral Pink Alert */
-  --accent-soft: rgba(255, 76, 98, 0.06);
-  --success: #2ecc71;
-  --warning: #ffb300;         /* Amber Yellow Stars */
-  
-  --border-light: #f2f4f6;
-  --border-medium: #e5e8eb;
-  --border-focus: #3182f6;
-  
-  --text-main: #191f28;       /* Charcoal Black */
-  --text-muted: #8b95a1;      /* Caption Slate */
-  --text-body: #4e5968;       /* Body Grey */
-  
-  /* Fonts & Radius */
-  --font-main: 'Outfit', 'Noto Sans KR', sans-serif;
-  --radius-lg: 24px;
-  --radius-md: 18px;
-  --radius-sm: 12px;
-  --radius-pill: 40px;
-  
-  /* Shadow & Animation Easing */
-  --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.04);
-  --shadow-modal: 0 -12px 40px rgba(0, 0, 0, 0.08);
-  --shadow-glow-p: 0 0 16px var(--primary-glow);
-  --transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Reset */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  -webkit-tap-highlight-color: transparent;
-}
-
-body {
-  font-family: var(--font-main);
-  background-color: var(--bg-dark);
-  color: var(--text-main);
-  min-height: 100vh;
-  overflow-x: hidden;
-  position: relative;
-  letter-spacing: -0.3px;
-  line-height: 1.5;
-}
-
-/* Mobile Frame Shell */
-.mobile-frame {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  max-width: 480px;
-  margin: 0 auto;
-  background-color: var(--bg-frame);
-  position: relative;
-  box-shadow: 0 25px 65px rgba(0, 0, 0, 0.3);
-  border-left: 1px solid var(--border-medium);
-  border-right: 1px solid var(--border-medium);
-}
-
-/* App Workspace Container */
-.app-workspace-container {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-.hidden {
-  display: none !important;
-}
-
-/* 1. INTRO MODE SELECT SCREEN (No emojis, sleek modern typography, absolute top-right lang-selector) */
-.intro-screen {
-  position: absolute;
-  inset: 0;
-  z-index: 10000;
-  background: var(--bg-dark);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-}
-
-.intro-overlay {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 50% 50%, rgba(49, 130, 246, 0.16) 0%, rgba(12, 13, 20, 0.98) 100%);
-  pointer-events: none; /* CRITICAL: Allows clicks and touches to pass directly to cards below */
-}
-
-.intro-lang-wrap {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  z-index: 10001;
-}
-
-.intro-lang-wrap select {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  color: white;
-  padding: 8px 14px;
-  border-radius: var(--radius-pill);
-  font-size: 11px;
-  font-weight: 800;
-  cursor: pointer;
-  outline: none;
-  font-family: var(--font-main);
-  transition: var(--transition);
-}
-
-.intro-lang-wrap select:focus {
-  border-color: var(--primary);
-  background: rgba(49, 130, 246, 0.2);
-}
-
-.intro-lang-wrap select option {
-  background: var(--bg-dark);
-  color: white;
-}
-
-.intro-content-wrap {
-  position: relative;
-  z-index: 2;
-  width: 100%;
-  text-align: center;
-  color: white;
-  display: flex;
-  flex-direction: column;
-}
-
-.intro-logo {
-  font-size: 24px;
-  font-weight: 900;
-  color: var(--primary);
-  margin-bottom: 12px;
-  letter-spacing: -0.5px;
-}
-
-.intro-content-wrap h2 {
-  font-size: 19px;     /* 글자가 가로로 안 잘리도록 약간 축소 */
-  font-weight: 800;
-  letter-spacing: -0.8px;
-  line-height: 1.4;
-  color: #f2f4f6;
-  word-break: keep-all; /* 단어 단위 줄바꿈 적용 */
-  overflow-wrap: break-word;
-  padding: 0 10px;
-}
-
-.intro-desc {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-top: 8px;
-  word-break: keep-all;
-  line-height: 1.4;
-  padding: 0 20px;
-}
-
-.mode-select-box-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-  margin-top: 36px;
-}
-
-.mode-card-btn {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1.5px solid rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius-md);
-  padding: 32px 24px;
-  cursor: pointer;
-  text-align: center;   /* 중앙 정렬 */
-  transition: var(--transition);
-  user-select: none;
-}
-
-.mode-card-btn:hover {
-  border-color: var(--primary);
-  background: rgba(49, 130, 246, 0.06);
-  transform: translateY(-2px);
-}
-
-.mode-card-btn h3 {
-  font-size: 21px;      /* 큼직하게 확장 */
-  font-weight: 900;
-  color: white;
-  letter-spacing: -0.5px;
-  margin-bottom: 8px;
-}
-
-.mode-card-btn p {
-  font-size: 13px;      /* 설명 큼직하게 확장 */
-  color: var(--text-muted);
-  line-height: 1.5;
-  word-break: keep-all;
-}
-
-.mode-badge-action {
-  display: inline-block;
-  margin-top: 18px;
-  font-size: 12px;
-  font-weight: 800;
-  color: var(--primary);
-}
-
-.mode-badge-action-sec {
-  display: inline-block;
-  margin-top: 18px;
-  font-size: 12px;
-  font-weight: 800;
-  color: var(--secondary);
-}
-
-.intro-footer {
-  margin-top: 54px;
-  font-size: 10px;
-  color: rgba(255,255,255,0.2);
-  letter-spacing: 1.5px;
-}
-
-/* Header */
-.nampo-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--border-light);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-}
-
-.logo-group {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-}
-
-.logo-group h1 {
-  font-size: 19px;
-  font-weight: 800;
-  color: var(--text-main);
-  letter-spacing: -0.8px;
-}
-
-.header-controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  position: relative;
-}
-
-.btn-mode-switch-pill {
-  background: var(--bg-gray-soft);
-  border: 1px solid var(--border-medium);
-  padding: 6px 12px;
-  border-radius: var(--radius-pill);
-  font-size: 10px;
-  font-weight: 800;
-  color: var(--text-body);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  transition: var(--transition);
-}
-
-.btn-mode-switch-pill:hover {
-  background: var(--primary-soft);
-  color: var(--primary);
-  border-color: var(--primary);
-}
-
-.btn-mode-switch-pill i {
-  width: 12px;
-  height: 12px;
-}
-
-/* Updates panel dropdown */
-.update-dropdown-wrap {
-  position: relative;
-}
-
-.btn-update {
-  background: var(--bg-gray-soft);
-  border: none;
-  color: var(--text-body);
-  padding: 6px 12px;
-  border-radius: var(--radius-pill);
-  font-size: 10px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.btn-update:hover {
-  background: var(--bg-gray-hover);
-}
-
-.btn-update i {
-  width: 12px;
-  height: 12px;
-  stroke-width: 2.2px;
-  transition: transform 0.3s ease;
-}
-
-.btn-update.open i {
-  transform: rotate(180deg);
-}
-
-.update-panel-content {
-  position: absolute;
-  top: 38px;
-  right: 0;
-  width: 280px;
-  background: #ffffff;
-  border: 1px solid var(--border-medium);
-  border-radius: var(--radius-md);
-  padding: 18px;
-  box-shadow: 0 12px 36px rgba(0,0,0,0.08);
-  z-index: 200;
-  display: none;
-  animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.update-panel-content.show {
-  display: block;
-}
-
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.update-panel-content h4 {
-  font-size: 12px;
-  font-weight: 800;
-  color: var(--text-main);
-  margin-bottom: 12px;
-  border-bottom: 1px solid var(--border-light);
-  padding-bottom: 8px;
-}
-
-.update-panel-content ul {
-  list-style: none;
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.update-panel-content li {
-  font-size: 11px;
-  color: var(--text-body);
-  line-height: 1.5;
-  margin-bottom: 12px;
-  border-left: 2px solid var(--primary);
-  padding-left: 10px;
-}
-
-.update-panel-content li strong {
-  display: block;
-  color: var(--text-main);
-  margin-bottom: 2px;
-  font-size: 9px;
-  text-transform: uppercase;
-}
-
-.lang-drop select {
-  background: var(--bg-gray-soft);
-  border: none;
-  color: var(--text-main);
-  padding: 6px 8px;
-  border-radius: var(--radius-pill);
-  font-size: 10px;
-  font-weight: 700;
-  cursor: pointer;
-  outline: none;
-}
-
-/* Sticky Top Navigation Dock */
-.nampo-nav-dock {
-  position: sticky;
-  top: 56px;
-  width: 100%;
-  height: 52px;
-  background: rgba(255, 255, 255, 0.96);
-  border-bottom: 1px solid var(--border-medium);
-  border-top: none;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  z-index: 99;
-  backdrop-filter: blur(20px);
-}
-
-.nav-btn {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  cursor: pointer;
-  flex: 1;
-  height: 100%;
-  transition: var(--transition);
-  opacity: 0.85;
-}
-
-.nav-btn i {
-  width: 18px;
-  height: 18px;
-  stroke-width: 2.2px;
-  transition: var(--transition);
-}
-
-.nav-btn span {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: -0.3px;
-}
-
-.nav-btn.active {
-  color: var(--primary);
-  opacity: 1;
-  border-bottom: 2.5px solid var(--primary);
-}
-
-.nav-btn.active i {
-  transform: scale(1.05);
-}
-
-/* Scroll body content */
-.nampo-body {
-  flex: 1;
-  padding: 20px 20px 32px 20px;
-  overflow-y: auto;
-  background: #ffffff;
-}
-
-/* Tab Panels */
-.tab-panel {
-  display: none;
-}
-
-.tab-panel.active {
-  display: block;
-  animation: tabFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes tabFadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Simple text title */
-.nampo-simple-title {
-  font-size: 14px;
-  font-weight: 800;
-  color: var(--primary);
-  background: var(--primary-soft);
-  border-radius: var(--radius-sm);
-  padding: 12px;
-  text-align: center;
-  margin-bottom: 20px;
-  letter-spacing: -0.5px;
-}
-
-/* 2. FLAT TEXT CATEGORY CHIP SLIDER */
-.menu-grid-header {
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--text-main);
-  margin-bottom: 12px;
-  letter-spacing: -0.5px;
-}
-
-.delivery-category-slider {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 8px;
-  margin-bottom: 20px;
-}
-
-.delivery-category-slider::-webkit-scrollbar {
-  display: none;
-}
-
-.delivery-cat-btn {
-  background: var(--bg-gray-soft);
-  border: 1px solid var(--border-medium);
-  color: var(--text-body);
-  padding: 8px 16px;
-  border-radius: var(--radius-pill);
-  font-size: 11px;
-  font-weight: 800;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: var(--transition);
-  font-family: var(--font-main);
-  outline: none;
-}
-
-.delivery-cat-btn:hover {
-  background: var(--bg-gray-hover);
-}
-
-.delivery-cat-btn.active {
-  background: var(--primary);
-  color: #ffffff;
-  border-color: var(--primary);
-  box-shadow: 0 4px 12px rgba(49, 130, 246, 0.12);
-}
-
-/* Shop list headers */
-.shop-list-header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 20px 0 12px 0;
-  border-bottom: 1px solid var(--border-light);
-  padding-bottom: 8px;
-}
-
-.shop-list-header-row h4 {
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--text-main);
-}
-
-.sort-tag-info {
-  font-size: 9px;
-  color: var(--primary);
-  background: var(--primary-soft);
-  padding: 2px 8px;
-  border-radius: var(--radius-pill);
-  font-weight: 800;
-}
-
-/* 3. COMPACT SHOP CARDS */
-.delivery-partners-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.delivery-partner-card {
-  display: flex;
-  gap: 12px;
-  padding: 12px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border-medium);
-  background: white;
-  cursor: pointer;
-  position: relative;
-  transition: var(--transition);
-}
-
-.delivery-partner-card:hover {
-  transform: translateY(-1.5px);
-  border-color: var(--primary);
-  box-shadow: var(--shadow-card);
-}
-
-.delivery-partner-card.is-partner-gold {
-  border-left: 4px solid var(--primary);
-  background: rgba(49, 130, 246, 0.01);
-}
-
-.delivery-card-thumb {
-  width: 82px;
-  height: 82px;
-  border-radius: 8px;
-  background-size: cover;
-  background-position: center;
-  flex-shrink: 0;
-  position: relative;
-}
-
-.delivery-card-partner-badge {
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  background: var(--primary);
-  color: white;
-  font-size: 8px;
-  font-weight: 900;
-  padding: 2px 4px;
-  border-radius: 4px;
-  letter-spacing: -0.2px;
-}
-
-.delivery-card-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.delivery-card-title-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 4px;
-}
-
-.delivery-card-title-row h3 {
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--text-main);
-  line-height: 1.3;
-}
-
-.delivery-card-rating {
-  font-size: 10px;
-  font-weight: 800;
-  color: var(--warning);
-  display: flex;
-  align-items: center;
-  gap: 2px;
-}
-
-.delivery-card-rating i {
-  width: 10px;
-  height: 10px;
-  fill: currentColor;
-}
-
-.delivery-card-benefit-snippet {
-  font-size: 10px;
-  color: var(--primary);
-  font-weight: 700;
-  line-height: 1.3;
-  margin-top: 4px;
-}
-
-.delivery-card-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 9px;
-  color: var(--text-muted);
-  margin-top: 6px;
-  border-top: 1px dashed var(--border-light);
-  padding-top: 4px;
-}
-
-.delivery-card-footer strong {
-  color: var(--text-body);
-}
-
-/* AI Planner Expandable Modal Box */
-.ai-planner-box-layout {
-  border: 1.5px solid var(--primary);
-  background: rgba(49, 130, 246, 0.01);
-}
-
-.ai-box-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--primary);
-}
-
-.ai-box-header i {
-  width: 16px;
-  height: 16px;
-}
-
-.ai-box-desc {
-  font-size: 11px;
-  color: var(--text-body);
-}
-
-.ai-modal-box-wrap {
-  animation: slideDown 0.3s ease-out;
-}
-
-.checkbox-group-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-top: 6px;
-}
-
-.check-pill {
-  background: var(--bg-gray-soft);
-  border-radius: var(--radius-sm);
-  padding: 8px 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  font-size: 10px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.check-pill input {
-  display: none;
-}
-
-.check-pill:has(input:checked) {
-  background: var(--primary-soft);
-  color: var(--primary);
-  border: 1px solid var(--primary);
-}
-
-.form-group-nampo {
-  margin-bottom: 12px;
-}
-
-.form-group-nampo label {
-  font-size: 10px;
-  font-weight: 800;
-  color: var(--text-main);
-  display: block;
-  margin-bottom: 4px;
-}
-
-.nampo-input {
-  width: 100%;
-  background: var(--bg-gray-soft);
-  border: 1px solid var(--border-medium);
-  border-radius: var(--radius-sm);
-  padding: 8px 12px;
-  font-size: 12px;
-  outline: none;
-  font-family: var(--font-main);
-  transition: var(--transition);
-}
-
-.nampo-input:focus {
-  border-color: var(--primary);
-  background: white;
-}
-
-/* AI Timeline Output */
-.ai-course-output-container {
-  margin-top: 16px;
-  border-top: 1px dashed var(--border-medium);
-  padding-top: 12px;
-}
-
-.ai-route-timeline-card {
-  position: relative;
-  padding-left: 20px;
-  margin-bottom: 16px;
-}
-
-.ai-route-timeline-card::before {
-  content: '';
-  position: absolute;
-  left: 6px;
-  top: 14px;
-  bottom: -18px;
-  width: 1.5px;
-  background: var(--border-medium);
-}
-
-.ai-route-timeline-card:last-child::before {
-  display: none;
-}
-
-.ai-card-dot {
-  position: absolute;
-  left: 0;
-  top: 4px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: white;
-  border: 3.5px solid var(--primary);
-}
-
-.ai-route-box {
-  background: var(--bg-gray-soft);
-  border-radius: var(--radius-sm);
-  padding: 10px;
-}
-
-.ai-route-box h5 {
-  font-size: 11px;
-  font-weight: 800;
-  color: var(--text-main);
-}
-
-.ai-route-box p {
-  font-size: 9px;
-  color: var(--text-body);
-}
-
-.ai-route-media {
-  width: 100%;
-  height: 80px;
-  background-size: cover;
-  background-position: center;
-  border-radius: 6px;
-  margin: 6px 0;
-}
-
-/* Global info boxes */
-.glass-box {
-  background: var(--bg-frame);
-  border: 1px solid var(--border-medium);
-  border-radius: var(--radius-md);
-  padding: 16px;
-  margin-bottom: 16px;
-}
-
-/* AuthStatus */
-.auth-status-banner {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-}
-
-.status-icon-wrap {
-  width: 36px;
-  height: 36px;
-  background: var(--primary-soft);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.status-icon-wrap i {
-  width: 16px;
-  height: 16px;
-  color: var(--primary);
-}
-
-.status-text-wrap {
-  flex: 1;
-}
-
-.status-text-wrap h3 {
-  font-size: 13px;
-  font-weight: 800;
-}
-
-.user-role-badge {
-  font-size: 8px;
-  font-weight: 800;
-  background: var(--primary-soft);
-  color: var(--primary);
-  padding: 1px 6px;
-  border-radius: 4px;
-}
-
-.status-text-wrap p {
-  font-size: 10px;
-  color: var(--text-body);
-}
-
-/* Profile wrapper */
-.profile-card-wrapper {
-  text-align: center;
-  padding: 24px;
-  border-bottom: 1px solid var(--border-light);
-  margin-bottom: 20px;
-}
-
-.profile-avatar {
-  font-size: 40px;
-  margin-bottom: 8px;
-}
-
-.user-role-badge-lg {
-  font-size: 10px;
-  background: var(--primary-soft);
-  color: var(--primary);
-  padding: 4px 12px;
-  border-radius: var(--radius-pill);
-  font-weight: 800;
-  display: inline-block;
-  margin-top: 4px;
-}
-
-/* Input group */
-.input-group {
-  display: flex;
-  align-items: center;
-  background: var(--bg-gray-soft);
-  border: 1px solid var(--border-medium);
-  border-radius: var(--radius-sm);
-  padding: 10px 14px;
-  margin-bottom: 12px;
-}
-
-.input-group i {
-  width: 16px;
-  height: 16px;
-  color: var(--text-muted);
-  margin-right: 10px;
-}
-
-.input-group input {
-  background: transparent;
-  border: none;
-  outline: none;
-  font-family: var(--font-main);
-  font-size: 12px;
-  flex: 1;
-  color: var(--text-main);
-}
-
-/* 4. MODAL DETAILED VIEW & CAROUSEL SWIPER */
-.modal-detail-media-scroller {
-  display: flex;
-  gap: 10px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  padding-bottom: 8px;
-  margin-bottom: 14px;
-}
-
-.modal-detail-media-scroller::-webkit-scrollbar {
-  height: 4px;
-}
-
-.modal-detail-media-scroller::-webkit-scrollbar-thumb {
-  background: var(--primary);
-  border-radius: 2px;
-}
-
-.detail-gallery-img, .detail-gallery-video {
-  width: 270px;
-  height: 160px;
-  border-radius: var(--radius-sm);
-  flex-shrink: 0;
-  scroll-snap-align: start;
-  object-fit: cover;
-  background-size: cover;
-  background-position: center;
-  border: 1.5px solid var(--border-medium);
-}
-
-.modal-detail-title-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 12px;
-}
-
-.modal-detail-title-row h3 {
-  font-size: 17px;
-  font-weight: 900;
-  letter-spacing: -0.5px;
-}
-
-/* Detail mapping link layout */
-.modal-detail-address-block {
-  margin-bottom: 12px;
-  font-size: 11px;
-  color: var(--text-body);
-}
-
-.address-val-text {
-  font-weight: 700;
-  color: var(--text-main);
-}
-
-.direction-btn-row {
-  display: flex;
-  gap: 10px;
-  margin-top: 6px;
-}
-
-.btn-dir-navigation {
-  font-size: 10px;
-  padding: 6px 12px;
-  border-radius: var(--radius-pill);
-  height: 28px;
-}
-
-/* Detail characteristics chips */
-.store-characteristics-wrap {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 12px 0;
-}
-
-.characteristic-badge {
-  font-size: 9px;
-  font-weight: 800;
-  padding: 4px 10px;
-  border-radius: 6px;
-}
-
-.badge-blue { background: var(--primary-soft); color: var(--primary); }
-.badge-secondary { background: rgba(0, 188, 212, 0.08); color: var(--secondary); }
-.badge-warning { background: rgba(255, 179, 0, 0.08); color: var(--warning); }
-.badge-accent { background: var(--accent-soft); color: var(--accent); }
-
-/* Pricing menu list */
-.pricing-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 11px;
-}
-
-.pricing-table td {
-  padding: 8px 0;
-  border-bottom: 1px dashed var(--border-medium);
-  color: var(--text-body);
-}
-
-.price-col {
-  text-align: right;
-  color: var(--primary);
-  font-weight: 800;
-}
-
-/* Merchant stats metrics */
-.merchant-metrics-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 16px;
-}
-
-.metric-card {
-  padding: 14px;
-  border-radius: var(--radius-sm);
-  display: flex;
-  flex-direction: column;
-}
-
-.bg-primary-soft { background: var(--primary-soft); color: var(--primary); }
-.bg-success-soft { background: rgba(46, 204, 113, 0.06); color: var(--success); }
-.metric-title { font-size: 10px; font-weight: 700; color: var(--text-muted); }
-.metric-val-num { font-size: 20px; font-weight: 800; margin-top: 4px; }
-
-/* Strict Media Uploader check-list */
-.required-media-checklist {
-  background: var(--accent-soft);
-  border: 1px solid rgba(255, 76, 98, 0.12);
-  border-radius: var(--radius-sm);
-  padding: 14px;
-  margin-top: 14px;
-}
-
-.required-media-checklist h5 {
-  font-size: 11px;
-  font-weight: 800;
-  color: var(--accent);
-  margin-bottom: 4px;
-}
-
-.required-media-checklist p {
-  font-size: 9px;
-  color: var(--text-body);
-  margin-bottom: 10px;
-}
-
-.checkbox-row-verif {
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
-  font-size: 10px;
-  margin-bottom: 8px;
-  cursor: pointer;
-  color: var(--text-body);
-  line-height: 1.4;
-}
-
-.checkbox-row-verif input {
-  margin-top: 2px;
-  accent-color: var(--accent);
-}
-
-.upload-guide-info {
-  background: var(--accent-soft);
-  border: 1.5px dashed var(--accent);
-  color: var(--text-body);
-  border-radius: var(--radius-sm);
-  padding: 12px;
-  font-size: 9px;
-  margin-bottom: 10px;
-  line-height: 1.4;
-}
-
-/* File previews selector */
-.media-thumb-selector-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.preview-thumb-box {
-  width: 100%;
-  aspect-ratio: 1;
-  background-size: cover;
-  background-position: center;
-  border-radius: 6px;
-  border: 1px solid var(--border-medium);
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
-
-.preview-thumb-box input {
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 14px;
-  height: 14px;
-  accent-color: var(--primary);
-  cursor: pointer;
-}
-
-.preview-thumb-box.video::after {
-  content: '▶';
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.3);
-  color: white;
-  font-size: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Menu Classification fields */
-.menu-classification-block {
-  border-left: 2px solid var(--primary);
-  padding-left: 10px;
-  margin-bottom: 16px;
-}
-
-.menu-classification-block h5 {
-  font-size: 10px;
-  font-weight: 800;
-  color: var(--text-main);
-  margin-bottom: 6px;
-}
-
-.input-inline-row {
-  display: flex;
-  gap: 8px;
-}
-
-.parking-radio-row {
-  display: flex;
-  gap: 10px;
-}
-
-.radio-pill {
-  flex: 1;
-  background: var(--bg-gray-soft);
-  border-radius: var(--radius-sm);
-  padding: 8px 4px;
-  font-size: 10px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  cursor: pointer;
-  transition: var(--transition);
-  border: 1px solid transparent;
-}
-
-.radio-pill input {
-  accent-color: var(--primary);
-}
-
-.radio-pill:has(input:checked) {
-  background: var(--primary-soft);
-  border-color: var(--primary);
-  color: var(--primary);
-}
-
-/* Apply Form header */
-.apply-header-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--primary);
-  margin-bottom: 4px;
-}
-
-.apply-header-row i {
-  width: 18px;
-  height: 18px;
-}
-
-.approved-state-banner {
-  background: rgba(46, 204, 113, 0.05);
-  border: 1.5px solid var(--success);
-  text-align: center;
-}
-
-.approved-state-banner h4 {
-  color: var(--success);
-  font-size: 13px;
-  font-weight: 800;
-  margin: 10px 0 4px 0;
-}
-
-.approved-state-banner p {
-  font-size: 11px;
-  color: var(--text-body);
-}
-
-/* MODAL Sheet styling */
-.modal {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.modal.active {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-}
-
-.modal-backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(5px);
-}
-
-.modal-content {
-  width: 100%;
-  max-width: 480px;
-  max-height: 85vh;
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-  border-top-left-radius: var(--radius-lg);
-  border-top-right-radius: var(--radius-lg);
-  padding: 24px;
-  background: #ffffff;
-  transform: translateY(100%);
-  transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1);
-  display: flex;
-  flex-direction: column;
-  z-index: 2;
-  box-shadow: var(--shadow-modal);
-}
-
-.modal.active .modal-content {
-  transform: translateY(0);
-}
-
-.modal-close {
-  position: absolute;
-  top: 18px;
-  right: 18px;
-  background: var(--bg-gray-soft);
-  border: none;
-  color: var(--text-main);
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
-}
-
-.modal-close i {
-  width: 16px;
-  height: 16px;
-  stroke-width: 2.2px;
-}
-
-.modal-scroll-body {
-  overflow-y: auto;
-  flex: 1;
-  padding-bottom: 20px;
-}
-
-/* Tab button navigation for modal */
-.modal-tabs-nav {
-  display: flex;
-  border-bottom: 1px solid var(--border-light);
-  margin-bottom: 12px;
-}
-
-.modal-tab-btn {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  font-size: 11px;
-  font-weight: 700;
-  padding: 8px 12px;
-  cursor: pointer;
-  border-bottom: 2.5px solid transparent;
-  transition: var(--transition);
-}
-
-.modal-tab-btn.active {
-  color: var(--primary);
-  border-color: var(--primary);
-}
-
-.modal-tab-panel {
-  display: none;
-}
-
-.modal-tab-panel.active {
-  display: block;
-}
-
-/* Reviews block in Modal */
-.reviews-section {
-  border-top: 1px solid var(--border-light);
-  padding-top: 14px;
-  margin-top: 16px;
-}
-
-.reviews-section h4 {
-  font-size: 12px;
-  font-weight: 800;
-  color: var(--text-main);
-  margin-bottom: 12px;
-}
-
-.review-item {
-  background: var(--bg-gray-soft);
-  border: none;
-  border-radius: var(--radius-sm);
-  padding: 10px;
-  margin-bottom: 8px;
-}
-
-.review-user-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 9px;
-  font-weight: 700;
-  color: var(--text-muted);
-  margin-bottom: 4px;
-}
-
-.review-user-row span {
-  color: var(--text-main);
-}
-
-.review-item p {
-  font-size: 11px;
-  color: var(--text-body);
-  line-height: 1.4;
-}
-
-/* Review Writer Form */
-.review-writer-box {
-  background: var(--primary-soft);
-  border: 1px solid rgba(49, 130, 246, 0.12);
-  border-radius: var(--radius-md);
-  padding: 12px;
-  margin-top: 16px;
-}
-
-.writer-rating-select {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.writer-rating-select select {
-  background: #ffffff;
-  border: 1px solid var(--border-medium);
-  color: var(--warning);
-  padding: 4px 6px;
-  border-radius: 4px;
-  outline: none;
-  font-weight: 700;
-}
-
-.writer-textarea {
-  background: #ffffff;
-  border: 1px solid var(--border-medium);
-  color: var(--text-main);
-  width: 100%;
-  padding: 8px;
-  border-radius: var(--radius-sm);
-  font-size: 11px;
-  resize: none;
-  outline: none;
-  font-family: var(--font-main);
-  margin-bottom: 8px;
-}
-
-/* QR Scanner */
-.qr-camera-viewport {
-  width: 100%;
-  max-width: 280px;
-  height: 240px;
-  background: #111115;
-  border-radius: var(--radius-md);
-  margin: 20px 0;
-  position: relative;
-  overflow: hidden;
-  border: 1px solid var(--border-medium);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.scanner-aim-box {
-  width: 140px;
-  height: 140px;
-  position: relative;
-}
-
-.aim-corner {
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  border: 3px solid var(--primary);
-}
-
-.top-left { top: 0; left: 0; border-right: none; border-bottom: none; }
-.top-right { top: 0; right: 0; border-left: none; border-bottom: none; }
-.bottom-left { bottom: 0; left: 0; border-right: none; border-top: none; }
-.bottom-right { bottom: 0; right: 0; border-left: none; border-top: none; }
-
-.modal.active .scanner-laser-line {
-  position: absolute;
-  left: 4px;
-  right: 4px;
-  height: 2.5px;
-  background: var(--primary);
-  box-shadow: 0 0 12px var(--primary);
-  animation: laserScan 2.2s infinite ease-in-out;
-}
-
-@keyframes laserScan {
-  0% { top: 4px; }
-  50% { top: 136px; }
-  100% { top: 4px; }
-}
-
-.qr-simulated-code {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 32px;
-  opacity: 0.85;
-}
-
-.camera-status-overlay {
-  position: absolute;
-  bottom: 12px;
-  font-size: 10px;
-  color: var(--text-muted);
-}
-
-/* Success Ticket */
-.qr-result-overlay {
-  position: absolute;
-  inset: 0;
-  background: #ffffff;
-  z-index: 20;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-lg);
-}
-
-.success-icon-check {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background: var(--success);
-  color: #ffffff;
-  font-size: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  margin-bottom: 12px;
-  box-shadow: 0 4px 16px rgba(46, 204, 113, 0.3);
-}
-
-.reward-box-ticket {
-  background: radial-gradient(circle at 0px 50%, transparent 8px, var(--bg-gray-soft) 9px), 
-              radial-gradient(circle at 100% 50%, transparent 8px, var(--bg-gray-soft) 9px);
-  width: 100%;
-  border-radius: var(--radius-sm);
-  padding: 16px 20px;
-  margin: 12px 0 20px 0;
-  border: 1px dashed var(--border-medium);
-}
-
-.ticket-label {
-  font-size: 9px;
-  color: var(--primary);
-  font-weight: 800;
-  display: block;
-}
-
-.ticket-value {
-  font-size: 12px;
-  font-weight: 800;
-  color: var(--text-main);
-  margin-top: 4px;
-}
-
-/* Stamps indicator grid */
-.stamp-grid {
-  display: flex;
-  justify-content: space-around;
-  margin: 12px 0 16px 0;
-}
-
-.stamp-node {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: var(--bg-gray-soft);
-  border: 1px solid var(--border-medium);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 15px;
-  color: var(--text-muted);
-}
-
-.stamp-node.active {
-  background: var(--primary-soft);
-  border: 1.5px solid var(--primary);
-  box-shadow: var(--shadow-glow-p);
-  color: var(--primary);
-}
-
-/* Timeline */
-.travel-timeline {
-  position: relative;
-  padding-left: 20px;
-  margin-top: 20px;
-}
-
-.travel-timeline::before {
-  content: '';
-  position: absolute;
-  left: 6px;
-  top: 10px;
-  bottom: 10px;
-  width: 2px;
-  background: var(--border-medium);
-}
-
-.travel-timeline.active::before {
-  background: var(--primary);
-}
-
-.timeline-node {
-  position: relative;
-  margin-bottom: 20px;
-}
-
-.timeline-icon-dot {
-  position: absolute;
-  left: -20px;
-  top: 4px;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #ffffff;
-  border: 3px solid var(--primary);
-  z-index: 2;
-}
-
-.timeline-card-box {
-  background: var(--bg-frame);
-  border: 1px solid var(--border-medium);
-  border-radius: var(--radius-md);
-  padding: 14px;
-  box-shadow: var(--shadow-card);
-}
-
-.timeline-card-box h4 {
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--text-main);
-  margin-bottom: 4px;
-}
-
-.timeline-card-box p {
-  font-size: 10px;
-  color: var(--text-body);
-  line-height: 1.4;
-}
-
-.timeline-time-badge {
-  font-size: 8px;
-  color: var(--primary);
-  font-weight: 700;
-  margin-top: 6px;
-  display: block;
-}
-
-.travel-memo-wrap {
-  border-top: 1px solid var(--border-light);
-  padding-top: 8px;
-  margin-top: 10px;
-}
-
-.travel-memo-wrap label {
-  font-size: 8px;
-  font-weight: 800;
-  color: var(--primary);
-  display: block;
-  margin-bottom: 4px;
-}
-
-.travel-memo-wrap textarea {
-  width: 100%;
-  background: var(--bg-gray-soft);
-  border: none;
-  color: var(--text-main);
-  padding: 6px 10px;
-  border-radius: var(--radius-sm);
-  font-size: 10px;
-  resize: none;
-  outline: none;
-  font-family: var(--font-main);
-  margin-bottom: 6px;
-}
-
-.empty-log-state {
-  text-align: center;
-  padding: 30px 10px;
-  color: var(--text-muted);
-}
-
-.empty-log-state i {
-  width: 28px;
-  height: 28px;
-  margin-bottom: 10px;
-  opacity: 0.6;
-}
-
-/* SNS Instagram */
-.instagram-story-canvas {
-  aspect-ratio: 9/16;
-  width: 100%;
-  max-width: 230px;
-  margin: 0 auto 16px auto;
-  border-radius: var(--radius-md);
-  background: linear-gradient(135deg, #1f2235 0%, var(--primary) 100%);
-  border: 1.5px solid rgba(255,255,255,0.15);
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  position: relative;
-  overflow: hidden;
-}
-
-.story-branding {
-  font-size: 11px;
-  font-weight: 800;
-  color: white;
-}
-
-.story-user-badge {
-  font-size: 9px;
-  background: rgba(255,255,255,0.12);
-  padding: 4px 10px;
-  border-radius: var(--radius-pill);
-  align-self: flex-start;
-  margin-top: 8px;
-  color: white;
-}
-
-.story-timeline-summary {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 10px;
-  margin: 16px 0;
-}
-
-.story-log-node {
-  background: rgba(0, 0, 0, 0.4);
-  border-left: 3px solid var(--secondary);
-  border-radius: 6px;
-  padding: 8px 12px;
-  font-size: 10px;
-  color: white;
-}
-
-.story-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-top: 1px solid rgba(255,255,255,0.15);
-  padding-top: 8px;
-  font-size: 8px;
-  color: rgba(255,255,255,0.7);
-}
-
-.sns-action-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nampo GoGo - Smart Local Tour Platform</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Outfit:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Mobile Frame Container -->
+  <div class="mobile-frame">
+    
+    <!-- 1. INTRO MODE SELECT SCREEN (No emojis, sleek modern typography, center-aligned, lang dropdown top-right) -->
+    <div id="intro-screen" class="intro-screen">
+      <div class="intro-overlay"></div>
+      
+      <!-- Top-right Lang Selector inside Intro -->
+      <div class="intro-lang-wrap">
+        <select id="intro-lang-select">
+          <option value="kr" selected>KR</option>
+          <option value="en">EN</option>
+          <option value="ch">CH</option>
+          <option value="jp">JP</option>
+        </select>
+      </div>
+
+      <div class="intro-content-wrap">
+        <div class="intro-logo">NAMPO GOGO</div>
+        <h2 data-trans="tagline">남포동 스마트 로컬여행 플랫폼</h2>
+        <p class="intro-desc" data-trans="pleaseLogin">로그인 후 QR 인증과 여행 로그를 기록해 보세요.</p>
+        
+        <div class="mode-select-box-grid">
+          <!-- Tourist mode card (With Direct Touch Handler) -->
+          <div class="mode-card-btn" id="btn-mode-tourist" onclick="handleModeSelect('tourist')">
+            <h3 data-trans="introTouristTitle">여행객 전용</h3>
+            <p data-trans="introTouristDesc">제휴 매장 검색, 길찾기, QR 스탬프 로그 모드</p>
+            <span class="mode-badge-action" data-trans="introTouristBtn">접속하기 ➔</span>
+          </div>
+
+          <!-- Merchant mode card (With Direct Touch Handler) -->
+          <div class="mode-card-btn" id="btn-mode-merchant" onclick="handleModeSelect('merchant')">
+            <h3 data-trans="introMerchantTitle">사업자 전용</h3>
+            <p data-trans="introMerchantDesc">매장 등록, 다중 업로드 가이드, 메뉴/결제 관리</p>
+            <span class="mode-badge-action-sec" data-trans="introMerchantBtn">가입 및 관리 ➔</span>
+          </div>
+        </div>
+        
+        <div class="intro-footer">Lantern Smart Platform v3.0</div>
+      </div>
+    </div>
+
+    <!-- 2. MAIN APP FRAME (Hidden initially, shown after mode selection) -->
+    <div id="app-workspace" class="app-workspace-container hidden">
+
+      <!-- Top Header Bar -->
+      <header class="nampo-header">
+        <div class="logo-group" id="btn-header-logo-home">
+          <h1>Nampo GoGo</h1>
+        </div>
+        
+        <div class="header-controls">
+          <!-- Mode Switch Button (No 'Mode' text, icon only) -->
+          <button id="btn-quick-mode-switch" class="btn-mode-switch-pill" style="padding: 6px 8px;">
+            <i data-lucide="refresh-cw"></i>
+          </button>
+
+          <!-- Update Notices Wrap -->
+          <div class="update-dropdown-wrap">
+            <button id="btn-update-toggle" class="btn-update">
+              <span data-trans="updateBtn">업데이트 내역</span>
+              <i data-lucide="chevron-down" id="icon-update-chevron"></i>
+            </button>
+            
+            <div id="update-panel" class="update-panel-content">
+              <h4 data-trans="updateTitle">최근 업데이트 소식</h4>
+              <ul id="update-logs-list">
+                <!-- Loaded dynamically -->
+              </ul>
+            </div>
+          </div>
+
+          <!-- Lang Select -->
+          <div class="lang-drop">
+            <select id="app-lang-select">
+              <option value="kr" selected>KR</option>
+              <option value="en">EN</option>
+              <option value="ch">CH</option>
+              <option value="jp">JP</option>
+            </select>
+          </div>
+        </div>
+      </header>
+
+      <!-- Sticky Top Navigation Tab Dock -->
+      <nav class="nampo-nav-dock" id="dynamic-nav-dock">
+        <!-- Renders based on tourist/merchant mode -->
+      </nav>
+
+      <!-- App Body Scroll Area -->
+      <main class="nampo-body">
+
+        <!-- ================= TOURIST MODE PANELS ================= -->
+
+        <!-- TOURIST TAB 1: Delivery App-Style Food Board -->
+        <section id="tab-tourist-explore" class="tab-panel active">
+          
+          <div class="nampo-simple-title" data-trans="tagline">남포동 스마트 로컬여행 플랫폼</div>
+
+          <!-- User Greeting Status Banner -->
+          <div class="glass-box auth-status-banner">
+            <div class="status-icon-wrap">
+              <i data-lucide="user" class="text-primary" id="user-status-icon"></i>
+            </div>
+            <div class="status-text-wrap">
+              <h3 id="user-status-heading">Guest User</h3>
+              <span class="user-role-badge" id="dashboard-user-role">Visitor</span>
+              <p id="user-status-desc" data-trans="pleaseLogin">로그인 후 QR 인증과 여행 로그를 기록해 보세요.</p>
+            </div>
+            <button class="btn btn-sm btn-outline" id="btn-tourist-login-shortcut">Login</button>
+          </div>
+
+          <!-- Flat Text Pill Category Slider (No Emojis, No Circles) -->
+          <h4 class="menu-grid-header" data-trans="allCategories">주변 식사 카테고리 검색</h4>
+          <div class="delivery-category-slider">
+            <button class="delivery-cat-btn active" data-subcat="all" data-trans="allCategories">전체보기</button>
+            <button class="delivery-cat-btn" data-subcat="pork" data-trans="subPork">국밥/한식</button>
+            <button class="delivery-cat-btn" data-subcat="seafood" data-trans="subSeafood">해산물/회</button>
+            <button class="delivery-cat-btn" data-subcat="pizza" data-trans="subPizza">피자/양식</button>
+            <button class="delivery-cat-btn" data-subcat="korean" data-trans="subKorean">전통한식</button>
+            <button class="delivery-cat-btn" data-subcat="chinese" data-trans="subChinese">중식/요리</button>
+            <button class="delivery-cat-btn" data-subcat="japanese" data-trans="subJapanese">일식/돈까스</button>
+            <button class="delivery-cat-btn" data-subcat="massage" data-trans="subMassage">마사지/뷰티</button>
+            <button class="delivery-cat-btn" data-subcat="cafe" data-trans="subCafe">디저트/카페</button>
+          </div>
+
+          <!-- AI Nampodong Course Router Mini Form -->
+          <div class="glass-box ai-planner-box-layout">
+            <div class="ai-box-header">
+              <i data-lucide="bot"></i>
+              <span>AI 남포동 맞춤 코스 추천기</span>
+            </div>
+            <p class="ai-box-desc">하고 싶은 활동과 예산을 적어주시면 AI가 최적의 도보 코스를 매칭합니다.</p>
+            
+            <button type="button" class="btn btn-primary btn-block btn-sm" id="btn-shortcut-ai-planner" style="margin-top: 10px;">
+              <i data-lucide="sparkles"></i> AI 추천 코스 짜기 폼 열기
+            </button>
+            
+            <div id="ai-planner-modal-content-area" class="ai-modal-box-wrap hidden">
+              <form id="nampo-ai-planner-form" onsubmit="event.preventDefault();" style="margin-top: 12px;">
+                <div class="form-group-nampo">
+                  <label>하고 싶은 활동 (중복 선택 가능)</label>
+                  <div class="checkbox-group-grid">
+                    <label class="check-pill">
+                      <input type="checkbox" name="ai-activities" value="massage" checked>
+                      <span>체험</span>
+                    </label>
+                    <label class="check-pill">
+                      <input type="checkbox" name="ai-activities" value="food" checked>
+                      <span>맛집</span>
+                    </label>
+                    <label class="check-pill">
+                      <input type="checkbox" name="ai-activities" value="cafe" checked>
+                      <span>카페</span>
+                    </label>
+                    <label class="check-pill">
+                      <input type="checkbox" name="ai-activities" value="shopping">
+                      <span>쇼핑</span>
+                    </label>
+                    <label class="check-pill">
+                      <input type="checkbox" name="ai-activities" value="sightseeing">
+                      <span>관광</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="form-group-nampo">
+                  <label>1인당 예산 범위 (KRW)</label>
+                  <select id="ai-budget-select" class="nampo-input">
+                    <option value="30000">30,000 KRW 이하</option>
+                    <option value="60000" selected>60,000 KRW 이하</option>
+                    <option value="100000">100,000 KRW 이하</option>
+                    <option value="999999">예산 상관없음</option>
+                  </select>
+                </div>
+                
+                <button type="button" class="btn btn-primary btn-block" id="btn-run-ai-recommend">
+                  <i data-lucide="sparkles"></i> 코스 빌드 시작
+                </button>
+              </form>
+
+              <!-- Output area -->
+              <div id="ai-course-output-area" class="ai-course-output-container hidden">
+                <!-- Dynamic route cards with navigation links -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Shop list matching priority sorting rules -->
+          <div class="shop-list-header-row">
+            <h4>주변 추천 맛집 및 마사지 센터</h4>
+            <span class="sort-tag-info">제휴사 ➔ 미디어수 ➔ 평점순 정렬</span>
+          </div>
+
+          <div class="delivery-partners-list" id="delivery-partners-container">
+            <!-- Rendered dynamically -->
+          </div>
+
+        </section>
+
+        <!-- TOURIST TAB 2: Travel Log Timeline -->
+        <section id="tab-tourist-log" class="tab-panel">
+          <div class="section-title">
+            <h2 data-trans="logTitle">나의 여행 로그 카드</h2>
+            <p data-trans="logDesc">QR 인증으로 수집된 나만의 남포동 여행 코스 리포트입니다.</p>
+          </div>
+
+          <div class="glass-box log-status-card">
+            <div class="stamp-grid" id="stamp-indicator-grid">
+              <!-- Stamps indicator nodes -->
+            </div>
+            <div class="log-meta-status">
+              <span data-trans="logCount">방문한 매장 수</span>: <strong class="text-primary" id="log-count-num">0</strong>
+            </div>
+          </div>
+
+          <!-- Log Timeline -->
+          <div id="travel-log-timeline" class="travel-timeline">
+            <div class="empty-log-state" id="log-empty-msg">
+              <i data-lucide="map-pin"></i>
+              <p data-trans="emptyLog">아직 방문 인증된 매장이 없습니다. 제휴 매장을 방문하고 스탬프를 적립해 보세요!</p>
+            </div>
+            <!-- Dynamic timeline nodes -->
+          </div>
+
+          <!-- SNS export card button -->
+          <div class="log-actions hidden" id="log-actions-bar">
+            <button class="btn btn-primary btn-block" id="btn-export-log-card">
+              <i data-lucide="share-2"></i> <span data-trans="snsExport">SNS 공유용 카드 생성 📸</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- TOURIST TAB 3: Tourist Profile / Login -->
+        <section id="tab-tourist-profile" class="tab-panel">
+          <div class="profile-card-wrapper">
+            <div class="profile-avatar" id="profile-avatar-emoji">👤</div>
+            <h3 id="profile-username">Guest User</h3>
+            <span class="user-role-badge-lg" id="profile-role-badge">Visitor</span>
+          </div>
+
+          <!-- Guest login form -->
+          <div class="glass-box auth-form-container" id="auth-form-card">
+            <h4 data-trans="loginTitle">3초 초간단 가입 & 로그인</h4>
+            <p class="auth-desc" data-trans="loginDesc">아이디와 비밀번호만 입력하면 즉시 가입 및 이용이 가능합니다.</p>
+            
+            <form id="nampo-auth-form" onsubmit="event.preventDefault();">
+              <input type="hidden" name="auth-role" value="visitor">
+              
+              <div class="input-group">
+                <i data-lucide="user"></i>
+                <input type="text" id="auth-username" required placeholder="아이디(닉네임) 입력" data-trans="usernamePlaceholder">
+              </div>
+              
+              <div class="input-group">
+                <i data-lucide="lock"></i>
+                <input type="password" id="auth-password" required placeholder="비밀번호 입력" data-trans="passwordPlaceholder">
+              </div>
+
+              <div class="input-group">
+                <i data-lucide="lock-keyhole"></i>
+                <input type="password" id="auth-password-confirm" required placeholder="비밀번호 확인 입력" data-trans="passwordConfirmPlaceholder">
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block" id="btn-submit-auth">
+                <i data-lucide="key"></i> <span data-trans="authBtn">로그인 / 가입 완료</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- Logout Button -->
+          <div class="logout-container hidden" id="logout-card">
+            <button class="btn btn-secondary btn-block text-accent" id="btn-action-logout">
+              <i data-lucide="log-out"></i> <span data-trans="logoutBtn">로그아웃</span>
+            </button>
+          </div>
+        </section>
+
+
+        <!-- ================= MERCHANT (BUSINESS) MODE PANELS ================= -->
+
+        <!-- MERCHANT TAB 1: Business Registration / Verification -->
+        <section id="tab-merchant-auth" class="tab-panel">
+          <div class="section-title">
+            <h2>제휴 사업자 계정 관리</h2>
+            <p>매장 정보를 등록하고 제휴 승인을 요청하여 파트너로 노출되세요.</p>
+          </div>
+
+          <!-- Step 1: Join / Login form -->
+          <div class="glass-box" id="merchant-login-card">
+            <h4 data-trans="loginTitle">사업자 로그인 / 3초 회원가입</h4>
+            <form id="merchant-join-form" onsubmit="event.preventDefault();" style="margin-top: 12px;">
+              <input type="hidden" name="auth-role-merchant" value="merchant">
+              
+              <div class="input-group">
+                <i data-lucide="user"></i>
+                <input type="text" id="m-auth-username" required placeholder="사업자 아이디 입력">
+              </div>
+              
+              <div class="input-group">
+                <i data-lucide="lock"></i>
+                <input type="password" id="m-auth-password" required placeholder="비밀번호 입력">
+              </div>
+
+              <div class="input-group">
+                <i data-lucide="lock-keyhole"></i>
+                <input type="password" id="m-auth-password-confirm" required placeholder="비밀번호 확인 입력">
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block">
+                <i data-lucide="key"></i> 가입 및 로그인 완료
+              </button>
+            </form>
+          </div>
+
+          <!-- Step 2: Merchant Partner Application Form -->
+          <div class="glass-box hidden" id="merchant-apply-card">
+            <div class="apply-header-row">
+              <i data-lucide="shield-check" class="text-primary"></i>
+              <h4>Nampo GoGo 공식 제휴 상점 등록 신청</h4>
+            </div>
+            <p class="auth-desc">제휴 상인으로 정식 등록하여 관광객 전용 페이지 최상단에 가게를 띄워보세요.</p>
+
+            <form id="merchant-apply-form" onsubmit="event.preventDefault();" style="margin-top: 14px;">
+              <div class="form-group-nampo">
+                <label>사업자 등록증 첨부 (인증용)</label>
+                <div class="upload-guide-info" style="border-color:var(--primary); background:var(--primary-soft); color:var(--text-main);">
+                  📄 사업자등록증 촬영 사진(JPG/PNG) 또는 PDF 파일을 넣어주세요. (최대 5MB)
+                </div>
+                <input type="file" id="apply-license-file" required class="nampo-input" style="padding: 6px;">
+              </div>
+
+              <div class="form-group-nampo">
+                <label>매장 주소 기입</label>
+                <input type="text" id="apply-address" required placeholder="예: 부산 중구 남포길 18" class="nampo-input">
+              </div>
+
+              <div class="form-group-nampo">
+                <label>업종 카테고리</label>
+                <select id="apply-subcategory" class="nampo-input">
+                  <option value="pork">국밥/한식 (Soup/Korean)</option>
+                  <option value="seafood">해산물/회 (Seafood/Raw)</option>
+                  <option value="pizza">피자/양식 (Pizza/Pasta)</option>
+                  <option value="korean">전통한식 (Traditional)</option>
+                  <option value="chinese">중식/요리 (Chinese)</option>
+                  <option value="japanese">일식/돈까스 (Sushi/Katsu)</option>
+                  <option value="massage">마사지/뷰티 (Massage)</option>
+                  <option value="cafe">디저트/카페 (Dessert/Cafe)</option>
+                </select>
+              </div>
+
+              <div class="form-group-nampo">
+                <label>대표 연락처</label>
+                <input type="tel" id="apply-phone" required placeholder="예: +82-51-245-1111 (국제전화 규격)" class="nampo-input">
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block" id="btn-submit-partnership">
+                <i data-lucide="check-square"></i> 공식 제휴 승인 신청하기
+              </button>
+            </form>
+          </div>
+
+          <!-- Step 3: Application Status / Approved Info Box -->
+          <div class="glass-box approved-state-banner hidden" id="merchant-approved-status-card">
+            <div class="success-icon-check">✓</div>
+            <h4>Nampo GoGo 공식 제휴 상인 승인 완료</h4>
+            <p>축하합니다! 공식 제휴 매장 인증이 완료되었습니다. 이제 상세 메뉴와 매장 미디어를 편집하여 실시간 갱신할 수 있습니다.</p>
+          </div>
+        </section>
+
+        <!-- MERCHANT TAB 2: Shop Details, Required Images verification & Menu Register -->
+        <section id="tab-merchant-manage" class="tab-panel">
+          <div class="section-title">
+            <h2 data-trans="merchantTitle">내 매장 관리 대시보드</h2>
+            <p>매장 사진(필수 조건 만족), 동영상 및 음식점 상세 메뉴(가격, 주차, 결제 수단)를 올려 업데이트하세요.</p>
+          </div>
+
+          <!-- Quick stats -->
+          <div class="merchant-metrics-grid">
+            <div class="metric-card bg-primary-soft">
+              <span class="metric-title" data-trans="visitorToday">오늘 방문자 수</span>
+              <span class="metric-value">18명</span>
+            </div>
+            <div class="metric-card bg-success-soft">
+              <span class="metric-title" data-trans="qrStampsIssued">QR 인증 횟수</span>
+              <span class="metric-value" id="merchant-stamps-val">24건</span>
+            </div>
+          </div>
+
+          <!-- Strict Media Upload Form -->
+          <div class="glass-box">
+            <h4 style="font-size:14px; font-weight:800; margin-bottom:10px;">매장 다중 미디어 업로드 (필수 규격 체크)</h4>
+            
+            <form id="merchant-media-upload-form" onsubmit="event.preventDefault();">
+              <div class="upload-guide-info">
+                📸 <strong>매장 사진 파일 규격 가이드라인:</strong><br>
+                - 모바일 화면 최적화 권장 비율: <strong>800x600 픽셀 (4:3 비율)</strong><br>
+                - 파일 확장자: <strong>JPG, PNG, WEBP</strong>만 업로드 가능 (장당 5MB 이하)<br>
+                🎥 <strong>동영상 파일 규격 가이드라인:</strong><br>
+                - 모바일 세로/가로 권장 비율: <strong>1280x720 픽셀</strong> / 확장자: <strong>MP4, WEBM</strong> (최대 3개)
+              </div>
+
+              <div class="form-group-nampo">
+                <label>미디어 파일 다중 선택 (사진 최대 10장, 동영상 최대 3개)</label>
+                <input type="file" id="merchant-media-files" multiple accept="image/png, image/jpeg, image/webp, video/mp4, video/webm" class="nampo-input" style="padding: 6px;">
+              </div>
+
+              <!-- Required Pictures Checklist Verification -->
+              <div class="required-media-checklist">
+                <h5>매장 노출을 위한 필수 사진 체크리스트</h5>
+                <p>업로드한 파일들 중 아래 요건에 해당하는 사진이 있는지 스스로 체크해 주세요.</p>
+                
+                <label class="checkbox-row-verif">
+                  <input type="checkbox" id="check-media-signboard" required>
+                  <span>1. 매장 대문 또는 간판 사진 (매장 이름이 선명하게 노출됨) <strong>[필수]</strong></span>
+                </label>
+                <label class="checkbox-row-verif">
+                  <input type="checkbox" id="check-media-menu" required>
+                  <span>2. 매장 메뉴판 또는 대표 메뉴판 사진 <strong>[필수]</strong></span>
+                </label>
+                <label class="checkbox-row-verif">
+                  <input type="checkbox" id="check-media-inside" required>
+                  <span>3. 매장 내부 모습 사진 (2장 이상 포함) <strong>[필수]</strong></span>
+                </label>
+                <label class="checkbox-row-verif">
+                  <input type="checkbox" id="check-media-outside" required>
+                  <span>4. 매장 외부 전경 사진 (2장 이상 포함) <strong>[필수]</strong></span>
+                </label>
+              </div>
+
+              <!-- Thumbnail selector preview -->
+              <div style="margin-top:14px; font-size:11px; font-weight:800; color:var(--primary);">💡 썸네일(대표 커버 사진) 라디오 선택</div>
+              <div class="media-thumb-selector-grid" id="merchant-media-previews">
+                <!-- Base64 previews populated here -->
+              </div>
+            </form>
+          </div>
+
+          <!-- Restaurant Menu / Payment / Parking Form -->
+          <div class="glass-box" style="margin-top: 20px;">
+            <h4 style="font-size:14px; font-weight:800; margin-bottom:12px;">음식점 상세 메뉴 및 이용 환경 등록</h4>
+            
+            <form id="merchant-menu-details-form" onsubmit="event.preventDefault();">
+              <!-- Benefits -->
+              <div class="form-group-nampo">
+                <label>관광객 제공 제휴 혜택 내용</label>
+                <input type="text" id="edit-benefit-input" required class="nampo-input" placeholder="예: 메인 메뉴 주문시 탄산음료 1캔 무료 제공">
+              </div>
+
+              <!-- Sched Hours & Phone -->
+              <div class="form-group-nampo">
+                <label>영업 시간</label>
+                <input type="text" id="edit-hours-input" required class="nampo-input" value="11:00 - 22:00">
+              </div>
+              <div class="form-group-nampo">
+                <label>연락처 (국제전화 형식 권장)</label>
+                <input type="tel" id="edit-phone-input" required class="nampo-input" value="+82-51-245-1234">
+              </div>
+
+              <!-- Menu classifications -->
+              <div class="menu-classification-block">
+                <h5>1. 추천 메뉴 등록 (Signature Menu)</h5>
+                <div class="input-inline-row">
+                  <input type="text" id="menu-sig-name" placeholder="메뉴 이름" class="nampo-input">
+                  <input type="text" id="menu-sig-price" placeholder="가격 (예: 15,000 KRW)" class="nampo-input">
+                </div>
+              </div>
+
+              <div class="menu-classification-block">
+                <h5>2. 기본 메뉴 등록 (Standard Menu)</h5>
+                <div class="input-inline-row">
+                  <input type="text" id="menu-std-name" placeholder="메뉴 이름" class="nampo-input">
+                  <input type="text" id="menu-std-price" placeholder="가격" class="nampo-input">
+                </div>
+              </div>
+
+              <div class="menu-classification-block">
+                <h5>3. 계절별 특선 메뉴 등록 (Seasonal Menu - 선택)</h5>
+                <div class="input-inline-row">
+                  <input type="text" id="menu-sea-name" placeholder="계절 특선 메뉴 이름" class="nampo-input">
+                  <input type="text" id="menu-sea-price" placeholder="가격" class="nampo-input">
+                </div>
+              </div>
+
+              <!-- Parking status -->
+              <div class="form-group-nampo">
+                <label>주차 가능 여부 (Parking Space)</label>
+                <div class="parking-radio-row">
+                  <label class="radio-pill">
+                    <input type="radio" name="m-parking-status" value="유" checked>
+                    <span>주차 가능 (Parking Available)</span>
+                  </label>
+                  <label class="radio-pill">
+                    <input type="radio" name="m-parking-status" value="무">
+                    <span>주차 불가 (No Parking)</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Payment methods multi-check -->
+              <div class="form-group-nampo">
+                <label>결제 가능 수단 (결제 수단 중복 선택 가능)</label>
+                <div class="checkbox-group-grid">
+                  <label class="check-pill">
+                    <input type="checkbox" name="m-payment-methods" value="신용카드" checked>
+                    <span>신용카드</span>
+                  </label>
+                  <label class="check-pill">
+                    <input type="checkbox" name="m-payment-methods" value="삼성페이" checked>
+                    <span>삼성페이</span>
+                  </label>
+                  <label class="check-pill">
+                    <input type="checkbox" name="m-payment-methods" value="알리페이">
+                    <span>Alipay (알리페이)</span>
+                  </label>
+                  <label class="check-pill">
+                    <input type="checkbox" name="m-payment-methods" value="위챗페이">
+                    <span>WeChat Pay (위챗페이)</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Final Submit Update button -->
+              <button type="submit" class="btn btn-primary btn-block" id="btn-save-store-complete" style="margin-top:20px;">
+                <i data-lucide="cloud-lightning"></i> 매장 정보 및 미디어 올리기
+              </button>
+            </form>
+          </div>
+        </section>
+
+      </main>
+
+    </div>
+
+  </div>
+
+  <!-- MODAL: Restaurant Details -->
+  <div class="modal" id="partner-detail-modal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content glass-card">
+      <button class="modal-close"><i data-lucide="x"></i></button>
+      <div class="modal-scroll-body" id="partner-modal-body-content">
+        <!-- Built dynamically on card click -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Virtual QR Scanner Simulator -->
+  <div class="modal" id="qr-scanner-modal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content glass-card qr-scanner-layout">
+      <button class="modal-close"><i data-lucide="x"></i></button>
+      <h3 data-trans="qrTitle">제휴매장 QR 인증</h3>
+      <p data-trans="qrDesc">매장에 비치된 Nampo GoGo QR 코드를 스캔하세요.</p>
+      
+      <div class="qr-camera-viewport">
+        <div class="scanner-aim-box">
+          <span class="aim-corner top-left"></span>
+          <span class="aim-corner top-right"></span>
+          <span class="aim-corner bottom-left"></span>
+          <span class="aim-corner bottom-right"></span>
+          <div class="scanner-laser-line"></div>
+          <div class="qr-simulated-code">🏮</div>
+        </div>
+        <div class="camera-status-overlay" data-trans="qrCameraSim">카메라 인식 중... (가상 스캔)</div>
+      </div>
+
+      <!-- Success Card Ticket overlay -->
+      <div id="qr-success-screen" class="qr-result-overlay hidden">
+        <div class="success-icon-check">✓</div>
+        <h4 data-trans="qrScanSuccess">Nampo GoGo 공식 제휴 인증 완료!</h4>
+        
+        <div class="reward-box-ticket">
+          <span class="ticket-label" style="font-weight:900;" data-trans="qrTitle">Nampo GoGo 공식 제휴 인증</span>
+          <div style="margin: 8px 0; font-size:10px; text-align:left; color:#9ca3af; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom:6px;">
+            <div>📅 <span data-trans="stampDate">방문 날짜</span>: <span id="stamp-card-date">2026.07.07</span></div>
+            <div>🕒 <span data-trans="stampTime">입점 시간</span>: <span id="stamp-card-time">17:15 PM</span></div>
+          </div>
+          <div style="text-align:left; margin-bottom: 8px;">
+            <span class="ticket-label" data-trans="benefitTitle">🎁 관광객 제휴 혜택</span>
+            <p id="qr-reward-text" class="ticket-value" style="color:var(--primary); font-size:13px; font-weight:800;">10% Off...</p>
+          </div>
+          <div style="font-size: 8px; color:var(--text-muted); text-align:left; line-height:1.2;" data-trans="stampStaffVerify">
+            ★ Nampo GoGo 공식 혜택 대상자임을 증명함 (직원 확인용)
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-block" id="btn-claim-stamp-confirm">
+          <i data-lucide="check-circle"></i> <span data-trans="btnConfirmStamp">직원 확인 후 혜택 받기</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Instagram Story SNS Card Export -->
+  <div class="modal" id="log-sns-modal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content glass-card sns-card-frame">
+      <button class="modal-close"><i data-lucide="x"></i></button>
+      <div class="modal-header">
+        <h3>Nampo GoGo Travel Story</h3>
+        <p>Instagram Story Template Preview</p>
+      </div>
+      <div class="modal-scroll-body">
+        <div class="instagram-story-canvas" id="story-card-canvas">
+          <div class="story-branding">Nampo GoGo</div>
+          <div class="story-user-badge" id="story-user-tag">@Explorer</div>
+          
+          <div class="story-timeline-summary" id="story-stamp-list">
+            <!-- Stamps nodes list -->
+          </div>
+          
+          <div class="story-footer">
+            <span>Scan QR code to join path</span>
+            <span class="foot-icon">🌊🏃</span>
+          </div>
+        </div>
+
+        <div class="sns-action-grid">
+          <button class="btn btn-secondary" id="btn-copy-sns-caption">
+            <i data-lucide="copy"></i> <span data-trans="snsCopyText">공유 텍스트 복사</span>
+          </button>
+          <button class="btn btn-primary" id="btn-download-sns-card">
+            <i data-lucide="download"></i> <span data-trans="snsDownloadImg">스토리 카드 다운로드</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
