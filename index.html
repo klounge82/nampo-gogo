@@ -18,18 +18,17 @@
   <!-- Mobile Frame Container -->
   <div class="mobile-frame">
     
-    <!-- 1. INTRO MODE SELECT SCREEN (Shows up first) -->
+    <!-- 1. INTRO MODE SELECT SCREEN (No emojis, sleek modern typography) -->
     <div id="intro-screen" class="intro-screen">
       <div class="intro-overlay"></div>
       <div class="intro-content-wrap">
-        <div class="intro-logo"> Lantern 🏮 Nampo GoGo </div>
+        <div class="intro-logo">NAMPO GOGO</div>
         <h2>남포동 스마트 로컬여행 플랫폼</h2>
         <p class="intro-desc">원하시는 모드를 선택하여 플랫폼을 시작해 주세요.</p>
         
         <div class="mode-select-box-grid">
           <!-- Tourist mode card -->
           <div class="mode-card-btn" id="btn-mode-tourist">
-            <div class="mode-card-icon">✈️</div>
             <h3>관광객 전용 모드</h3>
             <p>제휴 매장 검색, 길찾기, QR 스탬프 로그 모드</p>
             <span class="mode-badge-action">접속하기 ➔</span>
@@ -37,7 +36,6 @@
 
           <!-- Merchant mode card -->
           <div class="mode-card-btn" id="btn-mode-merchant">
-            <div class="mode-card-icon">🏢</div>
             <h3>제휴 사업자 전용 모드</h3>
             <p>매장 등록, 다중 업로드 가이드, 메뉴/결제 관리</p>
             <span class="mode-badge-action-sec">가입 및 관리 ➔</span>
@@ -54,7 +52,6 @@
       <!-- Top Header Bar -->
       <header class="nampo-header">
         <div class="logo-group" id="btn-header-logo-home">
-          <span class="logo-emoji">🏮</span>
           <h1>Nampo GoGo</h1>
         </div>
         
@@ -91,7 +88,7 @@
         </div>
       </header>
 
-      <!-- Sticky Top Navigation Tab Dock (Role-based active panels) -->
+      <!-- Sticky Top Navigation Tab Dock -->
       <nav class="nampo-nav-dock" id="dynamic-nav-dock">
         <!-- Renders based on tourist/merchant mode -->
       </nav>
@@ -119,45 +116,18 @@
             <button class="btn btn-sm btn-outline" id="btn-tourist-login-shortcut">Login</button>
           </div>
 
-          <!-- Delivery App (배민/요기요) Style Subcategory Grid Grid -->
-          <h4 class="menu-grid-header">🍲 주변 식사 카테고리 검색</h4>
-          <div class="delivery-category-grid">
-            <div class="delivery-cat-item active" data-subcat="all">
-              <div class="cat-circle">🍔</div>
-              <span>전체보기</span>
-            </div>
-            <div class="delivery-cat-item" data-subcat="pork">
-              <div class="cat-circle">🍲</div>
-              <span data-trans="subPork">국밥/한식</span>
-            </div>
-            <div class="delivery-cat-item" data-subcat="seafood">
-              <div class="cat-circle">🐙</div>
-              <span data-trans="subSeafood">해산물/회</span>
-            </div>
-            <div class="delivery-cat-item" data-subcat="pizza">
-              <div class="cat-circle">🍕</div>
-              <span data-trans="subPizza">피자/양식</span>
-            </div>
-            <div class="delivery-cat-item" data-subcat="korean">
-              <div class="cat-circle">🍚</div>
-              <span data-trans="subKorean">전통한식</span>
-            </div>
-            <div class="delivery-cat-item" data-subcat="chinese">
-              <div class="cat-circle">🍜</div>
-              <span data-trans="subChinese">중식/요리</span>
-            </div>
-            <div class="delivery-cat-item" data-subcat="japanese">
-              <div class="cat-circle">🍣</div>
-              <span data-trans="subJapanese">일식/돈까스</span>
-            </div>
-            <div class="delivery-cat-item" data-subcat="massage">
-              <div class="cat-circle">💆</div>
-              <span data-trans="subMassage">마사지/뷰티</span>
-            </div>
-            <div class="delivery-cat-item" data-subcat="cafe">
-              <div class="cat-circle">☕</div>
-              <span data-trans="subCafe">디저트/카페</span>
-            </div>
+          <!-- Flat Text Pill Category Slider (No Emojis, No Circles) -->
+          <h4 class="menu-grid-header">주변 식사 카테고리 검색</h4>
+          <div class="delivery-category-slider">
+            <button class="delivery-cat-btn active" data-subcat="all">전체보기</button>
+            <button class="delivery-cat-btn" data-subcat="pork" data-trans="subPork">국밥/한식</button>
+            <button class="delivery-cat-btn" data-subcat="seafood" data-trans="subSeafood">해산물/회</button>
+            <button class="delivery-cat-btn" data-subcat="pizza" data-trans="subPizza">피자/양식</button>
+            <button class="delivery-cat-btn" data-subcat="korean" data-trans="subKorean">전통한식</button>
+            <button class="delivery-cat-btn" data-subcat="chinese" data-trans="subChinese">중식/요리</button>
+            <button class="delivery-cat-btn" data-subcat="japanese" data-trans="subJapanese">일식/돈까스</button>
+            <button class="delivery-cat-btn" data-subcat="massage" data-trans="subMassage">마사지/뷰티</button>
+            <button class="delivery-cat-btn" data-subcat="cafe" data-trans="subCafe">디저트/카페</button>
           </div>
 
           <!-- AI Nampodong Course Router Mini Form -->
@@ -222,14 +192,14 @@
             </div>
           </div>
 
-          <!-- Shop list matching priority sorting rules (Fits 3 stores on screen, scrollable) -->
+          <!-- Shop list matching priority sorting rules -->
           <div class="shop-list-header-row">
-            <h4>📋 주변 추천 맛집 및 마사지 센터</h4>
+            <h4>주변 추천 맛집 및 마사지 센터</h4>
             <span class="sort-tag-info">제휴사 ➔ 미디어수 ➔ 평점순 정렬</span>
           </div>
 
           <div class="delivery-partners-list" id="delivery-partners-container">
-            <!-- Rendered dynamically (Compacted style) -->
+            <!-- Rendered dynamically -->
           </div>
 
         </section>
@@ -281,7 +251,7 @@
             <p class="auth-desc" data-trans="loginDesc">아이디와 비밀번호만 입력하면 즉시 가입 및 이용이 가능합니다.</p>
             
             <form id="nampo-auth-form" onsubmit="event.preventDefault();">
-              <input type="hidden" name="auth-role" value="visitor"> <!-- Tourist always visitor -->
+              <input type="hidden" name="auth-role" value="visitor">
               
               <div class="input-group">
                 <i data-lucide="user"></i>
@@ -349,7 +319,7 @@
             </form>
           </div>
 
-          <!-- Step 2: Merchant Partner Application Form (Active only if logged in as merchant) -->
+          <!-- Step 2: Merchant Partner Application Form -->
           <div class="glass-box hidden" id="merchant-apply-card">
             <div class="apply-header-row">
               <i data-lucide="shield-check" class="text-primary"></i>
@@ -425,7 +395,7 @@
 
           <!-- Strict Media Upload Form -->
           <div class="glass-box">
-            <h4 style="font-size:14px; font-weight:800; margin-bottom:10px;">📸 매장 다중 미디어 업로드 (필수 규격 체크)</h4>
+            <h4 style="font-size:14px; font-weight:800; margin-bottom:10px;">매장 다중 미디어 업로드 (필수 규격 체크)</h4>
             
             <form id="merchant-media-upload-form" onsubmit="event.preventDefault();">
               <div class="upload-guide-info">
@@ -443,7 +413,7 @@
 
               <!-- Required Pictures Checklist Verification -->
               <div class="required-media-checklist">
-                <h5>⚠️ 매장 노출을 위한 필수 사진 체크리스트</h5>
+                <h5>매장 노출을 위한 필수 사진 체크리스트</h5>
                 <p>업로드한 파일들 중 아래 요건에 해당하는 사진이 있는지 스스로 체크해 주세요.</p>
                 
                 <label class="checkbox-row-verif">
@@ -474,7 +444,7 @@
 
           <!-- Restaurant Menu / Payment / Parking Form -->
           <div class="glass-box" style="margin-top: 20px;">
-            <h4 style="font-size:14px; font-weight:800; margin-bottom:12px;">🍴 음식점 상세 메뉴 및 이용 환경 등록</h4>
+            <h4 style="font-size:14px; font-weight:800; margin-bottom:12px;">음식점 상세 메뉴 및 이용 환경 등록</h4>
             
             <form id="merchant-menu-details-form" onsubmit="event.preventDefault();">
               <!-- Benefits -->
@@ -570,7 +540,7 @@
 
   </div>
 
-  <!-- MODAL: Restaurant Swipe-Carousel Details & Verified Reviews -->
+  <!-- MODAL: Restaurant Details -->
   <div class="modal" id="partner-detail-modal">
     <div class="modal-backdrop"></div>
     <div class="modal-content glass-card">
@@ -639,7 +609,7 @@
       </div>
       <div class="modal-scroll-body">
         <div class="instagram-story-canvas" id="story-card-canvas">
-          <div class="story-branding">🏮 Nampo GoGo</div>
+          <div class="story-branding">Nampo GoGo</div>
           <div class="story-user-badge" id="story-user-tag">@Explorer</div>
           
           <div class="story-timeline-summary" id="story-stamp-list">

@@ -1,6 +1,6 @@
 // app.js - Nampo GoGo Platform Advanced Delivery-Style Single Page App
 
-// DOM Element Variable Declarations to Prevent Browser Undefined Variable Crashes
+// Fail-safe global variables
 let partnerDetailModal = null;
 let qrScannerModal = null;
 let logSnsModal = null;
@@ -49,6 +49,14 @@ document.addEventListener('DOMContentLoaded', () => {
   setupUpdatePanel();
   setupAIPlanner();
   setupCrossTabSync();
+  
+  // Bind Auth & Merchant Logic
+  setupAuthSystem();
+  setupMerchantSystem();
+
+  // Render initial views
+  renderPartnersList();
+  renderTravelLog();
 
   // Setup modal close actions
   setupModalCloseButtons();
@@ -119,44 +127,51 @@ function setupIntroModeSelection() {
   const enterTouristModeBtn = document.getElementById('btn-mode-tourist');
   const enterMerchantModeBtn = document.getElementById('btn-mode-merchant');
   const quickModeSwitchBtn = document.getElementById('btn-quick-mode-switch');
+  const logoHomeBtn = document.getElementById('btn-header-logo-home');
   
-  // Header Logo click also returns to Intro
-  document.getElementById('btn-header-logo-home').addEventListener('click', () => {
-    introScreen.classList.remove('hidden');
-    appWorkspace.classList.add('hidden');
-  });
+  if (logoHomeBtn && introScreen && appWorkspace) {
+    logoHomeBtn.addEventListener('click', () => {
+      introScreen.classList.remove('hidden');
+      appWorkspace.classList.add('hidden');
+    });
+  }
 
-  enterTouristModeBtn.addEventListener('click', () => {
-    appMode = 'tourist';
-    introScreen.classList.add('hidden');
-    appWorkspace.classList.remove('hidden');
-    
-    renderDynamicNavigationDock();
-    switchTabPanel('tourist-explore');
-  });
+  if (enterTouristModeBtn && introScreen && appWorkspace) {
+    enterTouristModeBtn.addEventListener('click', () => {
+      appMode = 'tourist';
+      introScreen.classList.add('hidden');
+      appWorkspace.classList.remove('hidden');
+      
+      renderDynamicNavigationDock();
+      switchTabPanel('tourist-explore');
+    });
+  }
 
-  enterMerchantModeBtn.addEventListener('click', () => {
-    appMode = 'merchant';
-    introScreen.classList.add('hidden');
-    appWorkspace.classList.remove('hidden');
-    
-    renderDynamicNavigationDock();
-    
-    // Auto redirect based on login status
-    if (currentUser && currentUserRole === 'merchant') {
-      switchTabPanel('merchant-manage');
-    } else {
-      switchTabPanel('merchant-auth');
-    }
-  });
+  if (enterMerchantModeBtn && introScreen && appWorkspace) {
+    enterMerchantModeBtn.addEventListener('click', () => {
+      appMode = 'merchant';
+      introScreen.classList.add('hidden');
+      appWorkspace.classList.remove('hidden');
+      
+      renderDynamicNavigationDock();
+      
+      if (currentUser && currentUserRole === 'merchant') {
+        switchTabPanel('merchant-manage');
+      } else {
+        switchTabPanel('merchant-auth');
+      }
+    });
+  }
 
-  quickModeSwitchBtn.addEventListener('click', () => {
-    introScreen.classList.remove('hidden');
-    appWorkspace.classList.add('hidden');
-  });
+  if (quickModeSwitchBtn && introScreen && appWorkspace) {
+    quickModeSwitchBtn.addEventListener('click', () => {
+      introScreen.classList.remove('hidden');
+      appWorkspace.classList.add('hidden');
+    });
+  }
 }
 
-// 4. Render Dynamic Role-Based Top Navigation
+// 4. Render Dynamic Top Navigation
 function renderDynamicNavigationDock() {
   const navDock = document.getElementById('dynamic-nav-dock');
   if (!navDock) return;
@@ -178,7 +193,6 @@ function renderDynamicNavigationDock() {
       </button>
     `;
   } else {
-    // Merchant Mode
     navDock.innerHTML = `
       <button class="nav-btn active" data-tab="merchant-auth">
         <i data-lucide="user-check"></i>
@@ -191,13 +205,11 @@ function renderDynamicNavigationDock() {
     `;
   }
 
-  // Bind click listeners
   const navButtons = navDock.querySelectorAll('.nav-btn');
   navButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       const targetTab = btn.getAttribute('data-tab');
 
-      // Prevent entry to management tab if not verified merchant
       if (targetTab === 'merchant-manage') {
         if (!currentUser || currentUserRole !== 'merchant') {
           alert("⚠️ 사업자 회원가입 및 로그인 완료 후 매장 관리가 가능합니다!");
@@ -231,7 +243,6 @@ function switchTabPanel(panelId) {
     activePanel.classList.add('active');
   }
 
-  // Reload statistics or lists on entry
   if (panelId === 'tourist-explore') {
     renderPartnersList();
   } else if (panelId === 'tourist-log') {
@@ -259,8 +270,6 @@ function setupLanguage() {
 
 function updateLanguageTexts() {
   updateLanguageTextsOnly();
-
-  // Redraw views to update multilingual values
   renderPartnersList();
   renderTravelLog();
   updateAuthUIs();
@@ -285,7 +294,6 @@ function updateLanguageTextsOnly() {
   });
 }
 
-// Fallback logic in case translations map contains old codes (ko, zh, ja)
 function getTranslation(lang, key) {
   let targetLang = lang;
   if (!translations[targetLang]) {
@@ -308,7 +316,7 @@ function getTranslation(lang, key) {
   return obj;
 }
 
-// 6. Global Updates Notices Panel
+// 6. Global Notices Board Panel
 function setupUpdatePanel() {
   const btnUpdateToggle = document.getElementById('btn-update-toggle');
   const updatePanel = document.getElementById('update-panel');
@@ -347,7 +355,7 @@ function renderUpdateLogs() {
   });
 }
 
-// 7. Tourist login/signup auth
+// 7. Tourist Auth System
 function setupAuthSystem() {
   const authForm = document.getElementById('nampo-auth-form');
   const btnLogout = document.getElementById('btn-action-logout');
@@ -378,7 +386,6 @@ function setupAuthSystem() {
         currentUser = matchedUser.id;
         currentUserRole = matchedUser.role;
       } else {
-        // Create visitor
         const newUser = { id: usernameInput, pw: passwordInput, role: 'visitor' };
         registeredUsers.push(newUser);
         localStorage.setItem('nampogogo_users', JSON.stringify(registeredUsers));
@@ -477,52 +484,40 @@ function renderPartnersList() {
   container.innerHTML = '';
 
   let filtered = [...partnersList];
-  
-  // Category subcategory filter
   if (activeSubcatFilter !== 'all') {
     filtered = filtered.filter(p => p.subCategory === activeSubcatFilter);
   }
 
-  // STRICT MULTI-SORTING ALGORITHM (Requested)
+  // Multi-sorting algorithm
   filtered.sort((a, b) => {
-    // 1. Partner status priority: Official Partners first
     const partnerA = a.isPartner ? 1 : 0;
     const partnerB = b.isPartner ? 1 : 0;
     if (partnerA !== partnerB) {
-      return partnerB - partnerA; // 1 (partner) comes before 0
+      return partnerB - partnerA;
     }
 
     if (a.isPartner && b.isPartner) {
-      // 2. If both are partners: [Image + Video count] descending
-      const mediaCountA = (a.gallery ? a.gallery.length : 0) + 1; // cover img is +1
+      const mediaCountA = (a.gallery ? a.gallery.length : 0) + 1;
       const mediaCountB = (b.gallery ? b.gallery.length : 0) + 1;
       if (mediaCountA !== mediaCountB) {
         return mediaCountB - mediaCountA;
       }
-
-      // 3. Review score descending
       if (a.rating !== b.rating) {
         return b.rating - a.rating;
       }
-
-      // 4. Video count descending
       const videoCountA = a.gallery ? a.gallery.filter(g => g.type === 'video').length : 0;
       const videoCountB = b.gallery ? b.gallery.filter(g => g.type === 'video').length : 0;
       if (videoCountA !== videoCountB) {
         return videoCountB - videoCountA;
       }
-
-      // 5. Image count descending
       const imgCountA = a.gallery ? a.gallery.filter(g => g.type === 'image').length : 0;
       const imgCountB = b.gallery ? b.gallery.filter(g => g.type === 'image').length : 0;
       return imgCountB - imgCountA;
     } else {
-      // For non-partners: review score descending
       return b.rating - a.rating;
     }
   });
 
-  // Render list
   if (filtered.length === 0) {
     container.innerHTML = `<div class="empty-log-state"><p>이 카테고리에 해당하는 매장이 없습니다.</p></div>`;
     return;
@@ -534,7 +529,6 @@ function renderPartnersList() {
     
     const isKorean = currentLang === 'kr';
     const directionLink = isKorean ? p.mapLinkNaver : p.mapLinkGoogle;
-    
     const mediaTotal = (p.gallery ? p.gallery.length : 0) + 1;
 
     card.innerHTML = `
@@ -567,12 +561,12 @@ function renderPartnersList() {
 }
 
 function setupSubcatGridClickHandlers() {
-  document.querySelectorAll('.delivery-cat-item').forEach(item => {
+  document.querySelectorAll('.delivery-cat-btn').forEach(item => {
     const newEl = item.cloneNode(true);
     item.parentNode.replaceChild(newEl, item);
 
     newEl.addEventListener('click', () => {
-      document.querySelectorAll('.delivery-cat-item').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.delivery-cat-btn').forEach(el => el.classList.remove('active'));
       newEl.classList.add('active');
       activeSubcatFilter = newEl.getAttribute('data-subcat');
       renderPartnersList();
@@ -580,7 +574,7 @@ function setupSubcatGridClickHandlers() {
   });
 }
 
-// 9. Partner Detail Modal with Horizontal Carousel Swiper & Map Links
+// 9. Partner Detail Modal
 function openPartnerDetail(id) {
   const p = partnersList.find(item => item.id === id);
   if (!p) return;
@@ -592,7 +586,6 @@ function openPartnerDetail(id) {
   const isKorean = currentLang === 'kr';
   const directionLink = isKorean ? p.mapLinkNaver : p.mapLinkGoogle;
 
-  // Build Carousel Swiper Slide images/videos
   let mediaSwiperMarkup = '';
   mediaSwiperMarkup += `<div class="detail-gallery-img" style="background-image: url('${p.image}')"></div>`;
   if (p.gallery && p.gallery.length > 0) {
@@ -605,7 +598,6 @@ function openPartnerDetail(id) {
     });
   }
 
-  // Pricing menu rows
   let pricingRows = '';
   p.priceList.forEach(item => {
     pricingRows += `
@@ -616,7 +608,6 @@ function openPartnerDetail(id) {
     `;
   });
 
-  // Characteristic Badges (Languages, payment methods, order, parking)
   const langBadgeStr = (p.menuForeign && p.menuForeign[currentLang]) ? `<span class="characteristic-badge badge-blue">다국어 대응</span>` : '';
   const parkingStr = p.parking ? `<span class="characteristic-badge badge-secondary">🚗 주차: ${p.parking}</span>` : '';
   
@@ -627,7 +618,6 @@ function openPartnerDetail(id) {
     });
   }
 
-  // Reviews list
   let reviewsMarkup = '';
   if (p.reviews.length === 0) {
     reviewsMarkup = `<p class="empty-state text-center">${getTranslation(currentLang, 'noReviews') || 'No reviews yet.'}</p>`;
@@ -645,7 +635,6 @@ function openPartnerDetail(id) {
     });
   }
 
-  // Review writer block
   let writerMarkup = '';
   if (currentUser) {
     if (isStamped) {
@@ -684,7 +673,7 @@ function openPartnerDetail(id) {
   const sc = p.scores || { hygiene: 4.8, taste: 4.8, service: 4.8, cleanliness: 4.8 };
 
   contentWrap.innerHTML = `
-    <!-- Horizontal Swipe Media Gallery (Carousel Swiper) -->
+    <!-- Horizontal Swipe Media Gallery -->
     <div class="modal-detail-media-scroller">
       ${mediaSwiperMarkup}
     </div>
@@ -701,7 +690,6 @@ function openPartnerDetail(id) {
       <div style="margin-top: 4px;">📞 연락처: <a href="tel:${p.phone}" class="address-val-text" style="color:var(--primary); text-decoration:underline;">${p.phone}</a></div>
       <div style="margin-top: 4px;">🕒 영업시간: <span class="address-val-text">${p.hours}</span></div>
       
-      <!-- Direction Map Button ( 분기 처리 연동 ) -->
       <div class="direction-btn-row">
         <button class="btn btn-primary btn-dir-navigation" onclick="window.open('${directionLink}', '_blank')">
           <i data-lucide="navigation" style="width:10px; height:10px;"></i> ${getTranslation(currentLang, 'getDirection') || 'Route'} (${p.distanceValue})
@@ -717,7 +705,7 @@ function openPartnerDetail(id) {
       <span class="characteristic-badge badge-accent">⚡ 주문: QR/대면</span>
     </div>
 
-    <!-- Google-style Accordion Detailed Rating 요약 -->
+    <!-- Accordion detailed rating -->
     <div class="rating-accordion-header" id="btn-rating-accordion-toggle">
       <span>📊 Google-style 세부 항목 평점 요약</span>
       <i data-lucide="chevron-down"></i>
@@ -776,7 +764,7 @@ function openPartnerDetail(id) {
       </div>
     </div>
 
-    <!-- TAB PANEL 3: SEO Crawler Tag Visualizer -->
+    <!-- TAB PANEL 3: SEO -->
     <div class="modal-tab-panel" id="modal-panel-seo">
       <div class="seo-info-box" style="background:var(--primary-soft); padding:12px; border-radius:6px; font-size:10px;">
         <div class="seo-tag-item"><strong>&lt;title&gt;</strong> ${p.name[currentLang] || p.name['en']} | Nampo GoGo Busan</div>
@@ -785,13 +773,11 @@ function openPartnerDetail(id) {
       </div>
     </div>
 
-    <!-- Scan stamp action button -->
     <button class="btn btn-secondary btn-block" id="btn-trigger-qr-scan" style="margin-top: 14px;">
       <i data-lucide="scan-line"></i> 
       <span>${isStamped ? (getTranslation(currentLang, 'alreadyStamped') || 'Stamped') : (getTranslation(currentLang, 'scanBtnText') || 'Scan QR')}</span>
     </button>
 
-    <!-- Reviews Section -->
     <div class="reviews-section">
       <h4 data-trans="reviewTitle">${getTranslation(currentLang, 'reviewTitle') || 'Reviews'}</h4>
       <div id="modal-reviews-list">
@@ -806,7 +792,6 @@ function openPartnerDetail(id) {
   }
   initLucide();
 
-  // Setup Detailed rating accordion toggle
   const accordionHeader = document.getElementById('btn-rating-accordion-toggle');
   if (accordionHeader) {
     accordionHeader.addEventListener('click', () => {
@@ -816,7 +801,6 @@ function openPartnerDetail(id) {
 
   setupModalTabs();
 
-  // Bind stamp trigger
   const qrBtn = document.getElementById('btn-trigger-qr-scan');
   if (qrBtn) {
     if (isStamped) qrBtn.setAttribute('disabled', 'true');
@@ -832,7 +816,6 @@ function openPartnerDetail(id) {
     });
   }
 
-  // Submit verified review handler
   const btnSubmitReview = document.getElementById('btn-submit-review-act');
   if (btnSubmitReview && currentUser && isStamped) {
     btnSubmitReview.addEventListener('click', () => {
@@ -857,9 +840,13 @@ function openPartnerDetail(id) {
 
       savePartnersToStorage();
       alert("Verified review posted successfully!");
-      openPartnerDetail(p.id); // Reload modal
+      openPartnerDetail(p.id);
     });
   }
+}
+
+function savePartnersToStorage() {
+  localStorage.setItem('nampogogo_partners_v3', JSON.stringify(partnersList));
 }
 
 function setupModalTabs() {
@@ -882,7 +869,7 @@ function setupModalTabs() {
   });
 }
 
-// 10. QR Scan verification
+// 10. QR Scan
 let targetQrPartnerId = null;
 
 function triggerQRScanner(partnerId) {
@@ -954,7 +941,7 @@ function setupInteractiveScans() {
   }
 }
 
-// 11. Travel Log & Stamps Timeline
+// 11. Travel Log
 function renderTravelLog() {
   const stampGrid = document.getElementById('stamp-indicator-grid');
   const timeline = document.getElementById('travel-log-timeline');
@@ -1083,16 +1070,13 @@ function openSNSCardModal() {
   }
 }
 
-
-// ================== 12. MERCHANT CONTROL SYSTEM & VERIFICATION ==================
-
+// 12. Merchant Control System
 function setupMerchantSystem() {
   const joinForm = document.getElementById('merchant-join-form');
   const applyForm = document.getElementById('merchant-apply-form');
   const mediaFileInput = document.getElementById('merchant-media-files');
   const storeSaveBtn = document.getElementById('btn-save-store-complete');
 
-  // Business Join / Login
   if (joinForm) {
     joinForm.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -1118,7 +1102,6 @@ function setupMerchantSystem() {
         currentUser = matchedUser.id;
         currentUserRole = matchedUser.role;
       } else {
-        // Sign up as merchant
         const newUser = { id: usernameInput, pw: passwordInput, role: 'merchant' };
         registeredUsers.push(newUser);
         localStorage.setItem('nampogogo_users', JSON.stringify(registeredUsers));
@@ -1135,7 +1118,6 @@ function setupMerchantSystem() {
     });
   }
 
-  // Partnership Application (Simulate immediate approval)
   if (applyForm) {
     applyForm.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -1145,13 +1127,11 @@ function setupMerchantSystem() {
       const subcat = document.getElementById('apply-subcategory').value;
       const phoneVal = document.getElementById('apply-phone').value.trim();
 
-      // Mock immediate approval
       localStorage.setItem(`nampogogo_merchant_approved_${currentUser}`, 'true');
       localStorage.setItem(`nampogogo_merchant_addr_${currentUser}`, addr);
       localStorage.setItem(`nampogogo_merchant_subcat_${currentUser}`, subcat);
       localStorage.setItem(`nampogogo_merchant_phone_${currentUser}`, phoneVal);
 
-      // Create a partner shop object if not exists
       const storeId = currentUser.toLowerCase().replace('owner_', 'partner_');
       let storeObj = partnersList.find(p => p.id === storeId);
       
@@ -1161,7 +1141,7 @@ function setupMerchantSystem() {
           name: { kr: `${currentUser} 매장`, en: `${currentUser} Store`, ch: `${currentUser} 铺`, jp: `${currentUser} 店` },
           category: (subcat === 'massage' || subcat === 'cafe') ? subcat : 'food',
           subCategory: subcat,
-          isPartner: true, // Marked as Partner!
+          isPartner: true,
           image: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=400&q=80",
           gallery: [],
           rating: 5.0,
@@ -1189,13 +1169,12 @@ function setupMerchantSystem() {
 
       alert("🎉 서류 심사 즉시 통과! Nampo GoGo 공식 제휴 매장으로 승인되었습니다!");
       
-      renderDynamicNavigationDock(); // Refresh lock tabs
+      renderDynamicNavigationDock();
       updateMerchantAuthUI();
       switchTabPanel('merchant-manage');
     });
   }
 
-  // Media files change preview loader
   if (mediaFileInput) {
     mediaFileInput.addEventListener('change', (e) => {
       const files = e.target.files;
@@ -1216,7 +1195,6 @@ function setupMerchantSystem() {
             data: base64Data
           });
 
-          // Build preview thumbnail
           const pBox = document.createElement('div');
           pBox.className = `preview-thumb-box ${isVideo ? 'video' : ''}`;
           pBox.style.backgroundImage = isVideo ? 'none' : `url('${base64Data}')`;
@@ -1242,12 +1220,10 @@ function setupMerchantSystem() {
     });
   }
 
-  // Save Store complete registration (With Strict Media Validation)
   if (storeSaveBtn) {
     storeSaveBtn.addEventListener('click', (e) => {
       e.preventDefault();
       
-      // Strict Media Validation Check
       const hasSignboard = document.getElementById('check-media-signboard').checked;
       const hasMenu = document.getElementById('check-media-menu').checked;
       const hasInside = document.getElementById('check-media-inside').checked;
@@ -1264,12 +1240,10 @@ function setupMerchantSystem() {
         return;
       }
 
-      // Update Text Fields
       store.benefits[currentLang] = document.getElementById('edit-benefit-input').value.trim();
       store.hours = document.getElementById('edit-hours-input').value.trim();
       store.phone = document.getElementById('edit-phone-input').value.trim();
       
-      // Menu registers
       const sigName = document.getElementById('menu-sig-name').value.trim();
       const sigPrice = document.getElementById('menu-sig-price').value.trim();
       const stdName = document.getElementById('menu-std-name').value.trim();
@@ -1282,14 +1256,11 @@ function setupMerchantSystem() {
       if (stdName) store.priceList.push({ name: { kr: stdName, en: stdName, ch: stdName, jp: stdName }, price: stdPrice });
       if (seaName) store.priceList.push({ name: { kr: seaName, en: seaName, ch: seaName, jp: seaName }, price: seaPrice });
 
-      // Parking Status
       store.parking = document.querySelector('input[name="m-parking-status"]:checked').value;
 
-      // Payments array
       const selectedPayments = Array.from(document.querySelectorAll('input[name="m-payment-methods"]:checked')).map(el => el.value);
       store.payments = selectedPayments;
 
-      // Apply base64 media
       if (tempUploadedMedia.length > 0) {
         store.gallery = tempUploadedMedia;
         if (selectedThumbnailBase64) {
@@ -1300,7 +1271,6 @@ function setupMerchantSystem() {
       savePartnersToStorage();
       alert("🎉 매장 상세 메뉴 및 미디어가 성공적으로 플랫폼에 게시 및 노출 순위 갱신 완료되었습니다!");
       
-      // Return to tourist explore board to check
       appMode = 'tourist';
       renderDynamicNavigationDock();
       switchTabPanel('tourist-explore');
@@ -1339,11 +1309,14 @@ function renderMerchantManagementForm() {
   const store = findMerchantStore();
   if (!store) return;
 
-  document.getElementById('edit-benefit-input').value = store.benefits[currentLang] || store.benefits['en'] || '';
-  document.getElementById('edit-hours-input').value = store.hours || '11:00 - 22:00';
-  document.getElementById('edit-phone-input').value = store.phone || '+82-51-111-2222';
+  const benefitInput = document.getElementById('edit-benefit-input');
+  const hoursInput = document.getElementById('edit-hours-input');
+  const phoneInput = document.getElementById('edit-phone-input');
 
-  // Load registered menus
+  if (benefitInput) benefitInput.value = store.benefits[currentLang] || store.benefits['en'] || '';
+  if (hoursInput) hoursInput.value = store.hours || '11:00 - 22:00';
+  if (phoneInput) phoneInput.value = store.phone || '+82-51-111-2222';
+
   const sigNameInput = document.getElementById('menu-sig-name');
   const sigPriceInput = document.getElementById('menu-sig-price');
   const stdNameInput = document.getElementById('menu-std-name');
@@ -1351,40 +1324,43 @@ function renderMerchantManagementForm() {
   const seaNameInput = document.getElementById('menu-sea-name');
   const seaPriceInput = document.getElementById('menu-sea-price');
 
-  if (store.priceList && store.priceList[0]) {
-    sigNameInput.value = store.priceList[0].name[currentLang] || store.priceList[0].name['en'];
-    sigPriceInput.value = store.priceList[0].price;
-  } else {
-    sigNameInput.value = ''; sigPriceInput.value = '';
+  if (sigNameInput && sigPriceInput) {
+    if (store.priceList && store.priceList[0]) {
+      sigNameInput.value = store.priceList[0].name[currentLang] || store.priceList[0].name['en'];
+      sigPriceInput.value = store.priceList[0].price;
+    } else {
+      sigNameInput.value = ''; sigPriceInput.value = '';
+    }
   }
 
-  if (store.priceList && store.priceList[1]) {
-    stdNameInput.value = store.priceList[1].name[currentLang] || store.priceList[1].name['en'];
-    stdPriceInput.value = store.priceList[1].price;
-  } else {
-    stdNameInput.value = ''; stdPriceInput.value = '';
+  if (stdNameInput && stdPriceInput) {
+    if (store.priceList && store.priceList[1]) {
+      stdNameInput.value = store.priceList[1].name[currentLang] || store.priceList[1].name['en'];
+      stdPriceInput.value = store.priceList[1].price;
+    } else {
+      stdNameInput.value = ''; stdPriceInput.value = '';
+    }
   }
 
-  if (store.priceList && store.priceList[2]) {
-    seaNameInput.value = store.priceList[2].name[currentLang] || store.priceList[2].name['en'];
-    seaPriceInput.value = store.priceList[2].price;
-  } else {
-    seaNameInput.value = ''; seaPriceInput.value = '';
+  if (seaNameInput && seaPriceInput) {
+    if (store.priceList && store.priceList[2]) {
+      seaNameInput.value = store.priceList[2].name[currentLang] || store.priceList[2].name['en'];
+      seaPriceInput.value = store.priceList[2].price;
+    } else {
+      seaNameInput.value = ''; seaPriceInput.value = '';
+    }
   }
 
-  // Load parking
   const parkVal = store.parking || '유';
   document.querySelectorAll('input[name="m-parking-status"]').forEach(radio => {
     radio.checked = radio.value === parkVal;
   });
 
-  // Load payments
   const pays = store.payments || ["신용카드", "삼성페이"];
   document.querySelectorAll('input[name="m-payment-methods"]').forEach(box => {
     box.checked = pays.includes(box.value);
   });
 
-  // Load stamp count count
   let stampCount = 0;
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
@@ -1399,11 +1375,7 @@ function renderMerchantManagementForm() {
   if (stampCountEl) stampCountEl.textContent = `${stampCount}건`;
 }
 
-// 13. ADMIN Console Mock placeholder (Needed to prevent app.js setup errors)
-function setupAdminSystem() {}
-function renderAdminReviews() {}
-
-// 14. AI Course Planner Logic
+// AI Course Planner Logic
 function setupAIPlanner() {
   const btnPlanner = document.getElementById('btn-run-ai-recommend');
   const outputArea = document.getElementById('ai-course-output-area');
@@ -1412,7 +1384,7 @@ function setupAIPlanner() {
 
   if (shortcutBtn) {
     shortcutBtn.addEventListener('click', () => {
-      plannerForm.classList.toggle('hidden');
+      if (plannerForm) plannerForm.classList.toggle('hidden');
     });
   }
 

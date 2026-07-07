@@ -1,4 +1,4 @@
-/* style.css - Nampo GoGo Premium Minimalist Design System with Delivery-Style Layout */
+/* style.css - Nampo GoGo Premium Minimalist Design System with Sticky Top Navigation */
 
 :root {
   /* Colors */
@@ -84,7 +84,7 @@ body {
   display: none !important;
 }
 
-/* 1. INTRO MODE SELECT SCREEN */
+/* 1. INTRO MODE SELECT SCREEN (No emojis, highly typography-oriented) */
 .intro-screen {
   position: absolute;
   inset: 0;
@@ -99,7 +99,7 @@ body {
 .intro-overlay {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 50%, rgba(49, 130, 246, 0.18) 0%, rgba(12, 13, 20, 0.98) 100%);
+  background: radial-gradient(circle at 50% 50%, rgba(49, 130, 246, 0.16) 0%, rgba(12, 13, 20, 0.98) 100%);
 }
 
 .intro-content-wrap {
@@ -113,17 +113,19 @@ body {
 }
 
 .intro-logo {
-  font-size: 20px;
-  font-weight: 800;
+  font-size: 24px;
+  font-weight: 900;
   color: var(--primary);
   margin-bottom: 12px;
+  letter-spacing: -0.5px;
 }
 
 .intro-content-wrap h2 {
-  font-size: 22px;
-  font-weight: 900;
+  font-size: 20px;
+  font-weight: 800;
   letter-spacing: -1px;
-  line-height: 1.3;
+  line-height: 1.4;
+  color: #f2f4f6;
 }
 
 .intro-desc {
@@ -140,10 +142,10 @@ body {
 }
 
 .mode-card-btn {
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.03);
   border: 1.5px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-md);
-  padding: 22px;
+  padding: 24px;
   cursor: pointer;
   text-align: left;
   transition: var(--transition);
@@ -155,27 +157,23 @@ body {
   transform: translateY(-2px);
 }
 
-.mode-card-icon {
-  font-size: 32px;
-  margin-bottom: 8px;
-}
-
 .mode-card-btn h3 {
   font-size: 15px;
   font-weight: 800;
   color: white;
+  letter-spacing: -0.3px;
 }
 
 .mode-card-btn p {
   font-size: 11px;
   color: var(--text-muted);
-  margin-top: 4px;
+  margin-top: 6px;
   line-height: 1.4;
 }
 
 .mode-badge-action {
   display: inline-block;
-  margin-top: 14px;
+  margin-top: 16px;
   font-size: 11px;
   font-weight: 800;
   color: var(--primary);
@@ -183,17 +181,17 @@ body {
 
 .mode-badge-action-sec {
   display: inline-block;
-  margin-top: 14px;
+  margin-top: 16px;
   font-size: 11px;
   font-weight: 800;
   color: var(--secondary);
 }
 
 .intro-footer {
-  margin-top: 48px;
+  margin-top: 54px;
   font-size: 10px;
-  color: rgba(255,255,255,0.25);
-  letter-spacing: 1px;
+  color: rgba(255,255,255,0.2);
+  letter-spacing: 1.5px;
 }
 
 /* Header */
@@ -215,10 +213,6 @@ body {
   align-items: center;
   gap: 6px;
   cursor: pointer;
-}
-
-.logo-emoji {
-  font-size: 20px;
 }
 
 .logo-group h1 {
@@ -455,65 +449,51 @@ body {
   letter-spacing: -0.5px;
 }
 
-/* 2. DELIVERY APP (배민/요기요) STYLE SUBCATEGORY GRID */
+/* 2. FLAT TEXT CATEGORY CHIP SLIDER (No circles, no emojis, Toss style) */
 .menu-grid-header {
   font-size: 13px;
   font-weight: 800;
   color: var(--text-main);
   margin-bottom: 12px;
+  letter-spacing: -0.5px;
 }
 
-.delivery-category-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin-bottom: 24px;
-}
-
-.delivery-cat-item {
+.delivery-category-slider {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  cursor: pointer;
-  transition: var(--transition);
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-bottom: 20px;
 }
 
-.cat-circle {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
+.delivery-category-slider::-webkit-scrollbar {
+  display: none;
+}
+
+.delivery-cat-btn {
   background: var(--bg-gray-soft);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  transition: var(--transition);
-  border: 1.5px solid transparent;
-}
-
-.delivery-cat-item span {
-  font-size: 10px;
-  font-weight: 700;
+  border: 1px solid var(--border-medium);
   color: var(--text-body);
-  margin-top: 6px;
-  text-align: center;
-  white-space: nowrap;
-}
-
-.delivery-cat-item:hover .cat-circle {
-  background: var(--bg-gray-hover);
-  transform: translateY(-2px);
-}
-
-.delivery-cat-item.active .cat-circle {
-  background: var(--primary-soft);
-  border-color: var(--primary);
-  transform: scale(1.05);
-}
-
-.delivery-cat-item.active span {
-  color: var(--primary);
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
   font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: var(--transition);
+  font-family: var(--font-main);
+  outline: none;
+}
+
+.delivery-cat-btn:hover {
+  background: var(--bg-gray-hover);
+}
+
+.delivery-cat-btn.active {
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+  box-shadow: 0 4px 12px rgba(49, 130, 246, 0.12);
 }
 
 /* Shop list headers */
@@ -541,7 +521,7 @@ body {
   font-weight: 800;
 }
 
-/* 3. COMPACT SHOP CARDS (Fits 3-4 on screen, scrollable list) */
+/* 3. COMPACT SHOP CARDS */
 .delivery-partners-list {
   display: flex;
   flex-direction: column;
