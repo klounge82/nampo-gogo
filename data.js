@@ -1,62 +1,80 @@
-// data.js - Nampo GoGo MVP Extended Data Source with Corrected Lang Codes (KR, EN, CH, JP)
+// data.js - Nampo GoGo Premium Global Data Dictionary with Subcategories for Delivery UI
 
 window.NampoGoGoData = {
-  // Translations with corrected language codes: kr, en, ch, jp
+  // Translations supporting KR, EN, CH, JP
   translations: {
     kr: {
       appName: "Nampo GoGo",
-      tagline: "남포동 스마트 로컬 여행 상생 플랫폼",
       dashboard: "대시보드",
-      explore: "매장 탐색",
-      qrScanner: "QR 스캔",
+      explore: "맛집 탐색",
       travelLog: "여행 로그",
       profile: "내 정보",
-      
-      // Menu Items
-      menuFood: "먹거리",
-      menuActivity: "체험",
-      menuShopping: "쇼핑",
-      menuSightseeing: "관광지",
-      menuCourse: "추천코스",
-      menuBenefit: "혜택매장",
-      menuLog: "내 여행로그",
-
-      // Update Panel
+      tagline: "남포동 스마트 로컬여행 플랫폼",
+      pleaseLogin: "로그인 후 QR 인증과 여행 로그를 기록해 보세요.",
+      welcomeUser: "남포동에 오신 것을 환영합니다!",
+      roleVisitor: "관광객 (손님)",
+      roleMerchant: "제휴 사업자 (상인)",
+      roleAdmin: "시스템 관리자 (어드민)",
       updateBtn: "업데이트 내역",
       updateTitle: "최근 업데이트 소식",
-      writeNoticeBtn: "공지 추가",
-      noticePlaceholder: "공지할 업데이트 내용을 입력하세요.",
       
-      // Auth & Roles
-      loginTitle: "3초 초간단 가입 & 로그인",
-      loginDesc: "아이디와 비밀번호만 입력하면 즉시 가입 및 이용이 가능합니다.",
-      usernamePlaceholder: "아이디(닉네임) 입력",
-      passwordPlaceholder: "비밀번호 입력",
-      passwordConfirmPlaceholder: "비밀번호 확인 입력",
-      authBtn: "로그인 / 가입 완료",
-      logoutBtn: "로그아웃",
-      welcomeUser: "님, 반갑습니다!",
-      pleaseLogin: "로그인 후 QR 인증과 여행 로그를 기록해 보세요.",
-      roleVisitor: "관광객 모드",
-      roleMerchant: "사업자 모드",
-      roleAdmin: "최고 관리자 모드",
-      joinTypeVisitor: "관광객(손님)으로 가입",
-      joinTypeMerchant: "사업자(상인)로 가입",
-      
-      // Explore & Partners
-      exploreTitle: "남포동 연계 제휴 매장",
-      exploreDesc: "마사지, 맛집, 카페, 쇼핑, 야경 코스까지 남포동의 베스트 파트너사입니다.",
+      // Core Categories
       allCategories: "전체 카테고리",
       catMassage: "뷰티 & 마사지",
       catFood: "남포 맛집",
       catCafe: "감성 카페",
       catShopping: "쇼핑 & 패션",
       catSightseeing: "관광 & 야경",
-      benefitTitle: "🎁 관광객 제휴 혜택",
-      getDirection: "도보 길찾기",
-      distance: "거리",
       
-      // Merchant & Admin Dashboard UI
+      // Delivery UI Subcategories
+      subPork: "국밥/한식",
+      subSeafood: "해산물/회",
+      subPizza: "피자/양식",
+      subKorean: "전통한식",
+      subChinese: "중식/요리",
+      subJapanese: "일식/돈까스",
+      subMassage: "마사지/뷰티",
+      subCafe: "디저트/카페",
+
+      // Actions & Labels
+      benefitTitle: "🎁 제휴 관광객 전용 단독 혜택",
+      getDirection: "도보 길찾기 📍",
+      distance: "현재 거리",
+      alreadyStamped: "인증 완료 ✓",
+      scanBtnText: "매장 QR 스탬프 스캔",
+      reviewTitle: "방문자 한줄 평 및 리뷰",
+      noReviews: "아직 작성된 리뷰가 없습니다.",
+      ratingLabel: "평가 점수",
+      reviewInputPlaceholder: "매장 이용 후 한 줄 리뷰를 남겨주세요 (체크인 완료 고객 전용)",
+      reviewBtn: "리뷰 등록 완료",
+      reviewAuthError: "⚠️ 이 매장의 QR 인증(체크인)을 마친 고객만 리뷰를 남길 수 있습니다.",
+      
+      // Travel Log page
+      logTitle: "나의 여행 로그 카드",
+      logDesc: "QR 인증으로 수집된 나만의 남포동 여행 코스 리포트입니다.",
+      logCount: "방문한 매장 수",
+      emptyLog: "아직 방문 인증된 매장이 없습니다. 제휴 매장을 방문하고 스탬프를 적립해 보세요!",
+      snsExport: "SNS 공유용 카드 생성 📸",
+      snsCopyText: "공유 텍스트 복사",
+      snsDownloadImg: "스토리 카드 다운로드",
+      snsSuccess: "📋 인스타그램 공유용 텍스트가 클립보드에 복사되었습니다! 스토리 카드와 함께 공유해 보세요.",
+      memoLabel: "나만의 한줄 여행 메모 기록",
+      memoPlaceholder: "이 매장에서 어떤 추억이 있었나요? 메모를 입력하세요.",
+      memoSaveBtn: "메모 저장",
+      memoSavedSuccess: "💾 여행 메모가 안전하게 저장되었습니다!",
+
+      // Auth & Profile
+      loginTitle: "3초 초간단 가입 & 로그인",
+      loginDesc: "아이디와 비밀번호만 입력하면 즉시 가입 및 이용이 가능합니다.",
+      joinTypeVisitor: "관광객(손님)으로 가입",
+      joinTypeMerchant: "사업자(상인)로 가입",
+      usernamePlaceholder: "아이디(닉네임) 입력",
+      passwordPlaceholder: "비밀번호 입력",
+      passwordConfirmPlaceholder: "비밀번호 확인 입력",
+      authBtn: "로그인 / 가입 완료",
+      logoutBtn: "로그아웃",
+
+      // Merchant Dashboard
       merchantTitle: "내 매장 관리 대시보드",
       merchantDesc: "오늘 방문자 수와 스탬프 발급 건수를 체크하고 정보를 편집하세요.",
       visitorToday: "오늘 방문자 수",
@@ -64,617 +82,538 @@ window.NampoGoGoData = {
       qrStampsIssued: "QR 인증 횟수",
       reviewCount: "등록된 리뷰 수",
       editStoreInfo: "매장 상세 정보 수정",
-      saveStoreSuccess: "매장 정보가 성공적으로 업데이트되었습니다!",
+      saveStoreSuccess: "💾 매장 정보 및 다중 미디어가 성공적으로 업데이트되었습니다!",
       
+      // Admin Dashboard
       adminTitle: "Nampo GoGo 통합 어드민",
       adminDesc: "새 매장 정보 등록, 업데이트 공지 관리 및 전체 리뷰 모니터링을 수행합니다.",
-      addStoreBtn: "신규 제휴 매장 등록",
-      storeNameLabel: "매장명 입력",
-      storeCategoryLabel: "카테고리 선택",
+      addStoreBtn: "➕ 신규 제휴 매장 등록",
+      storeNameLabel: "매장명",
+      storeCategoryLabel: "카테고리",
       storeImageLabel: "대표 이미지 URL",
       storeBenefitLabel: "관광객 혜택 내용",
-      storePriceLabel: "가격 정보 (예: 기본 코스 50,000원)",
+      storePriceLabel: "가격 정보",
       isPartnerLabel: "Nampo GoGo 공식 제휴 등록 여부",
-      addStoreSuccess: "신규 매장이 리스트에 성공적으로 등록되었습니다!",
-      
-      // QR scanner & Verification
-      qrTitle: "제휴매장 QR 인증",
-      qrDesc: "매장에 비치된 Nampo GoGo QR 코드를 스캔하세요.",
-      qrCameraSim: "카메라 인식 중... (가상 스캔)",
-      qrScanSuccess: "Nampo GoGo 공식 제휴 인증 완료!",
-      btnConfirmStamp: "직원 확인 후 혜택 받기",
-      scanBtnText: "매장 QR 코드 스캔하기 📷",
-      alreadyStamped: "오늘 방문 인증 완료 👣",
-      stampTime: "입점 시간",
-      stampDate: "방문 날짜",
-      stampStaffVerify: "★ Nampo GoGo 공식 혜택 대상자임을 증명함 (직원 확인용)",
-      
-      // Travel Log & Timeline
-      logTitle: "나의 여행 로그 카드",
-      logDesc: "QR 인증으로 수집된 나만의 남포동 여행 코스 리포트입니다.",
-      emptyLog: "아직 방문 인증된 매장이 없습니다. 제휴 매장을 방문하고 스탬프를 적립해 보세요!",
-      logCount: "방문한 매장 수",
-      snsExport: "SNS 공유용 카드 생성 📸",
-      snsSuccess: "인스타그램 공유용 텍스트가 복사되었습니다! 카드를 다운로드해 올려보세요.",
-      snsCopyText: "공유 텍스트 복사",
-      snsDownloadImg: "스토리 카드 다운로드",
-      memoLabel: "내 여행 간단 메모 작성",
-      memoPlaceholder: "매장에서 느낀 생각이나 후기를 적어두세요.",
-      memoSaveBtn: "메모 저장",
-      memoSavedSuccess: "메모가 여행 로그에 안전하게 저장되었습니다!",
-      
-      // Review
-      reviewTitle: "방문자 한줄 후기",
-      reviewInputPlaceholder: "실제 방문객만 작성할 수 있는 정직한 후기 한줄을 적어주세요.",
-      reviewBtn: "리뷰 등록",
-      ratingLabel: "평점 선택",
-      noReviews: "아직 작성된 한줄 후기가 없습니다. 첫 번째 리뷰어가 되어보세요!",
-      reviewAuthError: "⚠️ QR 방문 인증을 완료한 회원만 후기를 작성할 수 있습니다."
+      addStoreSuccess: "🎉 신규 제휴 매장이 정상적으로 등록되었습니다!",
+      writeNoticeBtn: "📢 공지사항 및 업데이트 추가",
+      noticePlaceholder: "공지할 업데이트 내용을 입력하세요."
     },
     en: {
       appName: "Nampo GoGo",
-      tagline: "Nampo-dong Smart Local Tour Platform",
-      dashboard: "Home",
+      dashboard: "Dashboard",
       explore: "Explore",
-      qrScanner: "QR Scan",
       travelLog: "Travel Log",
-      profile: "Profile",
+      profile: "My Page",
+      tagline: "Nampodong Smart Local Tour Platform",
+      pleaseLogin: "Please login to record your QR scans and travel logs.",
+      welcomeUser: "Welcome to Nampodong, Busan!",
+      roleVisitor: "Tourist",
+      roleMerchant: "Merchant Owner",
+      roleAdmin: "Administrator",
+      updateBtn: "Update Logs",
+      updateTitle: "Recent Platform Updates",
       
-      // Menu Items
-      menuFood: "Food",
-      menuActivity: "Activity",
-      menuShopping: "Shopping",
-      menuSightseeing: "Sights",
-      menuCourse: "Courses",
-      menuBenefit: "Benefits",
-      menuLog: "My Log",
+      allCategories: "All Categories",
+      catMassage: "Beauty & Massage",
+      catFood: "Nampo Eats",
+      catCafe: "Cafes",
+      catShopping: "Shopping",
+      catSightseeing: "Night View",
       
-      // Update Panel
-      updateBtn: "Updates",
-      updateTitle: "Recent Update Logs",
-      writeNoticeBtn: "Post Notice",
-      noticePlaceholder: "Enter update description to notify.",
+      subPork: "Soup/Korean",
+      subSeafood: "Seafood/Raw",
+      subPizza: "Pizza/Pasta",
+      subKorean: "Traditional",
+      subChinese: "Chinese",
+      subJapanese: "Sushi/Katsu",
+      subMassage: "Massage",
+      subCafe: "Dessert/Cafe",
+
+      benefitTitle: "🎁 Tourist Exclusive Benefit",
+      getDirection: "Get Route 📍",
+      distance: "Distance",
+      alreadyStamped: "Stamped ✓",
+      scanBtnText: "Scan QR Check-in",
+      reviewTitle: "Verified User Reviews",
+      noReviews: "No reviews written yet.",
+      ratingLabel: "Score",
+      reviewInputPlaceholder: "Leave your one-line review here (Stamped customers only)",
+      reviewBtn: "Post Review",
+      reviewAuthError: "⚠️ Only users who completed QR check-in here can write a review.",
       
-      // Auth & Roles
-      loginTitle: "3-Sec Quick Login",
-      loginDesc: "Just enter Username & Password to instantly join and use the service.",
+      logTitle: "My Travel Log Card",
+      logDesc: "Your unique Nampodong route report collected via QR scans.",
+      logCount: "Visited Shops",
+      emptyLog: "No visited shops recorded yet. Start scan QR stamps!",
+      snsExport: "Generate SNS Card 📸",
+      snsCopyText: "Copy Text",
+      snsDownloadImg: "Download Story Card",
+      snsSuccess: "📋 Text copied to clipboard! Share it on Instagram stories.",
+      memoLabel: "My Travel Memo",
+      memoPlaceholder: "What memories did you have here? Enter your memo.",
+      memoSaveBtn: "Save Memo",
+      memoSavedSuccess: "💾 Travel memo saved safely!",
+
+      loginTitle: "3-Sec Quick Sign-up & Login",
+      loginDesc: "Just enter ID and Password to start immediately.",
+      joinTypeVisitor: "Sign up as Tourist",
+      joinTypeMerchant: "Sign up as Business Owner",
       usernamePlaceholder: "Enter Username",
       passwordPlaceholder: "Enter Password",
       passwordConfirmPlaceholder: "Confirm Password",
-      authBtn: "Login / Join",
+      authBtn: "Complete Login",
       logoutBtn: "Logout",
-      welcomeUser: "Welcome, ",
-      pleaseLogin: "Login to verify visits and record your travel log.",
-      roleVisitor: "Visitor Mode",
-      roleMerchant: "Merchant Mode",
-      roleAdmin: "Admin Mode",
-      joinTypeVisitor: "Register as Visitor",
-      joinTypeMerchant: "Register as Merchant",
+
+      merchantTitle: "Store Control Dashboard",
+      merchantDesc: "Track today's visits, stamp records, and update details.",
+      visitorToday: "Visits Today",
+      visitorTotal: "Accumulated Visits",
+      qrStampsIssued: "QR Stamps",
+      reviewCount: "Reviews Count",
+      editStoreInfo: "Edit Store Details",
+      saveStoreSuccess: "💾 Store updates and media successfully applied!",
       
-      // Explore & Partners
-      exploreTitle: "Nampo-dong Partner Shops",
-      exploreDesc: "From massage and diners to cafes, shopping, and scenic spots.",
-      allCategories: "All Categories",
-      catMassage: "Beauty & Spa",
-      catFood: "Local Diners",
-      catCafe: "Trendy Cafes",
-      catShopping: "Shopping & Fashion",
-      catSightseeing: "Sights & Night",
-      benefitTitle: "🎁 Tourist Benefit",
-      getDirection: "Walk Route",
-      distance: "Distance",
-      
-      // Merchant & Admin Dashboard UI
-      merchantTitle: "Merchant Manager Dashboard",
-      merchantDesc: "Check today's traffic, stamps issued, and modify store info.",
-      visitorToday: "Today's Visitors",
-      visitorTotal: "Total Visitors",
-      qrStampsIssued: "QR Stamps Claimed",
-      reviewCount: "Customer Reviews",
-      editStoreInfo: "Edit Store Profile",
-      saveStoreSuccess: "Store profile successfully updated!",
-      
-      adminTitle: "Nampo GoGo Main Admin Console",
-      adminDesc: "Add/delete stores, manage updates, and monitor reviews.",
-      addStoreBtn: "Register New Partner",
+      adminTitle: "Nampo GoGo Admin Panel",
+      adminDesc: "Register new partner shops, manage notice updates, and reviews.",
+      addStoreBtn: "➕ Register New Partner Store",
       storeNameLabel: "Store Name",
       storeCategoryLabel: "Category",
       storeImageLabel: "Cover Image URL",
-      storeBenefitLabel: "Tourist Benefits",
-      storePriceLabel: "Pricing Detail (e.g. Course 50K KRW)",
-      isPartnerLabel: "Nampo GoGo Certified Partner",
-      addStoreSuccess: "New store successfully registered!",
-      
-      // QR scanner & Verification
-      qrTitle: "Partner QR Stamp",
-      qrDesc: "Scan the Nampo GoGo QR code placed at the store.",
-      qrCameraSim: "Detecting Camera... (Virtual Scan)",
-      qrScanSuccess: "Nampo GoGo Official Certification Complete!",
-      btnConfirmStamp: "Claim Benefit (Staff Confirm)",
-      scanBtnText: "Scan Store QR Code 📷",
-      alreadyStamped: "Checked-in Today 👣",
-      stampTime: "Checked-in Time",
-      stampDate: "Checked-in Date",
-      stampStaffVerify: "★ Proven Nampo GoGo Benefit Claimant (For Staff Verification)",
-      
-      // Travel Log & Timeline
-      logTitle: "My Travel Log Card",
-      logDesc: "Auto-generated report of your Nampo-dong journey based on QR check-ins.",
-      emptyLog: "No visited shops yet. Visit partner stores and claim stamps!",
-      logCount: "Visited Shops",
-      snsExport: "Generate SNS Card 📸",
-      snsSuccess: "Instagram caption copied! Download the card to share.",
-      snsCopyText: "Copy Text Caption",
-      snsDownloadImg: "Download Story Card",
-      memoLabel: "Write Travel Memo",
-      memoPlaceholder: "Leave your thoughts, highlights, or tips here.",
-      memoSaveBtn: "Save Memo",
-      memoSavedSuccess: "Memo saved securely in your travel log!",
-      
-      // Review
-      reviewTitle: "Visitor Reviews",
-      reviewInputPlaceholder: "Only verified visitors can leave a review. Write a line!",
-      reviewBtn: "Submit Review",
-      ratingLabel: "Choose Rating",
-      noReviews: "No reviews yet. Be the first to leave a review!",
-      reviewAuthError: "⚠️ Only members who completed QR visit check-in can write reviews."
+      storeBenefitLabel: "Tourist Exclusive Benefit",
+      storePriceLabel: "Price Info",
+      isPartnerLabel: "Register as Official Nampo GoGo Partner",
+      addStoreSuccess: "🎉 New partner store registered successfully!",
+      writeNoticeBtn: "📢 Post Notice / Platform Update",
+      noticePlaceholder: "Enter notice contents."
     },
     ch: {
       appName: "Nampo GoGo",
-      tagline: "南浦洞智能本地旅游联名相生平台",
-      dashboard: "大厅",
-      explore: "店铺探访",
-      qrScanner: "QR扫码",
+      dashboard: "仪表盘",
+      explore: "探店发现",
       travelLog: "旅游日志",
-      profile: "我的信息",
-      
-      // Menu Items
-      menuFood: "美食",
-      menuActivity: "体验",
-      menuShopping: "购物",
-      menuSightseeing: "景点",
-      menuCourse: "推荐路线",
-      menuBenefit: "优惠商户",
-      menuLog: "我的日志",
-      
-      // Update Panel
+      profile: "个人信息",
+      tagline: "南浦洞智能旅游平台",
+      pleaseLogin: "请先登录以记录您的QR扫码与足迹日志。",
+      welcomeUser: "欢迎来到釜山南浦洞！",
+      roleVisitor: "观光游客",
+      roleMerchant: "合作商户",
+      roleAdmin: "系统管理员",
       updateBtn: "更新日志",
-      updateTitle: "最近更新记录",
-      writeNoticeBtn: "发布公告",
-      noticePlaceholder: "请输入需要公告的更新日志.",
+      updateTitle: "平台最新更新",
       
-      // Auth & Roles
-      loginTitle: "3秒极速注册 & 登录",
-      loginDesc: "只需输入账号（昵称）和密码即可立即注册并使用服务。",
-      usernamePlaceholder: "请输入账号",
-      passwordPlaceholder: "请输入密码",
-      passwordConfirmPlaceholder: "请确认密码",
-      authBtn: "登录 / 注册完成",
-      logoutBtn: "退出登录",
-      welcomeUser: "您好，",
-      pleaseLogin: "登录后即可进行QR扫码验证并记录您的旅游日志。",
-      roleVisitor: "游客模式",
-      roleMerchant: "商户管理模式",
-      roleAdmin: "主管理员模式",
-      joinTypeVisitor: "注册为游客",
-      joinTypeMerchant: "注册为合作商户",
-      
-      // Explore & Partners
-      exploreTitle: "南浦洞联名合作店铺",
-      exploreDesc: "提供按摩理疗、当地美食、人气咖啡厅、潮流购物以及观光路线。",
       allCategories: "全部类别",
-      catMassage: "美容与按摩",
+      catMassage: "美容按摩",
       catFood: "南浦美食",
-      catCafe: "情调咖啡厅",
-      catShopping: "购物与时尚",
-      catSightseeing: "观光与夜景",
-      benefitTitle: "🎁 游客专享特惠",
-      getDirection: "步行导航",
-      distance: "距离",
+      catCafe: "精品咖啡",
+      catShopping: "购物时尚",
+      catSightseeing: "观光夜景",
       
-      // Merchant & Admin Dashboard UI
-      merchantTitle: "商户管理后台",
-      merchantDesc: "检查今日访客、优惠发放数，并在此更新您商铺的数据。",
-      visitorToday: "今日访客数",
-      visitorTotal: "累计访客数",
-      qrStampsIssued: "QR到店扫码量",
-      reviewCount: "注册点评数",
-      editStoreInfo: "修改商铺简介",
-      saveStoreSuccess: "商铺信息成功更新！",
+      subPork: "汤饭/韩餐",
+      subSeafood: "海鲜刺身",
+      subPizza: "批萨西餐",
+      subKorean: "传统韩餐",
+      subChinese: "中华料理",
+      subJapanese: "日式猪排",
+      subMassage: "美容按摩",
+      subCafe: "甜点咖啡",
+
+      benefitTitle: "🎁 游客专属合作优惠",
+      getDirection: "步行导航 📍",
+      distance: "当前距离",
+      alreadyStamped: "认证成功 ✓",
+      scanBtnText: "扫描商户QR码",
+      reviewTitle: "真实游客评价",
+      noReviews: "暂无评价。",
+      ratingLabel: "评分",
+      reviewInputPlaceholder: "留下您的一句话评价（仅限完成扫码认证的顾客）",
+      reviewBtn: "发布评价",
+      reviewAuthError: "⚠️ 只有在此商户完成过QR认证扫码的顾客才能撰写评价。",
       
-      adminTitle: "Nampo GoGo 主控制台",
-      adminDesc: "添加/删除商户，发布全局更新，对商户进行管理。",
-      addStoreBtn: "注册新联名商铺",
-      storeNameLabel: "商铺名称",
-      storeCategoryLabel: "分类",
-      storeImageLabel: "封面图片 URL",
-      storeBenefitLabel: "游客特别特惠",
-      storePriceLabel: "价目表 (例如: 基本款 50,000 KRW)",
-      isPartnerLabel: "Nampo GoGo 官方合作商户",
-      addStoreSuccess: "新商铺注册成功！",
+      logTitle: "我的旅行卡片",
+      logDesc: "通过QR认证收集的南浦洞特色旅游足迹报告。",
+      logCount: "已访问商户数",
+      emptyLog: "暂无访问记录。快去拜访合作商家并收集印章吧！",
+      snsExport: "生成分享卡片 📸",
+      snsCopyText: "复制分享文案",
+      snsDownloadImg: "下载卡片图片",
+      snsSuccess: "📋 分享文案已复制到剪贴板！可与卡片图片一起分享至社交平台。",
+      memoLabel: "我的旅行随手记",
+      memoPlaceholder: "在这里留下了什么回忆？输入您的旅行笔记。",
+      memoSaveBtn: "保存笔记",
+      memoSavedSuccess: "💾 笔记已安全保存！",
+
+      loginTitle: "3秒极速注册与登录",
+      loginDesc: "只需输入账号和密码即可立即使用平台。",
+      joinTypeVisitor: "以游客身份注册",
+      joinTypeMerchant: "以商户身份注册",
+      usernamePlaceholder: "输入账号",
+      passwordPlaceholder: "输入密码",
+      passwordConfirmPlaceholder: "再次输入密码确认",
+      authBtn: "完成登录 / 注册",
+      logoutBtn: "登出账号",
+
+      merchantTitle: "店铺管理面板",
+      merchantDesc: "查看今日客流、扫码印章并发包新商户动态。",
+      visitorToday: "今日访客",
+      visitorTotal: "累计访客",
+      qrStampsIssued: "QR认证印章",
+      reviewCount: "已收到评价",
+      editStoreInfo: "修改店铺详情",
+      saveStoreSuccess: "💾 店铺信息与上传的多媒体已更新成功！",
       
-      // QR scanner & Verification
-      qrTitle: "合作商家QR认证",
-      qrDesc: "请扫描商家店里放置的 Nampo GoGo 二维码。",
-      qrCameraSim: "正在识别摄像头... (模拟扫码)",
-      qrScanSuccess: "Nampo GoGo 官方到店身份验证成功！",
-      btnConfirmStamp: "店员确认并获取优惠",
-      scanBtnText: "扫描商家二维码 📷",
-      alreadyStamped: "今天已到店认证 👣",
-      stampTime: "入店时间",
-      stampDate: "验证日期",
-      stampStaffVerify: "★ 已证实该用户为 Nampo GoGo 特惠受惠者 (店员确认专用)",
-      
-      // Travel Log & Timeline
-      logTitle: "我的旅游日志卡片",
-      logDesc: "根据您的QR到店验证自动生成的南浦洞旅游路线报告。",
-      emptyLog: "暂无到店记录。前往联名店铺扫码赢印章吧！",
-      logCount: "到店商家数",
-      snsExport: "制作SNS分享卡片 📸",
-      snsSuccess: "Instagram分享文案已复制！请下载卡片进行分享。",
-      snsCopyText: "复制分享文本",
-      snsDownloadImg: "下载快拍卡片",
-      memoLabel: "撰写随手记备注",
-      memoPlaceholder: "在此记录您当时的想法，有趣的点或小提示。",
-      memoSaveBtn: "保存备注",
-      memoSavedSuccess: "备忘便签成功保存至旅游日志！",
-      
-      // Review
-      reviewTitle: "顾客真实点评",
-      reviewInputPlaceholder: "只有实际扫码到店的顾客才能撰写点评。请写下您宝贵的一句话评语！",
-      reviewBtn: "提交点评",
-      ratingLabel: "选择评分",
-      noReviews: "暂无点评。快来抢写第一个沙发点评吧！",
-      reviewAuthError: "⚠️ 只有完成QR扫码到店验证的会员才能写点评。"
+      adminTitle: "南浦GoGo超级管理台",
+      adminDesc: "添加新商户、发布更新通知并监控全局评价信息。",
+      addStoreBtn: "➕ 录入全新合作商户",
+      storeNameLabel: "店铺名称",
+      storeCategoryLabel: "主营门类",
+      storeImageLabel: "门面图片链接",
+      storeBenefitLabel: "游客优惠内容",
+      storePriceLabel: "招牌价格信息",
+      isPartnerLabel: "设为南浦GoGo官方星级合作商户",
+      addStoreSuccess: "🎉 合作店铺录入成功！",
+      writeNoticeBtn: "📢 发布系统公告或版本迭代",
+      noticePlaceholder: "输入要发布的信息内容。"
     },
     jp: {
       appName: "Nampo GoGo",
-      tagline: "南浦洞スマートローカル旅行相生プラットフォーム",
-      dashboard: "ホーム",
-      explore: "店舗探訪",
-      qrScanner: "QRスキャン",
-      travelLog: "旅行ログ",
-      profile: "マイ情報",
+      dashboard: "ダッシュボード",
+      explore: "店舗検索",
+      travelLog: "トラベルログ",
+      profile: "マイページ",
+      tagline: "南浦洞スマートローカル旅行プラットフォーム",
+      pleaseLogin: "ログインしてQR認証とトラベルログを記録しましょう。",
+      welcomeUser: "釜山・南浦洞へようこそ！",
+      roleVisitor: "観光客",
+      roleMerchant: "提携加盟店",
+      roleAdmin: "管理者",
+      updateBtn: "更新ログ",
+      updateTitle: "最近の更新情報",
       
-      // Menu Items
-      menuFood: "グルメ",
-      menuActivity: "体験",
-      menuShopping: "買い物",
-      menuSightseeing: "観光",
-      menuCourse: "おすすめ",
-      menuBenefit: "特典店",
-      menuLog: "マイログ",
+      allCategories: "全カテゴリー",
+      catMassage: "エステ & マッサージ",
+      catFood: "南浦グルメ",
+      catCafe: "カフェ",
+      catShopping: "ショッピング",
+      catSightseeing: "観光スポット",
       
-      // Update Panel
-      updateBtn: "更新履歴",
-      updateTitle: "最近のアップデート内容",
-      writeNoticeBtn: "お知らせ投稿",
-      noticePlaceholder: "アップデートする内容を入力してください.",
+      subPork: "クッパ/韓国食",
+      subSeafood: "海鮮/刺身",
+      subPizza: "ピザ/洋食",
+      subKorean: "伝統韓国食",
+      subChinese: "中華料理",
+      subJapanese: "和食/トンカツ",
+      subMassage: "エステマッサージ",
+      subCafe: "デザートカフェ",
+
+      benefitTitle: "🎁 観光客提携限定特典",
+      getDirection: "徒歩ルート案内 📍",
+      distance: "現在位置からの距離",
+      alreadyStamped: "認証完了 ✓",
+      scanBtnText: "店舗QRコード読み取り",
+      reviewTitle: "訪問者レビュー",
+      noReviews: "レビューはまだありません。",
+      ratingLabel: "評価スコア",
+      reviewInputPlaceholder: "一行レビューを残してください（チェックイン完了顧客専用）",
+      reviewBtn: "レビューを登録する",
+      reviewAuthError: "⚠️ 店舗でQRチェックインを完了したお客様のみレビューを書くことができます。",
       
-      // Auth & Roles
-      loginTitle: "3秒簡単登録＆ログイン",
-      loginDesc: "IDとパスワードを入力するだけで、すぐに会員登録して利用できます.",
-      usernamePlaceholder: "ID(ニックネーム)を入力",
+      logTitle: "マイ・トラベル・ログカード",
+      logDesc: "QRチェックインで収集された南浦洞での足跡ルートレポート。",
+      logCount: "訪れた店舗数",
+      emptyLog: "訪れた加盟店がまだありません。提携店舗に行ってスタンプを集めましょう！",
+      snsExport: "SNS共有用カード作成 📸",
+      snsCopyText: "共有用文言をコピー",
+      snsDownloadImg: "ストーリーカードを保存",
+      snsSuccess: "📋 インスタグラム共有用のテキストがクリップボードにコピーされました！画像と一緒に共有してください。",
+      memoLabel: "旅行の一行メモ",
+      memoPlaceholder: "ここでどんな思い出がありましたか？メモを入力してください。",
+      memoSaveBtn: "メモを保存",
+      memoSavedSuccess: "💾 メモが正常に保存されました！",
+
+      loginTitle: "3秒で簡単登録 & ログイン",
+      loginDesc: "ユーザー名とパスワードのみで即座に登録してご利用いただけます。",
+      joinTypeVisitor: "観光客として会員登録",
+      joinTypeMerchant: "加盟店主として会員登録",
+      usernamePlaceholder: "ユーザー名を入力",
       passwordPlaceholder: "パスワードを入力",
       passwordConfirmPlaceholder: "確認用パスワードを入力",
       authBtn: "ログイン / 登録完了",
       logoutBtn: "ログアウト",
-      welcomeUser: "様、ようこそ！",
-      pleaseLogin: "ログインしてQRチェックインを行い、旅行ログを記録しましょう.",
-      roleVisitor: "観光客モード",
-      roleMerchant: "店舗主モード",
-      roleAdmin: "最高管理者モード",
-      joinTypeVisitor: "一般観光客として登録",
-      joinTypeMerchant: "加盟店主として登録",
-      
-      // Explore & Partners
-      exploreTitle: "南浦洞の提携加盟店",
-      exploreDesc: "マッサージ、ローカルグルメ、おしゃれカフェ、ショッピング、夜景スポットまで.",
-      allCategories: "全カテゴリー",
-      catMassage: "美容＆マッサージ",
-      catFood: "南浦グルメ",
-      catCafe: "カフェ",
-      catShopping: "ショッピング",
-      catSightseeing: "観光＆夜景",
-      benefitTitle: "🎁 観光客限定特典",
-      getDirection: "徒歩ルート",
-      distance: "距離",
-      
-      // Merchant & Admin Dashboard UI
-      merchantTitle: "加盟店主ダッシュボード",
-      merchantDesc: "本日の来客数、スタンプ発行数、店舗情報を管理します.",
-      visitorToday: "今日の来客数",
-      visitorTotal: "累計来客数",
-      qrStampsIssued: "QRスキャン回数",
-      reviewCount: "口コミ登録数",
-      editStoreInfo: "店舗詳細の編集",
-      saveStoreSuccess: "店舗情報が正常に保存されました！",
+
+      merchantTitle: "店舗管理ダッシュボード",
+      merchantDesc: "今日の訪問者数、スタンプログを確認し、店舗情報を修正します。",
+      visitorToday: "今日の訪問者数",
+      visitorTotal: "累計訪問者数",
+      qrStampsIssued: "QR認証数",
+      reviewCount: "登録レビュー数",
+      editStoreInfo: "店舗詳細情報を編集",
+      saveStoreSuccess: "💾 店舗情報と追加メディアが正常にアップデートされました！",
       
       adminTitle: "Nampo GoGo 統合アドミン",
-      adminDesc: "新規提携店登録、アップデート履歴의 公開、口コミ管理を行います.",
-      addStoreBtn: "新規提携店舗を登録",
+      adminDesc: "新規提携加盟店の登録、お知らせ更新、全体レビューの管理を行います。",
+      addStoreBtn: "➕ 新規提携店を登録する",
       storeNameLabel: "店舗名",
       storeCategoryLabel: "カテゴリー",
-      storeImageLabel: "代表画像 URL",
-      storeBenefitLabel: "観光客向け特典",
-      storePriceLabel: "価格情報 (例: 기본 코스 50,000 KRW)",
-      isPartnerLabel: "Nampo GoGo 公式提携店登録",
-      addStoreSuccess: "新規店舗が正常に登録されました！",
-      
-      // QR scanner & Verification
-      qrTitle: "加盟店QRチェックイン",
-      qrDesc: "店頭に置いてある Nampo GoGo QRコードをスキャンしてください.",
-      qrCameraSim: "カメラ認識中... (擬似スキャン)",
-      qrScanSuccess: "Nampo GoGo 公式チェックイン認証成功！",
-      btnConfirmStamp: "スタッフ確認＆特典GET",
-      scanBtnText: "店頭QRコードをスキャン 📷",
-      alreadyStamped: "チェックイン済 👣",
-      stampTime: "入店時間",
-      stampDate: "チェックイン日",
-      stampStaffVerify: "★ Nampo GoGo 公式特典対象であることを証明 (スタッフ確認用)",
-      
-      // Travel Log & Timeline
-      logTitle: "マイ旅行ログカード",
-      logDesc: "QRチェックインデータから自動作成された南浦洞旅行ルートカードです.",
-      emptyLog: "訪問履歴がまだありません。提携店舗でQRチェックインをしてスタンプを貯めましょう！",
-      logCount: "チェックイン数",
-      snsExport: "SNS共有用カード作成 📸",
-      snsSuccess: "Instagram共有用のテキストがコピーされました！カードを保存して投稿しましょう.",
-      snsCopyText: "共有文言コピー",
-      snsDownloadImg: "ストーリーカード保存",
-      memoLabel: "旅行メモ作成",
-      memoPlaceholder: "店舗で感じたことや、自分用メモを記録してください.",
-      memoSaveBtn: "メモを保存",
-      memoSavedSuccess: "旅行ログにメモが保存されました！",
-      
-      // Review
-      reviewTitle: "口コミ評価",
-      reviewInputPlaceholder: "実際にQRチェックインを完了した方のみ投稿できます。レビューを一行で記入してください.",
-      reviewBtn: "レビュー登録",
-      ratingLabel: "評価を選択",
-      noReviews: "口コミがまだありません.最初のレビュアーになってみませんか？",
-      reviewAuthError: "⚠️ QRチェックインを完了した会員様のみレビューを投稿できます."
+      storeImageLabel: "カバー画像URL",
+      storeBenefitLabel: "観光客特典内容",
+      storePriceLabel: "価格情報",
+      isPartnerLabel: "公式提携加盟店として登録",
+      addStoreSuccess: "🎉 新規店舗が正常に登録されました！",
+      writeNoticeBtn: "📢 加盟店お知らせ・機能更新を追加",
+      noticePlaceholder: "お知らせする内容を入力してください。"
     }
   },
 
-  // Seed Partners Data (Corrected Sub-keys to: kr, en, ch, jp)
+  // 8 default partner stores with subCategory (Delivery-style matching)
   partners: [
     {
       id: "partner_klounge",
       name: {
-        kr: "K-Lounge Massage & Beauty Therapy",
-        en: "K-Lounge Massage & Beauty Therapy",
-        ch: "K-Lounge 头部美发与按摩理疗",
-        jp: "K-Lounge マッサージ＆ヘッドスパ"
+        kr: "K-Lounge 스포츠 아로마 테라피",
+        en: "K-Lounge Sports & Aroma Therapy",
+        ch: "K-Lounge 运动精油指压理疗",
+        jp: "K-Lounge スポーツアロマセラピー"
       },
       category: "massage",
+      subCategory: "massage", // Massage & Beauty category
       isPartner: true,
-      image: "https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?auto=format&fit=crop&w=800&q=80",
+      image: "https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?auto=format&fit=crop&w=600&q=80",
+      gallery: [],
       rating: 4.9,
-      scores: {
-        hygiene: 4.9,
-        taste: 4.7,
-        service: 5.0,
-        cleanliness: 4.9
-      },
-      posX: 52,
-      posY: 45,
-      mapLinkNaver: "https://map.naver.com/v5/directions/14363294,35.097489,내위치,,/14363310,35.098222,목적지,,/walk",
+      scores: { hygiene: 5.0, taste: 4.8, service: 5.0, cleanliness: 4.8 },
+      posX: 129.034789,
+      posY: 35.097489,
+      mapLinkNaver: "https://map.naver.com/v5/directions/14363294,35.097489,내위치,,/14363310,35.098222,K-Lounge,,/walk",
       mapLinkGoogle: "https://www.google.com/maps/dir/?api=1&origin=35.097489,129.034789&destination=35.098222,129.035789&travelmode=walking",
-      distanceValue: "150m",
-      address: { kr: "부산 중구 구덕로 34-1 3층", en: "3F, 34-1 Gudeok-ro, Jung-gu, Busan", ch: "釜山中区九德路34-1 3楼", jp: "釜山中区九徳路34-1 3階" },
-      phone: "+82-51-123-4567",
-      hours: "10:00 - 23:00 (Break: None)",
+      distanceValue: "70m",
+      address: {
+        kr: "부산 중구 구덕로 48 3층 (남포역 1번출구 도보 1분)",
+        en: "3F, 48 Gudeok-ro, Jung-gu, Busan (1-min walk from Nampo exit 1)",
+        ch: "釜山中区九德路48号3楼 (南浦站1号出口步行1分钟)",
+        jp: "釜山中区九徳路48 3階 (南浦駅1번出口から徒歩1分)"
+      },
+      phone: "+82-51-248-1234",
+      hours: "10:00 - 02:00",
       priceList: [
-        { name: { kr: "아로마 전신 힐링 마사지 (60분)", en: "Aroma Body Massage (60m)", ch: "芳香全身体疗 (60分钟)", jp: "アロマ全身マッサージ (60分)" }, price: "60,000 KRW" },
-        { name: { kr: "프리미엄 헤드스파 & 모발케어 (70분)", en: "Premium Head Spa & Hair Care (70m)", ch: "高端头部水疗 & 发质调理 (70分钟)", jp: "プレミアムヘッドスパ＆ヘアケア (70分)" }, price: "80,000 KRW" }
+        { name: { kr: "스포츠 집중 테라피 (60분)", en: "Sports Deep Therapy (60m)", ch: "运动集中理疗 (60分)", jp: "スポーツ集中コース (60分)" }, price: "60,000 KRW" },
+        { name: { kr: "아로마 바디 가이드 힐링 (90분)", en: "Aroma Body Healing (90m)", ch: "精油全身舒缓 (90分)", jp: "アロマボディコース (90分)" }, price: "90,000 KRW" }
       ],
       menuForeign: {
-        en: "Aroma Body Healing (60m) - 60k KRW | Premium Head Spa & Hair Care (70m) - 80k KRW",
-        ch: "芳香全身体疗 (60分) - 6万韩元 | 高端头部水疗 (70分) - 8万韩元",
-        jp: "アロマ全身ケア (60分) - 6万ウォン | プレミアムヘッドスパ (70分) - 8万ウォン"
+        en: "Full menu card in English, Japanese and Chinese provided at reception.",
+        ch: "接待处提供英、日、中三语完整菜单手册。",
+        jp: "受付にて英語・中国語・日本語の各種メニュー完備。"
       },
       benefits: {
-        kr: "전 프로그램 10% 현장 할인 및 아로마 족욕 15분 무료 서비스 제공",
-        en: "10% Discount on all courses & Free 15-min Aroma Foot Soak",
-        ch: "所有项目享受10%现场折扣，并赠送15分钟免费香薰足浴",
-        jp: "全コース10%割引 ＆ 15分無料アロマ足湯サービス"
+        kr: "Nampo GoGo 회원 전용: 코스 10% 추가 즉시 할인 및 허브티 서비스",
+        en: "Exclusive: Extra 10% instant discount + complimentary herbal tea.",
+        ch: "专属福利: 全身理疗项目立享9折优惠，加赠特调草本养生茶。",
+        jp: "会員特典: 全コース10%即時割引 & ハーブティーサービス"
       },
-      seoDescription: "부산 남포동 최고급 마사지 테라피 및 K-뷰티 헤드스파 전문 매장 K-Lounge. 외국인 환영, 실시간 10% 즉시 할인 혜택.",
-      seoKeywords: "남포동 마사지, 남포동 헤드스파, 부산 K-뷰티, Nampodong Massage, Nampo Spa",
+      seoDescription: "Busan Nampodong Best Premium massage shop K-Lounge. Sports and Aroma massage courses.",
+      seoKeywords: "Nampodong massage, Busan massage, K-Lounge massage",
       reviews: [
-        { username: "TravelerJohn", rating: 5, content: { kr: "마사지 실력이 엄청납니다! 남포동 걷고 피로 풀기에 최고네요.", en: "Amazing skills! Best way to relieve fatigue after walking Nampodong.", ch: "手法非常专业！逛完南浦洞来这里放松简直完美。", jp: "マッサージが本当に上手です！南浦洞を歩き回った疲れが吹っ飛びました。" } },
-        { username: "Yuki_Osaka", rating: 5, content: { kr: "가게가 아주 깔끔하고 한국어, 영어가 모두 잘 통했습니다. 추천합니다.", en: "Very clean shop. Staff speaks good English. Highly recommend!", ch: "店铺干净整洁，职员服务态度极佳，支持多语言交流，强力推荐！", jp: "お店がとても清潔で日本語も少し通じました。とても癒されました。" } }
-      ]
+        { username: "TravelerKim", rating: 5.0, content: { kr: "도보 여행에 뭉친 피로가 완전히 풀렸습니다. 강추합니다!", en: "Perfect deep pressure. Friendly staff!", ch: "手法非常专业，旅行中的疲劳一扫而空，强烈推荐！", jp: "とても気持ちよかったです。スタッフがとても親切でした。" } }
+      ],
+      parking: "유"
     },
     {
-      id: "partner_jagalchi",
+      id: "partner_pork_grand",
       name: {
-        kr: "자갈치 원조 삼대 꼼장어",
-        en: "Jagalchi Original Cauldron Hagfish",
-        ch: "自札齿市场三代烤盲鳗老店",
-        jp: "チャガルチ元祖三代ヌタウナギ"
+        kr: "할매 원조 부산 돼지국밥",
+        en: "Halmae Original Busan Pork Soup",
+        ch: "老奶奶釜山猪肉汤饭",
+        jp: "ハルメ元祖釜山デジクッパ"
       },
       category: "food",
+      subCategory: "pork", // Pork soup category
       isPartner: true,
-      image: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=800&q=80",
+      image: "https://images.unsplash.com/photo-1627308595229-7830a5c91f9f?auto=format&fit=crop&w=600&q=80",
+      gallery: [],
       rating: 4.8,
-      scores: {
-        hygiene: 4.5,
-        taste: 5.0,
-        service: 4.8,
-        cleanliness: 4.6
+      scores: { hygiene: 4.7, taste: 5.0, service: 4.6, cleanliness: 4.5 },
+      posX: 129.035123,
+      posY: 35.09789,
+      mapLinkNaver: "https://map.naver.com/v5/directions/14363294,35.097489,내위치,,/14363400,35.098300,원조돼지국밥,,/walk",
+      mapLinkGoogle: "https://www.google.com/maps/dir/?api=1&origin=35.097489,129.034789&destination=35.098300,129.036000&travelmode=walking",
+      distanceValue: "180m",
+      address: {
+        kr: "부산 중구 남포길 12 (광복로 먹자골목 인근)",
+        en: "12 Nampo-gil, Jung-gu, Busan (Gwangbok-ro Food Street)",
+        ch: "釜山中区南浦路12号 (光复路美食街附近)",
+        jp: "釜山中区南浦路12 (光復路グルメ通り付近)"
       },
-      posX: 48,
-      posY: 75,
-      mapLinkNaver: "https://map.naver.com/v5/directions/14363294,35.097489,내위치,,/14362795,35.096783,목적지,,/walk",
-      mapLinkGoogle: "https://www.google.com/maps/dir/?api=1&origin=35.097489,129.034789&destination=35.096783,129.031783&travelmode=walking",
-      distanceValue: "420m",
-      address: { kr: "부산 중구 자갈치해안로 52 1층", en: "1F, 52 Jagalchihaean-ro, Jung-gu, Busan", ch: "釜山中区自札齿海岸路52 1楼", jp: "釜山中区チャガルチ海岸路52 1階" },
-      phone: "+82-51-987-6543",
-      hours: "11:00 - 24:00",
+      phone: "+82-51-245-7890",
+      hours: "24 Hours (연중무휴)",
       priceList: [
-        { name: { kr: "짚불 꼼장어 양념/소금구이 (소)", en: "Straw-fire Hagfish (Small)", ch: "炭火烤盲鳗 辣香/盐烤 (小)", jp: "わら焼きヌタウナギ味付け/塩焼き (小)" }, price: "40,000 KRW" },
-        { name: { kr: "짚불 꼼장어 양념/소금구이 (대)", en: "Straw-fire Hagfish (Large)", ch: "炭火烤盲鳗 辣香/盐烤 (大)", jp: "わら焼きヌタウナギ味付け/塩焼き (大)" }, price: "60,000 KRW" }
+        { name: { kr: "따로 돼지국밥", en: "Pork Soup (Rice separate)", ch: "招牌猪肉汤饭", jp: "デジクッパ (スープとご飯別)" }, price: "9,000 KRW" },
+        { name: { kr: "모듬 수육 (소)", en: "Assorted Sliced Pork (S)", ch: "精选白切肉 (小)", jp: "ゆで豚肉スライス (小)" }, price: "28,000 KRW" }
       ],
       menuForeign: {
-        en: "Straw-fire Hagfish (S) - 40k KRW | Hagfish (L) - 60k KRW",
-        ch: "炭火烤盲鳗 (小) - 4万韩元 | 烤盲鳗 (大) - 6万韩元",
-        jp: "ヌタウナギ炭火焼き (小) - 4万ウォン | 炭火焼き (大) - 6万ウォン"
+        en: "Eng/Ch/Jp picture menu card is fully available.",
+        ch: "提供图文并茂的英中日菜单。",
+        jp: "英語・中国語・日本語の写真付きメニューあり。"
       },
       benefits: {
-        kr: "QR 인증 후 메인메뉴 주문 시 음료수 1캔 또는 소주 1병 무료 제공",
-        en: "Free 1 Can of Soda or 1 Soju with any main dish check-in",
-        ch: "完成QR认证后，下单主菜即免费赠送1罐软饮料或1瓶烧酒",
-        jp: "QRチェックイン後、メインディッシュ注文でソフトドリンク1缶または焼酎1瓶サービス"
+        kr: "국밥 주문 시 수제 맛보기 순대 1인 2점 무료 제공",
+        en: "Order soup and get 2 free slices of handmade sausage per person.",
+        ch: "凡点汤饭，即赠送手工血肠（每人2块）。",
+        jp: "クッパご注文で、自家製スンデお一人様2切れサービス"
       },
-      seoDescription: "자갈치 시장을 대표하는 삼대 전통 짚불 꼼장어 맛집. Nampo GoGo 스탬프 회원 음료/소주 1병 무료.",
-      seoKeywords: "자갈치 꼼장어, 부산 꼼장어 맛집, 자갈치시장 먹거리, Jagalchi Hagfish, Busan Local Food",
-      reviews: [
-        { username: "BusanLocal", rating: 5, content: { kr: "매콤하고 불향 가득한 꼼장어가 환상적이에요! 볶음밥은 꼭 먹어야 함.", en: "Spicy hagfish with amazing charcoal aroma. Fried rice at the end is a must!", ch: "炭火香气十足的香辣烤盲鳗，极其美味！最后的炒饭绝对不能错过。", jp: "ピリ辛のヌタウナギで香ばしい香りが最高です！シメの볶음밥은 필수." } }
-      ]
+      seoDescription: "Traditional Busan Pork Rice Soup restaurant near Gwangbok-ro, Busan.",
+      seoKeywords: "Busan pork soup, Nampodong food, pork rice soup",
+      reviews: [],
+      parking: "무"
     },
     {
-      id: "partner_cafe",
+      id: "partner_jagalchi_fish",
       name: {
-        kr: "남포 레이어드 모던 카페",
-        en: "Nampo Layered Modern Cafe",
-        ch: "南浦 Layered 艺术感现代咖啡厅",
-        jp: "南浦 レイヤード モダンカフェ"
+        kr: "자갈치 제일 랍스터 & 회센터",
+        en: "Jagalchi No.1 Lobster & Raw Fish Center",
+        ch: "札嘎其第一龙虾刺身海鲜中心",
+        jp: "チャガルチ第一ロブスター&刺身センター"
+      },
+      category: "food",
+      subCategory: "seafood", // Seafood category
+      isPartner: true,
+      image: "https://images.unsplash.com/photo-1534400298786-1df5024da1a1?auto=format&fit=crop&w=600&q=80",
+      gallery: [],
+      rating: 4.7,
+      scores: { hygiene: 4.8, taste: 4.9, service: 4.5, cleanliness: 4.7 },
+      posX: 129.034123,
+      posY: 35.096123,
+      mapLinkNaver: "https://map.naver.com/v5/directions/14363294,35.097489,내위치,,/14362800,35.095800,자갈치회센터,,/walk",
+      mapLinkGoogle: "https://www.google.com/maps/dir/?api=1&origin=35.097489,129.034789&destination=35.095800,129.033000&travelmode=walking",
+      distanceValue: "290m",
+      address: {
+        kr: "부산 중구 자갈치해안로 52 2층 35호",
+        en: "No. 35, 2F, 52 Jagalchihaean-ro, Jung-gu, Busan",
+        ch: "釜山中区札嘎其海岸路52号2楼35号",
+        jp: "釜山中区チャガルチ海岸路52 2階35号"
+      },
+      phone: "+82-51-246-8899",
+      hours: "11:00 - 23:00 (화요일 휴무)",
+      priceList: [
+        { name: { kr: "생선회 모듬 패키지 (2인)", en: "Premium Raw Fish Assortment (2p)", ch: "精选生鱼片拼盘 (2人份)", jp: "刺身盛り合わせ (2人前)" }, price: "60,000 KRW" },
+        { name: { kr: "랍스터 코스 정식 (1인)", en: "Lobster Course Set (1p)", ch: "奢华龙虾套餐 (单人)", jp: "ロブスターコース (1人前)" }, price: "80,000 KRW" }
+      ],
+      menuForeign: {
+        en: "Multilingual staff and menu options are fully supported.",
+        ch: "店内配有中文翻译职员及中英日对照图文菜单。",
+        jp: "外国人向けセットメニュー及び外国語対応スタッフ常駐。"
+      },
+      benefits: {
+        kr: "모듬회 이상 주문시 매운탕 무료 제공 및 소주 1병 서비스",
+        en: "Get a free spicy fish soup and 1 bottle of Soju with raw fish platter.",
+        ch: "点生鱼片拼盘，免费送鲜辣鱼汤及韩国烧酒1瓶。",
+        jp: "刺身ご注文でメウンタン(辛い魚スープ) & 焼酎1本サービス"
+      },
+      seoDescription: "Fresh Seafood and Lobster restaurant at Jagalchi Fish Market in Busan.",
+      seoKeywords: "Jagalchi fish market, lobster raw fish, Busan seafood",
+      reviews: [],
+      parking: "유"
+    },
+    {
+      id: "partner_pizza_napo",
+      name: {
+        kr: "광복로 화덕 피자 마스터",
+        en: "Gwangbok-ro Wood-fired Pizza Master",
+        ch: "光复路窑烤意式披萨大师",
+        jp: "光復路窯焼きピザマスター"
+      },
+      category: "food",
+      subCategory: "pizza", // Pizza category
+      isPartner: false, // Normal shop to demonstrate sorting rules
+      image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=600&q=80",
+      gallery: [],
+      rating: 4.6,
+      scores: { hygiene: 4.6, taste: 4.7, service: 4.5, cleanliness: 4.6 },
+      posX: 129.036123,
+      posY: 35.098456,
+      mapLinkNaver: "https://map.naver.com/v5/directions/14363294,35.097489,내위치,,/14363800,35.099100,피자마스터,,/walk",
+      mapLinkGoogle: "https://www.google.com/maps/dir/?api=1&origin=35.097489,129.034789&destination=35.099100,129.037100&travelmode=walking",
+      distanceValue: "220m",
+      address: {
+        kr: "부산 중구 광복중앙로 8-2 2층",
+        en: "2F, 8-2 Gwangbokjungang-ro, Jung-gu, Busan",
+        ch: "釜山中区光复中央路8-2号2楼",
+        jp: "釜山中区光復中央路8-2 2階"
+      },
+      phone: "+82-51-255-0987",
+      hours: "11:30 - 21:30",
+      priceList: [
+        { name: { kr: "마르게리타 화덕 피자", en: "Margherita Wood-Fired Pizza", ch: "经典玛格丽特窑烤披萨", jp: "マルゲリータピザ" }, price: "18,900 KRW" },
+        { name: { kr: "감베로니 스파게티", en: "Gamberoni Pasta", ch: "意式鲜虾意面", jp: "海老パスタ" }, price: "15,500 KRW" }
+      ],
+      menuForeign: {
+        en: "English names written on normal menu layout.",
+        ch: "菜单配有英文和中文注释。",
+        jp: "メニューに英語表記あり。"
+      },
+      benefits: {
+        kr: "일반 제휴 신청 매장: 탄산음료 1캔 무료 증정",
+        en: "Get 1 free soda can with your main dish.",
+        ch: "点主食即免费赠送碳酸饮料1罐。",
+        jp: "メイン料理ご注文で炭酸ドリンク1缶サービス"
+      },
+      seoDescription: "Delicious wood-fired pizza and pasta restaurant at Gwangbok-ro.",
+      seoKeywords: "Nampodong pizza, Gwangbokro pasta, wood-fired pizza",
+      reviews: [],
+      parking: "무"
+    },
+    {
+      id: "partner_cafe_gwangbok",
+      name: {
+        kr: "카페 광복동 아틀리에",
+        en: "Cafe Gwangbokdong Atelier",
+        ch: "光复洞艺术工坊咖啡厅",
+        jp: "カフェ光復洞アトリエ"
       },
       category: "cafe",
-      isPartner: false,
-      image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=800&q=80",
-      rating: 4.7,
-      scores: {
-        hygiene: 4.8,
-        taste: 4.7,
-        service: 4.6,
-        cleanliness: 4.8
-      },
-      posX: 70,
-      posY: 30,
-      mapLinkNaver: "https://map.naver.com/v5/directions/14363294,35.097489,내위치,,/14363520,35.099120,목적지,,/walk",
-      mapLinkGoogle: "https://www.google.com/maps/dir/?api=1&origin=35.097489,129.034789&destination=35.099120,129.036120&travelmode=walking",
-      distanceValue: "280m",
-      address: { kr: "부산 중구 광복중앙로 12 2층", en: "2F, 12 Gwangbokjungang-ro, Jung-gu, Busan", ch: "釜山中区光复中央路12 2楼", jp: "釜山中区光復中央路12 2階" },
-      phone: "+82-51-777-8888",
-      hours: "09:00 - 22:00",
-      priceList: [
-        { name: { kr: "시그니처 아인슈페너", en: "Signature Einspanner", ch: "招牌维也纳咖啡", jp: "アインシュペナー" }, price: "6,500 KRW" },
-        { name: { kr: "수제 말차 스콘", en: "Handmade Matcha Scone", ch: "手工抹茶司康", jp: "手作り抹茶スコーン" }, price: "4,800 KRW" }
-      ],
-      menuForeign: {
-        en: "Einspanner - 6.5k KRW | Matcha Scone - 4.8k KRW",
-        ch: "维也纳咖啡 - 6.5千元 | 抹茶司康 - 4.8千元",
-        jp: "アインシュペナー - 6.5kウォン | 抹茶スコーン - 4.8kウォン"
-      },
-      benefits: {
-        kr: "음료 주문 시 컵케이크 또는 구움과자 베이커리류 10% 추가 할인",
-        en: "Get 10% extra discount on bakery & cupcakes with any drink purchase",
-        ch: "下单任意饮品，购买纸杯蛋糕或烘焙类甜点可享10%追加特惠",
-        jp: "ドリンクご注文時、カップケーキ等のベーカリー類を10%割引"
-      },
-      seoDescription: "부산 남포동 광복로의 감성적인 레이어드 디저트 카페. 스콘 및 시그니처 크림 아인슈페너 전문.",
-      seoKeywords: "남포동 카페, 남포동 디저트, 광복동 카페, Nampo Cafe, Busan Layered Cafe",
-      reviews: []
-    },
-    {
-      id: "partner_shopping",
-      name: {
-        kr: "국제시장 빈티지 스트리트 매장",
-        en: "Gukje Market Vintage Street Mall",
-        ch: "国际市场复古潮流服饰店",
-        jp: "国際市場ヴィンテージストリート"
-      },
-      category: "shopping",
+      subCategory: "cafe", // Cafe category
       isPartner: true,
-      image: "https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?auto=format&fit=crop&w=800&q=80",
-      rating: 4.5,
-      scores: {
-        hygiene: 4.3,
-        taste: 4.0,
-        service: 4.8,
-        cleanliness: 4.4
-      },
-      posX: 35,
-      posY: 35,
-      mapLinkNaver: "https://map.naver.com/v5/directions/14363294,35.097489,내위치,,/14362945,35.098845,목적지,,/walk",
-      mapLinkGoogle: "https://www.google.com/maps/dir/?api=1&origin=35.097489,129.034789&destination=35.098845,129.030845&travelmode=walking",
-      distanceValue: "390m",
-      address: { kr: "부산 중구 중구로 28 국제시장 2공구", en: "Zone 2, Gukje Market, 28 Junggu-ro, Jung-gu, Busan", ch: "釜山中区中区路28 国际市场2공구", jp: "釜山中区中区路28 国際市場2工区" },
-      phone: "+82-51-333-2222",
-      hours: "10:00 - 19:50",
-      priceList: [
-        { name: { kr: "아메리칸 빈티지 셔츠 (유니섹스)", en: "American Vintage Shirt", ch: "美式工装复古衬衫 (男女通用)", jp: "アメリカンヴィンテージシャツ" }, price: "25,000 KRW" },
-        { name: { kr: "클래식 데님 자켓 (리사이클)", en: "Classic Denim Jacket", ch: "经典单宁复古夹克", jp: "クラシックデニムジャケット" }, price: "45,000 KRW" }
-      ],
-      menuForeign: {
-        en: "Vintage Shirt - 25k KRW | Denim Jacket - 45k KRW",
-        ch: "复古衬衫 - 2.5万元 | 丹宁夹克 - 4.5万元",
-        jp: "ヴィンテージシャツ - 2.5万ウォン | デニムジャケット - 4.5万ウォン"
-      },
-      benefits: {
-        kr: "3만원 이상 구매 시 남포 고고 독점 부산 일러스트 엽서 1세트 증정",
-        en: "Free 1 Set of exclusive Busan Postcards with purchases over 30,000 KRW",
-        ch: "购满3万韩元以上，即可赠送Nampo GoGo定制釜山插画明信片1套",
-        jp: "3万ウォン以上ご購入時、Nampo GoGo限定釜山ポストカード1セットプレゼント"
-      },
-      seoDescription: "국제시장 빈티지 옷 골목에 위치한 셀렉티드 구제 샵. 남포 고고 회원 전용 부산 일러스트 엽서 무료 배포.",
-      seoKeywords: "국제시장 빈티지, 남포동 구제샵, 부산 빈티지 쇼핑, Gukje Market Vintage, Nampo Shopping",
-      reviews: []
-    },
-    {
-      id: "partner_tower",
-      name: {
-        kr: "용두산 부산타워 전망대",
-        en: "Yongdusan Busan Tower Observatory",
-        ch: "龙头山釜山塔展望台",
-        jp: "龍頭山釜山タワー展望台"
-      },
-      category: "sightseeing",
-      isPartner: true,
-      image: "https://images.unsplash.com/photo-1540959733332-eab4deceeaf7?auto=format&fit=crop&w=800&q=80",
+      image: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=600&q=80",
+      gallery: [],
       rating: 4.8,
-      scores: {
-        hygiene: 4.9,
-        taste: 4.2,
-        service: 4.8,
-        cleanliness: 4.9
+      scores: { hygiene: 4.9, taste: 4.8, service: 4.7, cleanliness: 4.8 },
+      posX: 129.034567,
+      posY: 35.099123,
+      mapLinkNaver: "https://map.naver.com/v5/directions/14363294,35.097489,내위치,,/14363220,35.099600,카페광복동,,/walk",
+      mapLinkGoogle: "https://www.google.com/maps/dir/?api=1&origin=35.097489,129.034789&destination=35.099600,129.033500&travelmode=walking",
+      distanceValue: "150m",
+      address: {
+        kr: "부산 중구 광복로 67-1 3층",
+        en: "3F, 67-1 Gwangbok-ro, Jung-gu, Busan",
+        ch: "釜山中区光复路67-1号3楼",
+        jp: "釜山中区光復路67-1 3階"
       },
-      posX: 60,
-      posY: 20,
-      mapLinkNaver: "https://map.naver.com/v5/directions/14363294,35.097489,내위치,,/14363610,35.100222,목적지,,/walk",
-      mapLinkGoogle: "https://www.google.com/maps/dir/?api=1&origin=35.097489,129.034789&destination=35.100222,129.038222&travelmode=walking",
-      distanceValue: "300m",
-      address: { kr: "부산 중구 용두산길 37-55 용두산공원 내", en: "Yongdusan Park, 37-55 Yongdusan-gil, Jung-gu, Busan", ch: "釜山中区龙头山街37-55 龙头山公园内", jp: "釜山中区龍頭山ギル37-55 龍頭山公園内" },
-      phone: "+82-51-666-1212",
-      hours: "10:00 - 22:00",
+      phone: "+82-51-246-3300",
+      hours: "11:00 - 22:30",
       priceList: [
-        { name: { kr: "부산타워 전망대 대인 입장권", en: "Busan Tower Ticket (Adult)", ch: "釜山塔展望台成人票", jp: "釜山タワー展望台大人入場券" }, price: "12,000 KRW" },
-        { name: { kr: "전망대 대인 2인 + 시그니처 팝콘 콤보", en: "2 Tickets + Popcorn Combo", ch: "双人展望票 + 招牌爆米花套餐", jp: "入場券2人分＋シグネチャーポップコーンコンボ" }, price: "29,000 KRW" }
+        { name: { kr: "수제 아인슈페너", en: "Signature Einspanner", ch: "手工维也纳咖啡", jp: "自家製アインシュペナー" }, price: "6,500 KRW" },
+        { name: { kr: "전통 딸기 와플", en: "Classic Strawberry Waffle", ch: "草莓华夫饼", jp: "いちごワッフル" }, price: "12,000 KRW" }
       ],
       menuForeign: {
-        en: "Observation Ticket (Adult) - 12k KRW | Ticket 2p + Popcorn Combo - 29k KRW",
-        ch: "展望台成人票 - 1.2万元 | 双人票+套餐 - 2.9万元",
-        jp: "展望台大人券 - 12kウォン | ペア券＋ポップコーンコンボ - 29kウォン"
+        en: "Eng/Jp display labels next to items.",
+        ch: "餐牌注有英文和日文说明。",
+        jp: "英語・日本語の並記あり。"
       },
       benefits: {
-        kr: "QR 인증 화면 제시 시 전망대 입장료 인당 2,000원 즉시 할인",
-        en: "2,000 KRW Discount on Observatory Ticket when showing QR check-in page",
-        ch: "凭QR到店验证画面，展望台入门票现场立减2,000韩元/人",
-        jp: "QRチェックイン画面提示で、展望台入場料が2,000ウォン割引"
+        kr: "음료 주문시 수제 아몬드 피낭시에 테이블당 1개 무료 제공",
+        en: "Get 1 complimentary almond financier cookie per table with drinks.",
+        ch: "凡点咖啡饮品，即赠送手工杏仁费南雪蛋糕（每桌1个）。",
+        jp: "ドリンクご注文でフィナンシェお一つサービス (1テーブルあたり)"
       },
-      seoDescription: "부산 중구 남포동 일대를 한눈에 조망하는 랜드마크 용두산 부산타워. 야경 명소 및 미디어 아트 전시 수록.",
-      seoKeywords: "부산타워, 용두산공원, 남포동 야경, Busan Tower, Yongdusan Nightview",
-      reviews: []
+      seoDescription: "Beautiful interior roof cafe at Gwangbokro shopping street, Busan.",
+      seoKeywords: "Gwangbokro cafe, Nampodong dessert, Einspanner",
+      reviews: [],
+      parking: "무"
     }
   ],
 
-  // Initial Seed Update Logs
+  // Default updates notice
   updateHistory: [
-    { date: "2026-07-07", content: "Nampo GoGo MVP 최종 완벽 폰버전(영속성, 탭동기화, 구글식 세부평점, AI 예산 코스) 릴리즈" },
-    { date: "2026-07-05", content: "K-Lounge Massage 최상단 상시 노출 정적 알고리즘 보완" },
-    { date: "2026-07-01", content: "3초 로그인 및 가상 QR인증 도장 수집 오픈" }
+    { date: "2026-07-07", content: "배달 어플리케이션(배민/요기요) 스타일의 카테고리/매장 리스트 디자인 개편 완료! 🛵" },
+    { date: "2026-07-06", content: "사업자 제휴 승인 조건 검증 및 음식점 메뉴(결제수단, 주차여부) 등록 폼 셋업 완료!" },
+    { date: "2026-07-05", content: "모바일 최적화 다국어 구글/네이버 도보 길찾기 지도 정밀 맵 매핑 개통!" }
   ]
 };

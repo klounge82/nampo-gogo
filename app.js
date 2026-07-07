@@ -1,6 +1,6 @@
-// app.js - Nampo GoGo Platform Advanced Logic with Strict DOM Bindings & Fail-Safe Translations
+// app.js - Nampo GoGo Platform Advanced Delivery-Style Single Page App
 
-// Fail-safe global variables
+// DOM Element Variable Declarations to Prevent Browser Undefined Variable Crashes
 let partnerDetailModal = null;
 let qrScannerModal = null;
 let logSnsModal = null;
@@ -9,21 +9,26 @@ let partnersList = [];
 let updateHistoryList = [];
 
 let currentLang = 'kr';
-let activeTab = 'dashboard';
+let appMode = 'tourist'; // 'tourist' or 'merchant'
+let activeTab = 'tourist-explore'; // Dynamic active tab panel ID
+
+// User Auth states
 let currentUser = localStorage.getItem('nampogogo_user') || null;
-let currentUserRole = localStorage.getItem('nampogogo_user_role') || 'visitor';
+let currentUserRole = localStorage.getItem('nampogogo_user_role') || 'visitor'; // 'visitor', 'merchant', 'admin'
 let userStamps = [];
-let activeCategoryFilter = 'all';
+
+// Filtering & Sorting
+let activeSubcatFilter = 'all';
 let filterPartnerOnly = false;
 
-// Media Upload Temporary Arrays
+// Media Upload Temporary Arrays (Holds Base64 strings)
 let tempUploadedMedia = [];
 let selectedThumbnailBase64 = "";
 
 // Multi-Language Reference
 let translations = {};
 
-// Safe Initialization Hook (Ensures DOM is 100% ready before any data seed or script runs)
+// Safe Initialization Hook
 document.addEventListener('DOMContentLoaded', () => {
   // Bind DOM Elements
   partnerDetailModal = document.getElementById('partner-detail-modal');
@@ -40,18 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   initLucide();
   setupLanguage();
-  setupTabNavigation();
+  setupIntroModeSelection();
   setupUpdatePanel();
-  setupAuthSystem();
-  setupQuickDashboardMenu();
-  
-  // Render views
-  renderPartnersList();
-  renderTravelLog();
-  
-  setupInteractiveScans();
-  setupMerchantSystem();
-  setupAdminSystem();
   setupAIPlanner();
   setupCrossTabSync();
 
@@ -99,9 +94,8 @@ function setupCrossTabSync() {
       loadApplicationState();
       renderPartnersList();
       renderUpdateLogs();
-      if (activeTab === 'profile') {
-        renderMerchantStats();
-        renderAdminReviews();
+      if (appMode === 'merchant') {
+        renderMerchantManagementForm();
       }
       console.log("🔄 Data updated from another browser tab! UI refreshed.");
     }
@@ -117,7 +111,141 @@ function loadUserStamps() {
   }
 }
 
-// 3. Fail-Safe Multi-Language System
+// 3. Intro Screen & Mode Switcher
+function setupIntroModeSelection() {
+  const introScreen = document.getElementById('intro-screen');
+  const appWorkspace = document.getElementById('app-workspace');
+
+  const enterTouristModeBtn = document.getElementById('btn-mode-tourist');
+  const enterMerchantModeBtn = document.getElementById('btn-mode-merchant');
+  const quickModeSwitchBtn = document.getElementById('btn-quick-mode-switch');
+  
+  // Header Logo click also returns to Intro
+  document.getElementById('btn-header-logo-home').addEventListener('click', () => {
+    introScreen.classList.remove('hidden');
+    appWorkspace.classList.add('hidden');
+  });
+
+  enterTouristModeBtn.addEventListener('click', () => {
+    appMode = 'tourist';
+    introScreen.classList.add('hidden');
+    appWorkspace.classList.remove('hidden');
+    
+    renderDynamicNavigationDock();
+    switchTabPanel('tourist-explore');
+  });
+
+  enterMerchantModeBtn.addEventListener('click', () => {
+    appMode = 'merchant';
+    introScreen.classList.add('hidden');
+    appWorkspace.classList.remove('hidden');
+    
+    renderDynamicNavigationDock();
+    
+    // Auto redirect based on login status
+    if (currentUser && currentUserRole === 'merchant') {
+      switchTabPanel('merchant-manage');
+    } else {
+      switchTabPanel('merchant-auth');
+    }
+  });
+
+  quickModeSwitchBtn.addEventListener('click', () => {
+    introScreen.classList.remove('hidden');
+    appWorkspace.classList.add('hidden');
+  });
+}
+
+// 4. Render Dynamic Role-Based Top Navigation
+function renderDynamicNavigationDock() {
+  const navDock = document.getElementById('dynamic-nav-dock');
+  if (!navDock) return;
+  navDock.innerHTML = '';
+
+  if (appMode === 'tourist') {
+    navDock.innerHTML = `
+      <button class="nav-btn active" data-tab="tourist-explore">
+        <i data-lucide="search"></i>
+        <span data-trans="explore">맛집 탐색</span>
+      </button>
+      <button class="nav-btn" data-tab="tourist-log">
+        <i data-lucide="map"></i>
+        <span data-trans="travelLog">여행 로그</span>
+      </button>
+      <button class="nav-btn" data-tab="tourist-profile">
+        <i data-lucide="user"></i>
+        <span data-trans="profile">내 정보</span>
+      </button>
+    `;
+  } else {
+    // Merchant Mode
+    navDock.innerHTML = `
+      <button class="nav-btn active" data-tab="merchant-auth">
+        <i data-lucide="user-check"></i>
+        <span>계정 및 제휴신청</span>
+      </button>
+      <button class="nav-btn" data-tab="merchant-manage" id="nav-btn-merchant-manage-lock">
+        <i data-lucide="edit-3"></i>
+        <span>매장 정보 올리기</span>
+      </button>
+    `;
+  }
+
+  // Bind click listeners
+  const navButtons = navDock.querySelectorAll('.nav-btn');
+  navButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetTab = btn.getAttribute('data-tab');
+
+      // Prevent entry to management tab if not verified merchant
+      if (targetTab === 'merchant-manage') {
+        if (!currentUser || currentUserRole !== 'merchant') {
+          alert("⚠️ 사업자 회원가입 및 로그인 완료 후 매장 관리가 가능합니다!");
+          return;
+        }
+        const isApproved = localStorage.getItem(`nampogogo_merchant_approved_${currentUser}`) === 'true';
+        if (!isApproved) {
+          alert("⚠️ 아직 공식 제휴 승인이 나지 않았습니다. [계정 및 제휴신청] 탭에서 제휴 신청을 완료해 주세요!");
+          return;
+        }
+      }
+
+      navButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      switchTabPanel(targetTab);
+    });
+  });
+
+  initLucide();
+  updateLanguageTextsOnly();
+}
+
+function switchTabPanel(panelId) {
+  activeTab = panelId;
+  const panels = document.querySelectorAll('.tab-panel');
+  panels.forEach(p => p.classList.remove('active'));
+  
+  const activePanel = document.getElementById(`tab-${panelId}`);
+  if (activePanel) {
+    activePanel.classList.add('active');
+  }
+
+  // Reload statistics or lists on entry
+  if (panelId === 'tourist-explore') {
+    renderPartnersList();
+  } else if (panelId === 'tourist-log') {
+    renderTravelLog();
+  } else if (panelId === 'merchant-manage') {
+    renderMerchantManagementForm();
+  } else if (panelId === 'merchant-auth') {
+    updateMerchantAuthUI();
+  }
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// 5. Multi-Language System
 function setupLanguage() {
   const appLangSelect = document.getElementById('app-lang-select');
   if (appLangSelect) {
@@ -130,6 +258,20 @@ function setupLanguage() {
 }
 
 function updateLanguageTexts() {
+  updateLanguageTextsOnly();
+
+  // Redraw views to update multilingual values
+  renderPartnersList();
+  renderTravelLog();
+  updateAuthUIs();
+  
+  if (appMode === 'merchant') {
+    updateMerchantAuthUI();
+    renderMerchantManagementForm();
+  }
+}
+
+function updateLanguageTextsOnly() {
   document.querySelectorAll('[data-trans]').forEach(element => {
     const key = element.getAttribute('data-trans');
     const txt = getTranslation(currentLang, key);
@@ -141,19 +283,11 @@ function updateLanguageTexts() {
       }
     }
   });
-
-  renderPartnersList();
-  renderTravelLog();
-  updateAuthUIs();
-  renderMerchantStats();
-  renderAdminReviews();
 }
 
-// Fallback logic in case data.js cache uses old codes (ko, zh, ja)
+// Fallback logic in case translations map contains old codes (ko, zh, ja)
 function getTranslation(lang, key) {
   let targetLang = lang;
-  
-  // Fallback map if the keys in translations are old codes
   if (!translations[targetLang]) {
     if (targetLang === 'kr') targetLang = 'ko';
     if (targetLang === 'ch') targetLang = 'zh';
@@ -174,91 +308,7 @@ function getTranslation(lang, key) {
   return obj;
 }
 
-// 4. Tab Navigation Router
-function setupTabNavigation() {
-  const navButtons = document.querySelectorAll('.nav-btn');
-  const tabPanels = document.querySelectorAll('.tab-panel');
-
-  navButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const targetTab = btn.getAttribute('data-tab');
-      
-      navButtons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      tabPanels.forEach(panel => {
-        panel.classList.remove('active');
-        if (panel.id === `tab-${targetTab}`) {
-          panel.classList.add('active');
-        }
-      });
-
-      activeTab = targetTab;
-      
-      if (targetTab === 'profile') {
-        renderMerchantStats();
-        renderAdminReviews();
-      } else if (targetTab === 'travel-log') {
-        renderTravelLog();
-      }
-      
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-  });
-}
-
-// 5. Quick Dashboard 7 Menu Router
-function setupQuickDashboardMenu() {
-  document.querySelectorAll('.menu-item-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const menuAction = btn.getAttribute('data-menu');
-      
-      if (menuAction === 'log') {
-        const logNavBtn = document.querySelector('.nav-btn[data-tab="travel-log"]');
-        if (logNavBtn) logNavBtn.click();
-      } else if (menuAction === 'benefit') {
-        filterPartnerOnly = true;
-        activeCategoryFilter = 'all';
-        setActiveCategoryPill('all');
-        
-        const exploreNavBtn = document.querySelector('.nav-btn[data-tab="explore"]');
-        if (exploreNavBtn) exploreNavBtn.click();
-        renderPartnersList();
-      } else if (menuAction === 'course') {
-        const plannerBox = document.querySelector('.ai-planner-box-layout');
-        if (plannerBox) {
-          plannerBox.scrollIntoView({ behavior: 'smooth' });
-        }
-      } else {
-        filterPartnerOnly = false;
-        let targetCat = 'all';
-        if (menuAction === 'food') targetCat = 'food';
-        if (menuAction === 'activity') targetCat = 'massage';
-        if (menuAction === 'shopping') targetCat = 'shopping';
-        if (menuAction === 'sightseeing') targetCat = 'sightseeing';
-
-        activeCategoryFilter = targetCat;
-        setActiveCategoryPill(targetCat);
-        
-        const exploreNavBtn = document.querySelector('.nav-btn[data-tab="explore"]');
-        if (exploreNavBtn) exploreNavBtn.click();
-        renderPartnersList();
-      }
-    });
-  });
-}
-
-function setActiveCategoryPill(cat) {
-  document.querySelectorAll('.cat-pill').forEach(pill => {
-    if (pill.getAttribute('data-category') === cat) {
-      pill.classList.add('active');
-    } else {
-      pill.classList.remove('active');
-    }
-  });
-}
-
-// 6. Global Notices Board Panel
+// 6. Global Updates Notices Panel
 function setupUpdatePanel() {
   const btnUpdateToggle = document.getElementById('btn-update-toggle');
   const updatePanel = document.getElementById('update-panel');
@@ -297,11 +347,11 @@ function renderUpdateLogs() {
   });
 }
 
-// 7. Advanced Auth & Quick Sign-up
+// 7. Tourist login/signup auth
 function setupAuthSystem() {
   const authForm = document.getElementById('nampo-auth-form');
   const btnLogout = document.getElementById('btn-action-logout');
-  const btnDashboardAction = document.getElementById('btn-dashboard-auth-action');
+  const btnShortcut = document.getElementById('btn-tourist-login-shortcut');
 
   if (authForm) {
     authForm.addEventListener('submit', (e) => {
@@ -309,18 +359,17 @@ function setupAuthSystem() {
       const usernameInput = document.getElementById('auth-username').value.trim();
       const passwordInput = document.getElementById('auth-password').value;
       const confirmInput = document.getElementById('auth-password-confirm').value;
-      const selectedRole = document.querySelector('input[name="auth-role"]:checked').value;
 
       if (!usernameInput) return;
 
       if (passwordInput !== confirmInput) {
-        alert("❌ 비밀번호와 비밀번호 확인이 서로 다릅니다. 다시 입력하세요!");
+        alert("❌ 비밀번호와 비밀번호 확인이 다릅니다!");
         return;
       }
 
       let registeredUsers = JSON.parse(localStorage.getItem('nampogogo_users')) || [];
-      
       let matchedUser = registeredUsers.find(u => u.id === usernameInput);
+      
       if (matchedUser) {
         if (matchedUser.pw !== passwordInput) {
           alert("❌ 비밀번호가 올바르지 않습니다!");
@@ -329,16 +378,13 @@ function setupAuthSystem() {
         currentUser = matchedUser.id;
         currentUserRole = matchedUser.role;
       } else {
-        const newUser = {
-          id: usernameInput,
-          pw: passwordInput,
-          role: selectedRole
-        };
+        // Create visitor
+        const newUser = { id: usernameInput, pw: passwordInput, role: 'visitor' };
         registeredUsers.push(newUser);
         localStorage.setItem('nampogogo_users', JSON.stringify(registeredUsers));
         
         currentUser = usernameInput;
-        currentUserRole = selectedRole;
+        currentUserRole = 'visitor';
       }
 
       localStorage.setItem('nampogogo_user', currentUser);
@@ -348,9 +394,8 @@ function setupAuthSystem() {
       updateAuthUIs();
       authForm.reset();
       
-      alert(`👋 Welcome to Nampo GoGo!\nID: ${currentUser}\nRole: ${getTranslation(currentLang, 'role' + currentUserRole.charAt(0).toUpperCase() + currentUserRole.slice(1))}`);
-      
-      document.querySelector('.nav-btn[data-tab="dashboard"]').click();
+      alert(`👋 Welcome to Nampo GoGo!\nID: ${currentUser}`);
+      switchTabPanel('tourist-explore');
     });
   }
 
@@ -363,13 +408,13 @@ function setupAuthSystem() {
       localStorage.removeItem('nampogogo_user_role');
       updateAuthUIs();
       alert("Logged out successfully.");
-      document.querySelector('.nav-btn[data-tab="dashboard"]').click();
+      switchTabPanel('tourist-explore');
     });
   }
 
-  if (btnDashboardAction) {
-    btnDashboardAction.addEventListener('click', () => {
-      document.querySelector('.nav-btn[data-tab="profile"]').click();
+  if (btnShortcut) {
+    btnShortcut.addEventListener('click', () => {
+      switchTabPanel('tourist-profile');
     });
   }
 
@@ -379,7 +424,7 @@ function setupAuthSystem() {
 function updateAuthUIs() {
   const dashboardHeading = document.getElementById('user-status-heading');
   const dashboardDesc = document.getElementById('user-status-desc');
-  const btnDashboardAction = document.getElementById('btn-dashboard-auth-action');
+  const btnShortcut = document.getElementById('btn-tourist-login-shortcut');
   const dashboardRoleBadge = document.getElementById('dashboard-user-role');
   
   const profileUsername = document.getElementById('profile-username');
@@ -388,12 +433,6 @@ function updateAuthUIs() {
   
   const authFormCard = document.getElementById('auth-form-card');
   const logoutCard = document.getElementById('logout-card');
-  
-  const merchantControlCard = document.getElementById('merchant-control-card');
-  const adminControlCard = document.getElementById('admin-control-card');
-
-  if (merchantControlCard) merchantControlCard.classList.add('hidden');
-  if (adminControlCard) adminControlCard.classList.add('hidden');
 
   if (currentUser) {
     const roleTxt = getTranslation(currentLang, 'role' + currentUserRole.charAt(0).toUpperCase() + currentUserRole.slice(1)) || currentUserRole;
@@ -404,27 +443,21 @@ function updateAuthUIs() {
       dashboardRoleBadge.textContent = roleTxt;
       dashboardRoleBadge.classList.remove('hidden');
     }
-    if (btnDashboardAction) btnDashboardAction.textContent = "My Panel";
+    if (btnShortcut) btnShortcut.textContent = "My Info";
 
     if (profileUsername) profileUsername.textContent = currentUser;
     if (profileRoleBadge) profileRoleBadge.textContent = roleTxt;
     if (authFormCard) authFormCard.classList.add('hidden');
     if (logoutCard) logoutCard.classList.remove('hidden');
     
-    if (currentUserRole === 'merchant') {
-      if (merchantControlCard) merchantControlCard.classList.remove('hidden');
-      if (profileAvatarEmoji) profileAvatarEmoji.textContent = '🏢';
-    } else if (currentUserRole === 'admin') {
-      if (adminControlCard) adminControlCard.classList.remove('hidden');
-      if (profileAvatarEmoji) profileAvatarEmoji.textContent = '👑';
-    } else {
-      if (profileAvatarEmoji) profileAvatarEmoji.textContent = '👤';
+    if (profileAvatarEmoji) {
+      profileAvatarEmoji.textContent = currentUserRole === 'merchant' ? '🏢' : (currentUserRole === 'admin' ? '👑' : '👤');
     }
   } else {
     if (dashboardHeading) dashboardHeading.textContent = "Guest User";
     if (dashboardDesc) dashboardDesc.textContent = getTranslation(currentLang, 'pleaseLogin') || 'Please login.';
     if (dashboardRoleBadge) dashboardRoleBadge.classList.add('hidden');
-    if (btnDashboardAction) btnDashboardAction.textContent = "Login";
+    if (btnShortcut) btnShortcut.textContent = "Login";
 
     if (profileUsername) profileUsername.textContent = "Guest User";
     if (profileRoleBadge) profileRoleBadge.textContent = "Visitor";
@@ -437,55 +470,90 @@ function updateAuthUIs() {
   if (stampCountEl) stampCountEl.textContent = `${userStamps.length} / 5`;
 }
 
-// 8. Render Explore Partners
+// 8. Tourist Food Board category filtering & sorting
 function renderPartnersList() {
-  const container = document.getElementById('partners-cards-container');
+  const container = document.getElementById('delivery-partners-container');
   if (!container) return;
   container.innerHTML = '';
 
   let filtered = [...partnersList];
-  if (activeCategoryFilter !== 'all') {
-    filtered = filtered.filter(p => p.category === activeCategoryFilter);
+  
+  // Category subcategory filter
+  if (activeSubcatFilter !== 'all') {
+    filtered = filtered.filter(p => p.subCategory === activeSubcatFilter);
   }
 
-  if (filterPartnerOnly) {
-    filtered = filtered.filter(p => p.isPartner === true);
-  }
+  // STRICT MULTI-SORTING ALGORITHM (Requested)
+  filtered.sort((a, b) => {
+    // 1. Partner status priority: Official Partners first
+    const partnerA = a.isPartner ? 1 : 0;
+    const partnerB = b.isPartner ? 1 : 0;
+    if (partnerA !== partnerB) {
+      return partnerB - partnerA; // 1 (partner) comes before 0
+    }
 
-  // Prepend K-Lounge to top
-  const kLoungeObj = partnersList.find(p => p.id === 'partner_klounge');
-  if (kLoungeObj) {
-    filtered = filtered.filter(p => p.id !== 'partner_klounge');
-    filtered.unshift(kLoungeObj);
+    if (a.isPartner && b.isPartner) {
+      // 2. If both are partners: [Image + Video count] descending
+      const mediaCountA = (a.gallery ? a.gallery.length : 0) + 1; // cover img is +1
+      const mediaCountB = (b.gallery ? b.gallery.length : 0) + 1;
+      if (mediaCountA !== mediaCountB) {
+        return mediaCountB - mediaCountA;
+      }
+
+      // 3. Review score descending
+      if (a.rating !== b.rating) {
+        return b.rating - a.rating;
+      }
+
+      // 4. Video count descending
+      const videoCountA = a.gallery ? a.gallery.filter(g => g.type === 'video').length : 0;
+      const videoCountB = b.gallery ? b.gallery.filter(g => g.type === 'video').length : 0;
+      if (videoCountA !== videoCountB) {
+        return videoCountB - videoCountA;
+      }
+
+      // 5. Image count descending
+      const imgCountA = a.gallery ? a.gallery.filter(g => g.type === 'image').length : 0;
+      const imgCountB = b.gallery ? b.gallery.filter(g => g.type === 'image').length : 0;
+      return imgCountB - imgCountA;
+    } else {
+      // For non-partners: review score descending
+      return b.rating - a.rating;
+    }
+  });
+
+  // Render list
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="empty-log-state"><p>이 카테고리에 해당하는 매장이 없습니다.</p></div>`;
+    return;
   }
 
   filtered.forEach(p => {
     const card = document.createElement('div');
-    const isKLounge = p.id === 'partner_klounge';
-    card.className = `partner-card ${isKLounge ? 'priority-card' : ''}`;
+    card.className = `delivery-partner-card ${p.isPartner ? 'is-partner-gold' : ''}`;
     
     const isKorean = currentLang === 'kr';
     const directionLink = isKorean ? p.mapLinkNaver : p.mapLinkGoogle;
     
+    const mediaTotal = (p.gallery ? p.gallery.length : 0) + 1;
+
     card.innerHTML = `
-      ${isKLounge ? `<span class="priority-ribbon">⭐ K-LOUNGE PRIORITY</span>` : ''}
-      <div class="partner-card-img" style="background-image: url('${p.image}')">
-        <span class="partner-card-badge">${getTranslation(currentLang, 'cat' + p.category.charAt(0).toUpperCase() + p.category.slice(1)) || p.category}</span>
+      <div class="delivery-card-thumb" style="background-image: url('${p.image}')">
+        ${p.isPartner ? `<span class="delivery-card-partner-badge">제휴사</span>` : ''}
       </div>
-      <div class="partner-card-body">
-        <div class="card-title-row">
+      <div class="delivery-card-info">
+        <div class="delivery-card-title-row">
           <h3>${p.name[currentLang] || p.name['en']}</h3>
-          <div class="rating-badge"><i data-lucide="star"></i> ${p.rating.toFixed(1)}</div>
+          <div class="delivery-card-rating">
+            <i data-lucide="star"></i> ${p.rating.toFixed(1)}
+          </div>
         </div>
-        <div class="benefit-strip">
-          <h5>${getTranslation(currentLang, 'benefitTitle') || 'Benefits'}</h5>
-          <p>${p.benefits[currentLang] || p.benefits['en']}</p>
+        <div class="delivery-card-benefit-snippet">
+          🎁 ${p.benefits[currentLang] || p.benefits['en']}
         </div>
-        <div class="card-footer-row">
-          <span>📍 ${getTranslation(currentLang, 'distance') || 'Distance'}: <strong>${p.distanceValue}</strong></span>
-          <button class="btn btn-primary btn-sm btn-nav-map" onclick="event.stopPropagation(); window.open('${directionLink}', '_blank')">
-            <i data-lucide="navigation"></i> ${getTranslation(currentLang, 'getDirection') || 'Route'}
-          </button>
+        <div class="delivery-card-footer">
+          <span>📍 거리: <strong>${p.distanceValue}</strong> | 미디어: <strong>${mediaTotal}개</strong></span>
+          <strong>${getTranslation(currentLang, 'sub' + p.subCategory.charAt(0).toUpperCase() + p.subCategory.slice(1)) || p.subCategory}</strong>
         </div>
       </div>
     `;
@@ -495,37 +563,49 @@ function renderPartnersList() {
   });
 
   initLucide();
-  setupCategoryPills();
+  setupSubcatGridClickHandlers();
 }
 
-function setupCategoryPills() {
-  document.querySelectorAll('.cat-pill').forEach(pill => {
-    const newPill = pill.cloneNode(true);
-    pill.parentNode.replaceChild(newPill, pill);
+function setupSubcatGridClickHandlers() {
+  document.querySelectorAll('.delivery-cat-item').forEach(item => {
+    const newEl = item.cloneNode(true);
+    item.parentNode.replaceChild(newEl, item);
 
-    newPill.addEventListener('click', () => {
-      document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
-      newPill.classList.add('active');
-      activeCategoryFilter = newPill.getAttribute('data-category');
-      filterPartnerOnly = false;
+    newEl.addEventListener('click', () => {
+      document.querySelectorAll('.delivery-cat-item').forEach(el => el.classList.remove('active'));
+      newEl.classList.add('active');
+      activeSubcatFilter = newEl.getAttribute('data-subcat');
       renderPartnersList();
     });
   });
 }
 
-// 9. Partner Detail Modal (Gallery, Google-style Accordion Ratings)
+// 9. Partner Detail Modal with Horizontal Carousel Swiper & Map Links
 function openPartnerDetail(id) {
   const p = partnersList.find(item => item.id === id);
   if (!p) return;
 
   const contentWrap = document.getElementById('partner-modal-body-content');
   if (!contentWrap) return;
-  
+
   const isStamped = userStamps.some(s => s.partnerId === p.id);
   const isKorean = currentLang === 'kr';
   const directionLink = isKorean ? p.mapLinkNaver : p.mapLinkGoogle;
 
-  // Build Pricing rows
+  // Build Carousel Swiper Slide images/videos
+  let mediaSwiperMarkup = '';
+  mediaSwiperMarkup += `<div class="detail-gallery-img" style="background-image: url('${p.image}')"></div>`;
+  if (p.gallery && p.gallery.length > 0) {
+    p.gallery.forEach(file => {
+      if (file.type === 'video' || file.data.startsWith('data:video/')) {
+        mediaSwiperMarkup += `<video class="detail-gallery-video" controls src="${file.data}"></video>`;
+      } else {
+        mediaSwiperMarkup += `<div class="detail-gallery-img" style="background-image: url('${file.data}')"></div>`;
+      }
+    });
+  }
+
+  // Pricing menu rows
   let pricingRows = '';
   p.priceList.forEach(item => {
     pricingRows += `
@@ -536,21 +616,18 @@ function openPartnerDetail(id) {
     `;
   });
 
-  // Build Media Gallery slides (Images & Videos)
-  let mediaGallerySlides = '';
-  mediaGallerySlides += `<div class="detail-gallery-img" style="background-image: url('${p.image}')"></div>`;
+  // Characteristic Badges (Languages, payment methods, order, parking)
+  const langBadgeStr = (p.menuForeign && p.menuForeign[currentLang]) ? `<span class="characteristic-badge badge-blue">다국어 대응</span>` : '';
+  const parkingStr = p.parking ? `<span class="characteristic-badge badge-secondary">🚗 주차: ${p.parking}</span>` : '';
   
-  if (p.gallery && p.gallery.length > 0) {
-    p.gallery.forEach(file => {
-      if (file.type === 'video' || file.data.startsWith('data:video/')) {
-        mediaGallerySlides += `<video class="detail-gallery-video" controls src="${file.data}"></video>`;
-      } else {
-        mediaGallerySlides += `<div class="detail-gallery-img" style="background-image: url('${file.data}')"></div>`;
-      }
+  let paymentBadgeStr = '';
+  if (p.payments && p.payments.length > 0) {
+    p.payments.forEach(pay => {
+      paymentBadgeStr += `<span class="characteristic-badge badge-warning">💳 ${pay}</span>`;
     });
   }
 
-  // Build Reviews list
+  // Reviews list
   let reviewsMarkup = '';
   if (p.reviews.length === 0) {
     reviewsMarkup = `<p class="empty-state text-center">${getTranslation(currentLang, 'noReviews') || 'No reviews yet.'}</p>`;
@@ -607,14 +684,37 @@ function openPartnerDetail(id) {
   const sc = p.scores || { hygiene: 4.8, taste: 4.8, service: 4.8, cleanliness: 4.8 };
 
   contentWrap.innerHTML = `
-    <!-- Media Scroll Gallery -->
+    <!-- Horizontal Swipe Media Gallery (Carousel Swiper) -->
     <div class="modal-detail-media-scroller">
-      ${mediaGallerySlides}
+      ${mediaSwiperMarkup}
     </div>
 
+    <!-- Title and Rating -->
     <div class="modal-detail-title-row">
       <h3>${p.name[currentLang] || p.name['en']}</h3>
       <div class="rating-badge"><i data-lucide="star"></i> ${p.rating.toFixed(1)}</div>
+    </div>
+
+    <!-- Address, Phone & Map link -->
+    <div class="modal-detail-address-block">
+      <div>📍 주소: <span class="address-val-text">${p.address[currentLang] || p.address['en']}</span></div>
+      <div style="margin-top: 4px;">📞 연락처: <a href="tel:${p.phone}" class="address-val-text" style="color:var(--primary); text-decoration:underline;">${p.phone}</a></div>
+      <div style="margin-top: 4px;">🕒 영업시간: <span class="address-val-text">${p.hours}</span></div>
+      
+      <!-- Direction Map Button ( 분기 처리 연동 ) -->
+      <div class="direction-btn-row">
+        <button class="btn btn-primary btn-dir-navigation" onclick="window.open('${directionLink}', '_blank')">
+          <i data-lucide="navigation" style="width:10px; height:10px;"></i> ${getTranslation(currentLang, 'getDirection') || 'Route'} (${p.distanceValue})
+        </button>
+      </div>
+    </div>
+
+    <!-- Store Characteristics Badges -->
+    <div class="store-characteristics-wrap">
+      ${langBadgeStr}
+      ${parkingStr}
+      ${paymentBadgeStr}
+      <span class="characteristic-badge badge-accent">⚡ 주문: QR/대면</span>
     </div>
 
     <!-- Google-style Accordion Detailed Rating 요약 -->
@@ -629,7 +729,7 @@ function openPartnerDetail(id) {
         <span class="metric-score-val">${sc.hygiene.toFixed(1)}</span>
       </div>
       <div class="rating-metric-bar-row">
-        <span class="rating-metric-label">맛</span>
+        <span class="rating-metric-label">맛/품질</span>
         <div class="metric-bar-bg"><div class="metric-bar-fill" style="width: ${sc.taste * 20}%"></div></div>
         <span class="metric-score-val">${sc.taste.toFixed(1)}</span>
       </div>
@@ -639,7 +739,7 @@ function openPartnerDetail(id) {
         <span class="metric-score-val">${sc.service.toFixed(1)}</span>
       </div>
       <div class="rating-metric-bar-row">
-        <span class="rating-metric-label">청결</span>
+        <span class="rating-metric-label">청결도</span>
         <div class="metric-bar-bg"><div class="metric-bar-fill" style="width: ${sc.cleanliness * 20}%"></div></div>
         <span class="metric-score-val">${sc.cleanliness.toFixed(1)}</span>
       </div>
@@ -648,21 +748,15 @@ function openPartnerDetail(id) {
     <!-- Modal Tab buttons -->
     <div class="modal-tabs-nav" style="margin-top: 14px;">
       <button class="modal-tab-btn active" data-tab-panel="modal-panel-info">Introduction</button>
-      <button class="modal-tab-btn" data-tab-panel="modal-panel-pricing">Price List</button>
+      <button class="modal-tab-btn" data-tab-panel="modal-panel-pricing">Menu Price List</button>
       <button class="modal-tab-btn" data-tab-panel="modal-panel-seo">SEO Crawler Tag</button>
     </div>
 
     <!-- TAB PANEL 1: Info -->
     <div class="modal-tab-panel active" id="modal-panel-info">
-      <div class="benefit-strip">
-        <h5 data-trans="benefitTitle">${getTranslation(currentLang, 'benefitTitle') || 'Benefits'}</h5>
-        <p>${p.benefits[currentLang] || p.benefits['en']}</p>
-      </div>
-      
-      <div class="glass-box" style="margin-bottom:12px; font-size:11px; padding:12px; line-height:1.5;">
-        <div>📍 <strong>Address:</strong> ${p.address[currentLang] || p.address['en']}</div>
-        <div style="margin-top:4px;">📞 <strong>Tel:</strong> ${p.phone}</div>
-        <div style="margin-top:4px;">🕒 <strong>Hours:</strong> ${p.hours}</div>
+      <div class="benefit-strip" style="background:var(--primary-soft); padding:10px; border-radius:8px;">
+        <h5 style="font-size:10px; font-weight:800; color:var(--primary);">${getTranslation(currentLang, 'benefitTitle') || 'Benefits'}</h5>
+        <p style="font-size:11px; margin-top:2px;">${p.benefits[currentLang] || p.benefits['en']}</p>
       </div>
     </div>
 
@@ -684,33 +778,15 @@ function openPartnerDetail(id) {
 
     <!-- TAB PANEL 3: SEO Crawler Tag Visualizer -->
     <div class="modal-tab-panel" id="modal-panel-seo">
-      <div class="seo-info-box">
-        <div class="seo-box-header">
-          <i data-lucide="bot"></i>
-          <span>Search Engine Optimization (SEO) Meta Information</span>
-        </div>
-        <div class="seo-tag-item">
-          <strong>&lt;title&gt;</strong>
-          ${p.name[currentLang] || p.name['en']} | Nampo GoGo Busan Tour
-        </div>
-        <div class="seo-tag-item">
-          <strong>&lt;meta name="description"&gt;</strong>
-          ${p.seoDescription}
-        </div>
-        <div class="seo-tag-item">
-          <strong>&lt;meta name="keywords"&gt;</strong>
-          ${p.seoKeywords}
-        </div>
+      <div class="seo-info-box" style="background:var(--primary-soft); padding:12px; border-radius:6px; font-size:10px;">
+        <div class="seo-tag-item"><strong>&lt;title&gt;</strong> ${p.name[currentLang] || p.name['en']} | Nampo GoGo Busan</div>
+        <div class="seo-tag-item" style="margin-top:6px;"><strong>&lt;meta name="description"&gt;</strong> ${p.seoDescription}</div>
+        <div class="seo-tag-item" style="margin-top:6px;"><strong>&lt;meta name="keywords"&gt;</strong> ${p.seoKeywords}</div>
       </div>
     </div>
 
-    <!-- Map redirection with 도보 길찾기 -->
-    <button class="btn btn-primary btn-block" style="margin-bottom:12px;" onclick="window.open('${directionLink}', '_blank')">
-      <i data-lucide="navigation"></i> ${getTranslation(currentLang, 'getDirection') || 'Route'} (${p.distanceValue})
-    </button>
-
     <!-- Scan stamp action button -->
-    <button class="btn btn-secondary btn-block" id="btn-trigger-qr-scan">
+    <button class="btn btn-secondary btn-block" id="btn-trigger-qr-scan" style="margin-top: 14px;">
       <i data-lucide="scan-line"></i> 
       <span>${isStamped ? (getTranslation(currentLang, 'alreadyStamped') || 'Stamped') : (getTranslation(currentLang, 'scanBtnText') || 'Scan QR')}</span>
     </button>
@@ -744,12 +820,11 @@ function openPartnerDetail(id) {
   const qrBtn = document.getElementById('btn-trigger-qr-scan');
   if (qrBtn) {
     if (isStamped) qrBtn.setAttribute('disabled', 'true');
-    
     qrBtn.addEventListener('click', () => {
       if (!currentUser) {
         alert("Please login first to check-in.");
         if (partnerDetailModal) partnerDetailModal.classList.remove('active');
-        document.querySelector('.nav-btn[data-tab="profile"]').click();
+        switchTabPanel('tourist-profile');
         return;
       }
       if (partnerDetailModal) partnerDetailModal.classList.remove('active');
@@ -772,12 +847,7 @@ function openPartnerDetail(id) {
       const reviewObj = {
         username: currentUser,
         rating: rating,
-        content: {
-          kr: text,
-          en: text,
-          ch: text,
-          jp: text
-        }
+        content: { kr: text, en: text, ch: text, jp: text }
       };
 
       p.reviews.unshift(reviewObj);
@@ -787,13 +857,9 @@ function openPartnerDetail(id) {
 
       savePartnersToStorage();
       alert("Verified review posted successfully!");
-      openPartnerDetail(p.id);
+      openPartnerDetail(p.id); // Reload modal
     });
   }
-}
-
-function savePartnersToStorage() {
-  localStorage.setItem('nampogogo_partners_v3', JSON.stringify(partnersList));
 }
 
 function setupModalTabs() {
@@ -958,7 +1024,7 @@ function renderTravelLog() {
         if (stampObj) {
           stampObj.memo = textVal;
           localStorage.setItem(`nampogogo_stamps_${currentUser}`, JSON.stringify(userStamps));
-          alert(getTranslation(currentLang, 'memoSavedSuccess') || 'Memo saved successfully.');
+          alert(getTranslation(currentLang, 'memoSavedSuccess') || 'Memo saved.');
         }
       });
 
@@ -1017,17 +1083,125 @@ function openSNSCardModal() {
   }
 }
 
-// 12. Merchant Dashboard with Media 다중 업로드 & 썸네일 셀렉터
-function setupMerchantSystem() {
-  const editForm = document.getElementById('merchant-store-edit-form');
-  const fileInput = document.getElementById('merchant-media-files');
 
-  if (fileInput) {
-    fileInput.addEventListener('change', (e) => {
+// ================== 12. MERCHANT CONTROL SYSTEM & VERIFICATION ==================
+
+function setupMerchantSystem() {
+  const joinForm = document.getElementById('merchant-join-form');
+  const applyForm = document.getElementById('merchant-apply-form');
+  const mediaFileInput = document.getElementById('merchant-media-files');
+  const storeSaveBtn = document.getElementById('btn-save-store-complete');
+
+  // Business Join / Login
+  if (joinForm) {
+    joinForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const usernameInput = document.getElementById('m-auth-username').value.trim();
+      const passwordInput = document.getElementById('m-auth-password').value;
+      const confirmInput = document.getElementById('m-auth-password-confirm').value;
+
+      if (!usernameInput) return;
+
+      if (passwordInput !== confirmInput) {
+        alert("❌ 비밀번호와 비밀번호 확인이 서로 다릅니다!");
+        return;
+      }
+
+      let registeredUsers = JSON.parse(localStorage.getItem('nampogogo_users')) || [];
+      let matchedUser = registeredUsers.find(u => u.id === usernameInput);
+      
+      if (matchedUser) {
+        if (matchedUser.pw !== passwordInput) {
+          alert("❌ 비밀번호가 올바르지 않습니다!");
+          return;
+        }
+        currentUser = matchedUser.id;
+        currentUserRole = matchedUser.role;
+      } else {
+        // Sign up as merchant
+        const newUser = { id: usernameInput, pw: passwordInput, role: 'merchant' };
+        registeredUsers.push(newUser);
+        localStorage.setItem('nampogogo_users', JSON.stringify(registeredUsers));
+        
+        currentUser = usernameInput;
+        currentUserRole = 'merchant';
+      }
+
+      localStorage.setItem('nampogogo_user', currentUser);
+      localStorage.setItem('nampogogo_user_role', currentUserRole);
+      
+      updateMerchantAuthUI();
+      alert(`💼 사업자 모드 가입/로그인 완료!\nID: ${currentUser}`);
+    });
+  }
+
+  // Partnership Application (Simulate immediate approval)
+  if (applyForm) {
+    applyForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!currentUser) return;
+
+      const addr = document.getElementById('apply-address').value.trim();
+      const subcat = document.getElementById('apply-subcategory').value;
+      const phoneVal = document.getElementById('apply-phone').value.trim();
+
+      // Mock immediate approval
+      localStorage.setItem(`nampogogo_merchant_approved_${currentUser}`, 'true');
+      localStorage.setItem(`nampogogo_merchant_addr_${currentUser}`, addr);
+      localStorage.setItem(`nampogogo_merchant_subcat_${currentUser}`, subcat);
+      localStorage.setItem(`nampogogo_merchant_phone_${currentUser}`, phoneVal);
+
+      // Create a partner shop object if not exists
+      const storeId = currentUser.toLowerCase().replace('owner_', 'partner_');
+      let storeObj = partnersList.find(p => p.id === storeId);
+      
+      if (!storeObj) {
+        storeObj = {
+          id: storeId,
+          name: { kr: `${currentUser} 매장`, en: `${currentUser} Store`, ch: `${currentUser} 铺`, jp: `${currentUser} 店` },
+          category: (subcat === 'massage' || subcat === 'cafe') ? subcat : 'food',
+          subCategory: subcat,
+          isPartner: true, // Marked as Partner!
+          image: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=400&q=80",
+          gallery: [],
+          rating: 5.0,
+          scores: { hygiene: 5.0, taste: 5.0, service: 5.0, cleanliness: 5.0 },
+          posX: 129.034789,
+          posY: 35.097489,
+          mapLinkNaver: `https://map.naver.com/v5/directions/14363294,35.097489,내위치,,/14363310,35.098222,목적지,,/walk`,
+          mapLinkGoogle: `https://www.google.com/maps/dir/?api=1&origin=35.097489,129.034789&destination=35.098222,129.035789&travelmode=walking`,
+          distanceValue: "100m",
+          address: { kr: addr, en: addr, ch: addr, jp: addr },
+          phone: phoneVal,
+          hours: "11:00 - 22:00",
+          priceList: [],
+          menuForeign: { kr: "외국어 메뉴판 구비", en: "English Menu", ch: "中文菜单", jp: "日本語メニュー" },
+          benefits: { kr: "제휴 혜택 제공", en: "Exclusive benefit", ch: "合作福利", jp: "提携特典" },
+          seoDescription: `${currentUser} 제휴 매장`,
+          seoKeywords: `남포동 ${currentUser}`,
+          reviews: [],
+          payments: ["신용카드", "삼성페이"],
+          parking: "유"
+        };
+        partnersList.unshift(storeObj);
+        savePartnersToStorage();
+      }
+
+      alert("🎉 서류 심사 즉시 통과! Nampo GoGo 공식 제휴 매장으로 승인되었습니다!");
+      
+      renderDynamicNavigationDock(); // Refresh lock tabs
+      updateMerchantAuthUI();
+      switchTabPanel('merchant-manage');
+    });
+  }
+
+  // Media files change preview loader
+  if (mediaFileInput) {
+    mediaFileInput.addEventListener('change', (e) => {
       const files = e.target.files;
       const previewContainer = document.getElementById('merchant-media-previews');
       if (!previewContainer) return;
-      
+
       previewContainer.innerHTML = '';
       tempUploadedMedia = [];
 
@@ -1042,6 +1216,7 @@ function setupMerchantSystem() {
             data: base64Data
           });
 
+          // Build preview thumbnail
           const pBox = document.createElement('div');
           pBox.className = `preview-thumb-box ${isVideo ? 'video' : ''}`;
           pBox.style.backgroundImage = isVideo ? 'none' : `url('${base64Data}')`;
@@ -1067,16 +1242,54 @@ function setupMerchantSystem() {
     });
   }
 
-  if (editForm) {
-    editForm.addEventListener('submit', (e) => {
+  // Save Store complete registration (With Strict Media Validation)
+  if (storeSaveBtn) {
+    storeSaveBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      const store = findMerchantStore();
-      if (!store) return;
+      
+      // Strict Media Validation Check
+      const hasSignboard = document.getElementById('check-media-signboard').checked;
+      const hasMenu = document.getElementById('check-media-menu').checked;
+      const hasInside = document.getElementById('check-media-inside').checked;
+      const hasOutside = document.getElementById('check-media-outside').checked;
 
+      if (!hasSignboard || !hasMenu || !hasInside || !hasOutside) {
+        alert("⚠️ [업로드 필수 조건 미달]\n대문(간판) 사진, 메뉴판 사진, 내부 사진 2장 이상, 외부 전경 사진 2장 이상이 모두 포함되어 있는지 확인하시고 체크박스에 체크해 주셔야 최종 올리기가 가능합니다!");
+        return;
+      }
+
+      const store = findMerchantStore();
+      if (!store) {
+        alert("오류: 매장 정보를 찾을 수 없습니다.");
+        return;
+      }
+
+      // Update Text Fields
       store.benefits[currentLang] = document.getElementById('edit-benefit-input').value.trim();
       store.hours = document.getElementById('edit-hours-input').value.trim();
       store.phone = document.getElementById('edit-phone-input').value.trim();
+      
+      // Menu registers
+      const sigName = document.getElementById('menu-sig-name').value.trim();
+      const sigPrice = document.getElementById('menu-sig-price').value.trim();
+      const stdName = document.getElementById('menu-std-name').value.trim();
+      const stdPrice = document.getElementById('menu-std-price').value.trim();
+      const seaName = document.getElementById('menu-sea-name').value.trim();
+      const seaPrice = document.getElementById('menu-sea-price').value.trim();
 
+      store.priceList = [];
+      if (sigName) store.priceList.push({ name: { kr: sigName, en: sigName, ch: sigName, jp: sigName }, price: sigPrice });
+      if (stdName) store.priceList.push({ name: { kr: stdName, en: stdName, ch: stdName, jp: stdName }, price: stdPrice });
+      if (seaName) store.priceList.push({ name: { kr: seaName, en: seaName, ch: seaName, jp: seaName }, price: seaPrice });
+
+      // Parking Status
+      store.parking = document.querySelector('input[name="m-parking-status"]:checked').value;
+
+      // Payments array
+      const selectedPayments = Array.from(document.querySelectorAll('input[name="m-payment-methods"]:checked')).map(el => el.value);
+      store.payments = selectedPayments;
+
+      // Apply base64 media
       if (tempUploadedMedia.length > 0) {
         store.gallery = tempUploadedMedia;
         if (selectedThumbnailBase64) {
@@ -1085,238 +1298,123 @@ function setupMerchantSystem() {
       }
 
       savePartnersToStorage();
-      alert(getTranslation(currentLang, 'saveStoreSuccess') || 'Saved store details.');
-      renderPartnersList();
+      alert("🎉 매장 상세 메뉴 및 미디어가 성공적으로 플랫폼에 게시 및 노출 순위 갱신 완료되었습니다!");
+      
+      // Return to tourist explore board to check
+      appMode = 'tourist';
+      renderDynamicNavigationDock();
+      switchTabPanel('tourist-explore');
     });
+  }
+}
+
+function updateMerchantAuthUI() {
+  const loginCard = document.getElementById('merchant-login-card');
+  const applyCard = document.getElementById('merchant-apply-card');
+  const approvedCard = document.getElementById('merchant-approved-status-card');
+
+  if (loginCard) loginCard.classList.add('hidden');
+  if (applyCard) applyCard.classList.add('hidden');
+  if (approvedCard) approvedCard.classList.add('hidden');
+
+  if (!currentUser || currentUserRole !== 'merchant') {
+    if (loginCard) loginCard.classList.remove('hidden');
+  } else {
+    const isApproved = localStorage.getItem(`nampogogo_merchant_approved_${currentUser}`) === 'true';
+    if (isApproved) {
+      if (approvedCard) approvedCard.classList.remove('hidden');
+    } else {
+      if (applyCard) applyCard.classList.remove('hidden');
+    }
   }
 }
 
 function findMerchantStore() {
-  if (currentUserRole !== 'merchant') return null;
+  if (!currentUser || currentUserRole !== 'merchant') return null;
   const storeId = currentUser.toLowerCase().replace('owner_', 'partner_');
   return partnersList.find(p => p.id === storeId) || partnersList[0];
 }
 
-function renderMerchantStats() {
-  if (currentUserRole !== 'merchant') return;
-
+function renderMerchantManagementForm() {
   const store = findMerchantStore();
   if (!store) return;
 
-  const editBenefit = document.getElementById('edit-benefit-input');
-  const editHours = document.getElementById('edit-hours-input');
-  const editPhone = document.getElementById('edit-phone-input');
-  const reviewCount = document.getElementById('merchant-review-count');
+  document.getElementById('edit-benefit-input').value = store.benefits[currentLang] || store.benefits['en'] || '';
+  document.getElementById('edit-hours-input').value = store.hours || '11:00 - 22:00';
+  document.getElementById('edit-phone-input').value = store.phone || '+82-51-111-2222';
 
-  if (editBenefit) editBenefit.value = store.benefits[currentLang] || store.benefits['en'];
-  if (editHours) editHours.value = store.hours;
-  if (editPhone) editPhone.value = store.phone;
-  if (reviewCount) reviewCount.textContent = `${store.reviews.length}개`;
-  
-  const tbody = document.querySelector('#merchant-visit-logs-table tbody');
-  if (!tbody) return;
-  tbody.innerHTML = '';
+  // Load registered menus
+  const sigNameInput = document.getElementById('menu-sig-name');
+  const sigPriceInput = document.getElementById('menu-sig-price');
+  const stdNameInput = document.getElementById('menu-std-name');
+  const stdPriceInput = document.getElementById('menu-std-price');
+  const seaNameInput = document.getElementById('menu-sea-name');
+  const seaPriceInput = document.getElementById('menu-sea-price');
 
-  const visitLogs = [];
+  if (store.priceList && store.priceList[0]) {
+    sigNameInput.value = store.priceList[0].name[currentLang] || store.priceList[0].name['en'];
+    sigPriceInput.value = store.priceList[0].price;
+  } else {
+    sigNameInput.value = ''; sigPriceInput.value = '';
+  }
+
+  if (store.priceList && store.priceList[1]) {
+    stdNameInput.value = store.priceList[1].name[currentLang] || store.priceList[1].name['en'];
+    stdPriceInput.value = store.priceList[1].price;
+  } else {
+    stdNameInput.value = ''; stdPriceInput.value = '';
+  }
+
+  if (store.priceList && store.priceList[2]) {
+    seaNameInput.value = store.priceList[2].name[currentLang] || store.priceList[2].name['en'];
+    seaPriceInput.value = store.priceList[2].price;
+  } else {
+    seaNameInput.value = ''; seaPriceInput.value = '';
+  }
+
+  // Load parking
+  const parkVal = store.parking || '유';
+  document.querySelectorAll('input[name="m-parking-status"]').forEach(radio => {
+    radio.checked = radio.value === parkVal;
+  });
+
+  // Load payments
+  const pays = store.payments || ["신용카드", "삼성페이"];
+  document.querySelectorAll('input[name="m-payment-methods"]').forEach(box => {
+    box.checked = pays.includes(box.value);
+  });
+
+  // Load stamp count count
+  let stampCount = 0;
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
     if (key.startsWith('nampogogo_stamps_')) {
-      const visitorName = key.replace('nampogogo_stamps_', '');
       const stamps = JSON.parse(localStorage.getItem(key)) || [];
-      
       stamps.forEach(s => {
-        if (s.partnerId === store.id) {
-          visitLogs.push({
-            time: s.timestamp + ' (' + s.date + ')',
-            visitor: visitorName,
-            certified: 'Yes'
-          });
-        }
+        if (s.partnerId === store.id) stampCount += s.count;
       });
     }
   }
-
-  if (visitLogs.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="3" class="text-center" style="color:var(--text-muted);">No QR check-ins recorded yet.</td></tr>`;
-  } else {
-    visitLogs.forEach(log => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${log.time}</td>
-        <td>${log.visitor}</td>
-        <td class="text-success">${log.certified}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
+  const stampCountEl = document.getElementById('merchant-stamps-val');
+  if (stampCountEl) stampCountEl.textContent = `${stampCount}건`;
 }
 
-// 13. ADMIN Console logic
-function setupAdminSystem() {
-  const storeForm = document.getElementById('admin-add-store-form');
-  const noticeForm = document.getElementById('admin-add-notice-form');
-  const fileInput = document.getElementById('admin-media-files');
-
-  if (fileInput) {
-    fileInput.addEventListener('change', (e) => {
-      const files = e.target.files;
-      const previewContainer = document.getElementById('admin-media-previews');
-      if (!previewContainer) return;
-
-      previewContainer.innerHTML = '';
-      tempUploadedMedia = [];
-
-      Array.from(files).forEach((file, index) => {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const base64Data = event.target.result;
-          const isVideo = file.type.startsWith('video/');
-
-          tempUploadedMedia.push({
-            type: isVideo ? 'video' : 'image',
-            data: base64Data
-          });
-
-          const pBox = document.createElement('div');
-          pBox.className = `preview-thumb-box ${isVideo ? 'video' : ''}`;
-          pBox.style.backgroundImage = isVideo ? 'none' : `url('${base64Data}')`;
-          
-          const radio = document.createElement('input');
-          radio.type = 'radio';
-          radio.name = 'admin-thumb-select';
-          radio.value = index;
-          if (index === 0) {
-            radio.checked = true;
-            selectedThumbnailBase64 = base64Data;
-          }
-          
-          radio.addEventListener('change', () => {
-            selectedThumbnailBase64 = base64Data;
-          });
-
-          pBox.appendChild(radio);
-          previewContainer.appendChild(pBox);
-        };
-        reader.readAsDataURL(file);
-      });
-    });
-  }
-
-  if (storeForm) {
-    storeForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const nameVal = document.getElementById('admin-store-name').value.trim();
-      const catVal = document.getElementById('admin-store-cat').value;
-      const imgVal = document.getElementById('admin-store-img').value.trim();
-      const benefitVal = document.getElementById('admin-store-benefit').value.trim();
-      const priceVal = document.getElementById('admin-store-price').value.trim();
-      const isPartnerChecked = document.getElementById('admin-store-ispartner').checked;
-
-      const newId = 'partner_' + Date.now();
-      const finalCoverImg = selectedThumbnailBase64 || imgVal;
-
-      const newStoreObj = {
-        id: newId,
-        name: { kr: nameVal, en: nameVal, ch: nameVal, jp: nameVal },
-        category: catVal,
-        isPartner: isPartnerChecked,
-        image: finalCoverImg,
-        gallery: tempUploadedMedia,
-        rating: 5.0,
-        scores: { hygiene: 5.0, taste: 5.0, service: 5.0, cleanliness: 5.0 },
-        posX: 50,
-        posY: 50,
-        mapLinkNaver: `https://map.naver.com/v5/directions/14363294,35.097489,내위치,,/14363310,35.098222,목적지,,/walk`,
-        mapLinkGoogle: `https://www.google.com/maps/dir/?api=1&origin=35.097489,129.034789&destination=35.098222,129.035789&travelmode=walking`,
-        distanceValue: "350m",
-        address: { kr: "부산 중구 남포동 일대", en: "Nampodong, Jung-gu, Busan", ch: "釜山中区南浦洞", jp: "釜山中区南浦洞" },
-        phone: "+82-51-111-2222",
-        hours: "11:00 - 22:00",
-        priceList: [
-          { name: { kr: "대표 패키지 코스", en: "Signature Package", ch: "招牌主打套餐", jp: "대표코스" }, price: priceVal }
-        ],
-        menuForeign: {
-          en: `Signature Course - ${priceVal}`,
-          ch: `招牌套餐 - ${priceVal}`,
-          jp: `代表メニュー - ${priceVal}`
-        },
-        benefits: { kr: benefitVal, en: benefitVal, ch: benefitVal, jp: benefitVal },
-        seoDescription: `${nameVal} - 남포동에 위치한 제휴매장 정보.`,
-        seoKeywords: `남포동 ${nameVal}, 부산 ${nameVal}`,
-        reviews: []
-      };
-
-      partnersList.unshift(newStoreObj);
-      savePartnersToStorage();
-      alert(getTranslation(currentLang, 'addStoreSuccess') || 'Add store success.');
-      
-      localStorage.setItem('nampogogo_partners_v3', JSON.stringify(partnersList));
-
-      storeForm.reset();
-      const adminPreviews = document.getElementById('admin-media-previews');
-      if (adminPreviews) adminPreviews.innerHTML = '';
-      tempUploadedMedia = [];
-      selectedThumbnailBase64 = "";
-
-      renderPartnersList();
-      document.querySelector('.nav-btn[data-tab="explore"]').click();
-    });
-  }
-
-  if (noticeForm) {
-    noticeForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const noticeText = document.getElementById('admin-notice-textarea').value.trim();
-      if (!noticeText) return;
-
-      const now = new Date();
-      const dateStr = now.toISOString().split('T')[0];
-
-      updateHistoryList.unshift({
-        date: dateStr,
-        content: noticeText
-      });
-
-      localStorage.setItem('nampogogo_notices', JSON.stringify(updateHistoryList));
-      alert("Notice posted successfully!");
-      
-      document.getElementById('admin-notice-textarea').value = '';
-      renderUpdateLogs();
-    });
-  }
-}
-
-function renderAdminReviews() {
-  if (currentUserRole !== 'admin') return;
-
-  const tbody = document.querySelector('#admin-reviews-table tbody');
-  if (!tbody) return;
-  tbody.innerHTML = '';
-
-  let count = 0;
-  partnersList.forEach(p => {
-    p.reviews.forEach(rev => {
-      count++;
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${p.id}</td>
-        <td>${rev.username}</td>
-        <td class="text-warning">★ ${rev.rating.toFixed(1)}</td>
-        <td>${rev.content[currentLang] || rev.content['en']}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-  });
-
-  if (count === 0) {
-    tbody.innerHTML = `<tr><td colspan="4" class="text-center" style="color:var(--text-muted);">No reviews written on platform yet.</td></tr>`;
-  }
-}
+// 13. ADMIN Console Mock placeholder (Needed to prevent app.js setup errors)
+function setupAdminSystem() {}
+function renderAdminReviews() {}
 
 // 14. AI Course Planner Logic
 function setupAIPlanner() {
   const btnPlanner = document.getElementById('btn-run-ai-recommend');
   const outputArea = document.getElementById('ai-course-output-area');
+  const shortcutBtn = document.getElementById('btn-shortcut-ai-planner');
+  const plannerForm = document.getElementById('ai-planner-modal-content-area');
+
+  if (shortcutBtn) {
+    shortcutBtn.addEventListener('click', () => {
+      plannerForm.classList.toggle('hidden');
+    });
+  }
 
   if (btnPlanner && outputArea) {
     btnPlanner.addEventListener('click', () => {
@@ -1340,14 +1438,12 @@ function setupAIPlanner() {
 
       const restShops = partnersList.filter(p => p.id !== 'partner_klounge');
       const matched = restShops.filter(p => {
-        const catMatch = selectedActs.includes(p.category);
-        
+        const catMatch = selectedActs.includes(p.category) || selectedActs.includes(p.subCategory);
         let priceVal = 0;
         if (p.priceList && p.priceList[0]) {
           const rawStr = p.priceList[0].price;
           priceVal = parseInt(rawStr.replace(/[^0-9]/g, '')) || 0;
         }
-
         const budgetMatch = priceVal <= budgetVal;
         return catMatch && budgetMatch;
       });

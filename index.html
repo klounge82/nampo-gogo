@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nampo GoGo - Nampodong Smart Tour Platform</title>
+  <title>Nampo GoGo - Smart Local Tour Platform</title>
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,494 +18,559 @@
   <!-- Mobile Frame Container -->
   <div class="mobile-frame">
     
-    <!-- Top Header Bar -->
-    <header class="nampo-header">
-      <div class="logo-group">
-        <span class="logo-emoji">🏮</span>
-        <h1 data-trans="appName">Nampo GoGo</h1>
-      </div>
-      
-      <div class="header-controls">
-        <!-- Update Dropdown Slide Panel -->
-        <div class="update-dropdown-wrap">
-          <button id="btn-update-toggle" class="btn-update">
-            <span data-trans="updateBtn">업데이트 내역</span>
-            <i data-lucide="chevron-down" id="icon-update-chevron"></i>
-          </button>
-          
-          <div id="update-panel" class="update-panel-content">
-            <h4 data-trans="updateTitle">최근 업데이트 소식</h4>
-            <ul id="update-logs-list">
-              <!-- Dynamic update logs -->
-            </ul>
-          </div>
-        </div>
-
-        <!-- Lang Select -->
-        <div class="lang-drop">
-          <select id="app-lang-select">
-            <option value="kr" selected>KR</option>
-            <option value="en">EN</option>
-            <option value="ch">CH</option>
-            <option value="jp">JP</option>
-          </select>
-        </div>
-      </div>
-    </header>
-
-    <!-- Top Navigation Dock (Moved to Top for better navigation response) -->
-    <nav class="nampo-nav-dock">
-      <button class="nav-btn active" data-tab="dashboard">
-        <i data-lucide="home"></i>
-        <span data-trans="dashboard">대시보드</span>
-      </button>
-      <button class="nav-btn" data-tab="explore">
-        <i data-lucide="search"></i>
-        <span data-trans="explore">매장 탐색</span>
-      </button>
-      <button class="nav-btn" data-tab="travel-log">
-        <i data-lucide="map"></i>
-        <span data-trans="travelLog">여행 로그</span>
-      </button>
-      <button class="nav-btn" data-tab="profile">
-        <i data-lucide="user"></i>
-        <span data-trans="profile">내 정보</span>
-      </button>
-    </nav>
-
-    <!-- App Body (Scrollable Content Area) -->
-    <main class="nampo-body">
-
-      <!-- TAB 1: Dashboard -->
-      <section id="tab-dashboard" class="tab-panel active">
-        <!-- Simple text title instead of heavy gradient hero banner (Requested) -->
-        <div class="nampo-simple-title" data-trans="tagline">남포동 스마트 로컬여행 플랫폼</div>
-
-        <!-- User Greeting & Authentication Info Bar -->
-        <div class="glass-box auth-status-banner">
-          <div class="status-icon-wrap">
-            <i data-lucide="user" class="text-primary" id="user-status-icon"></i>
-          </div>
-          <div class="status-text-wrap">
-            <h3 id="user-status-heading">Guest User</h3>
-            <span class="user-role-badge" id="dashboard-user-role">Visitor</span>
-            <p id="user-status-desc" data-trans="pleaseLogin">로그인 후 QR 인증과 여행 로그를 기록해 보세요.</p>
-          </div>
-          <button class="btn btn-sm btn-outline" id="btn-dashboard-auth-action">Login</button>
-        </div>
-
-        <!-- 7 Core Quick Access Menu Categories (Clean Flat Cards) -->
-        <div class="core-menu-grid">
-          <button class="menu-item-btn" data-menu="food">
-            <span class="menu-label" data-trans="menuFood">먹거리</span>
-          </button>
-          <button class="menu-item-btn" data-menu="activity">
-            <span class="menu-label" data-trans="menuActivity">체험</span>
-          </button>
-          <button class="menu-item-btn" data-menu="shopping">
-            <span class="menu-label" data-trans="menuShopping">쇼핑</span>
-          </button>
-          <button class="menu-item-btn" data-menu="sightseeing">
-            <span class="menu-label" data-trans="menuSightseeing">관광지</span>
-          </button>
-          <button class="menu-item-btn" data-menu="course">
-            <span class="menu-label" data-trans="menuCourse">추천코스</span>
-          </button>
-          <button class="menu-item-btn" data-menu="benefit">
-            <span class="menu-label" data-trans="menuBenefit">혜택매장</span>
-          </button>
-          <button class="menu-item-btn" data-menu="log">
-            <span class="menu-label" data-trans="menuLog">내 여행로그</span>
-          </button>
-        </div>
-
-        <!-- AI Nampodong Course Router Form -->
-        <div class="glass-box ai-planner-box-layout">
-          <div class="ai-box-header">
-            <i data-lucide="bot"></i>
-            <span>AI 남포동 맞춤 코스 추천기</span>
-          </div>
-          <p class="ai-box-desc">하고 싶은 활동과 예산을 적어주시면 AI가 최적의 도보 코스를 매칭합니다.</p>
-          <form id="nampo-ai-planner-form" onsubmit="event.preventDefault();" style="margin-top: 12px;">
-            <div class="form-group-nampo">
-              <label>하고 싶은 활동 (중복 선택 가능)</label>
-              <div class="checkbox-group-grid">
-                <label class="check-pill">
-                  <input type="checkbox" name="ai-activities" value="massage" checked>
-                  <span>체험</span>
-                </label>
-                <label class="check-pill">
-                  <input type="checkbox" name="ai-activities" value="food" checked>
-                  <span>맛집</span>
-                </label>
-                <label class="check-pill">
-                  <input type="checkbox" name="ai-activities" value="cafe" checked>
-                  <span>카페</span>
-                </label>
-                <label class="check-pill">
-                  <input type="checkbox" name="ai-activities" value="shopping">
-                  <span>쇼핑</span>
-                </label>
-                <label class="check-pill">
-                  <input type="checkbox" name="ai-activities" value="sightseeing">
-                  <span>관광</span>
-                </label>
-              </div>
-            </div>
-
-            <div class="form-group-nampo">
-              <label>1인당 예산 범위 (KRW)</label>
-              <select id="ai-budget-select" class="nampo-input">
-                <option value="30000">30,000 KRW 이하</option>
-                <option value="60000" selected>60,000 KRW 이하</option>
-                <option value="100000">100,000 KRW 이하</option>
-                <option value="999999">예산 상관없음</option>
-              </select>
-            </div>
-            
-            <button type="button" class="btn btn-primary btn-block" id="btn-run-ai-recommend">
-              <i data-lucide="sparkles"></i> AI 추천 코스 짜기
-            </button>
-          </form>
-
-          <!-- Output area -->
-          <div id="ai-course-output-area" class="ai-course-output-container hidden">
-            <!-- Dynamic route cards with navigation links -->
-          </div>
-        </div>
-
-        <!-- Live Metrics Grid -->
-        <div class="info-blocks-grid">
-          <div class="glass-box info-item">
-            <div class="info-header">
-              <span>Nampodong Weather</span>
-              <i data-lucide="cloud-sun" class="text-warning"></i>
-            </div>
-            <span class="info-value">25°C</span>
-            <span class="info-sub">Gwangbok-ro, Busan</span>
-          </div>
-          <div class="glass-box info-item">
-            <div class="info-header">
-              <span>Stamp Status</span>
-              <i data-lucide="compass" class="text-secondary"></i>
-            </div>
-            <span class="info-value" id="dashboard-stamp-count">0 / 5</span>
-            <span class="info-sub">Checked-in shops</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- TAB 2: Explore & Shop Lists -->
-      <section id="tab-explore" class="tab-panel">
-        <div class="section-title">
-          <h2 data-trans="exploreTitle">남포동 연계 제휴 매장</h2>
-          <p data-trans="exploreDesc">마사지, 맛집, 카페, 쇼핑, 야경 코스까지 남포동의 베스트 파트너사입니다.</p>
-        </div>
-
-        <!-- Filter slider -->
-        <div class="category-slider">
-          <button class="cat-pill active" data-category="all" data-trans="allCategories">전체 카테고리</button>
-          <button class="cat-pill" data-category="massage" data-trans="catMassage">뷰티 & 마사지</button>
-          <button class="cat-pill" data-category="food" data-trans="catFood">남포 맛집</button>
-          <button class="cat-pill" data-category="cafe" data-trans="catCafe">감성 카페</button>
-          <button class="cat-pill" data-category="shopping" data-trans="catShopping">쇼핑 & 패션</button>
-          <button class="cat-pill" data-category="sightseeing" data-trans="catSightseeing">관광 & 야경</button>
-        </div>
-
-        <!-- Partners cards grid -->
-        <div class="partners-list" id="partners-cards-container">
-          <!-- Dynamic cards -->
-        </div>
-      </section>
-
-      <!-- TAB 3: Travel Log Timeline -->
-      <section id="tab-travel-log" class="tab-panel">
-        <div class="section-title">
-          <h2 data-trans="logTitle">나의 여행 로그 카드</h2>
-          <p data-trans="logDesc">QR 인증으로 수집된 나만의 남포동 여행 코스 리포트입니다.</p>
-        </div>
-
-        <div class="glass-box log-status-card">
-          <div class="stamp-grid" id="stamp-indicator-grid">
-            <!-- Stamps indicator nodes -->
-          </div>
-          <div class="log-meta-status">
-            <span data-trans="logCount">방문한 매장 수</span>: <strong class="text-primary" id="log-count-num">0</strong>
-          </div>
-        </div>
-
-        <!-- Log Timeline -->
-        <div id="travel-log-timeline" class="travel-timeline">
-          <div class="empty-log-state" id="log-empty-msg">
-            <i data-lucide="map-pin"></i>
-            <p data-trans="emptyLog">아직 방문 인증된 매장이 없습니다. 제휴 매장을 방문하고 스탬프를 적립해 보세요!</p>
-          </div>
-          <!-- Dynamic timeline nodes with Memobutton & Edit field -->
-        </div>
-
-        <!-- SNS export card button -->
-        <div class="log-actions hidden" id="log-actions-bar">
-          <button class="btn btn-primary btn-block" id="btn-export-log-card">
-            <i data-lucide="share-2"></i> <span data-trans="snsExport">SNS 공유용 카드 생성 📸</span>
-          </button>
-        </div>
-      </section>
-
-      <!-- TAB 4: Profile / Admin / Merchant Panels -->
-      <section id="tab-profile" class="tab-panel">
+    <!-- 1. INTRO MODE SELECT SCREEN (Shows up first) -->
+    <div id="intro-screen" class="intro-screen">
+      <div class="intro-overlay"></div>
+      <div class="intro-content-wrap">
+        <div class="intro-logo"> Lantern 🏮 Nampo GoGo </div>
+        <h2>남포동 스마트 로컬여행 플랫폼</h2>
+        <p class="intro-desc">원하시는 모드를 선택하여 플랫폼을 시작해 주세요.</p>
         
-        <!-- Standard Profile Header Card -->
-        <div class="profile-card-wrapper">
-          <div class="profile-avatar" id="profile-avatar-emoji">👤</div>
-          <h3 id="profile-username">Guest User</h3>
-          <span class="user-role-badge-lg" id="profile-role-badge">Visitor</span>
-        </div>
+        <div class="mode-select-box-grid">
+          <!-- Tourist mode card -->
+          <div class="mode-card-btn" id="btn-mode-tourist">
+            <div class="mode-card-icon">✈️</div>
+            <h3>관광객 전용 모드</h3>
+            <p>제휴 매장 검색, 길찾기, QR 스탬프 로그 모드</p>
+            <span class="mode-badge-action">접속하기 ➔</span>
+          </div>
 
-        <!-- 1. Guest Auth Form -->
-        <div class="glass-box auth-form-container" id="auth-form-card">
-          <h4 data-trans="loginTitle">3초 초간단 가입 & 로그인</h4>
-          <p class="auth-desc" data-trans="loginDesc">아이디와 비밀번호만 입력하면 즉시 가입 및 이용이 가능합니다.</p>
-          
-          <form id="nampo-auth-form" onsubmit="event.preventDefault();">
-            <!-- Type Selector -->
-            <div class="form-group-nampo">
-              <label>회원 구분 (Join Type)</label>
-              <div class="role-selector-row">
-                <label class="radio-pill">
-                  <input type="radio" name="auth-role" value="visitor" checked>
-                  <span data-trans="joinTypeVisitor">관광객(손님)으로 가입</span>
-                </label>
-                <label class="radio-pill">
-                  <input type="radio" name="auth-role" value="merchant">
-                  <span data-trans="joinTypeMerchant">사업자(상인)로 가입</span>
-                </label>
-              </div>
-            </div>
-
-            <div class="input-group">
-              <i data-lucide="user"></i>
-              <input type="text" id="auth-username" required placeholder="아이디(닉네임) 입력" data-trans="usernamePlaceholder">
-            </div>
-            
-            <div class="input-group">
-              <i data-lucide="lock"></i>
-              <input type="password" id="auth-password" required placeholder="비밀번호 입력" data-trans="passwordPlaceholder">
-            </div>
-
-            <div class="input-group">
-              <i data-lucide="lock-keyhole"></i>
-              <input type="password" id="auth-password-confirm" required placeholder="비밀번호 확인 입력" data-trans="passwordConfirmPlaceholder">
-            </div>
-
-            <button type="submit" class="btn btn-primary btn-block" id="btn-submit-auth">
-              <i data-lucide="key"></i> <span data-trans="authBtn">로그인 / 가입 완료</span>
-            </button>
-          </form>
-        </div>
-
-        <!-- 2. MERCHANT (Business Owner) Control Dashboard Panel -->
-        <div class="merchant-dashboard-panel hidden" id="merchant-control-card">
-          <div class="glass-box">
-            <h4 data-trans="merchantTitle">내 매장 관리 대시보드</h4>
-            <p class="auth-desc" data-trans="merchantDesc">오늘 방문자 수와 스탬프 발급 건수를 체크하고 정보를 편집하세요.</p>
-            
-            <!-- Statistics metrics grids -->
-            <div class="merchant-metrics-grid">
-              <div class="metric-card bg-primary-soft">
-                <span class="metric-title" data-trans="visitorToday">오늘 방문자 수</span>
-                <span class="metric-value" id="merchant-today-visitors">14명</span>
-              </div>
-              <div class="metric-card bg-secondary-soft">
-                <span class="metric-title" data-trans="visitorTotal">누적 방문자 수</span>
-                <span class="metric-value" id="merchant-total-visitors">482명</span>
-              </div>
-              <div class="metric-card bg-success-soft">
-                <span class="metric-title" data-trans="qrStampsIssued">QR 인증 횟수</span>
-                <span class="metric-value" id="merchant-qr-stamps">128건</span>
-              </div>
-              <div class="metric-card bg-warning-soft">
-                <span class="metric-title" data-trans="reviewCount">등록된 리뷰 수</span>
-                <span class="metric-value" id="merchant-review-count">2개</span>
-              </div>
-            </div>
-
-            <!-- Virtual visual chart -->
-            <div class="merchant-chart-container">
-              <span class="chart-label">📊 Weekly Visit Analytics (Check-ins)</span>
-              <div class="mock-chart-bar-flow">
-                <div class="chart-bar" style="height: 30%;" data-val="12"><span>Mon</span></div>
-                <div class="chart-bar" style="height: 50%;" data-val="24"><span>Tue</span></div>
-                <div class="chart-bar" style="height: 45%;" data-val="19"><span>Wed</span></div>
-                <div class="chart-bar" style="height: 70%;" data-val="35"><span>Thu</span></div>
-                <div class="chart-bar" style="height: 90%;" data-val="48"><span>Fri</span></div>
-                <div class="chart-bar" style="height: 85%;" data-val="42"><span>Sat</span></div>
-                <div class="chart-bar" style="height: 60%;" data-val="28"><span>Sun</span></div>
-              </div>
-            </div>
-
-            <!-- Edit store profile details -->
-            <div class="store-edit-form-wrap">
-              <h5 style="font-size: 13px; margin: 16px 0 10px 0;" data-trans="editStoreInfo">매장 상세 정보 수정</h5>
-              <form id="merchant-store-edit-form" onsubmit="event.preventDefault();">
-                <div class="form-group-nampo">
-                  <label>Tourist Benefits (혜택)</label>
-                  <input type="text" id="edit-benefit-input" required class="nampo-input">
-                </div>
-                <div class="form-group-nampo">
-                  <label>Store Working Hours (영업시간)</label>
-                  <input type="text" id="edit-hours-input" required class="nampo-input">
-                </div>
-                <div class="form-group-nampo">
-                  <label>Store Phone Number (연락처)</label>
-                  <input type="text" id="edit-phone-input" required class="nampo-input">
-                </div>
-
-                <!-- Media Upload Area for Merchant -->
-                <div class="form-group-nampo media-uploader-box">
-                  <label>매장 미디어 다중 업로드 (사진/동영상)</label>
-                  <div class="upload-guide-info">
-                    📸 <strong>사진 규격:</strong> 800x600px 권장, 확장자: JPG/PNG/WEBP (최대 10장, 장당 5MB)<br>
-                    🎥 <strong>동영상 규격:</strong> 1920x1080px 권장, 확장자: MP4/WEBM (최대 3개, 개당 20MB)
-                  </div>
-                  <input type="file" id="merchant-media-files" multiple accept="image/*, video/*" class="nampo-input" style="padding: 6px;">
-                  
-                  <div style="margin-top:10px; font-size:10px; font-weight:700; color:var(--primary);">💡 썸네일(대표사진) 선택</div>
-                  <div class="media-thumb-selector-grid" id="merchant-media-previews">
-                    <!-- Base64 previews list -->
-                  </div>
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-block btn-sm" id="btn-save-merchant-info">Save Updates</button>
-              </form>
-            </div>
-
-            <!-- Visitor check-in logs table list -->
-            <div class="merchant-logs-section">
-              <h5 style="font-size: 13px; margin: 20px 0 10px 0;">📋 Real-time visit Log data (방문기록)</h5>
-              <div class="table-scroll-wrap">
-                <table class="nampo-table" id="merchant-visit-logs-table">
-                  <thead>
-                    <tr>
-                      <th>Time</th>
-                      <th>Visitor ID</th>
-                      <th>Certified?</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <!-- Dynamic logs -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
+          <!-- Merchant mode card -->
+          <div class="mode-card-btn" id="btn-mode-merchant">
+            <div class="mode-card-icon">🏢</div>
+            <h3>제휴 사업자 전용 모드</h3>
+            <p>매장 등록, 다중 업로드 가이드, 메뉴/결제 관리</p>
+            <span class="mode-badge-action-sec">가입 및 관리 ➔</span>
           </div>
         </div>
+        
+        <div class="intro-footer">Lantern Smart Platform v3.0</div>
+      </div>
+    </div>
 
-        <!-- 3. ADMIN Control Console Panel -->
-        <div class="admin-control-panel hidden" id="admin-control-card">
-          <div class="glass-box">
-            <h4 data-trans="adminTitle">Nampo GoGo 통합 어드민</h4>
-            <p class="auth-desc" data-trans="adminDesc">새 매장 정보 등록, 업데이트 공지 관리 및 전체 리뷰 모니터링을 수행합니다.</p>
+    <!-- 2. MAIN APP FRAME (Hidden initially, shown after mode selection) -->
+    <div id="app-workspace" class="app-workspace-container hidden">
+
+      <!-- Top Header Bar -->
+      <header class="nampo-header">
+        <div class="logo-group" id="btn-header-logo-home">
+          <span class="logo-emoji">🏮</span>
+          <h1>Nampo GoGo</h1>
+        </div>
+        
+        <div class="header-controls">
+          <!-- Mode Switch Button -->
+          <button id="btn-quick-mode-switch" class="btn-mode-switch-pill">
+            <i data-lucide="refresh-cw"></i> Mode
+          </button>
+
+          <!-- Update Notices Wrap -->
+          <div class="update-dropdown-wrap">
+            <button id="btn-update-toggle" class="btn-update">
+              <span data-trans="updateBtn">업데이트 내역</span>
+              <i data-lucide="chevron-down" id="icon-update-chevron"></i>
+            </button>
             
-            <!-- Register new partner store -->
-            <div class="admin-section-block">
-              <h5 data-trans="addStoreBtn">➕ 신규 제휴 매장 등록</h5>
-              <form id="admin-add-store-form" onsubmit="event.preventDefault();" style="margin-top: 10px;">
+            <div id="update-panel" class="update-panel-content">
+              <h4 data-trans="updateTitle">최근 업데이트 소식</h4>
+              <ul id="update-logs-list">
+                <!-- Loaded dynamically -->
+              </ul>
+            </div>
+          </div>
+
+          <!-- Lang Select -->
+          <div class="lang-drop">
+            <select id="app-lang-select">
+              <option value="kr" selected>KR</option>
+              <option value="en">EN</option>
+              <option value="ch">CH</option>
+              <option value="jp">JP</option>
+            </select>
+          </div>
+        </div>
+      </header>
+
+      <!-- Sticky Top Navigation Tab Dock (Role-based active panels) -->
+      <nav class="nampo-nav-dock" id="dynamic-nav-dock">
+        <!-- Renders based on tourist/merchant mode -->
+      </nav>
+
+      <!-- App Body Scroll Area -->
+      <main class="nampo-body">
+
+        <!-- ================= TOURIST MODE PANELS ================= -->
+
+        <!-- TOURIST TAB 1: Delivery App-Style Food Board -->
+        <section id="tab-tourist-explore" class="tab-panel active">
+          
+          <div class="nampo-simple-title">남포동 스마트 로컬여행 플랫폼</div>
+
+          <!-- User Greeting Status Banner -->
+          <div class="glass-box auth-status-banner">
+            <div class="status-icon-wrap">
+              <i data-lucide="user" class="text-primary" id="user-status-icon"></i>
+            </div>
+            <div class="status-text-wrap">
+              <h3 id="user-status-heading">Guest User</h3>
+              <span class="user-role-badge" id="dashboard-user-role">Visitor</span>
+              <p id="user-status-desc" data-trans="pleaseLogin">로그인 후 QR 인증과 여행 로그를 기록해 보세요.</p>
+            </div>
+            <button class="btn btn-sm btn-outline" id="btn-tourist-login-shortcut">Login</button>
+          </div>
+
+          <!-- Delivery App (배민/요기요) Style Subcategory Grid Grid -->
+          <h4 class="menu-grid-header">🍲 주변 식사 카테고리 검색</h4>
+          <div class="delivery-category-grid">
+            <div class="delivery-cat-item active" data-subcat="all">
+              <div class="cat-circle">🍔</div>
+              <span>전체보기</span>
+            </div>
+            <div class="delivery-cat-item" data-subcat="pork">
+              <div class="cat-circle">🍲</div>
+              <span data-trans="subPork">국밥/한식</span>
+            </div>
+            <div class="delivery-cat-item" data-subcat="seafood">
+              <div class="cat-circle">🐙</div>
+              <span data-trans="subSeafood">해산물/회</span>
+            </div>
+            <div class="delivery-cat-item" data-subcat="pizza">
+              <div class="cat-circle">🍕</div>
+              <span data-trans="subPizza">피자/양식</span>
+            </div>
+            <div class="delivery-cat-item" data-subcat="korean">
+              <div class="cat-circle">🍚</div>
+              <span data-trans="subKorean">전통한식</span>
+            </div>
+            <div class="delivery-cat-item" data-subcat="chinese">
+              <div class="cat-circle">🍜</div>
+              <span data-trans="subChinese">중식/요리</span>
+            </div>
+            <div class="delivery-cat-item" data-subcat="japanese">
+              <div class="cat-circle">🍣</div>
+              <span data-trans="subJapanese">일식/돈까스</span>
+            </div>
+            <div class="delivery-cat-item" data-subcat="massage">
+              <div class="cat-circle">💆</div>
+              <span data-trans="subMassage">마사지/뷰티</span>
+            </div>
+            <div class="delivery-cat-item" data-subcat="cafe">
+              <div class="cat-circle">☕</div>
+              <span data-trans="subCafe">디저트/카페</span>
+            </div>
+          </div>
+
+          <!-- AI Nampodong Course Router Mini Form -->
+          <div class="glass-box ai-planner-box-layout">
+            <div class="ai-box-header">
+              <i data-lucide="bot"></i>
+              <span>AI 남포동 맞춤 코스 추천기</span>
+            </div>
+            <p class="ai-box-desc">하고 싶은 활동과 예산을 적어주시면 AI가 최적의 도보 코스를 매칭합니다.</p>
+            
+            <button type="button" class="btn btn-primary btn-block btn-sm" id="btn-shortcut-ai-planner" style="margin-top: 10px;">
+              <i data-lucide="sparkles"></i> AI 추천 코스 짜기 폼 열기
+            </button>
+            
+            <div id="ai-planner-modal-content-area" class="ai-modal-box-wrap hidden">
+              <form id="nampo-ai-planner-form" onsubmit="event.preventDefault();" style="margin-top: 12px;">
                 <div class="form-group-nampo">
-                  <label data-trans="storeNameLabel">매장명</label>
-                  <input type="text" id="admin-store-name" required placeholder="e.g. 자갈치 회센터" class="nampo-input">
+                  <label>하고 싶은 활동 (중복 선택 가능)</label>
+                  <div class="checkbox-group-grid">
+                    <label class="check-pill">
+                      <input type="checkbox" name="ai-activities" value="massage" checked>
+                      <span>체험</span>
+                    </label>
+                    <label class="check-pill">
+                      <input type="checkbox" name="ai-activities" value="food" checked>
+                      <span>맛집</span>
+                    </label>
+                    <label class="check-pill">
+                      <input type="checkbox" name="ai-activities" value="cafe" checked>
+                      <span>카페</span>
+                    </label>
+                    <label class="check-pill">
+                      <input type="checkbox" name="ai-activities" value="shopping">
+                      <span>쇼핑</span>
+                    </label>
+                    <label class="check-pill">
+                      <input type="checkbox" name="ai-activities" value="sightseeing">
+                      <span>관광</span>
+                    </label>
+                  </div>
                 </div>
+
                 <div class="form-group-nampo">
-                  <label data-trans="storeCategoryLabel">카테고리</label>
-                  <select id="admin-store-cat" class="nampo-input">
-                    <option value="food">food (먹거리)</option>
-                    <option value="massage">massage (체험/마사지)</option>
-                    <option value="shopping">shopping (쇼핑)</option>
-                    <option value="sightseeing">sightseeing (관광지/야경)</option>
-                    <option value="cafe">cafe (감성카페)</option>
+                  <label>1인당 예산 범위 (KRW)</label>
+                  <select id="ai-budget-select" class="nampo-input">
+                    <option value="30000">30,000 KRW 이하</option>
+                    <option value="60000" selected>60,000 KRW 이하</option>
+                    <option value="100000">100,000 KRW 이하</option>
+                    <option value="999999">예산 상관없음</option>
                   </select>
                 </div>
-                <div class="form-group-nampo">
-                  <label data-trans="storeImageLabel">대표 이미지 URL</label>
-                  <input type="url" id="admin-store-img" required value="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=400&q=80" class="nampo-input">
-                </div>
                 
-                <!-- Media Upload Area for Admin -->
-                <div class="form-group-nampo media-uploader-box">
-                  <label>매장 미디어 다중 업로드</label>
-                  <div class="upload-guide-info">
-                    📸 <strong>사진 규격:</strong> 800x600px 권장 (최대 10장) / 🎥 <strong>동영상 규격:</strong> 1920x1080px 권장 (최대 3개)
-                  </div>
-                  <input type="file" id="admin-media-files" multiple accept="image/*, video/*" class="nampo-input" style="padding: 6px;">
-                  
-                  <div style="margin-top:10px; font-size:10px; font-weight:700; color:var(--primary);">💡 썸네일(대표사진) 선택</div>
-                  <div class="media-thumb-selector-grid" id="admin-media-previews">
-                    <!-- Previews -->
-                  </div>
-                </div>
-
-                <div class="form-group-nampo">
-                  <label data-trans="storeBenefitLabel">관광객 혜택 내용</label>
-                  <input type="text" id="admin-store-benefit" required placeholder="e.g. 메인메뉴 주문시 음료 제공" class="nampo-input">
-                </div>
-                <div class="form-group-nampo">
-                  <label data-trans="storePriceLabel">가격 정보</label>
-                  <input type="text" id="admin-store-price" required placeholder="e.g. 대표 세트 25,000 KRW" class="nampo-input">
-                </div>
-                <div class="form-group-nampo checkbox-row">
-                  <input type="checkbox" id="admin-store-ispartner" checked>
-                  <label for="admin-store-ispartner" data-trans="isPartnerLabel">Nampo GoGo 공식 제휴 등록 여부</label>
-                </div>
-                <button type="submit" class="btn btn-primary btn-block btn-sm" id="btn-admin-add-store">Register Store</button>
+                <button type="button" class="btn btn-primary btn-block" id="btn-run-ai-recommend">
+                  <i data-lucide="sparkles"></i> 코스 빌드 시작
+                </button>
               </form>
-            </div>
 
-            <!-- Post updates & notices -->
-            <div class="admin-section-block" style="margin-top:24px;">
-              <h5 data-trans="writeNoticeBtn">📢 공지사항 및 업데이트 추가</h5>
-              <form id="admin-add-notice-form" onsubmit="event.preventDefault();" style="margin-top:10px;">
-                <textarea id="admin-notice-textarea" required placeholder="공지할 업데이트 내용을 입력하세요." data-trans="noticePlaceholder" class="writer-textarea" rows="2"></textarea>
-                <button type="submit" class="btn btn-secondary btn-block btn-sm" id="btn-admin-add-notice">Post Notice</button>
-              </form>
-            </div>
-
-            <!-- Global review list monitor -->
-            <div class="admin-section-block" style="margin-top:24px;">
-              <h5>💬 전체 리뷰 모니터링 관리</h5>
-              <div class="table-scroll-wrap" style="margin-top: 10px;">
-                <table class="nampo-table" id="admin-reviews-table">
-                  <thead>
-                    <tr>
-                      <th>Store ID</th>
-                      <th>Author</th>
-                      <th>Rating</th>
-                      <th>Content</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <!-- Loaded dynamically -->
-                  </tbody>
-                </table>
+              <!-- Output area -->
+              <div id="ai-course-output-area" class="ai-course-output-container hidden">
+                <!-- Dynamic route cards with navigation links -->
               </div>
             </div>
-
           </div>
-        </div>
 
-        <!-- Logout Action Bar -->
-        <div class="logout-container hidden" id="logout-card">
-          <button class="btn btn-secondary btn-block text-accent" id="btn-action-logout">
-            <i data-lucide="log-out"></i> <span data-trans="logoutBtn">로그아웃</span>
-          </button>
-        </div>
+          <!-- Shop list matching priority sorting rules (Fits 3 stores on screen, scrollable) -->
+          <div class="shop-list-header-row">
+            <h4>📋 주변 추천 맛집 및 마사지 센터</h4>
+            <span class="sort-tag-info">제휴사 ➔ 미디어수 ➔ 평점순 정렬</span>
+          </div>
 
-      </section>
+          <div class="delivery-partners-list" id="delivery-partners-container">
+            <!-- Rendered dynamically (Compacted style) -->
+          </div>
 
-    </main>
+        </section>
+
+        <!-- TOURIST TAB 2: Travel Log Timeline -->
+        <section id="tab-tourist-log" class="tab-panel">
+          <div class="section-title">
+            <h2 data-trans="logTitle">나의 여행 로그 카드</h2>
+            <p data-trans="logDesc">QR 인증으로 수집된 나만의 남포동 여행 코스 리포트입니다.</p>
+          </div>
+
+          <div class="glass-box log-status-card">
+            <div class="stamp-grid" id="stamp-indicator-grid">
+              <!-- Stamps indicator nodes -->
+            </div>
+            <div class="log-meta-status">
+              <span data-trans="logCount">방문한 매장 수</span>: <strong class="text-primary" id="log-count-num">0</strong>
+            </div>
+          </div>
+
+          <!-- Log Timeline -->
+          <div id="travel-log-timeline" class="travel-timeline">
+            <div class="empty-log-state" id="log-empty-msg">
+              <i data-lucide="map-pin"></i>
+              <p data-trans="emptyLog">아직 방문 인증된 매장이 없습니다. 제휴 매장을 방문하고 스탬프를 적립해 보세요!</p>
+            </div>
+            <!-- Dynamic timeline nodes -->
+          </div>
+
+          <!-- SNS export card button -->
+          <div class="log-actions hidden" id="log-actions-bar">
+            <button class="btn btn-primary btn-block" id="btn-export-log-card">
+              <i data-lucide="share-2"></i> <span data-trans="snsExport">SNS 공유용 카드 생성 📸</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- TOURIST TAB 3: Tourist Profile / Login -->
+        <section id="tab-tourist-profile" class="tab-panel">
+          <div class="profile-card-wrapper">
+            <div class="profile-avatar" id="profile-avatar-emoji">👤</div>
+            <h3 id="profile-username">Guest User</h3>
+            <span class="user-role-badge-lg" id="profile-role-badge">Visitor</span>
+          </div>
+
+          <!-- Guest login form -->
+          <div class="glass-box auth-form-container" id="auth-form-card">
+            <h4 data-trans="loginTitle">3초 초간단 가입 & 로그인</h4>
+            <p class="auth-desc" data-trans="loginDesc">아이디와 비밀번호만 입력하면 즉시 가입 및 이용이 가능합니다.</p>
+            
+            <form id="nampo-auth-form" onsubmit="event.preventDefault();">
+              <input type="hidden" name="auth-role" value="visitor"> <!-- Tourist always visitor -->
+              
+              <div class="input-group">
+                <i data-lucide="user"></i>
+                <input type="text" id="auth-username" required placeholder="아이디(닉네임) 입력" data-trans="usernamePlaceholder">
+              </div>
+              
+              <div class="input-group">
+                <i data-lucide="lock"></i>
+                <input type="password" id="auth-password" required placeholder="비밀번호 입력" data-trans="passwordPlaceholder">
+              </div>
+
+              <div class="input-group">
+                <i data-lucide="lock-keyhole"></i>
+                <input type="password" id="auth-password-confirm" required placeholder="비밀번호 확인 입력" data-trans="passwordConfirmPlaceholder">
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block" id="btn-submit-auth">
+                <i data-lucide="key"></i> <span data-trans="authBtn">로그인 / 가입 완료</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- Logout Button -->
+          <div class="logout-container hidden" id="logout-card">
+            <button class="btn btn-secondary btn-block text-accent" id="btn-action-logout">
+              <i data-lucide="log-out"></i> <span data-trans="logoutBtn">로그아웃</span>
+            </button>
+          </div>
+        </section>
+
+
+        <!-- ================= MERCHANT (BUSINESS) MODE PANELS ================= -->
+
+        <!-- MERCHANT TAB 1: Business Registration / Verification -->
+        <section id="tab-merchant-auth" class="tab-panel">
+          <div class="section-title">
+            <h2>제휴 사업자 계정 관리</h2>
+            <p>매장 정보를 등록하고 제휴 승인을 요청하여 파트너로 노출되세요.</p>
+          </div>
+
+          <!-- Step 1: Join / Login form -->
+          <div class="glass-box" id="merchant-login-card">
+            <h4 data-trans="loginTitle">사업자 로그인 / 3초 회원가입</h4>
+            <form id="merchant-join-form" onsubmit="event.preventDefault();" style="margin-top: 12px;">
+              <input type="hidden" name="auth-role-merchant" value="merchant">
+              
+              <div class="input-group">
+                <i data-lucide="user"></i>
+                <input type="text" id="m-auth-username" required placeholder="사업자 아이디 입력">
+              </div>
+              
+              <div class="input-group">
+                <i data-lucide="lock"></i>
+                <input type="password" id="m-auth-password" required placeholder="비밀번호 입력">
+              </div>
+
+              <div class="input-group">
+                <i data-lucide="lock-keyhole"></i>
+                <input type="password" id="m-auth-password-confirm" required placeholder="비밀번호 확인 입력">
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block">
+                <i data-lucide="key"></i> 가입 및 로그인 완료
+              </button>
+            </form>
+          </div>
+
+          <!-- Step 2: Merchant Partner Application Form (Active only if logged in as merchant) -->
+          <div class="glass-box hidden" id="merchant-apply-card">
+            <div class="apply-header-row">
+              <i data-lucide="shield-check" class="text-primary"></i>
+              <h4>Nampo GoGo 공식 제휴 상점 등록 신청</h4>
+            </div>
+            <p class="auth-desc">제휴 상인으로 정식 등록하여 관광객 전용 페이지 최상단에 가게를 띄워보세요.</p>
+
+            <form id="merchant-apply-form" onsubmit="event.preventDefault();" style="margin-top: 14px;">
+              <div class="form-group-nampo">
+                <label>사업자 등록증 첨부 (인증용)</label>
+                <div class="upload-guide-info" style="border-color:var(--primary); background:var(--primary-soft); color:var(--text-main);">
+                  📄 사업자등록증 촬영 사진(JPG/PNG) 또는 PDF 파일을 넣어주세요. (최대 5MB)
+                </div>
+                <input type="file" id="apply-license-file" required class="nampo-input" style="padding: 6px;">
+              </div>
+
+              <div class="form-group-nampo">
+                <label>매장 주소 기입</label>
+                <input type="text" id="apply-address" required placeholder="예: 부산 중구 남포길 18" class="nampo-input">
+              </div>
+
+              <div class="form-group-nampo">
+                <label>업종 카테고리</label>
+                <select id="apply-subcategory" class="nampo-input">
+                  <option value="pork">국밥/한식 (Soup/Korean)</option>
+                  <option value="seafood">해산물/회 (Seafood/Raw)</option>
+                  <option value="pizza">피자/양식 (Pizza/Pasta)</option>
+                  <option value="korean">전통한식 (Traditional)</option>
+                  <option value="chinese">중식/요리 (Chinese)</option>
+                  <option value="japanese">일식/돈까스 (Sushi/Katsu)</option>
+                  <option value="massage">마사지/뷰티 (Massage)</option>
+                  <option value="cafe">디저트/카페 (Dessert/Cafe)</option>
+                </select>
+              </div>
+
+              <div class="form-group-nampo">
+                <label>대표 연락처</label>
+                <input type="tel" id="apply-phone" required placeholder="예: +82-51-245-1111 (국제전화 규격)" class="nampo-input">
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block" id="btn-submit-partnership">
+                <i data-lucide="check-square"></i> 공식 제휴 승인 신청하기
+              </button>
+            </form>
+          </div>
+
+          <!-- Step 3: Application Status / Approved Info Box -->
+          <div class="glass-box approved-state-banner hidden" id="merchant-approved-status-card">
+            <div class="success-icon-check">✓</div>
+            <h4>Nampo GoGo 공식 제휴 상인 승인 완료</h4>
+            <p>축하합니다! 공식 제휴 매장 인증이 완료되었습니다. 이제 상세 메뉴와 매장 미디어를 편집하여 실시간 갱신할 수 있습니다.</p>
+          </div>
+        </section>
+
+        <!-- MERCHANT TAB 2: Shop Details, Required Images verification & Menu Register -->
+        <section id="tab-merchant-manage" class="tab-panel">
+          <div class="section-title">
+            <h2 data-trans="merchantTitle">내 매장 관리 대시보드</h2>
+            <p>매장 사진(필수 조건 만족), 동영상 및 음식점 상세 메뉴(가격, 주차, 결제 수단)를 올려 업데이트하세요.</p>
+          </div>
+
+          <!-- Quick stats -->
+          <div class="merchant-metrics-grid">
+            <div class="metric-card bg-primary-soft">
+              <span class="metric-title" data-trans="visitorToday">오늘 방문자 수</span>
+              <span class="metric-value">18명</span>
+            </div>
+            <div class="metric-card bg-success-soft">
+              <span class="metric-title" data-trans="qrStampsIssued">QR 인증 횟수</span>
+              <span class="metric-value" id="merchant-stamps-val">24건</span>
+            </div>
+          </div>
+
+          <!-- Strict Media Upload Form -->
+          <div class="glass-box">
+            <h4 style="font-size:14px; font-weight:800; margin-bottom:10px;">📸 매장 다중 미디어 업로드 (필수 규격 체크)</h4>
+            
+            <form id="merchant-media-upload-form" onsubmit="event.preventDefault();">
+              <div class="upload-guide-info">
+                📸 <strong>매장 사진 파일 규격 가이드라인:</strong><br>
+                - 모바일 화면 최적화 권장 비율: <strong>800x600 픽셀 (4:3 비율)</strong><br>
+                - 파일 확장자: <strong>JPG, PNG, WEBP</strong>만 업로드 가능 (장당 5MB 이하)<br>
+                🎥 <strong>동영상 파일 규격 가이드라인:</strong><br>
+                - 모바일 세로/가로 권장 비율: <strong>1280x720 픽셀</strong> / 확장자: <strong>MP4, WEBM</strong> (최대 3개)
+              </div>
+
+              <div class="form-group-nampo">
+                <label>미디어 파일 다중 선택 (사진 최대 10장, 동영상 최대 3개)</label>
+                <input type="file" id="merchant-media-files" multiple accept="image/png, image/jpeg, image/webp, video/mp4, video/webm" class="nampo-input" style="padding: 6px;">
+              </div>
+
+              <!-- Required Pictures Checklist Verification -->
+              <div class="required-media-checklist">
+                <h5>⚠️ 매장 노출을 위한 필수 사진 체크리스트</h5>
+                <p>업로드한 파일들 중 아래 요건에 해당하는 사진이 있는지 스스로 체크해 주세요.</p>
+                
+                <label class="checkbox-row-verif">
+                  <input type="checkbox" id="check-media-signboard" required>
+                  <span>1. 매장 대문 또는 간판 사진 (매장 이름이 선명하게 노출됨) <strong>[필수]</strong></span>
+                </label>
+                <label class="checkbox-row-verif">
+                  <input type="checkbox" id="check-media-menu" required>
+                  <span>2. 매장 메뉴판 또는 대표 메뉴판 사진 <strong>[필수]</strong></span>
+                </label>
+                <label class="checkbox-row-verif">
+                  <input type="checkbox" id="check-media-inside" required>
+                  <span>3. 매장 내부 모습 사진 (2장 이상 포함) <strong>[필수]</strong></span>
+                </label>
+                <label class="checkbox-row-verif">
+                  <input type="checkbox" id="check-media-outside" required>
+                  <span>4. 매장 외부 전경 사진 (2장 이상 포함) <strong>[필수]</strong></span>
+                </label>
+              </div>
+
+              <!-- Thumbnail selector preview -->
+              <div style="margin-top:14px; font-size:11px; font-weight:800; color:var(--primary);">💡 썸네일(대표 커버 사진) 라디오 선택</div>
+              <div class="media-thumb-selector-grid" id="merchant-media-previews">
+                <!-- Base64 previews populated here -->
+              </div>
+            </form>
+          </div>
+
+          <!-- Restaurant Menu / Payment / Parking Form -->
+          <div class="glass-box" style="margin-top: 20px;">
+            <h4 style="font-size:14px; font-weight:800; margin-bottom:12px;">🍴 음식점 상세 메뉴 및 이용 환경 등록</h4>
+            
+            <form id="merchant-menu-details-form" onsubmit="event.preventDefault();">
+              <!-- Benefits -->
+              <div class="form-group-nampo">
+                <label>관광객 제공 제휴 혜택 내용</label>
+                <input type="text" id="edit-benefit-input" required class="nampo-input" placeholder="예: 메인 메뉴 주문시 탄산음료 1캔 무료 제공">
+              </div>
+
+              <!-- Sched Hours & Phone -->
+              <div class="form-group-nampo">
+                <label>영업 시간</label>
+                <input type="text" id="edit-hours-input" required class="nampo-input" value="11:00 - 22:00">
+              </div>
+              <div class="form-group-nampo">
+                <label>연락처 (국제전화 형식 권장)</label>
+                <input type="tel" id="edit-phone-input" required class="nampo-input" value="+82-51-245-1234">
+              </div>
+
+              <!-- Menu classifications -->
+              <div class="menu-classification-block">
+                <h5>1. 추천 메뉴 등록 (Signature Menu)</h5>
+                <div class="input-inline-row">
+                  <input type="text" id="menu-sig-name" placeholder="메뉴 이름" class="nampo-input">
+                  <input type="text" id="menu-sig-price" placeholder="가격 (예: 15,000 KRW)" class="nampo-input">
+                </div>
+              </div>
+
+              <div class="menu-classification-block">
+                <h5>2. 기본 메뉴 등록 (Standard Menu)</h5>
+                <div class="input-inline-row">
+                  <input type="text" id="menu-std-name" placeholder="메뉴 이름" class="nampo-input">
+                  <input type="text" id="menu-std-price" placeholder="가격" class="nampo-input">
+                </div>
+              </div>
+
+              <div class="menu-classification-block">
+                <h5>3. 계절별 특선 메뉴 등록 (Seasonal Menu - 선택)</h5>
+                <div class="input-inline-row">
+                  <input type="text" id="menu-sea-name" placeholder="계절 특선 메뉴 이름" class="nampo-input">
+                  <input type="text" id="menu-sea-price" placeholder="가격" class="nampo-input">
+                </div>
+              </div>
+
+              <!-- Parking status -->
+              <div class="form-group-nampo">
+                <label>주차 가능 여부 (Parking Space)</label>
+                <div class="parking-radio-row">
+                  <label class="radio-pill">
+                    <input type="radio" name="m-parking-status" value="유" checked>
+                    <span>주차 가능 (Parking Available)</span>
+                  </label>
+                  <label class="radio-pill">
+                    <input type="radio" name="m-parking-status" value="무">
+                    <span>주차 불가 (No Parking)</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Payment methods multi-check -->
+              <div class="form-group-nampo">
+                <label>결제 가능 수단 (결제 수단 중복 선택 가능)</label>
+                <div class="checkbox-group-grid">
+                  <label class="check-pill">
+                    <input type="checkbox" name="m-payment-methods" value="신용카드" checked>
+                    <span>신용카드</span>
+                  </label>
+                  <label class="check-pill">
+                    <input type="checkbox" name="m-payment-methods" value="삼성페이" checked>
+                    <span>삼성페이</span>
+                  </label>
+                  <label class="check-pill">
+                    <input type="checkbox" name="m-payment-methods" value="알리페이">
+                    <span>Alipay (알리페이)</span>
+                  </label>
+                  <label class="check-pill">
+                    <input type="checkbox" name="m-payment-methods" value="위챗페이">
+                    <span>WeChat Pay (위챗페이)</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Final Submit Update button -->
+              <button type="submit" class="btn btn-primary btn-block" id="btn-save-store-complete" style="margin-top:20px;">
+                <i data-lucide="cloud-lightning"></i> 매장 정보 및 미디어 올리기
+              </button>
+            </form>
+          </div>
+        </section>
+
+      </main>
+
+    </div>
 
   </div>
 
-  <!-- MODAL: Partner Detail Profile & Reviews -->
+  <!-- MODAL: Restaurant Swipe-Carousel Details & Verified Reviews -->
   <div class="modal" id="partner-detail-modal">
     <div class="modal-backdrop"></div>
     <div class="modal-content glass-card">
@@ -524,7 +589,6 @@
       <h3 data-trans="qrTitle">제휴매장 QR 인증</h3>
       <p data-trans="qrDesc">매장에 비치된 Nampo GoGo QR 코드를 스캔하세요.</p>
       
-      <!-- Viewport area -->
       <div class="qr-camera-viewport">
         <div class="scanner-aim-box">
           <span class="aim-corner top-left"></span>
