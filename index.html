@@ -18,27 +18,38 @@
   <!-- Mobile Frame Container -->
   <div class="mobile-frame">
     
-    <!-- 1. INTRO MODE SELECT SCREEN (No emojis, sleek modern typography) -->
+    <!-- 1. INTRO MODE SELECT SCREEN (No emojis, sleek modern typography, center-aligned, lang dropdown top-right) -->
     <div id="intro-screen" class="intro-screen">
       <div class="intro-overlay"></div>
+      
+      <!-- Top-right Lang Selector inside Intro -->
+      <div class="intro-lang-wrap">
+        <select id="intro-lang-select">
+          <option value="kr" selected>KR</option>
+          <option value="en">EN</option>
+          <option value="ch">CH</option>
+          <option value="jp">JP</option>
+        </select>
+      </div>
+
       <div class="intro-content-wrap">
         <div class="intro-logo">NAMPO GOGO</div>
-        <h2>남포동 스마트 로컬여행 플랫폼</h2>
-        <p class="intro-desc">원하시는 모드를 선택하여 플랫폼을 시작해 주세요.</p>
+        <h2 data-trans="tagline">남포동 스마트 로컬여행 플랫폼</h2>
+        <p class="intro-desc" data-trans="pleaseLogin">로그인 후 QR 인증과 여행 로그를 기록해 보세요.</p>
         
         <div class="mode-select-box-grid">
           <!-- Tourist mode card -->
           <div class="mode-card-btn" id="btn-mode-tourist">
-            <h3>관광객 전용 모드</h3>
-            <p>제휴 매장 검색, 길찾기, QR 스탬프 로그 모드</p>
-            <span class="mode-badge-action">접속하기 ➔</span>
+            <h3 data-trans="introTouristTitle">여행객 전용</h3>
+            <p data-trans="introTouristDesc">제휴 매장 검색, 길찾기, QR 스탬프 로그 모드</p>
+            <span class="mode-badge-action" data-trans="introTouristBtn">접속하기 ➔</span>
           </div>
 
           <!-- Merchant mode card -->
           <div class="mode-card-btn" id="btn-mode-merchant">
-            <h3>제휴 사업자 전용 모드</h3>
-            <p>매장 등록, 다중 업로드 가이드, 메뉴/결제 관리</p>
-            <span class="mode-badge-action-sec">가입 및 관리 ➔</span>
+            <h3 data-trans="introMerchantTitle">사업자 전용</h3>
+            <p data-trans="introMerchantDesc">매장 등록, 다중 업로드 가이드, 메뉴/결제 관리</p>
+            <span class="mode-badge-action-sec" data-trans="introMerchantBtn">가입 및 관리 ➔</span>
           </div>
         </div>
         
@@ -56,9 +67,9 @@
         </div>
         
         <div class="header-controls">
-          <!-- Mode Switch Button -->
-          <button id="btn-quick-mode-switch" class="btn-mode-switch-pill">
-            <i data-lucide="refresh-cw"></i> Mode
+          <!-- Mode Switch Button (No 'Mode' text, icon only) -->
+          <button id="btn-quick-mode-switch" class="btn-mode-switch-pill" style="padding: 6px 8px;">
+            <i data-lucide="refresh-cw"></i>
           </button>
 
           <!-- Update Notices Wrap -->
@@ -101,7 +112,7 @@
         <!-- TOURIST TAB 1: Delivery App-Style Food Board -->
         <section id="tab-tourist-explore" class="tab-panel active">
           
-          <div class="nampo-simple-title">남포동 스마트 로컬여행 플랫폼</div>
+          <div class="nampo-simple-title" data-trans="tagline">남포동 스마트 로컬여행 플랫폼</div>
 
           <!-- User Greeting Status Banner -->
           <div class="glass-box auth-status-banner">
@@ -117,9 +128,9 @@
           </div>
 
           <!-- Flat Text Pill Category Slider (No Emojis, No Circles) -->
-          <h4 class="menu-grid-header">주변 식사 카테고리 검색</h4>
+          <h4 class="menu-grid-header" data-trans="allCategories">주변 식사 카테고리 검색</h4>
           <div class="delivery-category-slider">
-            <button class="delivery-cat-btn active" data-subcat="all">전체보기</button>
+            <button class="delivery-cat-btn active" data-subcat="all" data-trans="allCategories">전체보기</button>
             <button class="delivery-cat-btn" data-subcat="pork" data-trans="subPork">국밥/한식</button>
             <button class="delivery-cat-btn" data-subcat="seafood" data-trans="subSeafood">해산물/회</button>
             <button class="delivery-cat-btn" data-subcat="pizza" data-trans="subPizza">피자/양식</button>

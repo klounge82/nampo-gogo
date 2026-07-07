@@ -18,6 +18,14 @@ window.NampoGoGoData = {
       updateBtn: "업데이트 내역",
       updateTitle: "최근 업데이트 소식",
       
+      // Intro translation keys
+      introTouristTitle: "여행객 전용",
+      introTouristDesc: "제휴 매장 검색, 길찾기, QR 스탬프 로그 모드",
+      introTouristBtn: "접속하기 ➔",
+      introMerchantTitle: "사업자 전용",
+      introMerchantDesc: "매장 등록, 다중 업로드 가이드, 메뉴/결제 관리",
+      introMerchantBtn: "가입 및 관리 ➔",
+
       // Core Categories
       allCategories: "전체 카테고리",
       catMassage: "뷰티 & 마사지",
@@ -113,6 +121,14 @@ window.NampoGoGoData = {
       updateBtn: "Update Logs",
       updateTitle: "Recent Platform Updates",
       
+      // Intro translation keys
+      introTouristTitle: "For Tourists",
+      introTouristDesc: "Explore partners, get route guides, and scan stamps.",
+      introTouristBtn: "Enter ➔",
+      introMerchantTitle: "For Merchants",
+      introMerchantDesc: "Register store, upload media guidelines, manage menus.",
+      introMerchantBtn: "Manage ➔",
+
       allCategories: "All Categories",
       catMassage: "Beauty & Massage",
       catFood: "Nampo Eats",
@@ -201,6 +217,14 @@ window.NampoGoGoData = {
       updateBtn: "更新日志",
       updateTitle: "平台最新更新",
       
+      // Intro translation keys
+      introTouristTitle: "游客专用",
+      introTouristDesc: "查找合作商家、查看步行导航、扫码打卡足迹。",
+      introTouristBtn: "进入 ➔",
+      introMerchantTitle: "商户专用",
+      introMerchantDesc: "录入店铺信息、上传规定证照照片与商品菜单。",
+      introMerchantBtn: "注册管理 ➔",
+
       allCategories: "全部类别",
       catMassage: "美容按摩",
       catFood: "南浦美食",
@@ -289,8 +313,16 @@ window.NampoGoGoData = {
       updateBtn: "更新ログ",
       updateTitle: "最近の更新情報",
       
+      // Intro translation keys
+      introTouristTitle: "旅行者専用",
+      introTouristDesc: "加盟店検索、ルートナビ、QRスタンプ記録機能。",
+      introTouristBtn: "アクセス ➔",
+      introMerchantTitle: "事業者専用",
+      introMerchantDesc: "店舗の登録、コンテンツ規格チェック、メニュー管理。",
+      introMerchantBtn: "管理ページ ➔",
+
       allCategories: "全カテゴリー",
-      catMassage: "エステ & マッサージ",
+      catMassage: "エステ & 마ッサージ",
       catFood: "南浦グルメ",
       catCafe: "カフェ",
       catShopping: "ショッピング",
@@ -319,7 +351,7 @@ window.NampoGoGoData = {
       
       logTitle: "マイ・トラベル・ログカード",
       logDesc: "QRチェックインで収集された南浦洞での足跡ルートレポート。",
-      logCount: "訪れた店舗数",
+      logCount: "Grid",
       emptyLog: "訪れた加盟店がまだありません。提携店舗に行ってスタンプを集めましょう！",
       snsExport: "SNS共有用カード作成 📸",
       snsCopyText: "共有用文言をコピー",
@@ -364,7 +396,7 @@ window.NampoGoGoData = {
     }
   },
 
-  // 8 default partner stores with subCategory (Delivery-style matching)
+  // 8 default partner stores
   partners: [
     {
       id: "partner_klounge",
@@ -375,7 +407,7 @@ window.NampoGoGoData = {
         jp: "K-Lounge スポーツアロマセラピー"
       },
       category: "massage",
-      subCategory: "massage", // Massage & Beauty category
+      subCategory: "massage",
       isPartner: true,
       image: "https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?auto=format&fit=crop&w=600&q=80",
       gallery: [],
@@ -425,7 +457,7 @@ window.NampoGoGoData = {
         jp: "ハルメ元祖釜山デジクッパ"
       },
       category: "food",
-      subCategory: "pork", // Pork soup category
+      subCategory: "pork",
       isPartner: true,
       image: "https://images.unsplash.com/photo-1627308595229-7830a5c91f9f?auto=format&fit=crop&w=600&q=80",
       gallery: [],
@@ -457,7 +489,7 @@ window.NampoGoGoData = {
         kr: "국밥 주문 시 수제 맛보기 순대 1인 2점 무료 제공",
         en: "Order soup and get 2 free slices of handmade sausage per person.",
         ch: "凡点汤饭，即赠送手工血肠（每人2块）。",
-        jp: "クッパご注文で、自家製スンデお一人様2切れサービス"
+        jp: "クッパご注文で、自家製スン데お一人様2切れサービス"
       },
       seoDescription: "Traditional Busan Pork Rice Soup restaurant near Gwangbok-ro, Busan.",
       seoKeywords: "Busan pork soup, Nampodong food, pork rice soup",
@@ -473,7 +505,7 @@ window.NampoGoGoData = {
         jp: "チャガルチ第一ロブスター&刺身センター"
       },
       category: "food",
-      subCategory: "seafood", // Seafood category
+      subCategory: "seafood",
       isPartner: true,
       image: "https://images.unsplash.com/photo-1534400298786-1df5024da1a1?auto=format&fit=crop&w=600&q=80",
       gallery: [],
@@ -521,8 +553,8 @@ window.NampoGoGoData = {
         jp: "光復路窯焼きピザマスター"
       },
       category: "food",
-      subCategory: "pizza", // Pizza category
-      isPartner: false, // Normal shop to demonstrate sorting rules
+      subCategory: "pizza",
+      isPartner: false,
       image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=600&q=80",
       gallery: [],
       rating: 4.6,
@@ -569,7 +601,7 @@ window.NampoGoGoData = {
         jp: "カフェ光復洞アトリエ"
       },
       category: "cafe",
-      subCategory: "cafe", // Cafe category
+      subCategory: "cafe",
       isPartner: true,
       image: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=600&q=80",
       gallery: [],
@@ -610,7 +642,7 @@ window.NampoGoGoData = {
     }
   ],
 
-  // Default updates notice
+  // Default notices
   updateHistory: [
     { date: "2026-07-07", content: "배달 어플리케이션(배민/요기요) 스타일의 카테고리/매장 리스트 디자인 개편 완료! 🛵" },
     { date: "2026-07-06", content: "사업자 제휴 승인 조건 검증 및 음식점 메뉴(결제수단, 주차여부) 등록 폼 셋업 완료!" },

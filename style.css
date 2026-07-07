@@ -84,7 +84,7 @@ body {
   display: none !important;
 }
 
-/* 1. INTRO MODE SELECT SCREEN (No emojis, highly typography-oriented) */
+/* 1. INTRO MODE SELECT SCREEN (No emojis, sleek modern typography, absolute top-right lang-selector) */
 .intro-screen {
   position: absolute;
   inset: 0;
@@ -100,6 +100,37 @@ body {
   position: absolute;
   inset: 0;
   background: radial-gradient(circle at 50% 50%, rgba(49, 130, 246, 0.16) 0%, rgba(12, 13, 20, 0.98) 100%);
+}
+
+.intro-lang-wrap {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 10001;
+}
+
+.intro-lang-wrap select {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: white;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  outline: none;
+  font-family: var(--font-main);
+  transition: var(--transition);
+}
+
+.intro-lang-wrap select:focus {
+  border-color: var(--primary);
+  background: rgba(49, 130, 246, 0.2);
+}
+
+.intro-lang-wrap select option {
+  background: var(--bg-dark);
+  color: white;
 }
 
 .intro-content-wrap {
@@ -145,9 +176,9 @@ body {
   background: rgba(255, 255, 255, 0.03);
   border: 1.5px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-md);
-  padding: 24px;
+  padding: 32px 24px;   /* 넉넉한 패딩 */
   cursor: pointer;
-  text-align: left;
+  text-align: center;   /* 중앙 정렬 */
   transition: var(--transition);
 }
 
@@ -158,31 +189,31 @@ body {
 }
 
 .mode-card-btn h3 {
-  font-size: 15px;
-  font-weight: 800;
+  font-size: 21px;      /* 글자 크기 확장 */
+  font-weight: 900;
   color: white;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
 }
 
 .mode-card-btn p {
-  font-size: 11px;
+  font-size: 13px;      /* 설명 글자도 어울리게 확장 */
   color: var(--text-muted);
-  margin-top: 6px;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 .mode-badge-action {
   display: inline-block;
-  margin-top: 16px;
-  font-size: 11px;
+  margin-top: 18px;
+  font-size: 12px;
   font-weight: 800;
   color: var(--primary);
 }
 
 .mode-badge-action-sec {
   display: inline-block;
-  margin-top: 16px;
-  font-size: 11px;
+  margin-top: 18px;
+  font-size: 12px;
   font-weight: 800;
   color: var(--secondary);
 }
@@ -240,6 +271,7 @@ body {
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 4px;
   transition: var(--transition);
 }
@@ -251,8 +283,8 @@ body {
 }
 
 .btn-mode-switch-pill i {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
 }
 
 /* Updates panel dropdown */
@@ -449,7 +481,7 @@ body {
   letter-spacing: -0.5px;
 }
 
-/* 2. FLAT TEXT CATEGORY CHIP SLIDER (No circles, no emojis, Toss style) */
+/* 2. FLAT TEXT CATEGORY CHIP SLIDER */
 .menu-grid-header {
   font-size: 13px;
   font-weight: 800;

@@ -256,15 +256,27 @@ function switchTabPanel(panelId) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// 5. Multi-Language System
+// 5. Multi-Language System with Real-Time Dual Dropdown Synchronization
 function setupLanguage() {
   const appLangSelect = document.getElementById('app-lang-select');
+  const introLangSelect = document.getElementById('intro-lang-select');
+  
   if (appLangSelect) {
     appLangSelect.addEventListener('change', (e) => {
       currentLang = e.target.value;
+      if (introLangSelect) introLangSelect.value = currentLang;
       updateLanguageTexts();
     });
   }
+
+  if (introLangSelect) {
+    introLangSelect.addEventListener('change', (e) => {
+      currentLang = e.target.value;
+      if (appLangSelect) appLangSelect.value = currentLang;
+      updateLanguageTexts();
+    });
+  }
+
   updateLanguageTexts();
 }
 
@@ -428,6 +440,7 @@ function setupAuthSystem() {
   updateAuthUIs();
 }
 
+// 100% Fail-Safe Null-Guarded Auth UI State Syncer
 function updateAuthUIs() {
   const dashboardHeading = document.getElementById('user-status-heading');
   const dashboardDesc = document.getElementById('user-status-desc');
@@ -881,17 +894,23 @@ function triggerQRScanner(partnerId) {
   const dateStr = now.toLocaleDateString();
   const timeStr = now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
 
-  document.getElementById('stamp-card-date').textContent = dateStr;
-  document.getElementById('stamp-card-time').textContent = timeStr;
-  document.getElementById('qr-reward-text').textContent = p.benefits[currentLang] || p.benefits['en'];
+  const ticketDate = document.getElementById('stamp-card-date');
+  const ticketTime = document.getElementById('stamp-card-time');
+  const rewardTxt = document.getElementById('qr-reward-text');
+
+  if (ticketDate) ticketDate.textContent = dateStr;
+  if (ticketTime) ticketTime.textContent = timeStr;
+  if (rewardTxt) rewardTxt.textContent = p.benefits[currentLang] || p.benefits['en'];
   
-  document.getElementById('qr-success-screen').classList.add('hidden');
+  const successScreen = document.getElementById('qr-success-screen');
+  if (successScreen) successScreen.classList.add('hidden');
+  
   if (qrScannerModal) {
     qrScannerModal.classList.add('active');
   }
 
   setTimeout(() => {
-    document.getElementById('qr-success-screen').classList.remove('hidden');
+    if (successScreen) successScreen.classList.remove('hidden');
   }, 2200);
 }
 
