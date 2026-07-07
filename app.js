@@ -1,16 +1,65 @@
-// app.js - Nampo GoGo Platform Advanced Logic with Strict DOM Bindings
+// app.js - Nampo GoGo Platform Advanced Logic with Strict DOM Bindings & Fail-Safe Translations
 
-// DOM Element Variable Declarations to Prevent Browser Undefined Variable Crashes
+// Fail-safe global variables
 let partnerDetailModal = null;
 let qrScannerModal = null;
 let logSnsModal = null;
 
-// Global Seed Load and Local Storage Initialization
-initLocalStorageSeed();
+let partnersList = [];
+let updateHistoryList = [];
 
-function initLocalStorageSeed() {
-  const seed = window.NampoGoGoData;
+let currentLang = 'kr';
+let activeTab = 'dashboard';
+let currentUser = localStorage.getItem('nampogogo_user') || null;
+let currentUserRole = localStorage.getItem('nampogogo_user_role') || 'visitor';
+let userStamps = [];
+let activeCategoryFilter = 'all';
+let filterPartnerOnly = false;
+
+// Media Upload Temporary Arrays
+let tempUploadedMedia = [];
+let selectedThumbnailBase64 = "";
+
+// Multi-Language Reference
+let translations = {};
+
+// Safe Initialization Hook (Ensures DOM is 100% ready before any data seed or script runs)
+document.addEventListener('DOMContentLoaded', () => {
+  // Bind DOM Elements
+  partnerDetailModal = document.getElementById('partner-detail-modal');
+  qrScannerModal = document.getElementById('qr-scanner-modal');
+  logSnsModal = document.getElementById('log-sns-modal');
+
+  // Load Seed and Translations Safely
+  const seed = window.NampoGoGoData || { translations: {}, partners: [], updateHistory: [] };
+  translations = seed.translations || {};
+
+  initLocalStorageSeed(seed);
+  loadApplicationState();
+  loadUserStamps();
+
+  initLucide();
+  setupLanguage();
+  setupTabNavigation();
+  setupUpdatePanel();
+  setupAuthSystem();
+  setupQuickDashboardMenu();
   
+  // Render views
+  renderPartnersList();
+  renderTravelLog();
+  
+  setupInteractiveScans();
+  setupMerchantSystem();
+  setupAdminSystem();
+  setupAIPlanner();
+  setupCrossTabSync();
+
+  // Setup modal close actions
+  setupModalCloseButtons();
+});
+
+function initLocalStorageSeed(seed) {
   // Seed Users
   if (!localStorage.getItem('nampogogo_users')) {
     const defaultUsers = [
@@ -22,70 +71,20 @@ function initLocalStorageSeed() {
   }
 
   // Seed Partners list
-  if (!localStorage.getItem('nampogogo_partners_v3')) {
+  if (!localStorage.getItem('nampogogo_partners_v3') && seed.partners) {
     localStorage.setItem('nampogogo_partners_v3', JSON.stringify(seed.partners));
   }
 
   // Seed Notices
-  if (!localStorage.getItem('nampogogo_notices')) {
+  if (!localStorage.getItem('nampogogo_notices') && seed.updateHistory) {
     localStorage.setItem('nampogogo_notices', JSON.stringify(seed.updateHistory));
   }
-
-  loadApplicationState();
 }
-
-let partnersList = [];
-let updateHistoryList = [];
 
 function loadApplicationState() {
   partnersList = JSON.parse(localStorage.getItem('nampogogo_partners_v3')) || [];
   updateHistoryList = JSON.parse(localStorage.getItem('nampogogo_notices')) || [];
 }
-
-// App Variables
-const translations = window.NampoGoGoData.translations;
-let currentLang = 'kr';
-let activeTab = 'dashboard';
-let currentUser = localStorage.getItem('nampogogo_user') || null;
-let currentUserRole = localStorage.getItem('nampogogo_user_role') || 'visitor';
-let userStamps = [];
-let activeCategoryFilter = 'all';
-let filterPartnerOnly = false;
-
-// Media Upload Temporary Arrays (Holds Base64 strings)
-let tempUploadedMedia = [];
-let selectedThumbnailBase64 = "";
-
-// Document Load Hook
-document.addEventListener('DOMContentLoaded', () => {
-  // Bind DOM Elements
-  partnerDetailModal = document.getElementById('partner-detail-modal');
-  qrScannerModal = document.getElementById('qr-scanner-modal');
-  logSnsModal = document.getElementById('log-sns-modal');
-
-  initLucide();
-  loadUserStamps();
-  setupLanguage();
-  setupTabNavigation();
-  setupUpdatePanel();
-  setupAuthSystem();
-  setupQuickDashboardMenu();
-  renderPartnersList();
-  renderTravelLog();
-  setupInteractiveScans();
-  setupMerchantSystem();
-  setupAdminSystem();
-  setupAIPlanner();
-  setupCrossTabSync();
-
-  // Hero Quick link
-  document.getElementById('btn-hero-quick-link').addEventListener('click', () => {
-    openPartnerDetail('partner_klounge');
-  });
-
-  // Setup modal close buttons to avoid undefined issues
-  setupModalCloseButtons();
-});
 
 function initLucide() {
   if (window.lucide) {
@@ -118,13 +117,15 @@ function loadUserStamps() {
   }
 }
 
-// 3. Multi-Language System
+// 3. Fail-Safe Multi-Language System
 function setupLanguage() {
   const appLangSelect = document.getElementById('app-lang-select');
-  appLangSelect.addEventListener('change', (e) => {
-    currentLang = e.target.value;
-    updateLanguageTexts();
-  });
+  if (appLangSelect) {
+    appLangSelect.addEventListener('change', (e) => {
+      currentLang = e.target.value;
+      updateLanguageTexts();
+    });
+  }
   updateLanguageTexts();
 }
 
@@ -148,9 +149,21 @@ function updateLanguageTexts() {
   renderAdminReviews();
 }
 
+// Fallback logic in case data.js cache uses old codes (ko, zh, ja)
 function getTranslation(lang, key) {
+  let targetLang = lang;
+  
+  // Fallback map if the keys in translations are old codes
+  if (!translations[targetLang]) {
+    if (targetLang === 'kr') targetLang = 'ko';
+    if (targetLang === 'ch') targetLang = 'zh';
+    if (targetLang === 'jp') targetLang = 'ja';
+  }
+
   const keys = key.split('.');
-  let obj = translations[lang];
+  let obj = translations[targetLang];
+  if (!obj) return null;
+
   for (const k of keys) {
     if (obj && obj[k] !== undefined) {
       obj = obj[k];
@@ -194,14 +207,13 @@ function setupTabNavigation() {
   });
 }
 
-// 5. Quick Dashboard 7 Menu Router (Bug Fixed: Tab Transitioning and Rerendering)
+// 5. Quick Dashboard 7 Menu Router
 function setupQuickDashboardMenu() {
   document.querySelectorAll('.menu-item-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const menuAction = btn.getAttribute('data-menu');
       
       if (menuAction === 'log') {
-        // Switch to Travel Log Tab
         const logNavBtn = document.querySelector('.nav-btn[data-tab="travel-log"]');
         if (logNavBtn) logNavBtn.click();
       } else if (menuAction === 'benefit') {
@@ -209,12 +221,10 @@ function setupQuickDashboardMenu() {
         activeCategoryFilter = 'all';
         setActiveCategoryPill('all');
         
-        // Switch to Explore Tab and refresh
         const exploreNavBtn = document.querySelector('.nav-btn[data-tab="explore"]');
         if (exploreNavBtn) exploreNavBtn.click();
         renderPartnersList();
       } else if (menuAction === 'course') {
-        // Scroll to AI Planner Box
         const plannerBox = document.querySelector('.ai-planner-box-layout');
         if (plannerBox) {
           plannerBox.scrollIntoView({ behavior: 'smooth' });
@@ -230,7 +240,6 @@ function setupQuickDashboardMenu() {
         activeCategoryFilter = targetCat;
         setActiveCategoryPill(targetCat);
         
-        // Switch to Explore Tab and refresh
         const exploreNavBtn = document.querySelector('.nav-btn[data-tab="explore"]');
         if (exploreNavBtn) exploreNavBtn.click();
         renderPartnersList();
@@ -256,22 +265,24 @@ function setupUpdatePanel() {
 
   renderUpdateLogs();
 
-  btnUpdateToggle.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const isShowing = updatePanel.classList.contains('show');
-    if (isShowing) {
+  if (btnUpdateToggle && updatePanel) {
+    btnUpdateToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isShowing = updatePanel.classList.contains('show');
+      if (isShowing) {
+        updatePanel.classList.remove('show');
+        btnUpdateToggle.classList.remove('open');
+      } else {
+        updatePanel.classList.add('show');
+        btnUpdateToggle.classList.add('open');
+      }
+    });
+
+    document.addEventListener('click', () => {
       updatePanel.classList.remove('show');
       btnUpdateToggle.classList.remove('open');
-    } else {
-      updatePanel.classList.add('show');
-      btnUpdateToggle.classList.add('open');
-    }
-  });
-
-  document.addEventListener('click', () => {
-    updatePanel.classList.remove('show');
-    btnUpdateToggle.classList.remove('open');
-  });
+    });
+  }
 }
 
 function renderUpdateLogs() {
@@ -292,69 +303,75 @@ function setupAuthSystem() {
   const btnLogout = document.getElementById('btn-action-logout');
   const btnDashboardAction = document.getElementById('btn-dashboard-auth-action');
 
-  authForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const usernameInput = document.getElementById('auth-username').value.trim();
-    const passwordInput = document.getElementById('auth-password').value;
-    const confirmInput = document.getElementById('auth-password-confirm').value;
-    const selectedRole = document.querySelector('input[name="auth-role"]:checked').value;
+  if (authForm) {
+    authForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const usernameInput = document.getElementById('auth-username').value.trim();
+      const passwordInput = document.getElementById('auth-password').value;
+      const confirmInput = document.getElementById('auth-password-confirm').value;
+      const selectedRole = document.querySelector('input[name="auth-role"]:checked').value;
 
-    if (!usernameInput) return;
+      if (!usernameInput) return;
 
-    if (passwordInput !== confirmInput) {
-      alert("❌ 비밀번호와 비밀번호 확인이 서로 다릅니다. 다시 입력하세요!");
-      return;
-    }
-
-    let registeredUsers = JSON.parse(localStorage.getItem('nampogogo_users')) || [];
-    
-    let matchedUser = registeredUsers.find(u => u.id === usernameInput);
-    if (matchedUser) {
-      if (matchedUser.pw !== passwordInput) {
-        alert("❌ 비밀번호가 올바르지 않습니다!");
+      if (passwordInput !== confirmInput) {
+        alert("❌ 비밀번호와 비밀번호 확인이 서로 다릅니다. 다시 입력하세요!");
         return;
       }
-      currentUser = matchedUser.id;
-      currentUserRole = matchedUser.role;
-    } else {
-      const newUser = {
-        id: usernameInput,
-        pw: passwordInput,
-        role: selectedRole
-      };
-      registeredUsers.push(newUser);
-      localStorage.setItem('nampogogo_users', JSON.stringify(registeredUsers));
+
+      let registeredUsers = JSON.parse(localStorage.getItem('nampogogo_users')) || [];
       
-      currentUser = usernameInput;
-      currentUserRole = selectedRole;
-    }
+      let matchedUser = registeredUsers.find(u => u.id === usernameInput);
+      if (matchedUser) {
+        if (matchedUser.pw !== passwordInput) {
+          alert("❌ 비밀번호가 올바르지 않습니다!");
+          return;
+        }
+        currentUser = matchedUser.id;
+        currentUserRole = matchedUser.role;
+      } else {
+        const newUser = {
+          id: usernameInput,
+          pw: passwordInput,
+          role: selectedRole
+        };
+        registeredUsers.push(newUser);
+        localStorage.setItem('nampogogo_users', JSON.stringify(registeredUsers));
+        
+        currentUser = usernameInput;
+        currentUserRole = selectedRole;
+      }
 
-    localStorage.setItem('nampogogo_user', currentUser);
-    localStorage.setItem('nampogogo_user_role', currentUserRole);
-    
-    loadUserStamps();
-    updateAuthUIs();
-    authForm.reset();
-    
-    alert(`👋 Welcome to Nampo GoGo!\nID: ${currentUser}\nRole: ${getTranslation(currentLang, 'role' + currentUserRole.charAt(0).toUpperCase() + currentUserRole.slice(1))}`);
-    
-    document.querySelector('[data-tab="dashboard"]').click();
-  });
+      localStorage.setItem('nampogogo_user', currentUser);
+      localStorage.setItem('nampogogo_user_role', currentUserRole);
+      
+      loadUserStamps();
+      updateAuthUIs();
+      authForm.reset();
+      
+      alert(`👋 Welcome to Nampo GoGo!\nID: ${currentUser}\nRole: ${getTranslation(currentLang, 'role' + currentUserRole.charAt(0).toUpperCase() + currentUserRole.slice(1))}`);
+      
+      document.querySelector('.nav-btn[data-tab="dashboard"]').click();
+    });
+  }
 
-  btnLogout.addEventListener('click', () => {
-    currentUser = null;
-    currentUserRole = 'visitor';
-    userStamps = [];
-    localStorage.removeItem('nampogogo_user');
-    localStorage.removeItem('nampogogo_user_role');
-    updateAuthUIs();
-    alert("Logged out successfully.");
-    document.querySelector('[data-tab="dashboard"]').click();
-  });
+  if (btnLogout) {
+    btnLogout.addEventListener('click', () => {
+      currentUser = null;
+      currentUserRole = 'visitor';
+      userStamps = [];
+      localStorage.removeItem('nampogogo_user');
+      localStorage.removeItem('nampogogo_user_role');
+      updateAuthUIs();
+      alert("Logged out successfully.");
+      document.querySelector('.nav-btn[data-tab="dashboard"]').click();
+    });
+  }
 
-  btnDashboardAction.addEventListener('click', () => {
-    document.querySelector('[data-tab="profile"]').click();
-  });
+  if (btnDashboardAction) {
+    btnDashboardAction.addEventListener('click', () => {
+      document.querySelector('.nav-btn[data-tab="profile"]').click();
+    });
+  }
 
   updateAuthUIs();
 }
@@ -375,49 +392,52 @@ function updateAuthUIs() {
   const merchantControlCard = document.getElementById('merchant-control-card');
   const adminControlCard = document.getElementById('admin-control-card');
 
-  merchantControlCard.classList.add('hidden');
-  adminControlCard.classList.add('hidden');
+  if (merchantControlCard) merchantControlCard.classList.add('hidden');
+  if (adminControlCard) adminControlCard.classList.add('hidden');
 
   if (currentUser) {
-    const roleTxt = getTranslation(currentLang, 'role' + currentUserRole.charAt(0).toUpperCase() + currentUserRole.slice(1));
+    const roleTxt = getTranslation(currentLang, 'role' + currentUserRole.charAt(0).toUpperCase() + currentUserRole.slice(1)) || currentUserRole;
     
-    dashboardHeading.textContent = currentUser;
-    dashboardDesc.textContent = `${getTranslation(currentLang, 'welcomeUser')}`;
-    dashboardRoleBadge.textContent = roleTxt;
-    dashboardRoleBadge.classList.remove('hidden');
-    btnDashboardAction.textContent = "My Panel";
+    if (dashboardHeading) dashboardHeading.textContent = currentUser;
+    if (dashboardDesc) dashboardDesc.textContent = `${getTranslation(currentLang, 'welcomeUser') || 'Welcome!'}`;
+    if (dashboardRoleBadge) {
+      dashboardRoleBadge.textContent = roleTxt;
+      dashboardRoleBadge.classList.remove('hidden');
+    }
+    if (btnDashboardAction) btnDashboardAction.textContent = "My Panel";
 
-    profileUsername.textContent = currentUser;
-    profileRoleBadge.textContent = roleTxt;
-    authFormCard.classList.add('hidden');
-    logoutCard.classList.remove('hidden');
+    if (profileUsername) profileUsername.textContent = currentUser;
+    if (profileRoleBadge) profileRoleBadge.textContent = roleTxt;
+    if (authFormCard) authFormCard.classList.add('hidden');
+    if (logoutCard) logoutCard.classList.remove('hidden');
     
     if (currentUserRole === 'merchant') {
-      merchantControlCard.classList.remove('hidden');
-      profileAvatarEmoji.textContent = '🏢';
+      if (merchantControlCard) merchantControlCard.classList.remove('hidden');
+      if (profileAvatarEmoji) profileAvatarEmoji.textContent = '🏢';
     } else if (currentUserRole === 'admin') {
-      adminControlCard.classList.remove('hidden');
-      profileAvatarEmoji.textContent = '👑';
+      if (adminControlCard) adminControlCard.classList.remove('hidden');
+      if (profileAvatarEmoji) profileAvatarEmoji.textContent = '👑';
     } else {
-      profileAvatarEmoji.textContent = '👤';
+      if (profileAvatarEmoji) profileAvatarEmoji.textContent = '👤';
     }
   } else {
-    dashboardHeading.textContent = "Guest User";
-    dashboardDesc.textContent = getTranslation(currentLang, 'pleaseLogin');
-    dashboardRoleBadge.classList.add('hidden');
-    btnDashboardAction.textContent = "Login";
+    if (dashboardHeading) dashboardHeading.textContent = "Guest User";
+    if (dashboardDesc) dashboardDesc.textContent = getTranslation(currentLang, 'pleaseLogin') || 'Please login.';
+    if (dashboardRoleBadge) dashboardRoleBadge.classList.add('hidden');
+    if (btnDashboardAction) btnDashboardAction.textContent = "Login";
 
-    profileUsername.textContent = "Guest User";
-    profileRoleBadge.textContent = "Visitor";
-    profileAvatarEmoji.textContent = '👤';
-    authFormCard.classList.remove('hidden');
-    logoutCard.classList.add('hidden');
+    if (profileUsername) profileUsername.textContent = "Guest User";
+    if (profileRoleBadge) profileRoleBadge.textContent = "Visitor";
+    if (profileAvatarEmoji) profileAvatarEmoji.textContent = '👤';
+    if (authFormCard) authFormCard.classList.remove('hidden');
+    if (logoutCard) logoutCard.classList.add('hidden');
   }
 
-  document.getElementById('dashboard-stamp-count').textContent = `${userStamps.length} / 5`;
+  const stampCountEl = document.getElementById('dashboard-stamp-count');
+  if (stampCountEl) stampCountEl.textContent = `${userStamps.length} / 5`;
 }
 
-// 8. Render Explore Partners (Priority order, full stars, direction links)
+// 8. Render Explore Partners
 function renderPartnersList() {
   const container = document.getElementById('partners-cards-container');
   if (!container) return;
@@ -450,7 +470,7 @@ function renderPartnersList() {
     card.innerHTML = `
       ${isKLounge ? `<span class="priority-ribbon">⭐ K-LOUNGE PRIORITY</span>` : ''}
       <div class="partner-card-img" style="background-image: url('${p.image}')">
-        <span class="partner-card-badge">${getTranslation(currentLang, 'cat' + p.category.charAt(0).toUpperCase() + p.category.slice(1))}</span>
+        <span class="partner-card-badge">${getTranslation(currentLang, 'cat' + p.category.charAt(0).toUpperCase() + p.category.slice(1)) || p.category}</span>
       </div>
       <div class="partner-card-body">
         <div class="card-title-row">
@@ -458,13 +478,13 @@ function renderPartnersList() {
           <div class="rating-badge"><i data-lucide="star"></i> ${p.rating.toFixed(1)}</div>
         </div>
         <div class="benefit-strip">
-          <h5>${getTranslation(currentLang, 'benefitTitle')}</h5>
+          <h5>${getTranslation(currentLang, 'benefitTitle') || 'Benefits'}</h5>
           <p>${p.benefits[currentLang] || p.benefits['en']}</p>
         </div>
         <div class="card-footer-row">
-          <span>📍 ${getTranslation(currentLang, 'distance')}: <strong>${p.distanceValue}</strong></span>
+          <span>📍 ${getTranslation(currentLang, 'distance') || 'Distance'}: <strong>${p.distanceValue}</strong></span>
           <button class="btn btn-primary btn-sm btn-nav-map" onclick="event.stopPropagation(); window.open('${directionLink}', '_blank')">
-            <i data-lucide="navigation"></i> ${getTranslation(currentLang, 'getDirection')}
+            <i data-lucide="navigation"></i> ${getTranslation(currentLang, 'getDirection') || 'Route'}
           </button>
         </div>
       </div>
@@ -499,6 +519,8 @@ function openPartnerDetail(id) {
   if (!p) return;
 
   const contentWrap = document.getElementById('partner-modal-body-content');
+  if (!contentWrap) return;
+  
   const isStamped = userStamps.some(s => s.partnerId === p.id);
   const isKorean = currentLang === 'kr';
   const directionLink = isKorean ? p.mapLinkNaver : p.mapLinkGoogle;
@@ -531,7 +553,7 @@ function openPartnerDetail(id) {
   // Build Reviews list
   let reviewsMarkup = '';
   if (p.reviews.length === 0) {
-    reviewsMarkup = `<p class="empty-state text-center">${getTranslation(currentLang, 'noReviews')}</p>`;
+    reviewsMarkup = `<p class="empty-state text-center">${getTranslation(currentLang, 'noReviews') || 'No reviews yet.'}</p>`;
   } else {
     p.reviews.forEach(rev => {
       reviewsMarkup += `
@@ -554,7 +576,7 @@ function openPartnerDetail(id) {
         <div class="review-writer-box">
           <h5 style="font-size:11px; margin-bottom:8px; font-weight:800;">✍️ Write Verified Review</h5>
           <div class="writer-rating-select">
-            <span data-trans="ratingLabel">${getTranslation(currentLang, 'ratingLabel')}</span>
+            <span data-trans="ratingLabel">${getTranslation(currentLang, 'ratingLabel') || 'Rating'}</span>
             <select id="review-rating-select">
               <option value="5">★ 5.0</option>
               <option value="4">★ 4.0</option>
@@ -563,14 +585,14 @@ function openPartnerDetail(id) {
               <option value="1">★ 1.0</option>
             </select>
           </div>
-          <textarea id="review-comment-textarea" class="writer-textarea" rows="2" placeholder="${getTranslation(currentLang, 'reviewInputPlaceholder')}"></textarea>
-          <button class="btn btn-primary btn-sm btn-block" id="btn-submit-review-act">${getTranslation(currentLang, 'reviewBtn')}</button>
+          <textarea id="review-comment-textarea" class="writer-textarea" rows="2" placeholder="${getTranslation(currentLang, 'reviewInputPlaceholder') || 'Write review here...'}"></textarea>
+          <button class="btn btn-primary btn-sm btn-block" id="btn-submit-review-act">${getTranslation(currentLang, 'reviewBtn') || 'Submit'}</button>
         </div>
       `;
     } else {
       writerMarkup = `
         <div class="glass-box text-center" style="margin-top: 16px; border-color: var(--accent); padding: 10px;">
-          <p class="review-alert-msg" data-trans="reviewAuthError">${getTranslation(currentLang, 'reviewAuthError')}</p>
+          <p class="review-alert-msg" data-trans="reviewAuthError">${getTranslation(currentLang, 'reviewAuthError') || 'Verified stamps required.'}</p>
         </div>
       `;
     }
@@ -633,7 +655,7 @@ function openPartnerDetail(id) {
     <!-- TAB PANEL 1: Info -->
     <div class="modal-tab-panel active" id="modal-panel-info">
       <div class="benefit-strip">
-        <h5 data-trans="benefitTitle">${getTranslation(currentLang, 'benefitTitle')}</h5>
+        <h5 data-trans="benefitTitle">${getTranslation(currentLang, 'benefitTitle') || 'Benefits'}</h5>
         <p>${p.benefits[currentLang] || p.benefits['en']}</p>
       </div>
       
@@ -684,18 +706,18 @@ function openPartnerDetail(id) {
 
     <!-- Map redirection with 도보 길찾기 -->
     <button class="btn btn-primary btn-block" style="margin-bottom:12px;" onclick="window.open('${directionLink}', '_blank')">
-      <i data-lucide="navigation"></i> ${getTranslation(currentLang, 'getDirection')} (${p.distanceValue})
+      <i data-lucide="navigation"></i> ${getTranslation(currentLang, 'getDirection') || 'Route'} (${p.distanceValue})
     </button>
 
     <!-- Scan stamp action button -->
     <button class="btn btn-secondary btn-block" id="btn-trigger-qr-scan">
       <i data-lucide="scan-line"></i> 
-      <span>${isStamped ? getTranslation(currentLang, 'alreadyStamped') : getTranslation(currentLang, 'scanBtnText')}</span>
+      <span>${isStamped ? (getTranslation(currentLang, 'alreadyStamped') || 'Stamped') : (getTranslation(currentLang, 'scanBtnText') || 'Scan QR')}</span>
     </button>
 
     <!-- Reviews Section -->
     <div class="reviews-section">
-      <h4 data-trans="reviewTitle">${getTranslation(currentLang, 'reviewTitle')}</h4>
+      <h4 data-trans="reviewTitle">${getTranslation(currentLang, 'reviewTitle') || 'Reviews'}</h4>
       <div id="modal-reviews-list">
         ${reviewsMarkup}
       </div>
@@ -710,30 +732,35 @@ function openPartnerDetail(id) {
 
   // Setup Detailed rating accordion toggle
   const accordionHeader = document.getElementById('btn-rating-accordion-toggle');
-  accordionHeader.addEventListener('click', () => {
-    accordionHeader.classList.toggle('open');
-  });
+  if (accordionHeader) {
+    accordionHeader.addEventListener('click', () => {
+      accordionHeader.classList.toggle('open');
+    });
+  }
 
   setupModalTabs();
 
   // Bind stamp trigger
   const qrBtn = document.getElementById('btn-trigger-qr-scan');
-  if (isStamped) qrBtn.setAttribute('disabled', 'true');
-  
-  qrBtn.addEventListener('click', () => {
-    if (!currentUser) {
-      alert("Please login first to check-in.");
+  if (qrBtn) {
+    if (isStamped) qrBtn.setAttribute('disabled', 'true');
+    
+    qrBtn.addEventListener('click', () => {
+      if (!currentUser) {
+        alert("Please login first to check-in.");
+        if (partnerDetailModal) partnerDetailModal.classList.remove('active');
+        document.querySelector('.nav-btn[data-tab="profile"]').click();
+        return;
+      }
       if (partnerDetailModal) partnerDetailModal.classList.remove('active');
-      document.querySelector('.nav-btn[data-tab="profile"]').click();
-      return;
-    }
-    if (partnerDetailModal) partnerDetailModal.classList.remove('active');
-    triggerQRScanner(p.id);
-  });
+      triggerQRScanner(p.id);
+    });
+  }
 
   // Submit verified review handler
-  if (currentUser && isStamped) {
-    document.getElementById('btn-submit-review-act').addEventListener('click', () => {
+  const btnSubmitReview = document.getElementById('btn-submit-review-act');
+  if (btnSubmitReview && currentUser && isStamped) {
+    btnSubmitReview.addEventListener('click', () => {
       const rating = parseInt(document.getElementById('review-rating-select').value);
       const text = document.getElementById('review-comment-textarea').value.trim();
 
@@ -760,7 +787,7 @@ function openPartnerDetail(id) {
 
       savePartnersToStorage();
       alert("Verified review posted successfully!");
-      openPartnerDetail(p.id); // reload modal
+      openPartnerDetail(p.id);
     });
   }
 }
@@ -816,46 +843,49 @@ function triggerQRScanner(partnerId) {
 }
 
 function setupInteractiveScans() {
-  document.getElementById('btn-claim-stamp-confirm').addEventListener('click', () => {
-    if (!targetQrPartnerId) return;
+  const confirmBtn = document.getElementById('btn-claim-stamp-confirm');
+  if (confirmBtn) {
+    confirmBtn.addEventListener('click', () => {
+      if (!targetQrPartnerId) return;
 
-    const p = partnersList.find(item => item.id === targetQrPartnerId);
-    if (!p) return;
+      const p = partnersList.find(item => item.id === targetQrPartnerId);
+      if (!p) return;
 
-    const now = new Date();
-    const dateStr = now.toLocaleDateString();
-    const timeStr = now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+      const now = new Date();
+      const dateStr = now.toLocaleDateString();
+      const timeStr = now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
 
-    const index = userStamps.findIndex(s => s.partnerId === p.id);
-    let visitCount = 1;
-    
-    if (index !== -1) {
-      visitCount = userStamps[index].count + 1;
-      userStamps[index].timestamp = timeStr;
-      userStamps[index].date = dateStr;
-      userStamps[index].count = visitCount;
-    } else {
-      userStamps.push({
-        partnerId: p.id,
-        partnerName: p.name['kr'],
-        timestamp: timeStr,
-        date: dateStr,
-        count: 1,
-        isPartner: p.isPartner,
-        visitorId: currentUser,
-        storeId: p.id,
-        memo: ""
-      });
-    }
+      const index = userStamps.findIndex(s => s.partnerId === p.id);
+      let visitCount = 1;
+      
+      if (index !== -1) {
+        visitCount = userStamps[index].count + 1;
+        userStamps[index].timestamp = timeStr;
+        userStamps[index].date = dateStr;
+        userStamps[index].count = visitCount;
+      } else {
+        userStamps.push({
+          partnerId: p.id,
+          partnerName: p.name['kr'],
+          timestamp: timeStr,
+          date: dateStr,
+          count: 1,
+          isPartner: p.isPartner,
+          visitorId: currentUser,
+          storeId: p.id,
+          memo: ""
+        });
+      }
 
-    localStorage.setItem(`nampogogo_stamps_${currentUser}`, JSON.stringify(userStamps));
-    
-    updateAuthUIs();
-    renderTravelLog();
+      localStorage.setItem(`nampogogo_stamps_${currentUser}`, JSON.stringify(userStamps));
+      
+      updateAuthUIs();
+      renderTravelLog();
 
-    if (qrScannerModal) qrScannerModal.classList.remove('active');
-    alert(`👣 Visit Stamp Saved!\nStore: ${p.name[currentLang] || p.name['en']}\nBenefit Status: Certified ✔`);
-  });
+      if (qrScannerModal) qrScannerModal.classList.remove('active');
+      alert(`👣 Visit Stamp Saved!\nStore: ${p.name[currentLang] || p.name['en']}\nBenefit Status: Certified ✔`);
+    });
+  }
 }
 
 // 11. Travel Log & Stamps Timeline
@@ -881,18 +911,18 @@ function renderTravelLog() {
     stampGrid.appendChild(node);
   }
 
-  logCountNum.textContent = userStamps.length;
+  if (logCountNum) logCountNum.textContent = userStamps.length;
 
   const oldNodes = timeline.querySelectorAll('.timeline-node');
   oldNodes.forEach(n => n.remove());
 
   if (userStamps.length === 0) {
-    emptyMsg.classList.remove('hidden');
-    actionsBar.classList.add('hidden');
+    if (emptyMsg) emptyMsg.classList.remove('hidden');
+    if (actionsBar) actionsBar.classList.add('hidden');
     timeline.classList.remove('active');
   } else {
-    emptyMsg.classList.add('hidden');
-    actionsBar.classList.remove('hidden');
+    if (emptyMsg) emptyMsg.classList.add('hidden');
+    if (actionsBar) actionsBar.classList.remove('hidden');
     timeline.classList.add('active');
 
     userStamps.forEach((stamp, idx) => {
@@ -910,11 +940,11 @@ function renderTravelLog() {
           
           <!-- Memo Box -->
           <div class="travel-memo-wrap">
-            <label data-trans="memoLabel">${getTranslation(currentLang, 'memoLabel')}</label>
-            <textarea id="memo-input-${stamp.partnerId}" rows="2" placeholder="${getTranslation(currentLang, 'memoPlaceholder')}">${stamp.memo || ''}</textarea>
+            <label data-trans="memoLabel">${getTranslation(currentLang, 'memoLabel') || 'Memo'}</label>
+            <textarea id="memo-input-${stamp.partnerId}" rows="2" placeholder="${getTranslation(currentLang, 'memoPlaceholder') || 'Enter memo...'}">${stamp.memo || ''}</textarea>
             <button class="btn btn-secondary btn-sm btn-block btn-save-memo" data-id="${stamp.partnerId}">
               <i data-lucide="save" style="width:10px; height:10px;"></i> 
-              <span data-trans="memoSaveBtn">${getTranslation(currentLang, 'memoSaveBtn')}</span>
+              <span data-trans="memoSaveBtn">${getTranslation(currentLang, 'memoSaveBtn') || 'Save'}</span>
             </button>
           </div>
         </div>
@@ -928,7 +958,7 @@ function renderTravelLog() {
         if (stampObj) {
           stampObj.memo = textVal;
           localStorage.setItem(`nampogogo_stamps_${currentUser}`, JSON.stringify(userStamps));
-          alert(getTranslation(currentLang, 'memoSavedSuccess'));
+          alert(getTranslation(currentLang, 'memoSavedSuccess') || 'Memo saved successfully.');
         }
       });
 
@@ -936,7 +966,8 @@ function renderTravelLog() {
     });
 
     initLucide();
-    document.getElementById('btn-export-log-card').onclick = openSNSCardModal;
+    const exportBtn = document.getElementById('btn-export-log-card');
+    if (exportBtn) exportBtn.onclick = openSNSCardModal;
   }
 }
 
@@ -944,42 +975,46 @@ function openSNSCardModal() {
   const storyStampList = document.getElementById('story-stamp-list');
   const storyUserTag = document.getElementById('story-user-tag');
   
-  storyUserTag.textContent = `@${currentUser || 'Explorer'}`;
-  storyStampList.innerHTML = '';
-
-  userStamps.forEach((stamp, idx) => {
-    const p = partnersList.find(item => item.id === stamp.partnerId);
-    if (!p) return;
-    
-    const node = document.createElement('div');
-    node.className = 'story-log-node';
-    
-    const memoSnippet = stamp.memo ? `<br><span style="font-size:8px; opacity:0.8; font-style:italic;">"${stamp.memo}"</span>` : '';
-    
-    node.innerHTML = `🌟 Day Route ${idx + 1}<br><strong>${p.name[currentLang] || p.name['en']}</strong>${memoSnippet}`;
-    storyStampList.appendChild(node);
-  });
+  if (storyUserTag) storyUserTag.textContent = `@${currentUser || 'Explorer'}`;
+  if (storyStampList) {
+    storyStampList.innerHTML = '';
+    userStamps.forEach((stamp, idx) => {
+      const p = partnersList.find(item => item.id === stamp.partnerId);
+      if (!p) return;
+      
+      const node = document.createElement('div');
+      node.className = 'story-log-node';
+      const memoSnippet = stamp.memo ? `<br><span style="font-size:8px; opacity:0.8; font-style:italic;">"${stamp.memo}"</span>` : '';
+      node.innerHTML = `🌟 Day Route ${idx + 1}<br><strong>${p.name[currentLang] || p.name['en']}</strong>${memoSnippet}`;
+      storyStampList.appendChild(node);
+    });
+  }
 
   if (logSnsModal) logSnsModal.classList.add('active');
 
-  // Copy Caption Share Text
-  document.getElementById('btn-copy-sns-caption').onclick = () => {
-    const routeText = userStamps.map((stamp, idx) => {
-      const p = partnersList.find(item => item.id === stamp.partnerId);
-      const memoText = stamp.memo ? ` (${stamp.memo})` : '';
-      return `${idx + 1}. ${p ? p.name[currentLang] : ''}${memoText}`;
-    }).join('\n➔ ');
+  const btnCopyCaption = document.getElementById('btn-copy-sns-caption');
+  if (btnCopyCaption) {
+    btnCopyCaption.onclick = () => {
+      const routeText = userStamps.map((stamp, idx) => {
+        const p = partnersList.find(item => item.id === stamp.partnerId);
+        const memoText = stamp.memo ? ` (${stamp.memo})` : '';
+        return `${idx + 1}. ${p ? p.name[currentLang] : ''}${memoText}`;
+      }).join('\n➔ ');
 
-    const instagramText = `🔥 My Nampo GoGo Travel Footprints!\n👣 Today's route:\n${routeText}\n📍 Verified stamps collected at Nampodong, Busan.\n#NampoGoGo #BusanTour #Nampodong #BusanTravel #KLounge`;
-    
-    navigator.clipboard.writeText(instagramText).then(() => {
-      alert(getTranslation(currentLang, 'snsSuccess'));
-    });
-  };
+      const instagramText = `🔥 My Nampo GoGo Travel Footprints!\n👣 Today's route:\n${routeText}\n📍 Verified stamps collected at Nampodong, Busan.\n#NampoGoGo #BusanTour #Nampodong #BusanTravel #KLounge`;
+      
+      navigator.clipboard.writeText(instagramText).then(() => {
+        alert(getTranslation(currentLang, 'snsSuccess') || 'Copied to clipboard.');
+      });
+    };
+  }
 
-  document.getElementById('btn-download-sns-card').onclick = () => {
-    alert("📸 Story Card Template Image downloaded successfully (Simulation)!");
-  };
+  const btnDownloadCard = document.getElementById('btn-download-sns-card');
+  if (btnDownloadCard) {
+    btnDownloadCard.onclick = () => {
+      alert("📸 Story Card Template Image downloaded successfully (Simulation)!");
+    };
+  }
 }
 
 // 12. Merchant Dashboard with Media 다중 업로드 & 썸네일 셀렉터
@@ -991,6 +1026,8 @@ function setupMerchantSystem() {
     fileInput.addEventListener('change', (e) => {
       const files = e.target.files;
       const previewContainer = document.getElementById('merchant-media-previews');
+      if (!previewContainer) return;
+      
       previewContainer.innerHTML = '';
       tempUploadedMedia = [];
 
@@ -1048,7 +1085,7 @@ function setupMerchantSystem() {
       }
 
       savePartnersToStorage();
-      alert(getTranslation(currentLang, 'saveStoreSuccess'));
+      alert(getTranslation(currentLang, 'saveStoreSuccess') || 'Saved store details.');
       renderPartnersList();
     });
   }
@@ -1066,11 +1103,15 @@ function renderMerchantStats() {
   const store = findMerchantStore();
   if (!store) return;
 
-  document.getElementById('edit-benefit-input').value = store.benefits[currentLang] || store.benefits['en'];
-  document.getElementById('edit-hours-input').value = store.hours;
-  document.getElementById('edit-phone-input').value = store.phone;
+  const editBenefit = document.getElementById('edit-benefit-input');
+  const editHours = document.getElementById('edit-hours-input');
+  const editPhone = document.getElementById('edit-phone-input');
+  const reviewCount = document.getElementById('merchant-review-count');
 
-  document.getElementById('merchant-review-count').textContent = `${store.reviews.length}개`;
+  if (editBenefit) editBenefit.value = store.benefits[currentLang] || store.benefits['en'];
+  if (editHours) editHours.value = store.hours;
+  if (editPhone) editPhone.value = store.phone;
+  if (reviewCount) reviewCount.textContent = `${store.reviews.length}개`;
   
   const tbody = document.querySelector('#merchant-visit-logs-table tbody');
   if (!tbody) return;
@@ -1120,6 +1161,8 @@ function setupAdminSystem() {
     fileInput.addEventListener('change', (e) => {
       const files = e.target.files;
       const previewContainer = document.getElementById('admin-media-previews');
+      if (!previewContainer) return;
+
       previewContainer.innerHTML = '';
       tempUploadedMedia = [];
 
@@ -1190,7 +1233,7 @@ function setupAdminSystem() {
         phone: "+82-51-111-2222",
         hours: "11:00 - 22:00",
         priceList: [
-          { name: { kr: "대표 패키지 코스", en: "Signature Package", ch: "招牌主打套餐", jp: "代表コース" }, price: priceVal }
+          { name: { kr: "대표 패키지 코스", en: "Signature Package", ch: "招牌主打套餐", jp: "대표코스" }, price: priceVal }
         ],
         menuForeign: {
           en: `Signature Course - ${priceVal}`,
@@ -1205,7 +1248,7 @@ function setupAdminSystem() {
 
       partnersList.unshift(newStoreObj);
       savePartnersToStorage();
-      alert(getTranslation(currentLang, 'addStoreSuccess'));
+      alert(getTranslation(currentLang, 'addStoreSuccess') || 'Add store success.');
       
       localStorage.setItem('nampogogo_partners_v3', JSON.stringify(partnersList));
 
@@ -1275,7 +1318,7 @@ function setupAIPlanner() {
   const btnPlanner = document.getElementById('btn-run-ai-recommend');
   const outputArea = document.getElementById('ai-course-output-area');
 
-  if (btnPlanner) {
+  if (btnPlanner && outputArea) {
     btnPlanner.addEventListener('click', () => {
       const selectedActs = Array.from(document.querySelectorAll('input[name="ai-activities"]:checked')).map(el => el.value);
       const budgetVal = parseInt(document.getElementById('ai-budget-select').value);

@@ -1,4 +1,4 @@
-/* style.css - Nampo GoGo Premium Minimalist Design System with Clean Text Categories */
+/* style.css - Nampo GoGo Premium Minimalist Design System with Sticky Top Navigation */
 
 :root {
   /* Colors */
@@ -214,21 +214,20 @@ body {
   outline: none;
 }
 
-/* Bottom Navigation Dock */
+/* Sticky Top Navigation Dock (Moved from bottom to top header underside) */
 .nampo-nav-dock {
-  position: fixed;
-  bottom: 0;
+  position: sticky;
+  top: 56px; /* Below Header */
   width: 100%;
-  max-width: 478px;
-  height: 68px;
-  background: rgba(255, 255, 255, 0.95);
-  border-top: 1px solid var(--border-light);
+  height: 52px;
+  background: rgba(255, 255, 255, 0.96);
+  border-bottom: 1px solid var(--border-medium);
+  border-top: none;
   display: flex;
   justify-content: space-around;
   align-items: center;
-  z-index: 100;
+  z-index: 99;
   backdrop-filter: blur(20px);
-  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .nav-btn {
@@ -239,40 +238,41 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 5px;
+  gap: 3px;
   cursor: pointer;
   flex: 1;
   height: 100%;
   transition: var(--transition);
-  opacity: 0.8;
+  opacity: 0.85;
 }
 
 .nav-btn i {
-  width: 22px;
-  height: 22px;
-  stroke-width: 1.8px;
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.2px;
   transition: var(--transition);
 }
 
 .nav-btn span {
   font-size: 9px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: -0.3px;
 }
 
 .nav-btn.active {
   color: var(--primary);
   opacity: 1;
+  border-bottom: 2px solid var(--primary);
 }
 
 .nav-btn.active i {
-  transform: scale(1.08);
+  transform: scale(1.05);
 }
 
-/* Scroll body content */
+/* Scroll body content (Padding adjusted for top nav sticky header) */
 .nampo-body {
   flex: 1;
-  padding: 24px 24px 92px 24px;
+  padding: 20px 20px 32px 20px;
   overflow-y: auto;
   background: #ffffff;
 }
@@ -292,7 +292,20 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Typography section headers */
+/* Simple text title instead of heavy gradient banner */
+.nampo-simple-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--primary);
+  background: var(--primary-soft);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  text-align: center;
+  margin-bottom: 20px;
+  letter-spacing: -0.5px;
+}
+
+/* Global Typography section headers */
 .section-title {
   margin-bottom: 24px;
 }
@@ -385,61 +398,6 @@ body {
   border-radius: var(--radius-pill);
 }
 
-/* Hero Visual Banner */
-.nampo-hero-card {
-  height: 190px;
-  background: linear-gradient(to right, rgba(49, 130, 246, 0.9) 0%, rgba(0, 188, 212, 0.8) 100%), 
-              url('https://images.unsplash.com/photo-1540959733332-eab4deceeaf7?auto=format&fit=crop&w=800&q=80');
-  background-size: cover;
-  background-position: center;
-  border-radius: var(--radius-md);
-  position: relative;
-  overflow: hidden;
-  margin-bottom: 24px;
-  box-shadow: 0 10px 30px rgba(49, 130, 246, 0.15);
-  display: flex;
-  align-items: flex-end;
-  padding: 24px;
-}
-
-.hero-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.04);
-}
-
-.hero-content {
-  position: relative;
-  z-index: 2;
-}
-
-.nampo-hero-card h2 {
-  font-size: 26px;
-  font-weight: 800;
-  color: #ffffff;
-  letter-spacing: -1px;
-}
-
-.nampo-hero-card p {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.9);
-  margin-top: 4px;
-}
-
-.btn-hero-cta {
-  margin-top: 14px;
-  padding: 8px 16px;
-  font-size: 11px;
-  background: #ffffff;
-  color: var(--primary);
-  border-radius: var(--radius-pill);
-}
-
-.btn-hero-cta:hover {
-  background: var(--bg-gray-soft);
-  color: var(--primary);
-}
-
 /* User Greeting auth status banner */
 .auth-status-banner {
   display: flex;
@@ -494,10 +452,10 @@ body {
   margin-top: 4px;
 }
 
-/* 7 Core Quick Access Menu Categories (Emoji Removed, Modern Flat Badges) */
+/* 7 Core Quick Access Menu Categories */
 .core-menu-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 3 Columns for bigger size */
+  grid-template-columns: repeat(3, 1fr);
   gap: 10px;
   margin-bottom: 24px;
 }
@@ -521,7 +479,6 @@ body {
   transform: translateY(-2px);
 }
 
-/* Last button span two columns for clean layout */
 .menu-item-btn[data-menu="log"] {
   grid-column: span 3;
   background: var(--primary-soft);
@@ -1255,7 +1212,7 @@ body {
   align-items: flex-end;
   justify-content: center;
   opacity: 0;
-  visibility: hidden; /* Fully hide by default to block flashes */
+  visibility: hidden;
   pointer-events: none;
   transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -1532,7 +1489,7 @@ body {
   border-color: var(--primary);
 }
 
-/* QR Camera viewport (Laser Scan Animation restricted to active only) */
+/* QR Camera viewport */
 .qr-camera-viewport {
   width: 100%;
   max-width: 280px;
@@ -1566,7 +1523,6 @@ body {
 .bottom-left { bottom: 0; left: 0; border-right: none; border-top: none; }
 .bottom-right { bottom: 0; right: 0; border-left: none; border-top: none; }
 
-/* Laser scanner animation only runs when modal is active */
 .modal.active .scanner-laser-line {
   position: absolute;
   left: 4px;
@@ -1597,152 +1553,4 @@ body {
   bottom: 12px;
   font-size: 10px;
   color: var(--text-muted);
-}
-
-/* Success Ticket overlay */
-.qr-result-overlay {
-  position: absolute;
-  inset: 0;
-  background: #ffffff;
-  z-index: 20;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-lg);
-}
-
-.success-icon-check {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: var(--success);
-  color: #ffffff;
-  font-size: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  margin-bottom: 16px;
-  box-shadow: 0 4px 16px rgba(46, 204, 113, 0.3);
-}
-
-.reward-box-ticket {
-  background: radial-gradient(circle at 0px 50%, transparent 8px, var(--bg-gray-soft) 9px), 
-              radial-gradient(circle at 100% 50%, transparent 8px, var(--bg-gray-soft) 9px);
-  width: 100%;
-  border-radius: var(--radius-sm);
-  padding: 18px 24px;
-  margin: 16px 0 24px 0;
-  border: 1px dashed var(--border-medium);
-}
-
-.ticket-label {
-  font-size: 10px;
-  color: var(--primary);
-  font-weight: 800;
-  display: block;
-}
-
-.ticket-value {
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--text-main);
-  margin-top: 4px;
-}
-
-/* SNS Instagram Story export */
-.instagram-story-canvas {
-  aspect-ratio: 9/16;
-  width: 100%;
-  max-width: 250px;
-  margin: 0 auto 20px auto;
-  border-radius: var(--radius-md);
-  background: linear-gradient(135deg, #1f2235 0%, var(--primary) 100%);
-  border: 1.5px solid rgba(255,255,255,0.15);
-  box-shadow: var(--shadow-premium);
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  position: relative;
-  overflow: hidden;
-}
-
-.instagram-story-canvas::before {
-  content: '';
-  position: absolute;
-  width: 180px;
-  height: 180px;
-  background: rgba(255,255,255,0.08);
-  filter: blur(40px);
-  border-radius: 50%;
-  top: -40px;
-  left: -40px;
-}
-
-.story-branding {
-  font-size: 12px;
-  font-weight: 800;
-  color: white;
-  position: relative;
-  z-index: 5;
-}
-
-.story-user-badge {
-  font-size: 10px;
-  background: rgba(255,255,255,0.12);
-  backdrop-filter: blur(4px);
-  border: 1px solid rgba(255,255,255,0.15);
-  padding: 4px 12px;
-  border-radius: var(--radius-pill);
-  display: inline-block;
-  align-self: flex-start;
-  margin-top: 10px;
-  position: relative;
-  z-index: 5;
-  color: white;
-}
-
-.story-timeline-summary {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 12px;
-  margin: 20px 0;
-  position: relative;
-  z-index: 5;
-}
-
-.story-log-node {
-  background: rgba(0, 0, 0, 0.4);
-  border-left: 3.5px solid var(--secondary);
-  border-radius: 6px;
-  padding: 10px 14px;
-  font-size: 11px;
-  color: white;
-}
-
-.story-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-top: 1px solid rgba(255,255,255,0.15);
-  padding-top: 10px;
-  font-size: 9px;
-  color: rgba(255,255,255,0.7);
-  position: relative;
-  z-index: 5;
-}
-
-.foot-icon {
-  font-size: 14px;
-}
-
-.sns-action-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
 }

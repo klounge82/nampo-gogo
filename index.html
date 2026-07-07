@@ -41,7 +41,7 @@
           </div>
         </div>
 
-        <!-- Lang Select (Corrected labels and values: kr, en, ch, jp) -->
+        <!-- Lang Select -->
         <div class="lang-drop">
           <select id="app-lang-select">
             <option value="kr" selected>KR</option>
@@ -53,7 +53,7 @@
       </div>
     </header>
 
-    <!-- Bottom Navigation Dock -->
+    <!-- Top Navigation Dock (Moved to Top for better navigation response) -->
     <nav class="nampo-nav-dock">
       <button class="nav-btn active" data-tab="dashboard">
         <i data-lucide="home"></i>
@@ -78,17 +78,8 @@
 
       <!-- TAB 1: Dashboard -->
       <section id="tab-dashboard" class="tab-panel active">
-        <!-- Hero Visual Banner -->
-        <div class="nampo-hero-card">
-          <div class="hero-overlay"></div>
-          <div class="hero-content">
-            <h2>Nampo GoGo</h2>
-            <p data-trans="tagline">남포동 스마트 로컬 여행 상생 플랫폼</p>
-            <button class="btn btn-primary btn-hero-cta" id="btn-hero-quick-link">
-              <i data-lucide="sparkles"></i> K-Lounge Massage View
-            </button>
-          </div>
-        </div>
+        <!-- Simple text title instead of heavy gradient hero banner (Requested) -->
+        <div class="nampo-simple-title" data-trans="tagline">남포동 스마트 로컬여행 플랫폼</div>
 
         <!-- User Greeting & Authentication Info Bar -->
         <div class="glass-box auth-status-banner">
@@ -103,7 +94,7 @@
           <button class="btn btn-sm btn-outline" id="btn-dashboard-auth-action">Login</button>
         </div>
 
-        <!-- 7 Core Quick Access Menu Categories (Emoji Icons Removed for Minimalist Look) -->
+        <!-- 7 Core Quick Access Menu Categories (Clean Flat Cards) -->
         <div class="core-menu-grid">
           <button class="menu-item-btn" data-menu="food">
             <span class="menu-label" data-trans="menuFood">먹거리</span>
