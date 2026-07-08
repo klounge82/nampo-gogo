@@ -52,14 +52,14 @@
         <p class="intro-desc" data-trans="pleaseLogin">로그인 후 QR 인증과 여행 로그를 기록해 보세요.</p>
         
         <div class="mode-select-box-grid">
-          <!-- Tourist mode card (With Direct Touch Handler) -->
+          <!-- Tourist mode card -->
           <div class="mode-card-btn" id="btn-mode-tourist" onclick="handleModeSelect('tourist')">
             <h3 data-trans="introTouristTitle">여행객 전용</h3>
             <p data-trans="introTouristDesc">제휴 매장 검색, 길찾기, QR 스탬프 로그 모드</p>
             <span class="mode-badge-action" data-trans="introTouristBtn">접속하기 ➔</span>
           </div>
 
-          <!-- Merchant mode card (With Direct Touch Handler) -->
+          <!-- Merchant mode card -->
           <div class="mode-card-btn" id="btn-mode-merchant" onclick="handleModeSelect('merchant')">
             <h3 data-trans="introMerchantTitle">사업자 전용</h3>
             <p data-trans="introMerchantDesc">매장 등록, 다중 업로드 가이드, 메뉴/결제 관리</p>
@@ -81,7 +81,7 @@
         </div>
         
         <div class="header-controls">
-          <!-- Mode Switch Button (Now functions as location.reload() 새로고침) -->
+          <!-- Mode Switch Button -->
           <button id="btn-quick-mode-switch" class="btn-mode-switch-pill" style="padding: 6px 8px;" title="새로고침">
             <i data-lucide="refresh-cw"></i>
           </button>
@@ -141,7 +141,46 @@
             <button class="btn btn-sm btn-outline" id="btn-tourist-login-shortcut">Login</button>
           </div>
 
-          <!-- Flat Text Pill Category Slider (No Emojis, No Circles) -->
+          <!-- Embedded Login Form (Replaces separate profile tab, pops up or displays conditionally) -->
+          <div class="glass-box auth-form-container hidden" id="tourist-embedded-login-card" style="margin-bottom:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <h4 data-trans="loginTitle" style="font-weight:900; font-size:13px;">초간단 여행자 가입 및 로그인</h4>
+              <button class="btn btn-sm btn-outline" onclick="document.getElementById('tourist-embedded-login-card').classList.add('hidden')">닫기</button>
+            </div>
+            
+            <form id="nampo-auth-form" onsubmit="event.preventDefault();">
+              <input type="hidden" name="auth-role" value="visitor">
+              
+              <div class="input-group" style="padding: 8px 12px; margin-bottom: 8px;">
+                <i data-lucide="user" style="width:14px; height:14px; margin-right:6px;"></i>
+                <input type="text" id="auth-username" required placeholder="아이디(닉네임) 입력" data-trans="usernamePlaceholder" style="font-size:11px;">
+              </div>
+              
+              <div class="input-group" style="padding: 8px 12px; margin-bottom: 8px;">
+                <i data-lucide="lock" style="width:14px; height:14px; margin-right:6px;"></i>
+                <input type="password" id="auth-password" required placeholder="비밀번호 입력" data-trans="passwordPlaceholder" style="font-size:11px;">
+              </div>
+
+              <div class="input-group" style="padding: 8px 12px; margin-bottom: 10px;">
+                <i data-lucide="lock-keyhole" style="width:14px; height:14px; margin-right:6px;"></i>
+                <input type="password" id="auth-password-confirm" required placeholder="비밀번호 확인 입력" data-trans="passwordConfirmPlaceholder" style="font-size:11px;">
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block btn-sm" id="btn-submit-auth">
+                <i data-lucide="key" style="width:12px; height:12px;"></i> <span data-trans="authBtn">로그인 / 가입 완료</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- Tourist Profile Status Card (For logged-in tourist to logout) -->
+          <div class="glass-box hidden" id="tourist-profile-logout-card" style="margin-bottom:16px; padding: 12px 16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:11px;">접속 아이디: <strong id="tourist-logged-in-username">user</strong></span>
+              <button class="btn btn-xs btn-outline text-accent" id="btn-action-logout" style="padding:4px 8px; font-size:10px;">로그아웃</button>
+            </div>
+          </div>
+
+          <!-- Flat Text Pill Category Slider -->
           <h4 class="menu-grid-header" data-trans="allCategories">주변 식사 카테고리 검색</h4>
           <div class="delivery-category-slider">
             <button class="delivery-cat-btn active" data-subcat="all" data-trans="allCategories">전체보기</button>
@@ -227,6 +266,14 @@
             <!-- Rendered dynamically -->
           </div>
 
+          <!-- QR 스캔하기 하단 배치 (관광객 탭 아래 고정 유도용) -->
+          <div class="tourist-fixed-qr-dock" style="margin-top: 24px; text-align:center;">
+            <p style="font-size:10px; color:var(--text-muted); margin-bottom:8px;">가게 카운터의 QR코드를 스캔해 스탬프 혜택을 획득하세요.</p>
+            <button class="btn btn-secondary btn-block" id="btn-trigger-general-qr-scan" style="max-width:320px; margin: 0 auto; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+              <i data-lucide="scan-line"></i> <span>제휴매장 QR 인증하기</span>
+            </button>
+          </div>
+
         </section>
 
         <!-- TOURIST TAB 2: Travel Log Timeline -->
@@ -255,58 +302,12 @@
           </div>
 
           <!-- SNS export card button -->
-          <div class="log-actions hidden" id="log-actions-bar">
-            <button class="btn btn-primary btn-block" id="btn-export-log-card">
-              <i data-lucide="share-2"></i> <span data-trans="snsExport">SNS 공유용 카드 생성 📸</span>
+          <div class="log-actions hidden" id="log-actions-bar" style="margin-top: 20px;">
+            <button class="btn btn-primary btn-block" id="btn-export-log-card" style="border-radius: var(--radius-pill); font-weight:800; padding:12px;">
+              <i data-lucide="share-2"></i> <span data-trans="snsExport">SNS 공유용 스토리 카드 생성 📸</span>
             </button>
           </div>
         </section>
-
-        <!-- TOURIST TAB 3: Tourist Profile / Login -->
-        <section id="tab-tourist-profile" class="tab-panel">
-          <div class="profile-card-wrapper">
-            <div class="profile-avatar" id="profile-avatar-emoji">👤</div>
-            <h3 id="profile-username">Guest User</h3>
-            <span class="user-role-badge-lg" id="profile-role-badge">Visitor</span>
-          </div>
-
-          <!-- Guest login form -->
-          <div class="glass-box auth-form-container" id="auth-form-card">
-            <h4 data-trans="loginTitle">3초 초간단 가입 & 로그인</h4>
-            <p class="auth-desc" data-trans="loginDesc">아이디와 비밀번호만 입력하면 즉시 가입 및 이용이 가능합니다.</p>
-            
-            <form id="nampo-auth-form" onsubmit="event.preventDefault();">
-              <input type="hidden" name="auth-role" value="visitor">
-              
-              <div class="input-group">
-                <i data-lucide="user"></i>
-                <input type="text" id="auth-username" required placeholder="아이디(닉네임) 입력" data-trans="usernamePlaceholder">
-              </div>
-              
-              <div class="input-group">
-                <i data-lucide="lock"></i>
-                <input type="password" id="auth-password" required placeholder="비밀번호 입력" data-trans="passwordPlaceholder">
-              </div>
-
-              <div class="input-group">
-                <i data-lucide="lock-keyhole"></i>
-                <input type="password" id="auth-password-confirm" required placeholder="비밀번호 확인 입력" data-trans="passwordConfirmPlaceholder">
-              </div>
-
-              <button type="submit" class="btn btn-primary btn-block" id="btn-submit-auth">
-                <i data-lucide="key"></i> <span data-trans="authBtn">로그인 / 가입 완료</span>
-              </button>
-            </form>
-          </div>
-
-          <!-- Logout Button -->
-          <div class="logout-container hidden" id="logout-card">
-            <button class="btn btn-secondary btn-block text-accent" id="btn-action-logout">
-              <i data-lucide="log-out"></i> <span data-trans="logoutBtn">로그아웃</span>
-            </button>
-          </div>
-        </section>
-
 
         <!-- ================= MERCHANT (BUSINESS) MODE PANELS ================= -->
 
@@ -324,58 +325,58 @@
             <p>매장 정보를 등록하고 제휴 승인을 요청하여 파트너로 노출되세요.</p>
           </div>
 
-          <!-- Step 1-A: Choose Register or Login welcome screen -->
-          <div class="glass-box text-center" id="merchant-welcome-auth-card">
-            <h4 style="font-weight:900; font-size:16px; margin-bottom:12px;">사장님 전용 가입 & 로그인</h4>
-            <p class="auth-desc" style="margin-bottom:20px;">회원가입 후 제휴 등록 신청을 마쳐야 매장 노출 및 상세 올리기가 열립니다.</p>
-            <div style="display:flex; gap:12px;">
-              <button class="btn btn-primary flex-1" id="btn-show-merchant-register">회원가입 하기</button>
-              <button class="btn btn-secondary flex-1" id="btn-show-merchant-login">로그인 하기</button>
+          <!-- Premium High-Tech Inform Master Styled Welcome card -->
+          <div class="merchant-premium-auth-container" id="merchant-welcome-auth-card">
+            <h3 class="merchant-premium-title">사장님 전용 가입 & 로그인</h3>
+            <p class="merchant-premium-desc">공식 제휴 가맹점 심사 신청 및 대시보드 통계 관리를 위해 로그인해 주세요.</p>
+            <div class="premium-btn-group">
+              <button class="premium-btn-primary flex-1" id="btn-show-merchant-register">회원가입 하기</button>
+              <button class="premium-btn-secondary flex-1" id="btn-show-merchant-login">로그인 하기</button>
             </div>
           </div>
 
           <!-- Step 1-B: Real Register Form (Join) -->
-          <div class="glass-box hidden" id="merchant-register-card">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-              <h4 style="font-weight:800; font-size:14px;">사장님 회원가입</h4>
-              <button class="btn btn-sm btn-outline" id="btn-back-to-welcome-r">이전으로</button>
+          <div class="merchant-premium-auth-container hidden" id="merchant-register-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+              <h3 class="merchant-premium-title" style="margin-bottom:0; text-align:left;">사장님 회원가입</h3>
+              <button class="btn btn-xs btn-outline" id="btn-back-to-welcome-r" style="color:white; border-color:rgba(255,255,255,0.2);">이전으로</button>
             </div>
             <form id="merchant-join-form" onsubmit="event.preventDefault();">
-              <div class="input-group">
-                <i data-lucide="user-plus"></i>
+              <div class="premium-input-group">
+                <i data-lucide="user-plus" style="width:14px; height:14px;"></i>
                 <input type="text" id="m-register-username" required placeholder="신규 사업자 아이디(영어/숫자)">
               </div>
-              <div class="input-group">
-                <i data-lucide="lock"></i>
+              <div class="premium-input-group">
+                <i data-lucide="lock" style="width:14px; height:14px;"></i>
                 <input type="password" id="m-register-password" required placeholder="비밀번호 입력">
               </div>
-              <div class="input-group">
-                <i data-lucide="lock-keyhole"></i>
+              <div class="premium-input-group">
+                <i data-lucide="lock-keyhole" style="width:14px; height:14px;"></i>
                 <input type="password" id="m-register-password-confirm" required placeholder="비밀번호 확인">
               </div>
-              <button type="submit" class="btn btn-primary btn-block">
-                <i data-lucide="user-check"></i> 가입 완료 (자동 로그인)
+              <button type="submit" class="btn btn-primary btn-block" style="border-radius:var(--radius-pill); font-weight:800; padding:12px; margin-top:8px;">
+                <i data-lucide="user-check" style="width:14px; height:14px; display:inline-block; vertical-align:middle; margin-right:4px;"></i> 가입 완료 (자동 로그인)
               </button>
             </form>
           </div>
 
           <!-- Step 1-C: Real Login Form (Login) -->
-          <div class="glass-box hidden" id="merchant-login-card">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-              <h4 style="font-weight:800; font-size:14px;">사장님 로그인</h4>
-              <button class="btn btn-sm btn-outline" id="btn-back-to-welcome-l">이전으로</button>
+          <div class="merchant-premium-auth-container hidden" id="merchant-login-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+              <h3 class="merchant-premium-title" style="margin-bottom:0; text-align:left;">사장님 로그인</h3>
+              <button class="btn btn-xs btn-outline" id="btn-back-to-welcome-l" style="color:white; border-color:rgba(255,255,255,0.2);">이전으로</button>
             </div>
             <form id="merchant-login-form-submit" onsubmit="event.preventDefault();">
-              <div class="input-group">
-                <i data-lucide="user"></i>
+              <div class="premium-input-group">
+                <i data-lucide="user" style="width:14px; height:14px;"></i>
                 <input type="text" id="m-login-username" required placeholder="아이디 입력">
               </div>
-              <div class="input-group">
-                <i data-lucide="lock"></i>
+              <div class="premium-input-group">
+                <i data-lucide="lock" style="width:14px; height:14px;"></i>
                 <input type="password" id="m-login-password" required placeholder="비밀번호 입력">
               </div>
-              <button type="submit" class="btn btn-primary btn-block">
-                <i data-lucide="log-in"></i> 로그인 완료
+              <button type="submit" class="btn btn-primary btn-block" style="border-radius:var(--radius-pill); font-weight:800; padding:12px; margin-top:8px;">
+                <i data-lucide="log-in" style="width:14px; height:14px; display:inline-block; vertical-align:middle; margin-right:4px;"></i> 로그인 완료
               </button>
             </form>
           </div>
@@ -437,7 +438,7 @@
             <p class="auth-desc" style="margin-top: 6px;">제출하신 사업자등록증 및 매장 인증에 대한 심사가 진행 중입니다. 승인이 나면 매장 정보 올리기가 자동 오픈됩니다.</p>
             
             <!-- Admin simulator tool -->
-            <div class="admin-simulator-panel" style="margin-top:20px; border-top:1.5px dashed rgba(49, 130, 246, 0.2); padding-top:15px;">
+            <div class="admin-simulator-panel" style="margin-top:20px; border-top:1.5px dashed rgba(43, 97, 235, 0.2); padding-top:15px;">
               <span style="font-size:10px; font-weight:800; color:var(--primary); display:block; margin-bottom:8px;">🛠️ 개발자/어드민 시뮬레이션 키</span>
               <button class="btn btn-primary btn-sm btn-block" id="btn-demo-approve-instantly" style="border-radius: var(--radius-pill); font-size:11px;">
                 개발자 즉시 승인하기 (테스트용)
@@ -471,7 +472,7 @@
             </div>
           </div>
 
-          <!-- Monthly Visitors & Stamps Trend Line Graph (SVG rendering area) -->
+          <!-- Monthly Visitors & Stamps Trend Line Graph -->
           <div class="glass-box dashboard-graph-box">
             <h4 style="font-size:12px; font-weight:900; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
               <span>📈 월별 방문 및 QR 인증 추이 (최근 6개월)</span>
@@ -522,6 +523,11 @@
               <i data-lucide="history" style="width:14px; height:14px; color:var(--primary);"></i>
               작성 중이던 임시 저장(Draft) 데이터를 감지하여 복원했습니다! (24시간 보관)
             </p>
+          </div>
+
+          <!-- Upload validation failure errors report box (Sleek red box, hidden by default) -->
+          <div id="upload-error-report" class="upload-error-report-panel hidden">
+            <!-- Dynamic validation fails list -->
           </div>
 
           <!-- Strictly Regulated Media Uploader -->

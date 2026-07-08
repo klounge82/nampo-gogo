@@ -29,10 +29,29 @@ let tempVideosBase64List = [];
 // Dynamic Menu Rows Temporary Data
 let dynamicMenuItems = []; // Array of { id, category, name, price, imageBase64 }
 
+// Last viewed partner store ID to backup general scan checks
+let lastViewedPartnerId = "partner_jagalchi";
+
 // Multi-Language Reference
 let translations = {};
 
-// Direct Global Touch Handler for Mobile Compatibility (Ensures 100% click/touch reliability)
+// ⚡ Debounce helper to prevent input lag caused by localStorage stringify of massive base64 media
+function debounce(func, wait) {
+  let timeout;
+  return function(...args) {
+    const context = this;
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(context, args), wait);
+  };
+}
+
+// State Persistence switches
+function persistAppState() {
+  localStorage.setItem('nampogogo_app_mode', appMode);
+  localStorage.setItem('nampogogo_active_tab', activeTab);
+}
+
+// Direct Global Touch Handler for Mobile Compatibility
 window.handleModeSelect = function(mode) {
   console.log(`🎯 handleModeSelect triggered with mode: ${mode}`);
   const introScreen = document.getElementById('intro-screen');
@@ -64,9 +83,10 @@ window.handleModeSelect = function(mode) {
       switchTabPanel('merchant-auth');
     }
   }
+  persistAppState();
 };
 
-// Safe Initialization Hook (Robust try-catch sandbox isolation)
+// Safe Initialization Hook
 document.addEventListener('DOMContentLoaded', () => {
   console.log("🚀 Nampo GoGo App Initialization Starting...");
   
@@ -79,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const seed = window.NampoGoGoData || { translations: {}, partners: [], updateHistory: [] };
   translations = seed.translations || {};
 
-  // Safe isolated module executor helper to prevent single-point failures from stopping the app
+  // Safe isolated module executor helper
   function runSafe(moduleName, fn) {
     try {
       console.log(`[Module Init] Loading: ${moduleName}`);
@@ -106,9 +126,29 @@ document.addEventListener('DOMContentLoaded', () => {
   // Render initial views
   runSafe('Render Partners Board', () => renderPartnersList());
   runSafe('Render Travel Log Timeline', () => renderTravelLog());
-
-  // Setup modal close actions
   runSafe('Modal Buttons Bind', () => setupModalCloseButtons());
+
+  // ⚡ Recovery of Session states on reload (State Persistence)
+  runSafe('Recover Persistent App State', () => {
+    const savedMode = localStorage.getItem('nampogogo_app_mode');
+    const savedTab = localStorage.getItem('nampogogo_active_tab');
+
+    if (savedMode) {
+      appMode = savedMode;
+      const introScreen = document.getElementById('intro-screen');
+      const appWorkspace = document.getElementById('app-workspace');
+      if (introScreen && appWorkspace) {
+        introScreen.classList.add('hidden');
+        appWorkspace.classList.remove('hidden');
+      }
+      renderDynamicNavigationDock();
+      if (savedTab) {
+        switchTabPanel(savedTab);
+      } else {
+        switchTabPanel(savedMode === 'tourist' ? 'tourist-explore' : 'merchant-auth');
+      }
+    }
+  });
   
   console.log("🎉 Nampo GoGo App Fully Initialized!");
 });
@@ -183,12 +223,14 @@ function setupIntroModeSelection() {
   
   if (logoHomeBtn && introScreen && appWorkspace) {
     logoHomeBtn.addEventListener('click', () => {
+      // Clear persistence and go home
+      localStorage.removeItem('nampogogo_app_mode');
+      localStorage.removeItem('nampogogo_active_tab');
       introScreen.classList.remove('hidden');
       appWorkspace.classList.add('hidden');
     });
   }
 
-  // Add click listeners as secondary backup for event bubbling
   if (enterTouristModeBtn) {
     enterTouristModeBtn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -203,7 +245,7 @@ function setupIntroModeSelection() {
     });
   }
 
-  // Quick mode button is now 브라우저 새로고침
+  // Quick mode button functions as location.reload()
   if (quickModeSwitchBtn) {
     quickModeSwitchBtn.addEventListener('click', () => {
       console.log("🔄 브라우저 새로고침 실행!");
@@ -212,13 +254,14 @@ function setupIntroModeSelection() {
   }
 }
 
-// 4. Render Dynamic Top Navigation for Tourists and Approved Merchants
+// 4. Render Dynamic Top Navigation for Tourists (Removed "My Info") and Approved Merchants
 function renderDynamicNavigationDock() {
   const navDock = document.getElementById('dynamic-nav-dock');
   if (!navDock) return;
   navDock.innerHTML = '';
 
   if (appMode === 'tourist') {
+    // Render only two tabs (explore & log). Profile is embedded in explore tab now
     navDock.innerHTML = `
       <button class="nav-btn active" data-tab="tourist-explore">
         <i data-lucide="search"></i>
@@ -227,10 +270,6 @@ function renderDynamicNavigationDock() {
       <button class="nav-btn" data-tab="tourist-log">
         <i data-lucide="map"></i>
         <span data-trans="travelLog">여행 로그</span>
-      </button>
-      <button class="nav-btn" data-tab="tourist-profile">
-        <i data-lucide="user"></i>
-        <span data-trans="profile">내 정보</span>
       </button>
     `;
   } else {
@@ -244,7 +283,6 @@ function renderDynamicNavigationDock() {
         </button>
       `;
     } else {
-      // Approved Merchants get Dashboard & Upload tabs (Apply tab completely hidden)
       navDock.innerHTML = `
         <button class="nav-btn active" data-tab="merchant-manage">
           <i data-lucide="bar-chart-2"></i>
@@ -296,10 +334,11 @@ function switchTabPanel(panelId) {
     updateMerchantAuthUI();
   }
 
+  persistAppState();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// 5. Multi-Language System with Real-Time Dual Dropdown Synchronization
+// 5. Multi-Language System
 function setupLanguage() {
   const appLangSelect = document.getElementById('app-lang-select');
   const introLangSelect = document.getElementById('intro-lang-select');
@@ -394,7 +433,6 @@ function setupUpdatePanel() {
 
     document.addEventListener('click', () => {
       updatePanel.classList.remove('show');
-      btnUpdateToggle.classList.open = false;
       btnUpdateToggle.classList.remove('open');
     });
   }
@@ -412,11 +450,25 @@ function renderUpdateLogs() {
   });
 }
 
-// 7. Tourist Auth System
+// 7. Tourist Auth System (Integrates Login flow toggles inside exploration tab)
 function setupAuthSystem() {
   const authForm = document.getElementById('nampo-auth-form');
   const btnLogout = document.getElementById('btn-action-logout');
   const btnShortcut = document.getElementById('btn-tourist-login-shortcut');
+  const embeddedLoginCard = document.getElementById('tourist-embedded-login-card');
+
+  if (btnShortcut) {
+    btnShortcut.addEventListener('click', () => {
+      if (currentUser) {
+        // Toggle logout profile view
+        const profLogout = document.getElementById('tourist-profile-logout-card');
+        if (profLogout) profLogout.classList.toggle('hidden');
+      } else {
+        // Toggle login panel visibility
+        if (embeddedLoginCard) embeddedLoginCard.classList.toggle('hidden');
+      }
+    });
+  }
 
   if (authForm) {
     authForm.addEventListener('submit', (e) => {
@@ -458,6 +510,7 @@ function setupAuthSystem() {
       updateAuthUIs();
       authForm.reset();
       
+      if (embeddedLoginCard) embeddedLoginCard.classList.add('hidden');
       alert(`👋 Welcome to Nampo GoGo!\nID: ${currentUser}`);
       switchTabPanel('tourist-explore');
     });
@@ -471,14 +524,25 @@ function setupAuthSystem() {
       localStorage.removeItem('nampogogo_user');
       localStorage.removeItem('nampogogo_user_role');
       updateAuthUIs();
+      
+      const profLogout = document.getElementById('tourist-profile-logout-card');
+      if (profLogout) profLogout.classList.add('hidden');
       alert("Logged out successfully.");
       switchTabPanel('tourist-explore');
     });
   }
 
-  if (btnShortcut) {
-    btnShortcut.addEventListener('click', () => {
-      switchTabPanel('tourist-profile');
+  // Bind the bottom QR scanner trigger
+  const generalQrBtn = document.getElementById('btn-trigger-general-qr-scan');
+  if (generalQrBtn) {
+    generalQrBtn.addEventListener('click', () => {
+      if (!currentUser) {
+        alert("관광객 로그인을 먼저 진행해 주세요!");
+        if (embeddedLoginCard) embeddedLoginCard.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      triggerQRScanner(lastViewedPartnerId);
     });
   }
 
@@ -492,12 +556,8 @@ function updateAuthUIs() {
   const btnShortcut = document.getElementById('btn-tourist-login-shortcut');
   const dashboardRoleBadge = document.getElementById('dashboard-user-role');
   
-  const profileUsername = document.getElementById('profile-username');
-  const profileRoleBadge = document.getElementById('profile-role-badge');
-  const profileAvatarEmoji = document.getElementById('profile-avatar-emoji');
-  
-  const authFormCard = document.getElementById('auth-form-card');
-  const logoutCard = document.getElementById('logout-card');
+  const touristLoggedUsername = document.getElementById('tourist-logged-in-username');
+  const profileLogoutCard = document.getElementById('tourist-profile-logout-card');
 
   if (currentUser) {
     let roleTextKey = 'visitor';
@@ -512,27 +572,19 @@ function updateAuthUIs() {
       dashboardRoleBadge.textContent = roleTxt;
       dashboardRoleBadge.classList.remove('hidden');
     }
-    if (btnShortcut) btnShortcut.textContent = "My Info";
+    if (btnShortcut) btnShortcut.textContent = "My Account";
 
-    if (profileUsername) profileUsername.textContent = currentUser;
-    if (profileRoleBadge) profileRoleBadge.textContent = roleTxt;
-    if (authFormCard) authFormCard.classList.add('hidden');
-    if (logoutCard) logoutCard.classList.remove('hidden');
+    if (touristLoggedUsername) touristLoggedUsername.textContent = currentUser;
     
-    if (profileAvatarEmoji) {
-      profileAvatarEmoji.textContent = currentUserRole === 'merchant' ? '🏢' : (currentUserRole === 'admin' ? '👑' : '👤');
-    }
+    // Do not auto-show logout card unless they press Account switch, keep UI clean
+    if (profileLogoutCard) profileLogoutCard.classList.add('hidden');
   } else {
     if (dashboardHeading) dashboardHeading.textContent = "Guest User";
     if (dashboardDesc) dashboardDesc.textContent = getTranslation(currentLang, 'pleaseLogin') || 'Please login.';
     if (dashboardRoleBadge) dashboardRoleBadge.classList.add('hidden');
     if (btnShortcut) btnShortcut.textContent = "Login";
 
-    if (profileUsername) profileUsername.textContent = "Guest User";
-    if (profileRoleBadge) profileRoleBadge.textContent = "Visitor";
-    if (profileAvatarEmoji) profileAvatarEmoji.textContent = '👤';
-    if (authFormCard) authFormCard.classList.remove('hidden');
-    if (logoutCard) logoutCard.classList.add('hidden');
+    if (profileLogoutCard) profileLogoutCard.classList.add('hidden');
   }
 
   const stampCountEl = document.getElementById('dashboard-stamp-count');
@@ -637,10 +689,12 @@ function setupSubcatGridClickHandlers() {
   });
 }
 
-// 9. Partner Detail Modal (Equipped with Owner reply box render)
+// 9. Partner Detail Modal
 function openPartnerDetail(id) {
   const p = partnersList.find(item => item.id === id);
   if (!p) return;
+
+  lastViewedPartnerId = p.id; // cache last viewed shop for check-in button
 
   const contentWrap = document.getElementById('partner-modal-body-content');
   if (!contentWrap) return;
@@ -699,7 +753,6 @@ function openPartnerDetail(id) {
         revPhotosStr += `</div>`;
       }
 
-      // Check if there is an owner reply
       let replyStr = '';
       if (rev.reply) {
         replyStr = `
@@ -869,7 +922,8 @@ function openPartnerDetail(id) {
       </div>
     </div>
 
-    <button class="btn btn-secondary btn-block" id="btn-trigger-qr-scan" style="margin-top: 14px;">
+    <!-- 스탬프 획득 및 QR 스캔 이동 배치 -->
+    <button class="btn btn-secondary btn-block" id="btn-trigger-qr-scan" style="margin-top: 18px;">
       <i data-lucide="scan-line"></i> 
       <span>${isStamped ? (getTranslation(currentLang, 'alreadyStamped') || 'Stamped') : (getTranslation(currentLang, 'scanBtnText') || 'Scan QR')}</span>
     </button>
@@ -928,7 +982,10 @@ function openPartnerDetail(id) {
       if (!currentUser) {
         alert("Please login first to check-in.");
         if (partnerDetailModal) partnerDetailModal.classList.remove('active');
-        switchTabPanel('tourist-profile');
+        // Open embedded login card
+        const embeddedLoginCard = document.getElementById('tourist-embedded-login-card');
+        if (embeddedLoginCard) embeddedLoginCard.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
       }
       if (partnerDetailModal) partnerDetailModal.classList.remove('active');
@@ -1200,9 +1257,8 @@ function openSNSCardModal() {
   }
 }
 
-// 12. Merchant Refactored Control System
+// 12. Merchant Control System
 function setupMerchantSystem() {
-  // Bind Welcome elements
   const btnShowRegister = document.getElementById('btn-show-merchant-register');
   const btnShowLogin = document.getElementById('btn-show-merchant-login');
   const btnBackWelcomeR = document.getElementById('btn-back-to-welcome-r');
@@ -1238,7 +1294,6 @@ function setupMerchantSystem() {
     });
   }
 
-  // Bind register & login forms
   const joinForm = document.getElementById('merchant-join-form');
   const loginFormSubmit = document.getElementById('merchant-login-form-submit');
   const applyForm = document.getElementById('merchant-apply-form');
@@ -1357,6 +1412,10 @@ function setupMerchantSystem() {
     tempVideosBase64List = [];
     dynamicMenuItems = [];
 
+    // Clear state persistence on logout
+    localStorage.removeItem('nampogogo_app_mode');
+    localStorage.removeItem('nampogogo_active_tab');
+
     alert("로그아웃 되었습니다.");
     updateMerchantAuthUI();
     renderDynamicNavigationDock();
@@ -1430,7 +1489,7 @@ function setupMerchantSystem() {
           seoDescription: `${currentUser} 제휴 매장`,
           seoKeywords: `남포동 ${currentUser}`,
           reviews: [
-            { username: "TouristJ", rating: 5.0, content: { kr: "여기는 정말 숨겨진 맛집입니다! 강추!", en: "Super clean and wonderful service.", ch: "这里的老板非常热情，价格也很划算！", jp: "スタッフが丁寧で非常に良かったです。" }, reply: "" }
+            { username: "TouristJ", rating: 5.0, content: { kr: "여기는 정말 숨겨진 맛집입니다! 강추!", en: "Super clean and wonderful service.", ch: "这里的老板非常热情，价格也很划算！", jp: "スタッフ가丁寧で非常に良かったです。" }, reply: "" }
           ],
           payments: ["신용카드", "삼성페이"],
           parking: "유"
@@ -1526,16 +1585,17 @@ function addNewMenuFormRow(initialData = null) {
   const previewWrap = rowDiv.querySelector('.menu-preview-area');
   const removeBtn = rowDiv.querySelector('.btn-remove-menu-row');
 
-  const updateItemValues = () => {
+  // Debounced input capture to prevent typing lag
+  const debouncedValCapture = debounce(() => {
     item.category = catInput.value.trim();
     item.name = nameInput.value.trim();
     item.price = priceInput.value.trim();
     triggerDraftAutoSave();
-  };
+  }, 300);
 
-  catInput.addEventListener('input', updateItemValues);
-  nameInput.addEventListener('input', updateItemValues);
-  priceInput.addEventListener('input', updateItemValues);
+  catInput.addEventListener('input', debouncedValCapture);
+  nameInput.addEventListener('input', debouncedValCapture);
+  priceInput.addEventListener('input', debouncedValCapture);
 
   fileInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
@@ -1579,7 +1639,7 @@ function renderDynamicMenuRows(priceList = []) {
   }
 }
 
-// Strictly Regulated File upload verification bindings
+// Strictly Regulated File upload verification bindings (Cumulative additions, preserves existing base64 on check fails)
 function setupFormUploadValidators() {
   const signboardInput = document.getElementById('merchant-file-signboard');
   const insideInput = document.getElementById('merchant-files-inside');
@@ -1589,41 +1649,34 @@ function setupFormUploadValidators() {
   const insideArea = document.getElementById('inside-preview-area');
   const videoArea = document.getElementById('video-preview-area');
 
-  // Signboard (Exactly 1 photo required)
+  // Signboard (Cumulative addition)
   if (signboardInput && signboardArea) {
     signboardInput.addEventListener('change', (e) => {
-      signboardArea.innerHTML = '';
-      tempSignboardBase64 = "";
       const file = e.target.files[0];
       if (!file) return;
 
       const reader = new FileReader();
       reader.onload = (ev) => {
         tempSignboardBase64 = ev.target.result;
-        const box = document.createElement('div');
-        box.className = 'preview-thumb-box';
-        box.style.backgroundImage = `url('${ev.target.result}')`;
-        signboardArea.appendChild(box);
+        signboardArea.innerHTML = `<div class="preview-thumb-box" style="background-image: url('${ev.target.result}')"></div>`;
         triggerDraftAutoSave();
       };
       reader.readAsDataURL(file);
     });
   }
 
-  // Inside images (Min 2, Max 10. block 11+)
+  // Inside images (Cumulative, doesn't wipe old ones)
   if (insideInput && insideArea) {
     insideInput.addEventListener('change', (e) => {
       const files = e.target.files;
-      if (files.length > 10) {
-        alert("⚠️ [업로드 초과 알림]\n내부 및 기타 매장 사진은 최대 10장까지만 업로드할 수 있습니다.");
-        insideInput.value = ""; // clear input
-        insideArea.innerHTML = "";
-        tempInsideBase64List = [];
+      const totalPlanned = tempInsideBase64List.length + files.length;
+      
+      if (totalPlanned > 10) {
+        alert(`⚠️ [업로드 초과 알림]\n내부 및 기타 매장 사진은 최대 10장까지만 가능합니다.\n현재 등록된 파일 수: ${tempInsideBase64List.length}장 (추가하려던 파일 수: ${files.length}장)`);
+        insideInput.value = "";
         return;
       }
 
-      insideArea.innerHTML = '';
-      tempInsideBase64List = [];
       Array.from(files).forEach(file => {
         const reader = new FileReader();
         reader.onload = (ev) => {
@@ -1639,20 +1692,18 @@ function setupFormUploadValidators() {
     });
   }
 
-  // Videos (Max 3, block 4+)
+  // Videos (Cumulative, doesn't wipe old ones)
   if (videoInput && videoArea) {
     videoInput.addEventListener('change', (e) => {
       const files = e.target.files;
-      if (files.length > 3) {
-        alert("⚠️ [동영상 업로드 초과 알림]\n매장 홍보 동영상은 최대 3개까지만 업로드할 수 있습니다.");
+      const totalPlanned = tempVideosBase64List.length + files.length;
+
+      if (totalPlanned > 3) {
+        alert(`⚠️ [동영상 업로드 초과 알림]\n매장 홍보 동영상은 최대 3개까지만 가능합니다.\n현재 등록된 동영상 수: ${tempVideosBase64List.length}개`);
         videoInput.value = "";
-        videoArea.innerHTML = "";
-        tempVideosBase64List = [];
         return;
       }
 
-      videoArea.innerHTML = '';
-      tempVideosBase64List = [];
       Array.from(files).forEach(file => {
         const reader = new FileReader();
         reader.onload = (ev) => {
@@ -1672,11 +1723,16 @@ function setupFormUploadValidators() {
   const profileForm = document.getElementById('merchant-detail-profile-form');
   if (profileForm) {
     profileForm.querySelectorAll('input, select, textarea').forEach(el => {
-      el.addEventListener('input', triggerDraftAutoSave);
-      el.addEventListener('change', triggerDraftAutoSave);
+      el.addEventListener('input', debouncedAutoSave);
+      el.addEventListener('change', debouncedAutoSave);
     });
   }
 }
+
+// Debounced Auto Save wrapper to prevent text lag
+const debouncedAutoSave = debounce(() => {
+  triggerDraftAutoSave();
+}, 400);
 
 // Auto Save draft system (Active for 24 hours)
 function triggerDraftAutoSave() {
@@ -1734,7 +1790,6 @@ function loadDraftRecovery() {
 
   const wrap = JSON.parse(raw);
   const now = Date.now();
-  // Check if expired (24 hours)
   if (now - wrap.timestamp > 24 * 60 * 60 * 1000) {
     localStorage.removeItem(`nampogogo_draft_store_${currentUser}`);
     if (alertBox) alertBox.style.display = 'none';
@@ -1824,10 +1879,10 @@ function loadDraftRecovery() {
   const insideArea = document.getElementById('inside-preview-area');
   const videoArea = document.getElementById('video-preview-area');
 
-  if (signboardArea && tempSignboardBase64) {
-    signboardArea.innerHTML = `<div class="preview-thumb-box" style="background-image: url('${tempSignboardBase64}')"></div>`;
+  if (signboardArea) {
+    signboardArea.innerHTML = tempSignboardBase64 ? `<div class="preview-thumb-box" style="background-image: url('${tempSignboardBase64}')"></div>` : '';
   }
-  if (insideArea && tempInsideBase64List.length > 0) {
+  if (insideArea) {
     insideArea.innerHTML = '';
     tempInsideBase64List.forEach(data => {
       const box = document.createElement('div');
@@ -1836,7 +1891,7 @@ function loadDraftRecovery() {
       insideArea.appendChild(box);
     });
   }
-  if (videoArea && tempVideosBase64List.length > 0) {
+  if (videoArea) {
     videoArea.innerHTML = '';
     tempVideosBase64List.forEach(() => {
       const box = document.createElement('div');
@@ -1855,32 +1910,57 @@ function loadDraftRecovery() {
   }
 }
 
-// Final Save Store Details Submission
+// Final Save Store Details Submission (Failure report and cumulative media saving)
 function saveStoreDetailsComplete() {
   const store = findMerchantStore();
+  const errorReportPanel = document.getElementById('upload-error-report');
+  
   if (!store) {
     alert("오류: 제휴 상점을 찾을 수 없습니다.");
     return;
   }
 
-  // Strict Media check
-  if (!tempSignboardBase64) {
-    alert("⚠️ [사진 등록 누락]\n간판/대문 사진(1장 필수)을 등록해 주세요.");
-    return;
-  }
-  if (tempInsideBase64List.length < 2) {
-    alert("⚠️ [사진 등록 누락]\n매장 내부 사진을 최소 2장 이상 업로드해 주세요.");
-    return;
+  if (errorReportPanel) {
+    errorReportPanel.innerHTML = '';
+    errorReportPanel.classList.add('hidden');
   }
 
-  // Messenger validation (At least 1 must be filled)
+  let failedReasons = [];
+
+  // 1. Signboard media validation
+  if (!tempSignboardBase64) {
+    failedReasons.push("대표(간판/대문) 사진 1장 등록이 누락되었습니다. (1장 필수)");
+  }
+  
+  // 2. Inside photos validation
+  if (tempInsideBase64List.length < 2) {
+    failedReasons.push(`매장 내부 전경 사진이 부족합니다. 최소 2장 이상이 필요합니다. (현재: ${tempInsideBase64List.length}장)`);
+  }
+
+  // 3. Messenger validation
   const wechat = document.getElementById('messenger-wechat').value.trim();
   const whatsapp = document.getElementById('messenger-whatsapp').value.trim();
   const line = document.getElementById('messenger-line').value.trim();
   const kakao = document.getElementById('messenger-kakao').value.trim();
 
   if (!wechat && !whatsapp && !line && !kakao) {
-    alert("⚠️ [사장님 개인 연락망 누락]\n위챗, 왓츠앱, 라인, 카카오톡 중 최소 1개 이상의 연락처를 반드시 기입해 주세요!");
+    failedReasons.push("개인 메신저 연락망(위챗, 왓츠앱, 라인, 카톡) 중 최소 1개 이상을 필히 기입하셔야 합니다.");
+  }
+
+  // Show detailed fail reports if any checks fail
+  if (failedReasons.length > 0) {
+    if (errorReportPanel) {
+      errorReportPanel.innerHTML = `
+        <h5>⚠️ [매장 정보 등록 실패] 가이드라인 미준수 항목</h5>
+        <ul>
+          ${failedReasons.map(r => `<li>${r}</li>`).join('')}
+        </ul>
+        <p style="font-size:9px; color:var(--text-muted); margin-top:8px;">기존에 통과하여 업로드해 둔 사진들은 지워지지 않고 보존되었습니다. 누락된 항목만 다시 작성 및 추가 첨부해 주세요.</p>
+      `;
+      errorReportPanel.classList.remove('hidden');
+    }
+    alert("⚠️ 가이드라인 미준수로 업로드가 실패되었습니다. 아래 미준수 리포트를 확인하고 수정해 주세요.");
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     return;
   }
 
@@ -1940,12 +2020,16 @@ function saveStoreDetailsComplete() {
     store.gallery.push({ type: 'video', data: data });
   });
 
+  // Save changes to storage
   savePartnersToStorage();
 
   // Clear draft
   localStorage.removeItem(`nampogogo_draft_store_${currentUser}`);
 
-  // ⚡ Success Feedback modal reveal instead of generic alert + immediate redirect
+  // ⚡ INSTANT DEPLOYMENT: Instantly update in-memory cache and re-render tourist view
+  renderPartnersList();
+
+  // Success Feedback modal reveal instead of generic alert
   const successModal = document.getElementById('merchant-success-feedback-modal');
   if (successModal) {
     successModal.classList.add('active');
@@ -2236,7 +2320,6 @@ function renderMerchantManagementForm() {
   const hoursEachBlock = document.getElementById('hours-block-each');
 
   if (hoursStr.includes('월:')) {
-    // 요일별 개별 시간 매핑
     document.querySelectorAll('input[name="hours-input-type"]').forEach(r => {
       r.checked = r.value === 'each';
     });
@@ -2252,7 +2335,6 @@ function renderMerchantManagementForm() {
       }
     });
   } else {
-    // 매일 동일 시간 매핑
     document.querySelectorAll('input[name="hours-input-type"]').forEach(r => {
       r.checked = r.value === 'same';
     });
@@ -2312,10 +2394,10 @@ function renderMerchantManagementForm() {
     });
   }
 
-  // 6. Populate dynamic menu list (Preserves and displays all items)
+  // 6. Populate dynamic menu list
   renderDynamicMenuRows(store.priceList);
 
-  // Try recovering draft as secondary priority (Overrides stored store data if 24 hours draft exists)
+  // Try recovering draft as secondary priority
   loadDraftRecovery();
 }
 
