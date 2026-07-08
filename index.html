@@ -652,44 +652,23 @@
                 </div>
               </div>
 
-              <!-- Menu Items with Photo Upload (Supports 3 items) -->
+              <!-- Menu Items with Photo Upload & '+' Dynamic Addition Button -->
               <div class="form-group-nampo" style="border:1.5px solid var(--border-medium); padding:12px; border-radius:var(--radius-sm); margin-top:14px;">
                 <label style="color:var(--primary); font-weight:900;">🍔 매장 메뉴/서비스 등록 (사진 필수 첨부)</label>
                 <p style="font-size:8px; color:var(--text-muted); margin-bottom:8px; line-height:1.2;">
                   ※ 무형 서비스(뷰티/마사지/에스테틱 등)일 경우, 시연 및 한눈에 어떤 혜택인지 알 수 있는 테라피 내용 사진을 첨부해 주세요.
                 </p>
 
-                <!-- Menu Item 1 -->
-                <div class="menu-upload-row" style="margin-bottom:12px; border-bottom:1px dashed var(--border-medium); padding-bottom:12px;">
-                  <span style="font-size:9px; font-weight:800; color:var(--text-main); display:block; margin-bottom:4px;">대표 추천 메뉴 1</span>
-                  <div class="input-inline-row" style="margin-bottom:6px;">
-                    <input type="text" id="m-menu1-name" class="nampo-input flex-1" placeholder="메뉴 이름">
-                    <input type="text" id="m-menu1-price" class="nampo-input flex-1" placeholder="가격(예: 15,000 KRW)">
-                  </div>
-                  <input type="file" id="m-menu1-file" accept="image/*" class="nampo-input" style="padding:4px;">
-                  <div id="m-menu1-preview" class="media-thumb-selector-grid" style="margin-top:6px;"></div>
+                <!-- Dynamic menu items container -->
+                <div id="merchant-dynamic-menu-list">
+                  <!-- Generated Dynamically by app.js -->
                 </div>
 
-                <!-- Menu Item 2 -->
-                <div class="menu-upload-row" style="margin-bottom:12px; border-bottom:1px dashed var(--border-medium); padding-bottom:12px;">
-                  <span style="font-size:9px; font-weight:800; color:var(--text-main); display:block; margin-bottom:4px;">기본 메뉴 2</span>
-                  <div class="input-inline-row" style="margin-bottom:6px;">
-                    <input type="text" id="m-menu2-name" class="nampo-input flex-1" placeholder="메뉴 이름">
-                    <input type="text" id="m-menu2-price" class="nampo-input flex-1" placeholder="가격">
-                  </div>
-                  <input type="file" id="m-menu2-file" accept="image/*" class="nampo-input" style="padding:4px;">
-                  <div id="m-menu2-preview" class="media-thumb-selector-grid" style="margin-top:6px;"></div>
-                </div>
-
-                <!-- Menu Item 3 -->
-                <div class="menu-upload-row" style="margin-bottom:0;">
-                  <span style="font-size:9px; font-weight:800; color:var(--text-main); display:block; margin-bottom:4px;">계절/기타 메뉴 3</span>
-                  <div class="input-inline-row" style="margin-bottom:6px;">
-                    <input type="text" id="m-menu3-name" class="nampo-input flex-1" placeholder="메뉴 이름">
-                    <input type="text" id="m-menu3-price" class="nampo-input flex-1" placeholder="가격">
-                  </div>
-                  <input type="file" id="m-menu3-file" accept="image/*" class="nampo-input" style="padding:4px;">
-                  <div id="m-menu3-preview" class="media-thumb-selector-grid" style="margin-top:6px;"></div>
+                <!-- '+' Dynamic menu add button -->
+                <div style="display:flex; justify-content:center; margin-top:12px;">
+                  <button type="button" class="btn btn-secondary btn-sm" id="btn-merchant-add-menu-row" style="border-radius: var(--radius-pill); font-size:11px; padding:6px 16px;">
+                    <i data-lucide="plus-circle" style="width:12px; height:12px; display:inline-block; vertical-align:middle; margin-right:4px;"></i> 메뉴 추가하기
+                  </button>
                 </div>
               </div>
 
@@ -857,6 +836,21 @@
           </button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Merchant Registration Success Feedback (Large check animation) -->
+  <div class="modal" id="merchant-success-feedback-modal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content glass-card" style="text-align:center; padding:32px 24px; max-width:400px; margin:auto; border-radius: var(--radius-lg);">
+      <div class="success-icon-check" style="width:72px; height:72px; font-size:36px; margin: 0 auto 16px auto; background: var(--success); display:flex; align-items:center; justify-content:center; color:white; border-radius:50%;">✓</div>
+      <h3 style="font-size:18px; font-weight:900; color:var(--text-main); margin-bottom:8px;">매장 정보 등록 성공!</h3>
+      <p style="font-size:12px; color:var(--text-body); line-height:1.5; margin-bottom:24px;">
+        축하합니다! 매장 상세 메뉴 및 대표 이미지, 다중 미디어가 플랫폼에 정상적으로 노출 갱신 완료되었습니다.
+      </p>
+      <button class="btn btn-primary btn-block" id="btn-success-feedback-confirm" style="border-radius: var(--radius-pill);">
+        대시보드 바로가기 ➔
+      </button>
     </div>
   </div>
 

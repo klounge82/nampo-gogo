@@ -25,7 +25,9 @@ let filterPartnerOnly = false;
 let tempSignboardBase64 = "";
 let tempInsideBase64List = [];
 let tempVideosBase64List = [];
-let tempMenuImagesBase64 = ["", "", ""]; // 3 menu item images
+
+// Dynamic Menu Rows Temporary Data
+let dynamicMenuItems = []; // Array of { id, category, name, price, imageBase64 }
 
 // Multi-Language Reference
 let translations = {};
@@ -392,6 +394,7 @@ function setupUpdatePanel() {
 
     document.addEventListener('click', () => {
       updatePanel.classList.remove('show');
+      btnUpdateToggle.classList.open = false;
       btnUpdateToggle.classList.remove('open');
     });
   }
@@ -662,9 +665,10 @@ function openPartnerDetail(id) {
   if (p.priceList && Array.isArray(p.priceList)) {
     p.priceList.forEach(item => {
       const menuImgStr = item.image ? `<br><img src="${item.image}" style="width:60px; height:45px; border-radius:4px; margin-top:4px; object-fit:cover;">` : '';
+      const catText = item.categoryText ? `<span style="font-size:9px; background:var(--bg-gray-soft); padding:2px 6px; border-radius:4px; margin-right:4px;">${item.categoryText}</span>` : '';
       pricingRows += `
         <tr>
-          <td>${item.name[currentLang] || item.name['en']}${menuImgStr}</td>
+          <td>${catText}${item.name[currentLang] || item.name['en']}${menuImgStr}</td>
           <td class="price-col">${item.price}</td>
         </tr>
       `;
@@ -1312,7 +1316,7 @@ function setupMerchantSystem() {
         return;
       }
       if (matched.pw !== passwordInput) {
-        alert("❌ 비밀번호가 일체하지 않습니다!");
+        alert("❌ 비밀번호가 일치하지 않습니다!");
         return;
       }
 
@@ -1351,7 +1355,7 @@ function setupMerchantSystem() {
     tempSignboardBase64 = "";
     tempInsideBase64List = [];
     tempVideosBase64List = [];
-    tempMenuImagesBase64 = ["", "", ""];
+    dynamicMenuItems = [];
 
     alert("로그아웃 되었습니다.");
     updateMerchantAuthUI();
@@ -1444,6 +1448,14 @@ function setupMerchantSystem() {
   // Strictly Regulated File upload verification bindings
   setupFormUploadValidators();
 
+  // [+] Add menu row click binder
+  const addMenuBtn = document.getElementById('btn-merchant-add-menu-row');
+  if (addMenuBtn) {
+    addMenuBtn.addEventListener('click', () => {
+      addNewMenuFormRow();
+    });
+  }
+
   // Save merchant uploader form complete
   const saveStoreBtn = document.getElementById('btn-save-merchant-form');
   if (saveStoreBtn) {
@@ -1452,9 +1464,122 @@ function setupMerchantSystem() {
       saveStoreDetailsComplete();
     });
   }
+
+  // Success Feedback modal confirm button
+  const successConfirmBtn = document.getElementById('btn-success-feedback-confirm');
+  const successModal = document.getElementById('merchant-success-feedback-modal');
+  if (successConfirmBtn && successModal) {
+    successConfirmBtn.addEventListener('click', () => {
+      successModal.classList.remove('active');
+      switchTabPanel('merchant-manage');
+    });
+  }
 }
 
-// Strictly Regulated Media inputs and verification checks
+// Dynamically generate menu input fields in DOM
+function addNewMenuFormRow(initialData = null) {
+  const container = document.getElementById('merchant-dynamic-menu-list');
+  if (!container) return;
+
+  const rowId = 'menu-row-' + Date.now() + '-' + Math.floor(Math.random()*1000);
+  const item = {
+    id: rowId,
+    category: initialData ? initialData.categoryText || "" : "",
+    name: initialData ? initialData.name.kr || "" : "",
+    price: initialData ? initialData.price || "" : "",
+    imageBase64: initialData ? initialData.image || "" : ""
+  };
+  dynamicMenuItems.push(item);
+
+  const rowDiv = document.createElement('div');
+  rowDiv.className = 'menu-upload-row';
+  rowDiv.id = rowId;
+  rowDiv.style.marginBottom = '12px';
+  rowDiv.style.borderBottom = '1px dashed var(--border-medium)';
+  rowDiv.style.paddingBottom = '12px';
+  rowDiv.style.position = 'relative';
+
+  rowDiv.innerHTML = `
+    <button type="button" class="btn-remove-menu-row" style="position:absolute; top:0; right:0; background:none; border:none; color:var(--accent); font-size:11px; font-weight:800; cursor:pointer;">삭제</button>
+    
+    <div class="form-group-nampo" style="margin-bottom:6px;">
+      <label style="font-weight:normal; font-size:9px;">메뉴 분류 / 카테고리 (예: 추천 메뉴, 기본 메뉴, 계절 메뉴)</label>
+      <input type="text" class="nampo-input menu-cat-field" value="${item.category}" placeholder="예: 추천 메뉴">
+    </div>
+    
+    <div class="input-inline-row" style="margin-bottom:6px;">
+      <input type="text" class="nampo-input menu-name-field" value="${item.name}" placeholder="세부 메뉴 이름" style="flex:1;">
+      <input type="text" class="nampo-input menu-price-field" value="${item.price}" placeholder="가격 (예: 15,000 KRW)" style="flex:1;">
+    </div>
+    
+    <input type="file" class="nampo-input menu-file-field" accept="image/*" style="padding:4px;">
+    <div class="menu-preview-area media-thumb-selector-grid" style="margin-top:6px;">
+      ${item.imageBase64 ? `<div class="preview-thumb-box" style="background-image: url('${item.imageBase64}')"></div>` : ''}
+    </div>
+  `;
+
+  // Bind change events for value capture
+  const catInput = rowDiv.querySelector('.menu-cat-field');
+  const nameInput = rowDiv.querySelector('.menu-name-field');
+  const priceInput = rowDiv.querySelector('.menu-price-field');
+  const fileInput = rowDiv.querySelector('.menu-file-field');
+  const previewWrap = rowDiv.querySelector('.menu-preview-area');
+  const removeBtn = rowDiv.querySelector('.btn-remove-menu-row');
+
+  const updateItemValues = () => {
+    item.category = catInput.value.trim();
+    item.name = nameInput.value.trim();
+    item.price = priceInput.value.trim();
+    triggerDraftAutoSave();
+  };
+
+  catInput.addEventListener('input', updateItemValues);
+  nameInput.addEventListener('input', updateItemValues);
+  priceInput.addEventListener('input', updateItemValues);
+
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      item.imageBase64 = ev.target.result;
+      previewWrap.innerHTML = `<div class="preview-thumb-box" style="background-image: url('${ev.target.result}')"></div>`;
+      triggerDraftAutoSave();
+    };
+    reader.readAsDataURL(file);
+  });
+
+  removeBtn.addEventListener('click', () => {
+    rowDiv.remove();
+    dynamicMenuItems = dynamicMenuItems.filter(i => i.id !== rowId);
+    triggerDraftAutoSave();
+  });
+
+  container.appendChild(rowDiv);
+}
+
+// Clear and render dynamically menu rows list
+function renderDynamicMenuRows(priceList = []) {
+  const container = document.getElementById('merchant-dynamic-menu-list');
+  if (!container) return;
+
+  container.innerHTML = '';
+  dynamicMenuItems = [];
+
+  if (priceList && priceList.length > 0) {
+    priceList.forEach(item => {
+      addNewMenuFormRow(item);
+    });
+  } else {
+    // Generate default 3 empty rows
+    for (let i = 0; i < 3; i++) {
+      addNewMenuFormRow();
+    }
+  }
+}
+
+// Strictly Regulated File upload verification bindings
 function setupFormUploadValidators() {
   const signboardInput = document.getElementById('merchant-file-signboard');
   const insideInput = document.getElementById('merchant-files-inside');
@@ -1463,30 +1588,6 @@ function setupFormUploadValidators() {
   const signboardArea = document.getElementById('signboard-preview-area');
   const insideArea = document.getElementById('inside-preview-area');
   const videoArea = document.getElementById('video-preview-area');
-
-  // 3 Menu File Uploaders
-  for (let i = 1; i <= 3; i++) {
-    const mInput = document.getElementById(`m-menu${i}-file`);
-    const mPreview = document.getElementById(`m-menu${i}-preview`);
-    if (mInput && mPreview) {
-      mInput.addEventListener('change', (e) => {
-        mPreview.innerHTML = '';
-        const file = e.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          tempMenuImagesBase64[i-1] = ev.target.result;
-          const box = document.createElement('div');
-          box.className = 'preview-thumb-box';
-          box.style.backgroundImage = `url('${ev.target.result}')`;
-          mPreview.appendChild(box);
-          triggerDraftAutoSave();
-        };
-        reader.readAsDataURL(file);
-      });
-    }
-  }
 
   // Signboard (Exactly 1 photo required)
   if (signboardInput && signboardArea) {
@@ -1601,13 +1702,8 @@ function triggerDraftAutoSave() {
     hoursType: hoursType,
     hoursVal: hoursVal,
     
-    // Menu names/prices
-    menu1Name: document.getElementById('m-menu1-name')?.value || "",
-    menu1Price: document.getElementById('m-menu1-price')?.value || "",
-    menu2Name: document.getElementById('m-menu2-name')?.value || "",
-    menu2Price: document.getElementById('m-menu2-price')?.value || "",
-    menu3Name: document.getElementById('m-menu3-name')?.value || "",
-    menu3Price: document.getElementById('m-menu3-price')?.value || "",
+    // Dynamic Menu Items capture
+    menuItems: dynamicMenuItems,
 
     parking: document.querySelector('input[name="m-upload-parking"]:checked')?.value || '유',
     payments: Array.from(document.querySelectorAll('input[name="m-upload-payment"]:checked')).map(el => el.value),
@@ -1616,8 +1712,7 @@ function triggerDraftAutoSave() {
     // Base64 photos backup
     signboard: tempSignboardBase64,
     inside: tempInsideBase64List,
-    videos: tempVideosBase64List,
-    menuImages: tempMenuImagesBase64
+    videos: tempVideosBase64List
   };
 
   const wrap = {
@@ -1695,12 +1790,20 @@ function loadDraftRecovery() {
     });
   }
 
-  // Restore Menu inputs
-  for (let i = 1; i <= 3; i++) {
-    const nameField = document.getElementById(`m-menu${i}-name`);
-    const priceField = document.getElementById(`m-menu${i}-price`);
-    if (nameField) nameField.value = draft[`menu${i}Name`] || "";
-    if (priceField) priceField.value = draft[`menu${i}Price`] || "";
+  // Restore dynamic menus
+  const container = document.getElementById('merchant-dynamic-menu-list');
+  if (container && draft.menuItems) {
+    container.innerHTML = '';
+    dynamicMenuItems = [];
+    draft.menuItems.forEach(item => {
+      const initialSeed = {
+        categoryText: item.category,
+        name: { kr: item.name },
+        price: item.price,
+        image: item.imageBase64
+      };
+      addNewMenuFormRow(initialSeed);
+    });
   }
 
   // Payments & Languages checkboxes
@@ -1715,7 +1818,6 @@ function loadDraftRecovery() {
   tempSignboardBase64 = draft.signboard || "";
   tempInsideBase64List = draft.inside || [];
   tempVideosBase64List = draft.videos || [];
-  tempMenuImagesBase64 = draft.menuImages || ["", "", ""];
 
   // Re-render Preview areas
   const signboardArea = document.getElementById('signboard-preview-area');
@@ -1742,12 +1844,6 @@ function loadDraftRecovery() {
       box.innerHTML = '▶';
       videoArea.appendChild(box);
     });
-  }
-  for (let i = 1; i <= 3; i++) {
-    const mPrev = document.getElementById(`m-menu${i}-preview`);
-    if (mPrev && tempMenuImagesBase64[i-1]) {
-      mPrev.innerHTML = `<div class="preview-thumb-box" style="background-image: url('${tempMenuImagesBase64[i-1]}')"></div>`;
-    }
   }
 
   // Show recovery notice
@@ -1816,21 +1912,18 @@ function saveStoreDetailsComplete() {
   // Personal messengers lists
   store.messenger = { wechat, whatsapp, line, kakao };
 
-  // Menu items list mapping
+  // Menu items list mapping from Dynamic rows
   store.priceList = [];
-  for (let i = 1; i <= 3; i++) {
-    const nameVal = document.getElementById(`m-menu${i}-name`).value.trim();
-    const priceVal = document.getElementById(`m-menu${i}-price`).value.trim();
-    const imgBase64 = tempMenuImagesBase64[i-1];
-    
-    if (nameVal && priceVal) {
+  dynamicMenuItems.forEach(item => {
+    if (item.name && item.price) {
       store.priceList.push({
-        name: { kr: nameVal, en: nameVal, ch: nameVal, jp: nameVal },
-        price: priceVal,
-        image: imgBase64 || ""
+        name: { kr: item.name, en: item.name, ch: item.name, jp: item.name },
+        price: item.price,
+        image: item.imageBase64 || "",
+        categoryText: item.category || ""
       });
     }
-  }
+  });
 
   store.parking = document.querySelector('input[name="m-upload-parking"]:checked').value;
   store.payments = Array.from(document.querySelectorAll('input[name="m-upload-payment"]:checked')).map(el => el.value);
@@ -1852,10 +1945,14 @@ function saveStoreDetailsComplete() {
   // Clear draft
   localStorage.removeItem(`nampogogo_draft_store_${currentUser}`);
 
-  alert("🎉 매장 상세 메뉴 및 미디어가 성공적으로 게시되었습니다!");
-  
-  // Back to Dashboard
-  switchTabPanel('merchant-manage');
+  // ⚡ Success Feedback modal reveal instead of generic alert + immediate redirect
+  const successModal = document.getElementById('merchant-success-feedback-modal');
+  if (successModal) {
+    successModal.classList.add('active');
+  } else {
+    alert("🎉 매장 상세 메뉴 및 미디어가 성공적으로 게시되었습니다!");
+    switchTabPanel('merchant-manage');
+  }
 }
 
 // Render dynamic elements for merchant dashboard tab
@@ -2099,6 +2196,7 @@ function findMerchantStore() {
   return partnersList.find(p => p.id === storeId) || partnersList[0];
 }
 
+// 🛡️ 100% Data Preservation on Load (Form Editing Recovery)
 function renderMerchantManagementForm() {
   const store = findMerchantStore();
   if (!store) return;
@@ -2106,7 +2204,118 @@ function renderMerchantManagementForm() {
   const uploadUsername = document.getElementById('merchant-upload-username');
   if (uploadUsername) uploadUsername.textContent = currentUser;
 
-  // Try recovering draft first
+  // 1. Populate basic Text values
+  const benefitInput = document.getElementById('m-upload-benefit');
+  const phoneInput = document.getElementById('m-upload-phone');
+  const wechatInput = document.getElementById('messenger-wechat');
+  const whatsappInput = document.getElementById('messenger-whatsapp');
+  const lineInput = document.getElementById('messenger-line');
+  const kakaoInput = document.getElementById('messenger-kakao');
+
+  if (benefitInput) benefitInput.value = store.benefits[currentLang] || store.benefits['en'] || "";
+  if (phoneInput) phoneInput.value = store.phone || "";
+  
+  if (store.messenger) {
+    if (wechatInput) wechatInput.value = store.messenger.wechat || "";
+    if (whatsappInput) whatsappInput.value = store.messenger.whatsapp || "";
+    if (lineInput) lineInput.value = store.messenger.line || "";
+    if (kakaoInput) kakaoInput.value = store.messenger.kakao || "";
+  }
+
+  // 2. Populate Radios
+  document.querySelectorAll('input[name="m-upload-category"]').forEach(r => {
+    r.checked = r.value === store.subCategory;
+  });
+  document.querySelectorAll('input[name="m-upload-parking"]').forEach(r => {
+    r.checked = r.value === store.parking;
+  });
+
+  // 3. Populate Hours
+  const hoursStr = store.hours || "11:00 - 22:00";
+  const hoursSameBlock = document.getElementById('hours-block-same');
+  const hoursEachBlock = document.getElementById('hours-block-each');
+
+  if (hoursStr.includes('월:')) {
+    // 요일별 개별 시간 매핑
+    document.querySelectorAll('input[name="hours-input-type"]').forEach(r => {
+      r.checked = r.value === 'each';
+    });
+    if (hoursSameBlock) hoursSameBlock.classList.add('hidden');
+    if (hoursEachBlock) hoursEachBlock.classList.remove('hidden');
+
+    const splitDayList = hoursStr.split(', ');
+    const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+    days.forEach((day, idx) => {
+      const field = document.getElementById(`h-${day}`);
+      if (field && splitDayList[idx]) {
+        field.value = splitDayList[idx].split(': ')[1] || "11:00 - 22:00";
+      }
+    });
+  } else {
+    // 매일 동일 시간 매핑
+    document.querySelectorAll('input[name="hours-input-type"]').forEach(r => {
+      r.checked = r.value === 'same';
+    });
+    if (hoursSameBlock) hoursSameBlock.classList.remove('hidden');
+    if (hoursEachBlock) hoursEachBlock.classList.add('hidden');
+    const sameInp = document.getElementById('hours-input-same-val');
+    if (sameInp) sameInp.value = hoursStr;
+  }
+
+  // 4. Populate Checkboxes
+  document.querySelectorAll('input[name="m-upload-payment"]').forEach(box => {
+    box.checked = (store.payments || []).includes(box.value);
+  });
+  document.querySelectorAll('input[name="m-upload-languages"]').forEach(box => {
+    box.checked = (store.languages || []).includes(box.value);
+  });
+
+  // 5. Populate Media values
+  tempSignboardBase64 = store.image || "";
+  tempInsideBase64List = [];
+  tempVideosBase64List = [];
+
+  if (store.gallery && Array.isArray(store.gallery)) {
+    store.gallery.forEach(file => {
+      if (file.type === 'video' || file.data.startsWith('data:video/')) {
+        tempVideosBase64List.push(file.data);
+      } else {
+        tempInsideBase64List.push(file.data);
+      }
+    });
+  }
+
+  // Render previews
+  const signboardArea = document.getElementById('signboard-preview-area');
+  const insideArea = document.getElementById('inside-preview-area');
+  const videoArea = document.getElementById('video-preview-area');
+
+  if (signboardArea) {
+    signboardArea.innerHTML = tempSignboardBase64 ? `<div class="preview-thumb-box" style="background-image: url('${tempSignboardBase64}')"></div>` : '';
+  }
+  if (insideArea) {
+    insideArea.innerHTML = '';
+    tempInsideBase64List.forEach(data => {
+      const box = document.createElement('div');
+      box.className = 'preview-thumb-box';
+      box.style.backgroundImage = `url('${data}')`;
+      insideArea.appendChild(box);
+    });
+  }
+  if (videoArea) {
+    videoArea.innerHTML = '';
+    tempVideosBase64List.forEach(() => {
+      const box = document.createElement('div');
+      box.className = 'preview-thumb-box video';
+      box.innerHTML = '▶';
+      videoArea.appendChild(box);
+    });
+  }
+
+  // 6. Populate dynamic menu list (Preserves and displays all items)
+  renderDynamicMenuRows(store.priceList);
+
+  // Try recovering draft as secondary priority (Overrides stored store data if 24 hours draft exists)
   loadDraftRecovery();
 }
 

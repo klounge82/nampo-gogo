@@ -2093,3 +2093,40 @@ body {
   line-height: 1;
   cursor: pointer;
 }
+
+/* Dynamic Menu upload row premium styles */
+.menu-upload-row {
+  background: var(--bg-gray-soft);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  border: 1px solid var(--border-medium);
+  transition: var(--transition);
+}
+
+.menu-upload-row:hover {
+  border-color: var(--primary);
+  background: #ffffff;
+  box-shadow: var(--shadow-card);
+}
+
+.btn-remove-menu-row {
+  transition: var(--transition);
+}
+
+.btn-remove-menu-row:hover {
+  color: #ff1a35 !important;
+  transform: scale(1.05);
+}
+
+/* Success Checkmark Animation */
+.success-icon-check {
+  animation: checkBounce 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes checkBounce {
+  0% { transform: scale(0.3); opacity: 0; }
+  50% { transform: scale(1.1); }
+  70% { transform: scale(0.9); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
