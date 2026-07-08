@@ -1,4 +1,4 @@
-/* style.css - Nampo GoGo Premium Midnight Dark Mode with Responsive Phone Frame Shell */
+/* style.css - Nampo GoGo Premium Midnight Dark Mode with Centered Fluid Mobile Layout */
 
 :root {
   /* Colors - Luxury Midnight & Neon Indigo (High-tech Slate) */
@@ -54,128 +54,45 @@ html, body {
   font-family: var(--font-main);
   color: var(--text-main);
   display: flex;
-  align-items: center;
   justify-content: center;
   overflow: hidden;
   letter-spacing: -0.3px;
   line-height: 1.4;
 }
 
-/* 📱 Inform Master Style Phone Bezel Frame (For PC Viewports) */
-.phone-shell {
-  width: 100%;
-  max-width: 410px;
-  height: 95vh;
-  min-height: 680px;
-  max-height: 880px;
-  background: #12131a;
-  border: 12px solid #000000;
-  border-radius: 44px;
-  position: relative;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 
-              inset 0 0 8px rgba(255, 255, 255, 0.1);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  transition: var(--transition);
-}
-
-/* Dynamic Island/Notch */
-.phone-notch {
-  position: absolute;
-  top: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100px;
-  height: 22px;
-  background: #000000;
-  border-radius: 12px;
-  z-index: 10002;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-}
-
-.phone-notch::before {
-  content: '';
-  width: 8px;
-  height: 8px;
-  background: #0d0f1a;
-  border-radius: 50%;
-  margin-right: 40px;
-  border: 2px solid #111;
-}
-
-/* Home indicator bar at bottom */
-.phone-home-indicator {
-  position: absolute;
-  bottom: 6px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 110px;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.25);
-  border-radius: 2px;
-  z-index: 10002;
-  pointer-events: none;
-}
-
-/* Mobile Inside Screen Viewport */
+/* 📱 Centered Fluid Mobile Container (PC에서는 중앙 정렬, 모바일에서는 100% 핏) */
 .mobile-frame {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
   width: 100%;
+  max-width: 480px;
   height: 100%;
   background-color: var(--bg-frame);
   position: relative;
   overflow: hidden;
-  padding-top: 14px; /* Offset for notch */
-  padding-bottom: 12px; /* Offset for indicator */
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+  border-left: 1px solid rgba(255, 255, 255, 0.05);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* 📱 Responsive Mobile Fit: Under 768px (Tablet & Mobile viewport)
-   Prevents double scrollbars, clipping, or viewport overflow on real devices */
-@media (max-width: 768px) {
-  html, body {
+/* Responsive Mobile viewport optimization */
+@media (max-width: 480px) {
+  body {
     background-color: var(--bg-frame);
-    overflow: hidden;
-    height: 100%;
-    align-items: flex-start;
   }
   
-  .phone-shell {
-    max-width: 100% !important;
-    width: 100% !important;
-    height: 100vh !important;
-    max-height: 100vh !important;
-    min-height: 100vh !important;
-    border: none !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-  }
-
-  .phone-notch {
-    display: none !important;
-  }
-
-  .phone-home-indicator {
-    display: none !important;
-  }
-
   .mobile-frame {
-    padding-top: 0 !important;
-    padding-bottom: 24px !important; /* Safe area padding to prevent Safari URL bar overlay */
-    border-radius: 0 !important;
+    border: none;
+    box-shadow: none;
+    padding-bottom: env(safe-area-inset-bottom); /* iOS 하단 여백 대응 */
   }
-  
+
   .logo-group h1 {
-    font-size: 13px !important;
+    font-size: 14px !important;
   }
   
   .btn-update span {
-    display: none !important; /* Hide '업데이트' text on mobile, icons only */
+    display: none !important; /* 모바일에서는 업데이트 아이콘만 노출 */
   }
   
   .btn-update {
@@ -187,18 +104,18 @@ html, body {
   }
   
   #hours-block-each {
-    grid-template-columns: 1fr !important; /* Stack weekday hours inputs vertically on mobile */
+    grid-template-columns: 1fr !important;
   }
 }
 
 /* In-App Notification Toast Banner */
 .notification-banner {
   position: absolute;
-  top: 45px;
+  top: 60px;
   left: 50%;
   transform: translateX(-50%);
-  width: calc(100% - 20px);
-  max-width: 380px;
+  width: calc(100% - 24px);
+  max-width: 430px;
   background: rgba(13, 15, 26, 0.95);
   backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);

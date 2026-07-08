@@ -90,6 +90,22 @@ window.handleModeSelect = function(mode) {
 document.addEventListener('DOMContentLoaded', () => {
   console.log("🚀 Nampo GoGo App Initialization Starting...");
   
+  // 🛡️ [캐시/구버전 크래시 방지 안전핀] 옛 버전의 잘못된 데이터가 스토리지에 남아있어 터지는 현상 자가 복구
+  try {
+    const rawPartners = localStorage.getItem('nampogogo_partners_v3');
+    if (rawPartners) {
+      const parsed = JSON.parse(rawPartners);
+      if (!Array.isArray(parsed)) {
+        // 잘못된 형태이면 강제 클리어하여 시드 유도
+        localStorage.removeItem('nampogogo_partners_v3');
+        console.warn("🧹 깨진 partnersList 데이터 감지 및 강제 청소 완료.");
+      }
+    }
+  } catch (e) {
+    localStorage.removeItem('nampogogo_partners_v3');
+    console.warn("🧹 JSON 파싱 에러 partnersList 강제 리셋 완료.");
+  }
+
   // Bind core DOM Elements
   partnerDetailModal = document.getElementById('partner-detail-modal');
   qrScannerModal = document.getElementById('qr-scanner-modal');
@@ -333,7 +349,14 @@ function switchTabPanel(panelId) {
   }
 
   persistAppState();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  
+  // Safe container scroll helper
+  const container = document.querySelector('.nampo-body');
+  if (container) {
+    container.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 }
 
 // 5. Multi-Language System
@@ -897,7 +920,7 @@ function openPartnerDetail(id) {
           </tbody>
         </table>
         
-        <div style="border-top:1px dashed rgba(0,0,0,0.06); margin-top:10px; padding-top:8px;">
+        <div style="border-top:1px dashed rgba(255,255,255,0.06); margin-top:10px; padding-top:8px;">
           <span style="font-size:8px; font-weight:800; color:var(--primary); text-transform:uppercase;">🌐 Foreign Language Menu</span>
           <p style="font-size:10px; color:var(--text-body); margin-top:4px; font-style:italic;">"${(p.menuForeign && p.menuForeign[currentLang]) ? p.menuForeign[currentLang] : (p.menuForeign ? p.menuForeign['en'] : 'Supported')}"</p>
         </div>
@@ -932,7 +955,6 @@ function openPartnerDetail(id) {
   }
   initLucide();
 
-  // Accordion toggle
   const accordionHeader = document.getElementById('btn-rating-accordion-toggle');
   if (accordionHeader) {
     accordionHeader.addEventListener('click', () => {
@@ -942,7 +964,6 @@ function openPartnerDetail(id) {
 
   setupModalTabs();
 
-  // Review Photo attachment previews
   let reviewBase64Photos = [];
   const reviewFileInput = document.getElementById('review-upload-files');
   const reviewPhotoPreviewWrap = document.getElementById('review-photo-preview-wrap');
@@ -1246,7 +1267,7 @@ function openSNSCardModal() {
   }
 }
 
-// 12. Merchant Refactored Control System
+// 12. Merchant Control System
 function setupMerchantSystem() {
   const btnShowRegister = document.getElementById('btn-show-merchant-register');
   const btnShowLogin = document.getElementById('btn-show-merchant-login');
@@ -1359,7 +1380,7 @@ function setupMerchantSystem() {
         return;
       }
 
-      currentUser = matched.id;
+      currentUser = usernameInput;
       currentUserRole = matched.role;
       localStorage.setItem('nampogogo_user', currentUser);
       localStorage.setItem('nampogogo_user_role', currentUserRole);
@@ -1397,7 +1418,7 @@ function setupMerchantSystem() {
     localStorage.removeItem('nampogogo_app_mode');
     localStorage.removeItem('nampogogo_active_tab');
 
-    alert("로그아웃 되었었습니다.");
+    alert("로그아웃 되었습니다.");
     updateMerchantAuthUI();
     renderDynamicNavigationDock();
     switchTabPanel('merchant-auth');
@@ -1563,7 +1584,7 @@ function addNewMenuFormRow(initialData = null) {
     item.name = nameInput.value.trim();
     item.price = priceInput.value.trim();
     triggerDraftAutoSave();
-  }, 250);
+  }, 200);
 
   catInput.addEventListener('input', debouncedValCapture);
   nameInput.addEventListener('input', debouncedValCapture);
@@ -1621,7 +1642,6 @@ function setupFormUploadValidators() {
   const insideArea = document.getElementById('inside-preview-area');
   const videoArea = document.getElementById('video-preview-area');
 
-  // Signboard (Cumulative addition)
   if (signboardInput && signboardArea) {
     signboardInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
@@ -1637,7 +1657,6 @@ function setupFormUploadValidators() {
     });
   }
 
-  // Inside images (Cumulative, doesn't wipe old ones)
   if (insideInput && insideArea) {
     insideInput.addEventListener('change', (e) => {
       const files = e.target.files;
@@ -1664,7 +1683,6 @@ function setupFormUploadValidators() {
     });
   }
 
-  // Videos (Cumulative, doesn't wipe old ones)
   if (videoInput && videoArea) {
     videoInput.addEventListener('change', (e) => {
       const files = e.target.files;
@@ -1691,7 +1709,6 @@ function setupFormUploadValidators() {
     });
   }
 
-  // Bind change events to form elements for Auto Save Draft
   const profileForm = document.getElementById('merchant-detail-profile-form');
   if (profileForm) {
     profileForm.querySelectorAll('input, select, textarea').forEach(el => {
@@ -1704,7 +1721,7 @@ function setupFormUploadValidators() {
 // Debounced Auto Save wrapper to prevent text lag
 const debouncedAutoSave = debounce(() => {
   triggerDraftAutoSave();
-}, 300);
+}, 250);
 
 // Auto Save draft system (Active for 24 hours - ONLY saves text metadata to prevent stringify lag!)
 function triggerDraftAutoSave() {
@@ -1719,7 +1736,6 @@ function triggerDraftAutoSave() {
     hoursVal = days.map(d => document.getElementById(`h-${d}`)?.value || "").join('|');
   }
 
-  // Filter menu items metadata only (omitting imageBase64 to save storage write load and avoid key lags)
   const menuMeta = dynamicMenuItems.map(i => {
     return { id: i.id, category: i.category, name: i.name, price: i.price };
   });
@@ -1811,7 +1827,6 @@ function loadDraftRecovery() {
     });
   }
 
-  // Restore dynamic menus meta only (leaving existing photo base64 untouched)
   const container = document.getElementById('merchant-dynamic-menu-list');
   if (container && draft.menuItems && draft.menuItems.length > 0) {
     container.innerHTML = '';
@@ -1821,7 +1836,7 @@ function loadDraftRecovery() {
         categoryText: item.category,
         name: { kr: item.name },
         price: item.price,
-        image: "" // photo remains blank or preserved from store save
+        image: ""
       };
       addNewMenuFormRow(initialSeed);
     });
@@ -2212,7 +2227,6 @@ function updateMerchantAuthUI() {
   if (!currentUser || currentUserRole !== 'merchant') {
     if (welcomeAuthCard) welcomeAuthCard.classList.remove('hidden');
   } else {
-    // Logged in
     if (miniProfileBar && miniUsername) {
       miniUsername.textContent = currentUser;
       miniProfileBar.classList.remove('hidden');
@@ -2246,13 +2260,11 @@ function renderMerchantManagementForm() {
   if (uploadUsername) uploadUsername.textContent = currentUser || "Guest";
 
   if (!store) {
-    // Fresh start, draw 3 empty rows
     renderDynamicMenuRows([]);
     loadDraftRecovery();
     return;
   }
 
-  // 1. Populate basic Text values
   const benefitInput = document.getElementById('m-upload-benefit');
   const phoneInput = document.getElementById('m-upload-phone');
   const wechatInput = document.getElementById('messenger-wechat');
@@ -2270,7 +2282,6 @@ function renderMerchantManagementForm() {
     if (kakaoInput) kakaoInput.value = store.messenger.kakao || "";
   }
 
-  // 2. Populate Radios
   document.querySelectorAll('input[name="m-upload-category"]').forEach(r => {
     r.checked = r.value === store.subCategory;
   });
@@ -2278,7 +2289,6 @@ function renderMerchantManagementForm() {
     r.checked = r.value === store.parking;
   });
 
-  // 3. Populate Hours
   const hoursStr = store.hours || "11:00 - 22:00";
   const hoursSameBlock = document.getElementById('hours-block-same');
   const hoursEachBlock = document.getElementById('hours-block-each');
@@ -2308,7 +2318,6 @@ function renderMerchantManagementForm() {
     if (sameInp) sameInp.value = hoursStr;
   }
 
-  // 4. Populate Checkboxes
   document.querySelectorAll('input[name="m-upload-payment"]').forEach(box => {
     box.checked = (store.payments || []).includes(box.value);
   });
@@ -2316,7 +2325,6 @@ function renderMerchantManagementForm() {
     box.checked = (store.languages || []).includes(box.value);
   });
 
-  // 5. Populate Media values
   tempSignboardBase64 = store.image || "";
   tempInsideBase64List = [];
   tempVideosBase64List = [];
@@ -2331,7 +2339,6 @@ function renderMerchantManagementForm() {
     });
   }
 
-  // Render previews
   const signboardArea = document.getElementById('signboard-preview-area');
   const insideArea = document.getElementById('inside-preview-area');
   const videoArea = document.getElementById('video-preview-area');
@@ -2358,10 +2365,7 @@ function renderMerchantManagementForm() {
     });
   }
 
-  // 6. Populate dynamic menu list
   renderDynamicMenuRows(store.priceList);
-
-  // Try recovering draft as secondary priority
   loadDraftRecovery();
 }
 
