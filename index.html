@@ -15,741 +15,750 @@
 </head>
 <body>
 
-  <!-- In-app Notification Banner for New Reviews (Sleek Toast style) -->
-  <div id="merchant-notification-banner" class="notification-banner hidden">
-    <div class="notif-content">
-      <i data-lucide="bell-ring" class="notif-icon"></i>
-      <div class="notif-text">
-        <strong>리뷰 알림</strong>
-        <span>새로운 고객 리뷰가 등록되었습니다! <strong id="notif-review-count">0</strong>건 대기 중</span>
-      </div>
-    </div>
-    <button class="notif-close-btn" onclick="document.getElementById('merchant-notification-banner').classList.add('hidden')">
-      <i data-lucide="x"></i>
-    </button>
-  </div>
-
-  <!-- Mobile Frame Container -->
-  <div class="mobile-frame">
+  <!-- 📱 Inform Master Style Phone Shell -->
+  <div class="phone-shell">
     
-    <!-- 1. INTRO MODE SELECT SCREEN (No emojis, sleek modern typography, center-aligned, lang dropdown top-right) -->
-    <div id="intro-screen" class="intro-screen">
-      <div class="intro-overlay"></div>
-      
-      <!-- Top-right Lang Selector inside Intro -->
-      <div class="intro-lang-wrap">
-        <select id="intro-lang-select">
-          <option value="kr" selected>KR</option>
-          <option value="en">EN</option>
-          <option value="ch">CH</option>
-          <option value="jp">JP</option>
-        </select>
-      </div>
+    <!-- Phone Bezel Details -->
+    <div class="phone-notch"></div>
+    <div class="phone-home-indicator"></div>
 
-      <div class="intro-content-wrap">
-        <div class="intro-logo">NAMPO GOGO</div>
-        <h2 data-trans="tagline">남포동 스마트 로컬여행 플랫폼</h2>
-        <p class="intro-desc" data-trans="pleaseLogin">로그인 후 QR 인증과 여행 로그를 기록해 보세요.</p>
-        
-        <div class="mode-select-box-grid">
-          <!-- Tourist mode card -->
-          <div class="mode-card-btn" id="btn-mode-tourist" onclick="handleModeSelect('tourist')">
-            <h3 data-trans="introTouristTitle">여행객 전용</h3>
-            <p data-trans="introTouristDesc">제휴 매장 검색, 길찾기, QR 스탬프 로그 모드</p>
-            <span class="mode-badge-action" data-trans="introTouristBtn">접속하기 ➔</span>
-          </div>
-
-          <!-- Merchant mode card -->
-          <div class="mode-card-btn" id="btn-mode-merchant" onclick="handleModeSelect('merchant')">
-            <h3 data-trans="introMerchantTitle">사업자 전용</h3>
-            <p data-trans="introMerchantDesc">매장 등록, 다중 업로드 가이드, 메뉴/결제 관리</p>
-            <span class="mode-badge-action-sec" data-trans="introMerchantBtn">가입 및 관리 ➔</span>
-          </div>
+    <!-- In-app Notification Banner for New Reviews (Sleek Toast style) -->
+    <div id="merchant-notification-banner" class="notification-banner hidden">
+      <div class="notif-content">
+        <i data-lucide="bell-ring" class="notif-icon"></i>
+        <div class="notif-text">
+          <strong>리뷰 알림</strong>
+          <span>새로운 고객 리뷰가 등록되었습니다! <strong id="notif-review-count">0</strong>건 대기 중</span>
         </div>
-        
-        <div class="intro-footer">Lantern Smart Platform v3.0</div>
       </div>
+      <button class="notif-close-btn" onclick="document.getElementById('merchant-notification-banner').classList.add('hidden')">
+        <i data-lucide="x" style="width:14px; height:14px; color:white;"></i>
+      </button>
     </div>
 
-    <!-- 2. MAIN APP FRAME (Hidden initially, shown after mode selection) -->
-    <div id="app-workspace" class="app-workspace-container hidden">
-
-      <!-- Top Header Bar -->
-      <header class="nampo-header">
-        <div class="logo-group" id="btn-header-logo-home">
-          <h1>Nampo GoGo</h1>
-        </div>
+    <!-- Mobile Frame Screen Viewport Inside Bezel -->
+    <div class="mobile-frame">
+      
+      <!-- 1. INTRO MODE SELECT SCREEN (No emojis, sleek modern typography, center-aligned, lang dropdown top-right) -->
+      <div id="intro-screen" class="intro-screen">
+        <div class="intro-overlay"></div>
         
-        <div class="header-controls">
-          <!-- Mode Switch Button -->
-          <button id="btn-quick-mode-switch" class="btn-mode-switch-pill" style="padding: 6px 8px;" title="새로고침">
-            <i data-lucide="refresh-cw"></i>
-          </button>
-
-          <!-- Update Notices Wrap -->
-          <div class="update-dropdown-wrap">
-            <button id="btn-update-toggle" class="btn-update">
-              <span data-trans="updateBtn">업데이트 내역</span>
-              <i data-lucide="chevron-down" id="icon-update-chevron"></i>
-            </button>
-            
-            <div id="update-panel" class="update-panel-content">
-              <h4 data-trans="updateTitle">최근 업데이트 소식</h4>
-              <ul id="update-logs-list">
-                <!-- Loaded dynamically -->
-              </ul>
-            </div>
-          </div>
-
-          <!-- Lang Select -->
-          <div class="lang-drop">
-            <select id="app-lang-select">
-              <option value="kr" selected>KR</option>
-              <option value="en">EN</option>
-              <option value="ch">CH</option>
-              <option value="jp">JP</option>
-            </select>
-          </div>
+        <!-- Top-right Lang Selector inside Intro -->
+        <div class="intro-lang-wrap">
+          <select id="intro-lang-select">
+            <option value="kr" selected>KR</option>
+            <option value="en">EN</option>
+            <option value="ch">CH</option>
+            <option value="jp">JP</option>
+          </select>
         </div>
-      </header>
 
-      <!-- Sticky Top Navigation Tab Dock -->
-      <nav class="nampo-nav-dock" id="dynamic-nav-dock">
-        <!-- Renders based on tourist/merchant mode -->
-      </nav>
-
-      <!-- App Body Scroll Area -->
-      <main class="nampo-body">
-
-        <!-- ================= TOURIST MODE PANELS ================= -->
-
-        <!-- TOURIST TAB 1: Delivery App-Style Food Board -->
-        <section id="tab-tourist-explore" class="tab-panel active">
+        <div class="intro-content-wrap">
+          <div class="intro-logo">NAMPO GOGO</div>
+          <h2 data-trans="tagline">남포동 스마트 로컬여행 플랫폼</h2>
+          <p class="intro-desc" data-trans="pleaseLogin">로그인 후 QR 인증과 여행 로그를 기록해 보세요.</p>
           
-          <div class="nampo-simple-title" data-trans="tagline">남포동 스마트 로컬여행 플랫폼</div>
-
-          <!-- User Greeting Status Banner -->
-          <div class="glass-box auth-status-banner">
-            <div class="status-icon-wrap">
-              <i data-lucide="user" class="text-primary" id="user-status-icon"></i>
+          <div class="mode-select-box-grid">
+            <!-- Tourist mode card -->
+            <div class="mode-card-btn" id="btn-mode-tourist" onclick="handleModeSelect('tourist')">
+              <h3 data-trans="introTouristTitle">여행객 전용</h3>
+              <p data-trans="introTouristDesc">제휴 매장 검색, 길찾기, QR 스탬프 로그 모드</p>
+              <span class="mode-badge-action" data-trans="introTouristBtn">접속하기 ➔</span>
             </div>
-            <div class="status-text-wrap">
-              <h3 id="user-status-heading">Guest User</h3>
-              <span class="user-role-badge" id="dashboard-user-role">Visitor</span>
-              <p id="user-status-desc" data-trans="pleaseLogin">로그인 후 QR 인증과 여행 로그를 기록해 보세요.</p>
-            </div>
-            <button class="btn btn-sm btn-outline" id="btn-tourist-login-shortcut">Login</button>
-          </div>
 
-          <!-- Embedded Login Form (Replaces separate profile tab, pops up or displays conditionally) -->
-          <div class="glass-box auth-form-container hidden" id="tourist-embedded-login-card" style="margin-bottom:16px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-              <h4 data-trans="loginTitle" style="font-weight:900; font-size:13px;">초간단 여행자 가입 및 로그인</h4>
-              <button class="btn btn-sm btn-outline" onclick="document.getElementById('tourist-embedded-login-card').classList.add('hidden')">닫기</button>
-            </div>
-            
-            <form id="nampo-auth-form" onsubmit="event.preventDefault();">
-              <input type="hidden" name="auth-role" value="visitor">
-              
-              <div class="input-group" style="padding: 8px 12px; margin-bottom: 8px;">
-                <i data-lucide="user" style="width:14px; height:14px; margin-right:6px;"></i>
-                <input type="text" id="auth-username" required placeholder="아이디(닉네임) 입력" data-trans="usernamePlaceholder" style="font-size:11px;">
-              </div>
-              
-              <div class="input-group" style="padding: 8px 12px; margin-bottom: 8px;">
-                <i data-lucide="lock" style="width:14px; height:14px; margin-right:6px;"></i>
-                <input type="password" id="auth-password" required placeholder="비밀번호 입력" data-trans="passwordPlaceholder" style="font-size:11px;">
-              </div>
-
-              <div class="input-group" style="padding: 8px 12px; margin-bottom: 10px;">
-                <i data-lucide="lock-keyhole" style="width:14px; height:14px; margin-right:6px;"></i>
-                <input type="password" id="auth-password-confirm" required placeholder="비밀번호 확인 입력" data-trans="passwordConfirmPlaceholder" style="font-size:11px;">
-              </div>
-
-              <button type="submit" class="btn btn-primary btn-block btn-sm" id="btn-submit-auth">
-                <i data-lucide="key" style="width:12px; height:12px;"></i> <span data-trans="authBtn">로그인 / 가입 완료</span>
-              </button>
-            </form>
-          </div>
-
-          <!-- Tourist Profile Status Card (For logged-in tourist to logout) -->
-          <div class="glass-box hidden" id="tourist-profile-logout-card" style="margin-bottom:16px; padding: 12px 16px;">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-              <span style="font-size:11px;">접속 아이디: <strong id="tourist-logged-in-username">user</strong></span>
-              <button class="btn btn-xs btn-outline text-accent" id="btn-action-logout" style="padding:4px 8px; font-size:10px;">로그아웃</button>
+            <!-- Merchant mode card -->
+            <div class="mode-card-btn" id="btn-mode-merchant" onclick="handleModeSelect('merchant')">
+              <h3 data-trans="introMerchantTitle">사업자 전용</h3>
+              <p data-trans="introMerchantDesc">매장 등록, 다중 업로드 가이드, 메뉴/결제 관리</p>
+              <span class="mode-badge-action-sec" data-trans="introMerchantBtn">가입 및 관리 ➔</span>
             </div>
           </div>
+          
+          <div class="intro-footer">Lantern Smart Platform v3.0</div>
+        </div>
+      </div>
 
-          <!-- Flat Text Pill Category Slider -->
-          <h4 class="menu-grid-header" data-trans="allCategories">주변 식사 카테고리 검색</h4>
-          <div class="delivery-category-slider">
-            <button class="delivery-cat-btn active" data-subcat="all" data-trans="allCategories">전체보기</button>
-            <button class="delivery-cat-btn" data-subcat="pork" data-trans="subPork">국밥/한식</button>
-            <button class="delivery-cat-btn" data-subcat="seafood" data-trans="subSeafood">해산물/회</button>
-            <button class="delivery-cat-btn" data-subcat="pizza" data-trans="subPizza">피자/양식</button>
-            <button class="delivery-cat-btn" data-subcat="korean" data-trans="subKorean">전통한식</button>
-            <button class="delivery-cat-btn" data-subcat="chinese" data-trans="subChinese">중식/요리</button>
-            <button class="delivery-cat-btn" data-subcat="japanese" data-trans="subJapanese">일식/돈까스</button>
-            <button class="delivery-cat-btn" data-subcat="massage" data-trans="subMassage">마사지/뷰티</button>
-            <button class="delivery-cat-btn" data-subcat="cafe" data-trans="subCafe">디저트/카페</button>
+      <!-- 2. MAIN APP FRAME (Hidden initially, shown after mode selection) -->
+      <div id="app-workspace" class="app-workspace-container hidden">
+
+        <!-- Top Header Bar -->
+        <header class="nampo-header">
+          <div class="logo-group" id="btn-header-logo-home">
+            <h1>Nampo GoGo</h1>
           </div>
-
-          <!-- AI Nampodong Course Router Mini Form -->
-          <div class="glass-box ai-planner-box-layout">
-            <div class="ai-box-header">
-              <i data-lucide="bot"></i>
-              <span>AI 남포동 맞춤 코스 추천기</span>
-            </div>
-            <p class="ai-box-desc">하고 싶은 활동과 예산을 적어주시면 AI가 최적의 도보 코스를 매칭합니다.</p>
-            
-            <button type="button" class="btn btn-primary btn-block btn-sm" id="btn-shortcut-ai-planner" style="margin-top: 10px;">
-              <i data-lucide="sparkles"></i> AI 추천 코스 짜기 폼 열기
+          
+          <div class="header-controls">
+            <!-- Mode Switch Button -->
+            <button id="btn-quick-mode-switch" class="btn-mode-switch-pill" style="padding: 6px 8px;" title="새로고침">
+              <i data-lucide="refresh-cw"></i>
             </button>
+
+            <!-- Update Notices Wrap -->
+            <div class="update-dropdown-wrap">
+              <button id="btn-update-toggle" class="btn-update">
+                <span data-trans="updateBtn">업데이트</span>
+                <i data-lucide="chevron-down" id="icon-update-chevron" style="width:10px; height:10px; stroke-width:3px;"></i>
+              </button>
+              
+              <div id="update-panel" class="update-panel-content">
+                <h4 data-trans="updateTitle">최근 업데이트 소식</h4>
+                <ul id="update-logs-list">
+                  <!-- Loaded dynamically -->
+                </ul>
+              </div>
+            </div>
+
+            <!-- Lang Select -->
+            <div class="lang-drop">
+              <select id="app-lang-select">
+                <option value="kr" selected>KR</option>
+                <option value="en">EN</option>
+                <option value="ch">CH</option>
+                <option value="jp">JP</option>
+              </select>
+            </div>
+          </div>
+        </header>
+
+        <!-- Sticky Top Navigation Tab Dock -->
+        <nav class="nampo-nav-dock" id="dynamic-nav-dock">
+          <!-- Renders based on tourist/merchant mode -->
+        </nav>
+
+        <!-- App Body Scroll Area -->
+        <main class="nampo-body">
+
+          <!-- ================= TOURIST MODE PANELS ================= -->
+
+          <!-- TOURIST TAB 1: Delivery App-Style Food Board -->
+          <section id="tab-tourist-explore" class="tab-panel active">
             
-            <div id="ai-planner-modal-content-area" class="ai-modal-box-wrap hidden">
-              <form id="nampo-ai-planner-form" onsubmit="event.preventDefault();" style="margin-top: 12px;">
+            <div class="nampo-simple-title" data-trans="tagline">남포동 스마트 로컬여행 플랫폼</div>
+
+            <!-- User Greeting Status Banner -->
+            <div class="glass-box auth-status-banner">
+              <div class="status-icon-wrap">
+                <i data-lucide="user" class="text-primary" id="user-status-icon"></i>
+              </div>
+              <div class="status-text-wrap">
+                <h3 id="user-status-heading">Guest User</h3>
+                <span class="user-role-badge" id="dashboard-user-role">Visitor</span>
+                <p id="user-status-desc" data-trans="pleaseLogin">로그인 후 QR 인증과 여행 로그를 기록해 보세요.</p>
+              </div>
+              <button class="btn btn-sm btn-outline" id="btn-tourist-login-shortcut">Login</button>
+            </div>
+
+            <!-- Embedded Login Form -->
+            <div class="glass-box auth-form-container hidden" id="tourist-embedded-login-card" style="margin-bottom:14px; border-color:var(--primary);">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h4 data-trans="loginTitle" style="font-weight:900; font-size:12px;">초간단 여행자 가입 및 로그인</h4>
+                <button class="btn btn-sm btn-outline" onclick="document.getElementById('tourist-embedded-login-card').classList.add('hidden')" style="padding:2px 8px; font-size:10px;">닫기</button>
+              </div>
+              
+              <form id="nampo-auth-form" onsubmit="event.preventDefault();">
+                <input type="hidden" name="auth-role" value="visitor">
+                
+                <div class="input-group" style="padding: 8px 12px; margin-bottom: 8px;">
+                  <i data-lucide="user" style="width:14px; height:14px; margin-right:6px;"></i>
+                  <input type="text" id="auth-username" required placeholder="아이디(닉네임) 입력" data-trans="usernamePlaceholder" style="font-size:11px;">
+                </div>
+                
+                <div class="input-group" style="padding: 8px 12px; margin-bottom: 8px;">
+                  <i data-lucide="lock" style="width:14px; height:14px; margin-right:6px;"></i>
+                  <input type="password" id="auth-password" required placeholder="비밀번호 입력" data-trans="passwordPlaceholder" style="font-size:11px;">
+                </div>
+
+                <div class="input-group" style="padding: 8px 12px; margin-bottom: 10px;">
+                  <i data-lucide="lock-keyhole" style="width:14px; height:14px; margin-right:6px;"></i>
+                  <input type="password" id="auth-password-confirm" required placeholder="비밀번호 확인 입력" data-trans="passwordConfirmPlaceholder" style="font-size:11px;">
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block btn-sm" id="btn-submit-auth" style="border-radius:var(--radius-pill); font-size:11px; padding:8px 0;">
+                  <i data-lucide="key" style="width:12px; height:12px;"></i> <span data-trans="authBtn">로그인 / 가입 완료</span>
+                </button>
+              </form>
+            </div>
+
+            <!-- Tourist Profile Status Card -->
+            <div class="glass-box hidden" id="tourist-profile-logout-card" style="margin-bottom:14px; padding: 10px 14px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:11px;">접속 아이디: <strong id="tourist-logged-in-username">user</strong></span>
+                <button class="btn btn-xs btn-outline text-accent" id="btn-action-logout" style="padding:4px 8px; font-size:10px; border-radius:var(--radius-pill);">로그아웃</button>
+              </div>
+            </div>
+
+            <!-- Flat Text Pill Category Slider -->
+            <h4 class="menu-grid-header" data-trans="allCategories">주변 식사 카테고리 검색</h4>
+            <div class="delivery-category-slider">
+              <button class="delivery-cat-btn active" data-subcat="all" data-trans="allCategories">전체보기</button>
+              <button class="delivery-cat-btn" data-subcat="pork" data-trans="subPork">국밥/한식</button>
+              <button class="delivery-cat-btn" data-subcat="seafood" data-trans="subSeafood">해산물/회</button>
+              <button class="delivery-cat-btn" data-subcat="pizza" data-trans="subPizza">피자/양식</button>
+              <button class="delivery-cat-btn" data-subcat="korean" data-trans="subKorean">전통한식</button>
+              <button class="delivery-cat-btn" data-subcat="chinese" data-trans="subChinese">중식/요리</button>
+              <button class="delivery-cat-btn" data-subcat="japanese" data-trans="subJapanese">일식/돈까스</button>
+              <button class="delivery-cat-btn" data-subcat="massage" data-trans="subMassage">마사지/뷰티</button>
+              <button class="delivery-cat-btn" data-subcat="cafe" data-trans="subCafe">디저트/카페</button>
+            </div>
+
+            <!-- AI Nampodong Course Router Mini Form -->
+            <div class="glass-box ai-planner-box-layout">
+              <div class="ai-box-header">
+                <i data-lucide="bot"></i>
+                <span>AI 남포동 맞춤 코스 추천기</span>
+              </div>
+              <p class="ai-box-desc">하고 싶은 활동과 예산을 적어주시면 AI가 최적의 도보 코스를 매칭합니다.</p>
+              
+              <button type="button" class="btn btn-primary btn-block btn-sm" id="btn-shortcut-ai-planner" style="margin-top: 10px;">
+                <i data-lucide="sparkles"></i> AI 추천 코스 짜기 폼 열기
+              </button>
+              
+              <div id="ai-planner-modal-content-area" class="ai-modal-box-wrap hidden">
+                <form id="nampo-ai-planner-form" onsubmit="event.preventDefault();" style="margin-top: 12px;">
+                  <div class="form-group-nampo">
+                    <label>하고 싶은 활동 (중복 선택 가능)</label>
+                    <div class="checkbox-group-grid">
+                      <label class="check-pill">
+                        <input type="checkbox" name="ai-activities" value="massage" checked>
+                        <span>체험</span>
+                      </label>
+                      <label class="check-pill">
+                        <input type="checkbox" name="ai-activities" value="food" checked>
+                        <span>맛집</span>
+                      </label>
+                      <label class="check-pill">
+                        <input type="checkbox" name="ai-activities" value="cafe" checked>
+                        <span>카페</span>
+                      </label>
+                      <label class="check-pill">
+                        <input type="checkbox" name="ai-activities" value="shopping">
+                        <span>쇼핑</span>
+                      </label>
+                      <label class="check-pill">
+                        <input type="checkbox" name="ai-activities" value="sightseeing">
+                        <span>관광</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div class="form-group-nampo">
+                    <label>1인당 예산 범위 (KRW)</label>
+                    <select id="ai-budget-select" class="nampo-input">
+                      <option value="30000">30,000 KRW 이하</option>
+                      <option value="60000" selected>60,000 KRW 이하</option>
+                      <option value="100000">100,000 KRW 이하</option>
+                      <option value="999999">예산 상관없음</option>
+                    </select>
+                  </div>
+                  
+                  <button type="button" class="btn btn-primary btn-block" id="btn-run-ai-recommend">
+                    <i data-lucide="sparkles"></i> 코스 빌드 시작
+                  </button>
+                </form>
+
+                <!-- Output area -->
+                <div id="ai-course-output-area" class="ai-course-output-container hidden">
+                  <!-- Dynamic route cards with navigation links -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Shop list matching priority sorting -->
+            <div class="shop-list-header-row">
+              <h4>주변 추천 맛집 및 마사지 센터</h4>
+              <span class="sort-tag-info">제휴사 ➔ 미디어수 ➔ 평점순 정렬</span>
+            </div>
+
+            <div class="delivery-partners-list" id="delivery-partners-container">
+              <!-- Rendered dynamically -->
+            </div>
+
+            <!-- QR 스캔하기 하단 배치 (관광객 탭 아래 고정) -->
+            <div class="tourist-fixed-qr-dock" style="margin-top: 24px; text-align:center;">
+              <p style="font-size:10px; color:var(--text-body); margin-bottom:8px;">가게 카운터의 QR코드를 스캔해 스탬프 혜택을 획득하세요.</p>
+              <button class="btn btn-secondary btn-block" id="btn-trigger-general-qr-scan" style="max-width:320px; margin: 0 auto; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border-radius:var(--radius-pill);">
+                <i data-lucide="scan-line"></i> <span>제휴매장 QR 인증하기</span>
+              </button>
+            </div>
+
+          </section>
+
+          <!-- TOURIST TAB 2: Travel Log Timeline -->
+          <section id="tab-tourist-log" class="tab-panel">
+            <div class="section-title">
+              <h2 data-trans="logTitle">나의 여행 로그 카드</h2>
+              <p data-trans="logDesc">QR 인증으로 수집된 나만의 남포동 여행 코스 리포트입니다.</p>
+            </div>
+
+            <div class="glass-box log-status-card">
+              <div class="stamp-grid" id="stamp-indicator-grid">
+                <!-- Stamps indicator nodes -->
+              </div>
+              <div class="log-meta-status">
+                <span data-trans="logCount">방문한 매장 수</span>: <strong class="text-primary" id="log-count-num">0</strong>
+              </div>
+            </div>
+
+            <!-- Log Timeline -->
+            <div id="travel-log-timeline" class="travel-timeline">
+              <div class="empty-log-state" id="log-empty-msg">
+                <i data-lucide="map-pin"></i>
+                <p data-trans="emptyLog">아직 방문 인증된 매장이 없습니다. 제휴 매장을 방문하고 스탬프를 적립해 보세요!</p>
+              </div>
+              <!-- Dynamic timeline nodes -->
+            </div>
+
+            <!-- SNS export card button -->
+            <div class="log-actions hidden" id="log-actions-bar" style="margin-top: 20px;">
+              <button class="btn btn-primary btn-block" id="btn-export-log-card" style="border-radius: var(--radius-pill); font-weight:800; padding:12px;">
+                <i data-lucide="share-2"></i> <span data-trans="snsExport">SNS 공유용 스토리 카드 생성 📸</span>
+              </button>
+            </div>
+          </section>
+
+          <!-- ================= MERCHANT (BUSINESS) MODE PANELS ================= -->
+
+          <!-- MERCHANT TAB 1: Business Registration / Verification -->
+          <section id="tab-merchant-auth" class="tab-panel">
+            
+            <!-- Mini Logout Button for logged-in Merchants before partnership approval -->
+            <div class="merchant-profile-mini-bar hidden" id="merchant-mini-profile-header">
+              <span>로그인 계정: <strong id="merchant-mini-username">owner</strong></span>
+              <button class="btn btn-sm btn-outline text-accent" id="btn-merchant-logout-auth">로그아웃</button>
+            </div>
+
+            <div class="section-title">
+              <h2>제휴 사업자 계정 관리</h2>
+              <p>매장 정보를 등록하고 제휴 승인을 요청하여 파트너로 노출되세요.</p>
+            </div>
+
+            <!-- Premium High-Tech Inform Master Styled Welcome card -->
+            <div class="merchant-premium-auth-container" id="merchant-welcome-auth-card">
+              <h3 class="merchant-premium-title">사장님 전용 가입 & 로그인</h3>
+              <p class="merchant-premium-desc">공식 제휴 가맹점 심사 신청 및 대시보드 통계 관리를 위해 로그인해 주세요.</p>
+              <div class="premium-btn-group">
+                <button class="premium-btn-primary flex-1" id="btn-show-merchant-register">회원가입 하기</button>
+                <button class="premium-btn-secondary flex-1" id="btn-show-merchant-login">로그인 하기</button>
+              </div>
+            </div>
+
+            <!-- Step 1-B: Real Register Form (Join) -->
+            <div class="merchant-premium-auth-container hidden" id="merchant-register-card">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+                <h3 class="merchant-premium-title" style="margin-bottom:0; text-align:left;">사장님 회원가입</h3>
+                <button class="btn btn-xs btn-outline" id="btn-back-to-welcome-r" style="color:white; border-color:rgba(255,255,255,0.2);">이전으로</button>
+              </div>
+              <form id="merchant-join-form" onsubmit="event.preventDefault();">
+                <div class="premium-input-group">
+                  <i data-lucide="user-plus" style="width:14px; height:14px;"></i>
+                  <input type="text" id="m-register-username" required placeholder="신규 사업자 아이디(영어/숫자)">
+                </div>
+                <div class="premium-input-group">
+                  <i data-lucide="lock" style="width:14px; height:14px;"></i>
+                  <input type="password" id="m-register-password" required placeholder="비밀번호 입력">
+                </div>
+                <div class="premium-input-group">
+                  <i data-lucide="lock-keyhole" style="width:14px; height:14px;"></i>
+                  <input type="password" id="m-register-password-confirm" required placeholder="비밀번호 확인">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block" style="border-radius:var(--radius-pill); font-weight:800; padding:12px; margin-top:8px;">
+                  <i data-lucide="user-check" style="width:14px; height:14px; display:inline-block; vertical-align:middle; margin-right:4px;"></i> 가입 완료 (자동 로그인)
+                </button>
+              </form>
+            </div>
+
+            <!-- Step 1-C: Real Login Form (Login) -->
+            <div class="merchant-premium-auth-container hidden" id="merchant-login-card">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+                <h3 class="merchant-premium-title" style="margin-bottom:0; text-align:left;">사장님 로그인</h3>
+                <button class="btn btn-xs btn-outline" id="btn-back-to-welcome-l" style="color:white; border-color:rgba(255,255,255,0.2);">이전으로</button>
+              </div>
+              <form id="merchant-login-form-submit" onsubmit="event.preventDefault();">
+                <div class="premium-input-group">
+                  <i data-lucide="user" style="width:14px; height:14px;"></i>
+                  <input type="text" id="m-login-username" required placeholder="아이디 입력">
+                </div>
+                <div class="premium-input-group">
+                  <i data-lucide="lock" style="width:14px; height:14px;"></i>
+                  <input type="password" id="m-login-password" required placeholder="비밀번호 입력">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block" style="border-radius:var(--radius-pill); font-weight:800; padding:12px; margin-top:8px;">
+                  <i data-lucide="log-in" style="width:14px; height:14px; display:inline-block; vertical-align:middle; margin-right:4px;"></i> 로그인 완료
+                </button>
+              </form>
+            </div>
+
+            <!-- Step 2: Merchant Partner Application Form -->
+            <div class="glass-box hidden" id="merchant-apply-card">
+              <div class="apply-header-row">
+                <i data-lucide="shield-check" class="text-primary"></i>
+                <h4>Nampo GoGo 공식 제휴 상점 등록 신청</h4>
+              </div>
+              <p class="auth-desc">제휴 상인으로 정식 등록하여 관광객 전용 페이지 최상단에 가게를 띄워보세요.</p>
+
+              <form id="merchant-apply-form" onsubmit="event.preventDefault();" style="margin-top: 14px;">
                 <div class="form-group-nampo">
-                  <label>하고 싶은 활동 (중복 선택 가능)</label>
-                  <div class="checkbox-group-grid">
-                    <label class="check-pill">
-                      <input type="checkbox" name="ai-activities" value="massage" checked>
-                      <span>체험</span>
+                  <label>사업자 등록증 첨부 (인증용)</label>
+                  <div class="upload-guide-info" style="border-color:var(--primary); background:var(--primary-soft); color:var(--text-main);">
+                    📄 사업자등록증 촬영 사진(JPG/PNG) 또는 PDF 파일을 넣어주세요. (최대 5MB)
+                  </div>
+                  <input type="file" id="apply-license-file" required class="nampo-input" style="padding: 6px;">
+                </div>
+
+                <div class="form-group-nampo">
+                  <label>매장 주소 기입</label>
+                  <input type="text" id="apply-address" required placeholder="예: 부산 중구 남포길 18" class="nampo-input">
+                </div>
+
+                <div class="form-group-nampo">
+                  <label>업종 카테고리</label>
+                  <select id="apply-subcategory" class="nampo-input">
+                    <option value="pork">국밥/한식 (Soup/Korean)</option>
+                    <option value="seafood">해산물/회 (Seafood/Raw)</option>
+                    <option value="pizza">피자/양식 (Pizza/Pasta)</option>
+                    <option value="korean">전통한식 (Traditional)</option>
+                    <option value="chinese">중식/요리 (Chinese)</option>
+                    <option value="japanese">일식/돈까스 (Sushi/Katsu)</option>
+                    <option value="massage">미용/피부/마사지 (Beauty/Massage)</option>
+                    <option value="cafe">디저트/카페 (Dessert/Cafe)</option>
+                  </select>
+                </div>
+
+                <div class="form-group-nampo">
+                  <label>대표 연락처</label>
+                  <input type="tel" id="apply-phone" required placeholder="예: +82-51-245-1111 (국제전화 규격)" class="nampo-input">
+                </div>
+
+                <!-- Sleek Rounded Centered Submit Button -->
+                <div style="display:flex; justify-content:center; margin-top:20px;">
+                  <button type="submit" class="btn btn-primary btn-round-centered" id="btn-submit-partnership">
+                    제휴 신청서 전송하기 ➔
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Step 3: PENDING/심사중 Banner with Simulator Toggle -->
+            <div class="glass-box approved-state-banner pending-state hidden" id="merchant-pending-status-card">
+              <div class="pending-icon-clock">⌛</div>
+              <h4>현재 서류 심사 진행 중입니다.</h4>
+              <p class="auth-desc" style="margin-top: 6px;">제출하신 사업자등록증 및 매장 인증에 대한 심사가 진행 중입니다. 승인이 나면 매장 정보 올리기가 자동 오픈됩니다.</p>
+              
+              <!-- Admin simulator tool -->
+              <div class="admin-simulator-panel" style="margin-top:20px; border-top:1.5px dashed rgba(43, 97, 235, 0.2); padding-top:15px;">
+                <span style="font-size:10px; font-weight:800; color:var(--primary); display:block; margin-bottom:8px;">🛠️ 개발자/어드민 시뮬레이션 키</span>
+                <button class="btn btn-primary btn-sm btn-block" id="btn-demo-approve-instantly" style="border-radius: var(--radius-pill); font-size:11px;">
+                  개발자 즉시 승인하기 (테스트용)
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- MERCHANT TAB 2: 매장 관리 (대시보드 통계 & 월간 그래프 & 리뷰 관리 및 답글) -->
+          <section id="tab-merchant-manage" class="tab-panel">
+            
+            <div class="merchant-profile-mini-bar" id="merchant-dashboard-profile-header">
+              <span>제휴 파트너: <strong id="merchant-dashboard-username">owner</strong></span>
+              <button class="btn btn-sm btn-outline text-accent" id="btn-merchant-logout-dashboard">로그아웃</button>
+            </div>
+
+            <div class="section-title">
+              <h2 data-trans="merchantTitle">내 매장 관리 대시보드</h2>
+              <p>매장의 실시간 유동 분석, 월간 통계 수치 및 고객 방문 리뷰를 통합 관리합니다.</p>
+            </div>
+
+            <!-- Quick Metrics (Today Visitor, Stamp counts) -->
+            <div class="merchant-metrics-grid">
+              <div class="metric-card bg-primary-soft">
+                <span class="metric-title" data-trans="visitorToday">오늘 방문자 수</span>
+                <span class="metric-value" id="dashboard-metric-visitor-today">12명</span>
+              </div>
+              <div class="metric-card bg-success-soft">
+                <span class="metric-title" data-trans="qrStampsIssued">QR 인증 횟수</span>
+                <span class="metric-value" id="merchant-stamps-val">0건</span>
+              </div>
+            </div>
+
+            <!-- Monthly Visitors & Stamps Trend Line Graph -->
+            <div class="glass-box dashboard-graph-box">
+              <h4 style="font-size:12px; font-weight:900; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+                <span>📈 월별 방문 및 QR 인증 추이 (최근 6개월)</span>
+                <span style="font-size:9px; font-weight:normal; color:var(--text-body);">Toss Style SVG Chart</span>
+              </h4>
+              
+              <div class="chart-canvas-wrapper">
+                <svg id="merchant-monthly-chart-svg" viewBox="0 0 400 180" width="100%" height="180">
+                  <!-- SVG Draw elements -->
+                </svg>
+              </div>
+              
+              <div class="chart-legend-row" style="display:flex; justify-content:center; gap:16px; margin-top:10px; font-size:9px; font-weight:800;">
+                <span style="color:var(--primary);">● 월별 방문객 수 (명)</span>
+                <span style="color:var(--secondary);">● QR 스탬프 인증 수 (건)</span>
+              </div>
+            </div>
+
+            <!-- Reviews management & Owner Reply area -->
+            <div class="glass-box dashboard-reviews-box" style="margin-top:20px;">
+              <h4 style="font-size:13px; font-weight:900; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+                <span>💬 매장 리뷰 통합 관리</span>
+                <span class="badge-blue" id="dashboard-review-count-badge" style="font-size:9px; padding:2px 8px; border-radius:10px;">0건</span>
+              </h4>
+              
+              <div id="merchant-reviews-manager-list" class="dashboard-reviews-list-wrap">
+                <!-- Dynamically populated customer reviews with ratings, photos and reply options -->
+              </div>
+            </div>
+          </section>
+
+          <!-- MERCHANT TAB 3: 매장 정보 올리기 / 수정 (폼 전면 개편) -->
+          <section id="tab-merchant-upload" class="tab-panel">
+            
+            <div class="merchant-profile-mini-bar" id="merchant-upload-profile-header">
+              <span>제휴 파트너: <strong id="merchant-upload-username">owner</strong></span>
+              <button class="btn btn-sm btn-outline text-accent" id="btn-merchant-logout-upload">로그아웃</button>
+            </div>
+
+            <div class="section-title">
+              <h2>매장 상세 정보 올리기 / 수정</h2>
+              <p>사진 크기 규격, 영업 요일별 선택, 사장님 연락처 및 메뉴 사진 등 상세 정보를 엄격하게 기입하세요.</p>
+            </div>
+
+            <!-- Auto draft notice -->
+            <div class="glass-box draft-recovery-alert" id="draft-recovery-alert-box" style="display:none; background:var(--primary-soft); border:1.5px solid var(--primary); padding:10px; margin-bottom:15px; border-radius:var(--radius-sm);">
+              <p style="font-size:10px; font-weight:700; color:var(--text-main); display:flex; align-items:center; gap:6px;">
+                <i data-lucide="history" style="width:14px; height:14px; color:var(--primary);"></i>
+                작성 중이던 임시 저장(Draft) 데이터를 감지하여 복원했습니다! (24시간 보관)
+              </p>
+            </div>
+
+            <!-- Upload validation failure errors report box -->
+            <div id="upload-error-report" class="upload-error-report-panel hidden">
+              <!-- Dynamic validation fails list -->
+            </div>
+
+            <!-- Strictly Regulated Media Uploader -->
+            <div class="glass-box">
+              <h4 style="font-size:13px; font-weight:800; margin-bottom:10px;">1. 매장 다중 미디어 업로드 (규격 검사)</h4>
+              
+              <div class="upload-guide-info" style="border-color:var(--primary); background:var(--primary-soft); color:var(--text-main); margin-bottom:14px;">
+                📸 <strong>사진 파일 필수 규격 안내:</strong><br>
+                - <strong>간판 사진 [필수 1장]</strong>: 외부 전경/간판/문입구 노출 (1순위)<br>
+                - <strong>내부 모습 사진 [최소 2장 ~ 최대 10장]</strong>: 10장 초과 시 경고창 팝업 및 차단<br>
+                🎥 <strong>동영상 파일 규격 안내:</strong><br>
+                - <strong>동영상 [최대 3개]</strong>: 3개 초과 시 경고창 팝업 및 차단 (MP4/WEBM)
+              </div>
+
+              <!-- Signboard photo upload -->
+              <div class="form-group-nampo" style="border-bottom:1px dashed var(--border-medium); padding-bottom:12px; margin-bottom:12px;">
+                <label>📁 간판/대문 사진 등록 (1장 필수)</label>
+                <input type="file" id="merchant-file-signboard" accept="image/png, image/jpeg, image/webp" class="nampo-input" style="padding: 6px;">
+                <div class="media-thumb-selector-grid" id="signboard-preview-area"></div>
+              </div>
+
+              <!-- Inside photo upload -->
+              <div class="form-group-nampo" style="border-bottom:1px dashed var(--border-medium); padding-bottom:12px; margin-bottom:12px;">
+                <label>📁 매장 내부/기타 사진 등록 (최소 2장 ~ 최대 10장)</label>
+                <input type="file" id="merchant-files-inside" multiple accept="image/png, image/jpeg, image/webp" class="nampo-input" style="padding: 6px;">
+                <div class="media-thumb-selector-grid" id="inside-preview-area"></div>
+              </div>
+
+              <!-- Video upload -->
+              <div class="form-group-nampo">
+                <label>📁 매장 동영상 등록 (최대 3개)</label>
+                <input type="file" id="merchant-files-video" multiple accept="video/mp4, video/webm" class="nampo-input" style="padding: 6px;">
+                <div class="media-thumb-selector-grid" id="video-preview-area"></div>
+              </div>
+            </div>
+
+            <!-- Basic store form -->
+            <div class="glass-box" style="margin-top: 20px;">
+              <h4 style="font-size:13px; font-weight:800; margin-bottom:12px;">2. 매장 이용 환경 및 연락망 등록</h4>
+              
+              <form id="merchant-detail-profile-form" onsubmit="event.preventDefault();">
+                
+                <!-- Business Category selector (Exactly 3 categories) -->
+                <div class="form-group-nampo">
+                  <label>업종 선택</label>
+                  <div class="parking-radio-row" style="flex-wrap:wrap; gap:8px;">
+                    <label class="radio-pill flex-1" style="min-width:90px;">
+                      <input type="radio" name="m-upload-category" value="food" checked>
+                      <span>음식점</span>
                     </label>
-                    <label class="check-pill">
-                      <input type="checkbox" name="ai-activities" value="food" checked>
-                      <span>맛집</span>
+                    <label class="radio-pill flex-1" style="min-width:90px;">
+                      <input type="radio" name="m-upload-category" value="karaoke">
+                      <span>노래방/노래연습장</span>
                     </label>
-                    <label class="check-pill">
-                      <input type="checkbox" name="ai-activities" value="cafe" checked>
-                      <span>카페</span>
-                    </label>
-                    <label class="check-pill">
-                      <input type="checkbox" name="ai-activities" value="shopping">
-                      <span>쇼핑</span>
-                    </label>
-                    <label class="check-pill">
-                      <input type="checkbox" name="ai-activities" value="sightseeing">
-                      <span>관광</span>
+                    <label class="radio-pill flex-1" style="min-width:90px;">
+                      <input type="radio" name="m-upload-category" value="massage">
+                      <span>미용/피부/마사지</span>
                     </label>
                   </div>
                 </div>
 
+                <!-- Exclusive tourist benefit -->
                 <div class="form-group-nampo">
-                  <label>1인당 예산 범위 (KRW)</label>
-                  <select id="ai-budget-select" class="nampo-input">
-                    <option value="30000">30,000 KRW 이하</option>
-                    <option value="60000" selected>60,000 KRW 이하</option>
-                    <option value="100000">100,000 KRW 이하</option>
-                    <option value="999999">예산 상관없음</option>
-                  </select>
-                </div>
-                
-                <button type="button" class="btn btn-primary btn-block" id="btn-run-ai-recommend">
-                  <i data-lucide="sparkles"></i> 코스 빌드 시작
-                </button>
-              </form>
-
-              <!-- Output area -->
-              <div id="ai-course-output-area" class="ai-course-output-container hidden">
-                <!-- Dynamic route cards with navigation links -->
-              </div>
-            </div>
-          </div>
-
-          <!-- Shop list matching priority sorting rules -->
-          <div class="shop-list-header-row">
-            <h4>주변 추천 맛집 및 마사지 센터</h4>
-            <span class="sort-tag-info">제휴사 ➔ 미디어수 ➔ 평점순 정렬</span>
-          </div>
-
-          <div class="delivery-partners-list" id="delivery-partners-container">
-            <!-- Rendered dynamically -->
-          </div>
-
-          <!-- QR 스캔하기 하단 배치 (관광객 탭 아래 고정 유도용) -->
-          <div class="tourist-fixed-qr-dock" style="margin-top: 24px; text-align:center;">
-            <p style="font-size:10px; color:var(--text-muted); margin-bottom:8px;">가게 카운터의 QR코드를 스캔해 스탬프 혜택을 획득하세요.</p>
-            <button class="btn btn-secondary btn-block" id="btn-trigger-general-qr-scan" style="max-width:320px; margin: 0 auto; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
-              <i data-lucide="scan-line"></i> <span>제휴매장 QR 인증하기</span>
-            </button>
-          </div>
-
-        </section>
-
-        <!-- TOURIST TAB 2: Travel Log Timeline -->
-        <section id="tab-tourist-log" class="tab-panel">
-          <div class="section-title">
-            <h2 data-trans="logTitle">나의 여행 로그 카드</h2>
-            <p data-trans="logDesc">QR 인증으로 수집된 나만의 남포동 여행 코스 리포트입니다.</p>
-          </div>
-
-          <div class="glass-box log-status-card">
-            <div class="stamp-grid" id="stamp-indicator-grid">
-              <!-- Stamps indicator nodes -->
-            </div>
-            <div class="log-meta-status">
-              <span data-trans="logCount">방문한 매장 수</span>: <strong class="text-primary" id="log-count-num">0</strong>
-            </div>
-          </div>
-
-          <!-- Log Timeline -->
-          <div id="travel-log-timeline" class="travel-timeline">
-            <div class="empty-log-state" id="log-empty-msg">
-              <i data-lucide="map-pin"></i>
-              <p data-trans="emptyLog">아직 방문 인증된 매장이 없습니다. 제휴 매장을 방문하고 스탬프를 적립해 보세요!</p>
-            </div>
-            <!-- Dynamic timeline nodes -->
-          </div>
-
-          <!-- SNS export card button -->
-          <div class="log-actions hidden" id="log-actions-bar" style="margin-top: 20px;">
-            <button class="btn btn-primary btn-block" id="btn-export-log-card" style="border-radius: var(--radius-pill); font-weight:800; padding:12px;">
-              <i data-lucide="share-2"></i> <span data-trans="snsExport">SNS 공유용 스토리 카드 생성 📸</span>
-            </button>
-          </div>
-        </section>
-
-        <!-- ================= MERCHANT (BUSINESS) MODE PANELS ================= -->
-
-        <!-- MERCHANT TAB 1: Business Registration / Verification -->
-        <section id="tab-merchant-auth" class="tab-panel">
-          
-          <!-- Mini Logout Button for logged-in Merchants before partnership approval -->
-          <div class="merchant-profile-mini-bar hidden" id="merchant-mini-profile-header">
-            <span>로그인 계정: <strong id="merchant-mini-username">owner</strong></span>
-            <button class="btn btn-sm btn-outline text-accent" id="btn-merchant-logout-auth">로그아웃</button>
-          </div>
-
-          <div class="section-title">
-            <h2>제휴 사업자 계정 관리</h2>
-            <p>매장 정보를 등록하고 제휴 승인을 요청하여 파트너로 노출되세요.</p>
-          </div>
-
-          <!-- Premium High-Tech Inform Master Styled Welcome card -->
-          <div class="merchant-premium-auth-container" id="merchant-welcome-auth-card">
-            <h3 class="merchant-premium-title">사장님 전용 가입 & 로그인</h3>
-            <p class="merchant-premium-desc">공식 제휴 가맹점 심사 신청 및 대시보드 통계 관리를 위해 로그인해 주세요.</p>
-            <div class="premium-btn-group">
-              <button class="premium-btn-primary flex-1" id="btn-show-merchant-register">회원가입 하기</button>
-              <button class="premium-btn-secondary flex-1" id="btn-show-merchant-login">로그인 하기</button>
-            </div>
-          </div>
-
-          <!-- Step 1-B: Real Register Form (Join) -->
-          <div class="merchant-premium-auth-container hidden" id="merchant-register-card">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
-              <h3 class="merchant-premium-title" style="margin-bottom:0; text-align:left;">사장님 회원가입</h3>
-              <button class="btn btn-xs btn-outline" id="btn-back-to-welcome-r" style="color:white; border-color:rgba(255,255,255,0.2);">이전으로</button>
-            </div>
-            <form id="merchant-join-form" onsubmit="event.preventDefault();">
-              <div class="premium-input-group">
-                <i data-lucide="user-plus" style="width:14px; height:14px;"></i>
-                <input type="text" id="m-register-username" required placeholder="신규 사업자 아이디(영어/숫자)">
-              </div>
-              <div class="premium-input-group">
-                <i data-lucide="lock" style="width:14px; height:14px;"></i>
-                <input type="password" id="m-register-password" required placeholder="비밀번호 입력">
-              </div>
-              <div class="premium-input-group">
-                <i data-lucide="lock-keyhole" style="width:14px; height:14px;"></i>
-                <input type="password" id="m-register-password-confirm" required placeholder="비밀번호 확인">
-              </div>
-              <button type="submit" class="btn btn-primary btn-block" style="border-radius:var(--radius-pill); font-weight:800; padding:12px; margin-top:8px;">
-                <i data-lucide="user-check" style="width:14px; height:14px; display:inline-block; vertical-align:middle; margin-right:4px;"></i> 가입 완료 (자동 로그인)
-              </button>
-            </form>
-          </div>
-
-          <!-- Step 1-C: Real Login Form (Login) -->
-          <div class="merchant-premium-auth-container hidden" id="merchant-login-card">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
-              <h3 class="merchant-premium-title" style="margin-bottom:0; text-align:left;">사장님 로그인</h3>
-              <button class="btn btn-xs btn-outline" id="btn-back-to-welcome-l" style="color:white; border-color:rgba(255,255,255,0.2);">이전으로</button>
-            </div>
-            <form id="merchant-login-form-submit" onsubmit="event.preventDefault();">
-              <div class="premium-input-group">
-                <i data-lucide="user" style="width:14px; height:14px;"></i>
-                <input type="text" id="m-login-username" required placeholder="아이디 입력">
-              </div>
-              <div class="premium-input-group">
-                <i data-lucide="lock" style="width:14px; height:14px;"></i>
-                <input type="password" id="m-login-password" required placeholder="비밀번호 입력">
-              </div>
-              <button type="submit" class="btn btn-primary btn-block" style="border-radius:var(--radius-pill); font-weight:800; padding:12px; margin-top:8px;">
-                <i data-lucide="log-in" style="width:14px; height:14px; display:inline-block; vertical-align:middle; margin-right:4px;"></i> 로그인 완료
-              </button>
-            </form>
-          </div>
-
-          <!-- Step 2: Merchant Partner Application Form -->
-          <div class="glass-box hidden" id="merchant-apply-card">
-            <div class="apply-header-row">
-              <i data-lucide="shield-check" class="text-primary"></i>
-              <h4>Nampo GoGo 공식 제휴 상점 등록 신청</h4>
-            </div>
-            <p class="auth-desc">제휴 상인으로 정식 등록하여 관광객 전용 페이지 최상단에 가게를 띄워보세요.</p>
-
-            <form id="merchant-apply-form" onsubmit="event.preventDefault();" style="margin-top: 14px;">
-              <div class="form-group-nampo">
-                <label>사업자 등록증 첨부 (인증용)</label>
-                <div class="upload-guide-info" style="border-color:var(--primary); background:var(--primary-soft); color:var(--text-main);">
-                  📄 사업자등록증 촬영 사진(JPG/PNG) 또는 PDF 파일을 넣어주세요. (최대 5MB)
-                </div>
-                <input type="file" id="apply-license-file" required class="nampo-input" style="padding: 6px;">
-              </div>
-
-              <div class="form-group-nampo">
-                <label>매장 주소 기입</label>
-                <input type="text" id="apply-address" required placeholder="예: 부산 중구 남포길 18" class="nampo-input">
-              </div>
-
-              <div class="form-group-nampo">
-                <label>업종 카테고리</label>
-                <select id="apply-subcategory" class="nampo-input">
-                  <option value="pork">국밥/한식 (Soup/Korean)</option>
-                  <option value="seafood">해산물/회 (Seafood/Raw)</option>
-                  <option value="pizza">피자/양식 (Pizza/Pasta)</option>
-                  <option value="korean">전통한식 (Traditional)</option>
-                  <option value="chinese">중식/요리 (Chinese)</option>
-                  <option value="japanese">일식/돈까스 (Sushi/Katsu)</option>
-                  <option value="massage">미용/피부/마사지 (Beauty/Massage)</option>
-                  <option value="cafe">디저트/카페 (Dessert/Cafe)</option>
-                </select>
-              </div>
-
-              <div class="form-group-nampo">
-                <label>대표 연락처</label>
-                <input type="tel" id="apply-phone" required placeholder="예: +82-51-245-1111 (국제전화 규격)" class="nampo-input">
-              </div>
-
-              <!-- Sleek Rounded Centered Submit Button -->
-              <div style="display:flex; justify-content:center; margin-top:20px;">
-                <button type="submit" class="btn btn-primary btn-round-centered" id="btn-submit-partnership">
-                  제휴 신청서 전송하기 ➔
-                </button>
-              </div>
-            </form>
-          </div>
-
-          <!-- Step 3: PENDING/심사중 Banner with Simulator Toggle -->
-          <div class="glass-box approved-state-banner pending-state hidden" id="merchant-pending-status-card">
-            <div class="pending-icon-clock">⌛</div>
-            <h4>현재 서류 심사 진행 중입니다.</h4>
-            <p class="auth-desc" style="margin-top: 6px;">제출하신 사업자등록증 및 매장 인증에 대한 심사가 진행 중입니다. 승인이 나면 매장 정보 올리기가 자동 오픈됩니다.</p>
-            
-            <!-- Admin simulator tool -->
-            <div class="admin-simulator-panel" style="margin-top:20px; border-top:1.5px dashed rgba(43, 97, 235, 0.2); padding-top:15px;">
-              <span style="font-size:10px; font-weight:800; color:var(--primary); display:block; margin-bottom:8px;">🛠️ 개발자/어드민 시뮬레이션 키</span>
-              <button class="btn btn-primary btn-sm btn-block" id="btn-demo-approve-instantly" style="border-radius: var(--radius-pill); font-size:11px;">
-                개발자 즉시 승인하기 (테스트용)
-              </button>
-            </div>
-          </div>
-        </section>
-
-        <!-- MERCHANT TAB 2: 매장 관리 (대시보드 통계 & 월간 그래프 & 리뷰 관리 및 답글) -->
-        <section id="tab-merchant-manage" class="tab-panel">
-          
-          <div class="merchant-profile-mini-bar" id="merchant-dashboard-profile-header">
-            <span>제휴 파트너: <strong id="merchant-dashboard-username">owner</strong></span>
-            <button class="btn btn-sm btn-outline text-accent" id="btn-merchant-logout-dashboard">로그아웃</button>
-          </div>
-
-          <div class="section-title">
-            <h2 data-trans="merchantTitle">내 매장 관리 대시보드</h2>
-            <p>매장의 실시간 유동 분석, 월간 통계 수치 및 고객 방문 리뷰를 통합 관리합니다.</p>
-          </div>
-
-          <!-- Quick Metrics (Today Visitor, Stamp counts) -->
-          <div class="merchant-metrics-grid">
-            <div class="metric-card bg-primary-soft">
-              <span class="metric-title" data-trans="visitorToday">오늘 방문자 수</span>
-              <span class="metric-value" id="dashboard-metric-visitor-today">12명</span>
-            </div>
-            <div class="metric-card bg-success-soft">
-              <span class="metric-title" data-trans="qrStampsIssued">QR 인증 횟수</span>
-              <span class="metric-value" id="merchant-stamps-val">0건</span>
-            </div>
-          </div>
-
-          <!-- Monthly Visitors & Stamps Trend Line Graph -->
-          <div class="glass-box dashboard-graph-box">
-            <h4 style="font-size:12px; font-weight:900; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
-              <span>📈 월별 방문 및 QR 인증 추이 (최근 6개월)</span>
-              <span style="font-size:9px; font-weight:normal; color:var(--text-muted);">Toss Style SVG Chart</span>
-            </h4>
-            
-            <div class="chart-canvas-wrapper">
-              <svg id="merchant-monthly-chart-svg" viewBox="0 0 400 180" width="100%" height="180">
-                <!-- SVG Draw elements -->
-              </svg>
-            </div>
-            
-            <div class="chart-legend-row" style="display:flex; justify-content:center; gap:16px; margin-top:10px; font-size:9px; font-weight:800;">
-              <span style="color:var(--primary);">● 월별 방문객 수 (명)</span>
-              <span style="color:var(--secondary);">● QR 스탬프 인증 수 (건)</span>
-            </div>
-          </div>
-
-          <!-- Reviews management & Owner Reply area -->
-          <div class="glass-box dashboard-reviews-box" style="margin-top:20px;">
-            <h4 style="font-size:13px; font-weight:900; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
-              <span>💬 매장 리뷰 통합 관리</span>
-              <span class="badge-blue" id="dashboard-review-count-badge" style="font-size:9px; padding:2px 8px; border-radius:10px;">0건</span>
-            </h4>
-            
-            <div id="merchant-reviews-manager-list" class="dashboard-reviews-list-wrap">
-              <!-- Dynamically populated customer reviews with ratings, photos and reply options -->
-            </div>
-          </div>
-        </section>
-
-        <!-- MERCHANT TAB 3: 매장 정보 올리기 / 수정 (폼 전면 개편) -->
-        <section id="tab-merchant-upload" class="tab-panel">
-          
-          <div class="merchant-profile-mini-bar" id="merchant-upload-profile-header">
-            <span>제휴 파트너: <strong id="merchant-upload-username">owner</strong></span>
-            <button class="btn btn-sm btn-outline text-accent" id="btn-merchant-logout-upload">로그아웃</button>
-          </div>
-
-          <div class="section-title">
-            <h2>매장 상세 정보 올리기 / 수정</h2>
-            <p>사진 크기 규격, 영업 요일별 선택, 사장님 연락처 및 메뉴 사진 등 상세 정보를 엄격하게 기입하세요.</p>
-          </div>
-
-          <!-- Auto draft notice -->
-          <div class="glass-box draft-recovery-alert" id="draft-recovery-alert-box" style="display:none; background:var(--primary-soft); border:1.5px solid var(--primary); padding:10px; margin-bottom:15px; border-radius:var(--radius-sm);">
-            <p style="font-size:10px; font-weight:700; color:var(--text-main); display:flex; align-items:center; gap:6px;">
-              <i data-lucide="history" style="width:14px; height:14px; color:var(--primary);"></i>
-              작성 중이던 임시 저장(Draft) 데이터를 감지하여 복원했습니다! (24시간 보관)
-            </p>
-          </div>
-
-          <!-- Upload validation failure errors report box (Sleek red box, hidden by default) -->
-          <div id="upload-error-report" class="upload-error-report-panel hidden">
-            <!-- Dynamic validation fails list -->
-          </div>
-
-          <!-- Strictly Regulated Media Uploader -->
-          <div class="glass-box">
-            <h4 style="font-size:13px; font-weight:800; margin-bottom:10px;">1. 매장 다중 미디어 업로드 (규격 검사)</h4>
-            
-            <div class="upload-guide-info" style="border-color:var(--primary); background:var(--primary-soft); color:var(--text-main); margin-bottom:14px;">
-              📸 <strong>사진 파일 필수 규격 안내:</strong><br>
-              - <strong>간판 사진 [필수 1장]</strong>: 외부 전경/간판/문입구 노출 (1순위)<br>
-              - <strong>내부 모습 사진 [최소 2장 ~ 최대 10장]</strong>: 10장 초과 시 경고창 팝업 및 차단<br>
-              🎥 <strong>동영상 파일 규격 안내:</strong><br>
-              - <strong>동영상 [최대 3개]</strong>: 3개 초과 시 경고창 팝업 및 차단 (MP4/WEBM)
-            </div>
-
-            <!-- Signboard photo upload -->
-            <div class="form-group-nampo" style="border-bottom:1px dashed var(--border-medium); padding-bottom:12px; margin-bottom:12px;">
-              <label>📁 간판/대문 사진 등록 (1장 필수)</label>
-              <input type="file" id="merchant-file-signboard" accept="image/png, image/jpeg, image/webp" class="nampo-input" style="padding: 6px;">
-              <div class="media-thumb-selector-grid" id="signboard-preview-area"></div>
-            </div>
-
-            <!-- Inside photo upload -->
-            <div class="form-group-nampo" style="border-bottom:1px dashed var(--border-medium); padding-bottom:12px; margin-bottom:12px;">
-              <label>📁 매장 내부/기타 사진 등록 (최소 2장 ~ 최대 10장)</label>
-              <input type="file" id="merchant-files-inside" multiple accept="image/png, image/jpeg, image/webp" class="nampo-input" style="padding: 6px;">
-              <div class="media-thumb-selector-grid" id="inside-preview-area"></div>
-            </div>
-
-            <!-- Video upload -->
-            <div class="form-group-nampo">
-              <label>📁 매장 동영상 등록 (최대 3개)</label>
-              <input type="file" id="merchant-files-video" multiple accept="video/mp4, video/webm" class="nampo-input" style="padding: 6px;">
-              <div class="media-thumb-selector-grid" id="video-preview-area"></div>
-            </div>
-          </div>
-
-          <!-- Basic store form -->
-          <div class="glass-box" style="margin-top: 20px;">
-            <h4 style="font-size:13px; font-weight:800; margin-bottom:12px;">2. 매장 이용 환경 및 연락망 등록</h4>
-            
-            <form id="merchant-detail-profile-form" onsubmit="event.preventDefault();">
-              
-              <!-- Business Category selector (Exactly 3 categories) -->
-              <div class="form-group-nampo">
-                <label>업종 선택</label>
-                <div class="parking-radio-row" style="flex-wrap:wrap; gap:8px;">
-                  <label class="radio-pill flex-1" style="min-width:90px;">
-                    <input type="radio" name="m-upload-category" value="food" checked>
-                    <span>음식점</span>
-                  </label>
-                  <label class="radio-pill flex-1" style="min-width:90px;">
-                    <input type="radio" name="m-upload-category" value="karaoke">
-                    <span>노래방/노래연습장</span>
-                  </label>
-                  <label class="radio-pill flex-1" style="min-width:90px;">
-                    <input type="radio" name="m-upload-category" value="massage">
-                    <span>미용/피부/마사지</span>
-                  </label>
-                </div>
-              </div>
-
-              <!-- Exclusive tourist benefit -->
-              <div class="form-group-nampo">
-                <label>관광객 제공 제휴 혜택 내용 (예시)</label>
-                <input type="text" id="m-upload-benefit" required class="nampo-input" placeholder="예: 메인 메뉴 주문 시 탄산음료 1캔 무료 제공 (체크인 완료 한정)">
-              </div>
-
-              <!-- Contact with global guide -->
-              <div class="form-group-nampo">
-                <label>매장 대표 전화번호 (국제전화 형식 기준 82+...)</label>
-                <input type="text" id="m-upload-phone" required class="nampo-input" placeholder="예: +82-51-123-4567">
-              </div>
-
-              <!-- Owner personal messenger (4 options, at least 1 required) -->
-              <div class="form-group-nampo" style="border: 1.5px solid var(--border-medium); padding: 12px; border-radius: var(--radius-sm);">
-                <label style="color:var(--primary); font-weight:900;">💬 사장님 개인 연락망 (위챗/왓츠앱/라인/카톡 중 1개 필수)</label>
-                <p style="font-size:8px; color:var(--text-muted); margin-bottom:8px; line-height:1.3;">
-                  - 왓츠앱(WhatsApp): 영어권 관광객이 선호합니다.<br>
-                  - 라인(Line): 일본/대만 관광객이 선호합니다.<br>
-                  - 위챗(WeChat): 중국어권 관광객이 선호합니다.
-                </p>
-                <div class="form-group-nampo" style="margin-bottom:8px;">
-                  <label style="font-weight:normal; font-size:9px;">위챗 (WeChat) ID</label>
-                  <input type="text" id="messenger-wechat" class="nampo-input messenger-field" placeholder="위챗 아이디 입력">
-                </div>
-                <div class="form-group-nampo" style="margin-bottom:8px;">
-                  <label style="font-weight:normal; font-size:9px;">왓츠앱 (WhatsApp) 번호</label>
-                  <input type="text" id="messenger-whatsapp" class="nampo-input messenger-field" placeholder="왓츠앱 번호 입력">
-                </div>
-                <div class="form-group-nampo" style="margin-bottom:8px;">
-                  <label style="font-weight:normal; font-size:9px;">라인 (Line) ID</label>
-                  <input type="text" id="messenger-line" class="nampo-input messenger-field" placeholder="라인 아이디 입력">
-                </div>
-                <div class="form-group-nampo" style="margin-bottom:0;">
-                  <label style="font-weight:normal; font-size:9px;">카카오톡 (KakaoTalk) ID</label>
-                  <input type="text" id="messenger-kakao" class="nampo-input messenger-field" placeholder="카카오톡 아이디 입력">
-                </div>
-              </div>
-
-              <!-- Business Hours dynamic format selection -->
-              <div class="form-group-nampo" style="margin-top:14px;">
-                <label>영업시간 등록 방식</label>
-                <div class="parking-radio-row" style="margin-bottom:10px;">
-                  <label class="radio-pill flex-1">
-                    <input type="radio" name="hours-input-type" value="same" checked>
-                    <span>매일 동일 시간 적용</span>
-                  </label>
-                  <label class="radio-pill flex-1">
-                    <input type="radio" name="hours-input-type" value="each">
-                    <span>요일별 개별 시간 입력</span>
-                  </label>
+                  <label>관광객 제공 제휴 혜택 내용 (예시)</label>
+                  <input type="text" id="m-upload-benefit" required class="nampo-input" placeholder="예: 메인 메뉴 주문 시 탄산음료 1캔 무료 제공 (체크인 완료 한정)">
                 </div>
 
-                <!-- Unified time input -->
-                <div id="hours-block-same" class="hours-input-sub-panel">
-                  <input type="text" id="hours-input-same-val" class="nampo-input" value="11:00 - 22:00" placeholder="예: 11:00 - 22:00">
+                <!-- Contact with global guide -->
+                <div class="form-group-nampo">
+                  <label>매장 대표 전화번호 (국제전화 형식 기준 82+...)</label>
+                  <input type="text" id="m-upload-phone" required class="nampo-input" placeholder="예: +82-51-123-4567">
                 </div>
 
-                <!-- Day-by-day time input -->
-                <div id="hours-block-each" class="hours-input-sub-panel hidden" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-                  <div class="form-group-nampo" style="margin-bottom:6px;"><label>월요일</label><input type="text" id="h-mon" class="nampo-input h-day-field" value="11:00 - 22:00"></div>
-                  <div class="form-group-nampo" style="margin-bottom:6px;"><label>화요일</label><input type="text" id="h-tue" class="nampo-input h-day-field" value="11:00 - 22:00"></div>
-                  <div class="form-group-nampo" style="margin-bottom:6px;"><label>수요일</label><input type="text" id="h-wed" class="nampo-input h-day-field" value="11:00 - 22:00"></div>
-                  <div class="form-group-nampo" style="margin-bottom:6px;"><label>목요일</label><input type="text" id="h-thu" class="nampo-input h-day-field" value="11:00 - 22:00"></div>
-                  <div class="form-group-nampo" style="margin-bottom:6px;"><label>금요일</label><input type="text" id="h-fri" class="nampo-input h-day-field" value="11:00 - 22:00"></div>
-                  <div class="form-group-nampo" style="margin-bottom:6px;"><label>토요일</label><input type="text" id="h-sat" class="nampo-input h-day-field" value="11:00 - 23:00"></div>
-                  <div class="form-group-nampo" style="margin-bottom:6px; grid-column: span 2;"><label>일요일</label><input type="text" id="h-sun" class="nampo-input h-day-field" value="11:00 - 22:00"></div>
+                <!-- Owner personal messenger -->
+                <div class="form-group-nampo" style="border: 1.5px solid var(--border-medium); padding: 12px; border-radius: var(--radius-sm);">
+                  <label style="color:var(--primary); font-weight:900;">💬 사장님 개인 연락망 (위챗/왓츠앱/라인/카톡 중 1개 필수)</label>
+                  <p style="font-size:8px; color:var(--text-body); margin-bottom:8px; line-height:1.3;">
+                    - 왓츠앱(WhatsApp): 영어권 관광객이 선호합니다.<br>
+                    - 라인(Line): 일본/대만 관광객이 선호합니다.<br>
+                    - 위챗(WeChat): 중국어권 관광객이 선호합니다.
+                  </p>
+                  <div class="form-group-nampo" style="margin-bottom:8px;">
+                    <label style="font-weight:normal; font-size:9px;">위챗 (WeChat) ID</label>
+                    <input type="text" id="messenger-wechat" class="nampo-input messenger-field" placeholder="위챗 아이디 입력">
+                  </div>
+                  <div class="form-group-nampo" style="margin-bottom:8px;">
+                    <label style="font-weight:normal; font-size:9px;">왓츠앱 (WhatsApp) 번호</label>
+                    <input type="text" id="messenger-whatsapp" class="nampo-input messenger-field" placeholder="왓츠앱 번호 입력">
+                  </div>
+                  <div class="form-group-nampo" style="margin-bottom:8px;">
+                    <label style="font-weight:normal; font-size:9px;">라인 (Line) ID</label>
+                    <input type="text" id="messenger-line" class="nampo-input messenger-field" placeholder="라인 아이디 입력">
+                  </div>
+                  <div class="form-group-nampo" style="margin-bottom:0;">
+                    <label style="font-weight:normal; font-size:9px;">카카오톡 (KakaoTalk) ID</label>
+                    <input type="text" id="messenger-kakao" class="nampo-input messenger-field" placeholder="카카오톡 아이디 입력">
+                  </div>
                 </div>
-              </div>
 
-              <!-- Menu Items with Photo Upload & '+' Dynamic Addition Button -->
-              <div class="form-group-nampo" style="border:1.5px solid var(--border-medium); padding:12px; border-radius:var(--radius-sm); margin-top:14px;">
-                <label style="color:var(--primary); font-weight:900;">🍔 매장 메뉴/서비스 등록 (사진 필수 첨부)</label>
-                <p style="font-size:8px; color:var(--text-muted); margin-bottom:8px; line-height:1.2;">
-                  ※ 무형 서비스(뷰티/마사지/에스테틱 등)일 경우, 시연 및 한눈에 어떤 혜택인지 알 수 있는 테라피 내용 사진을 첨부해 주세요.
-                </p>
+                <!-- Business Hours selection -->
+                <div class="form-group-nampo" style="margin-top:14px;">
+                  <label>영업시간 등록 방식</label>
+                  <div class="parking-radio-row" style="margin-bottom:10px;">
+                    <label class="radio-pill flex-1">
+                      <input type="radio" name="hours-input-type" value="same" checked>
+                      <span>매일 동일 시간 적용</span>
+                    </label>
+                    <label class="radio-pill flex-1">
+                      <input type="radio" name="hours-input-type" value="each">
+                      <span>요일별 개별 시간 입력</span>
+                    </label>
+                  </div>
 
-                <!-- Dynamic menu items container -->
-                <div id="merchant-dynamic-menu-list">
-                  <!-- Generated Dynamically by app.js -->
+                  <!-- Unified time input -->
+                  <div id="hours-block-same" class="hours-input-sub-panel">
+                    <input type="text" id="hours-input-same-val" class="nampo-input" value="11:00 - 22:00" placeholder="예: 11:00 - 22:00">
+                  </div>
+
+                  <!-- Day-by-day time input -->
+                  <div id="hours-block-each" class="hours-input-sub-panel hidden" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                    <div class="form-group-nampo" style="margin-bottom:6px;"><label>월요일</label><input type="text" id="h-mon" class="nampo-input h-day-field" value="11:00 - 22:00"></div>
+                    <div class="form-group-nampo" style="margin-bottom:6px;"><label>화요일</label><input type="text" id="h-tue" class="nampo-input h-day-field" value="11:00 - 22:00"></div>
+                    <div class="form-group-nampo" style="margin-bottom:6px;"><label>수요일</label><input type="text" id="h-wed" class="nampo-input h-day-field" value="11:00 - 22:00"></div>
+                    <div class="form-group-nampo" style="margin-bottom:6px;"><label>목요일</label><input type="text" id="h-thu" class="nampo-input h-day-field" value="11:00 - 22:00"></div>
+                    <div class="form-group-nampo" style="margin-bottom:6px;"><label>금요일</label><input type="text" id="h-fri" class="nampo-input h-day-field" value="11:00 - 22:00"></div>
+                    <div class="form-group-nampo" style="margin-bottom:6px;"><label>토요일</label><input type="text" id="h-sat" class="nampo-input h-day-field" value="11:00 - 23:00"></div>
+                    <div class="form-group-nampo" style="margin-bottom:6px; grid-column: span 2;"><label>일요일</label><input type="text" id="h-sun" class="nampo-input h-day-field" value="11:00 - 22:00"></div>
+                  </div>
                 </div>
 
-                <!-- '+' Dynamic menu add button -->
-                <div style="display:flex; justify-content:center; margin-top:12px;">
-                  <button type="button" class="btn btn-secondary btn-sm" id="btn-merchant-add-menu-row" style="border-radius: var(--radius-pill); font-size:11px; padding:6px 16px;">
-                    <i data-lucide="plus-circle" style="width:12px; height:12px; display:inline-block; vertical-align:middle; margin-right:4px;"></i> 메뉴 추가하기
+                <!-- Menu Items with Photo Upload & '+' Dynamic Addition Button -->
+                <div class="form-group-nampo" style="border:1.5px solid var(--border-medium); padding:12px; border-radius:var(--radius-sm); margin-top:14px;">
+                  <label style="color:var(--primary); font-weight:900;">🍔 매장 메뉴/서비스 등록 (사진 필수 첨부)</label>
+                  <p style="font-size:8px; color:var(--text-body); margin-bottom:8px; line-height:1.2;">
+                    ※ 무형 서비스(뷰티/마사지/에스테틱 등)일 경우, 시연 및 한눈에 어떤 혜택인지 알 수 있는 테라피 내용 사진을 첨부해 주세요.
+                  </p>
+
+                  <!-- Dynamic menu items container -->
+                  <div id="merchant-dynamic-menu-list">
+                    <!-- Generated Dynamically by app.js -->
+                  </div>
+
+                  <!-- '+' Dynamic menu add button -->
+                  <div style="display:flex; justify-content:center; margin-top:12px;">
+                    <button type="button" class="btn btn-secondary btn-sm" id="btn-merchant-add-menu-row" style="border-radius: var(--radius-pill); font-size:11px; padding:6px 16px;">
+                      <i data-lucide="plus-circle" style="width:12px; height:12px; display:inline-block; vertical-align:middle; margin-right:4px;"></i> 메뉴 추가하기
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Parking Options -->
+                <div class="form-group-nampo" style="margin-top:14px;">
+                  <label>주차 가능 여부 (Parking Space)</label>
+                  <div class="parking-radio-row">
+                    <label class="radio-pill flex-1">
+                      <input type="radio" name="m-upload-parking" value="유" checked>
+                      <span>주차 가능 (Parking Available)</span>
+                    </label>
+                    <label class="radio-pill flex-1">
+                      <input type="radio" name="m-upload-parking" value="무">
+                      <span>주차 불가 (No Parking)</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Payment options multi-check -->
+                <div class="form-group-nampo">
+                  <label>결제 가능 수단 (결제 수단 중복 선택 가능)</label>
+                  <div class="checkbox-group-grid">
+                    <label class="check-pill">
+                      <input type="checkbox" name="m-upload-payment" value="신용카드" checked>
+                      <span>신용카드</span>
+                    </label>
+                    <label class="check-pill">
+                      <input type="checkbox" name="m-upload-payment" value="삼성페이" checked>
+                      <span>삼성페이</span>
+                    </label>
+                    <label class="check-pill">
+                      <input type="checkbox" name="m-upload-payment" value="알리페이">
+                      <span>Alipay (알리페이)</span>
+                    </label>
+                    <label class="check-pill">
+                      <input type="checkbox" name="m-upload-payment" value="위챗페이">
+                      <span>WeChat Pay (위챗페이)</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Store Communication Languages -->
+                <div class="form-group-nampo">
+                  <label>매장 내 지원 가능 외국어 (다중 선택 가능)</label>
+                  <div class="checkbox-group-grid">
+                    <label class="check-pill">
+                      <input type="checkbox" name="m-upload-languages" value="영어" checked>
+                      <span>영어 (English)</span>
+                    </label>
+                    <label class="check-pill">
+                      <input type="checkbox" name="m-upload-languages" value="일어">
+                      <span>일어 (Japanese)</span>
+                    </label>
+                    <label class="check-pill">
+                      <input type="checkbox" name="m-upload-languages" value="중국어">
+                      <span>중국어 (Chinese)</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Sleek Rounded Centered Submission Button -->
+                <div style="display:flex; justify-content:center; margin-top:28px; margin-bottom:10px;">
+                  <button type="submit" class="btn btn-primary btn-round-centered" id="btn-save-merchant-form">
+                    매장 정보 및 미디어 올리기 ⚡
                   </button>
                 </div>
-              </div>
+              </form>
+            </div>
+          </section>
 
-              <!-- Parking Options -->
-              <div class="form-group-nampo" style="margin-top:14px;">
-                <label>주차 가능 여부 (Parking Space)</label>
-                <div class="parking-radio-row">
-                  <label class="radio-pill flex-1">
-                    <input type="radio" name="m-upload-parking" value="유" checked>
-                    <span>주차 가능 (Parking Available)</span>
-                  </label>
-                  <label class="radio-pill flex-1">
-                    <input type="radio" name="m-upload-parking" value="무">
-                    <span>주차 불가 (No Parking)</span>
-                  </label>
-                </div>
-              </div>
+        </main>
 
-              <!-- Payment options multi-check -->
-              <div class="form-group-nampo">
-                <label>결제 가능 수단 (결제 수단 중복 선택 가능)</label>
-                <div class="checkbox-group-grid">
-                  <label class="check-pill">
-                    <input type="checkbox" name="m-upload-payment" value="신용카드" checked>
-                    <span>신용카드</span>
-                  </label>
-                  <label class="check-pill">
-                    <input type="checkbox" name="m-upload-payment" value="삼성페이" checked>
-                    <span>삼성페이</span>
-                  </label>
-                  <label class="check-pill">
-                    <input type="checkbox" name="m-upload-payment" value="알리페이">
-                    <span>Alipay (알리페이)</span>
-                  </label>
-                  <label class="check-pill">
-                    <input type="checkbox" name="m-upload-payment" value="위챗페이">
-                    <span>WeChat Pay (위챗페이)</span>
-                  </label>
-                </div>
-              </div>
-
-              <!-- Store Communication Languages -->
-              <div class="form-group-nampo">
-                <label>매장 내 지원 가능 외국어 (다중 선택 가능)</label>
-                <div class="checkbox-group-grid">
-                  <label class="check-pill">
-                    <input type="checkbox" name="m-upload-languages" value="영어" checked>
-                    <span>영어 (English)</span>
-                  </label>
-                  <label class="check-pill">
-                    <input type="checkbox" name="m-upload-languages" value="일어">
-                    <span>일어 (Japanese)</span>
-                  </label>
-                  <label class="check-pill">
-                    <input type="checkbox" name="m-upload-languages" value="중국어">
-                    <span>중국어 (Chinese)</span>
-                  </label>
-                </div>
-              </div>
-
-              <!-- Sleek Rounded Centered Submission Button -->
-              <div style="display:flex; justify-content:center; margin-top:28px; margin-bottom:10px;">
-                <button type="submit" class="btn btn-primary btn-round-centered" id="btn-save-merchant-form">
-                  매장 정보 및 미디어 올리기 ⚡
-                </button>
-              </div>
-            </form>
-          </div>
-        </section>
-
-      </main>
+      </div>
 
     </div>
 
-  </div>
+  </div> <!-- End phone-shell -->
 
   <!-- MODAL: Restaurant Details -->
   <div class="modal" id="partner-detail-modal">
@@ -845,12 +854,12 @@
     </div>
   </div>
 
-  <!-- MODAL: Merchant Registration Success Feedback (Large check animation) -->
+  <!-- MODAL: Merchant Registration Success Feedback -->
   <div class="modal" id="merchant-success-feedback-modal">
     <div class="modal-backdrop"></div>
     <div class="modal-content glass-card" style="text-align:center; padding:32px 24px; max-width:400px; margin:auto; border-radius: var(--radius-lg);">
       <div class="success-icon-check" style="width:72px; height:72px; font-size:36px; margin: 0 auto 16px auto; background: var(--success); display:flex; align-items:center; justify-content:center; color:white; border-radius:50%;">✓</div>
-      <h3 style="font-size:18px; font-weight:900; color:var(--text-main); margin-bottom:8px;">매장 정보 등록 성공!</h3>
+      <h3 style="font-size:18px; font-weight:900; color:white; margin-bottom:8px;">매장 정보 등록 성공!</h3>
       <p style="font-size:12px; color:var(--text-body); line-height:1.5; margin-bottom:24px;">
         축하합니다! 매장 상세 메뉴 및 대표 이미지, 다중 미디어가 플랫폼에 정상적으로 노출 갱신 완료되었습니다.
       </p>

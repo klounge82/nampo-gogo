@@ -35,7 +35,7 @@ let lastViewedPartnerId = "partner_jagalchi";
 // Multi-Language Reference
 let translations = {};
 
-// ⚡ Debounce helper to prevent input lag caused by localStorage stringify of massive base64 media
+// ⚡ Debounce helper
 function debounce(func, wait) {
   let timeout;
   return function(...args) {
@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
   runSafe('Render Travel Log Timeline', () => renderTravelLog());
   runSafe('Modal Buttons Bind', () => setupModalCloseButtons());
 
-  // ⚡ Recovery of Session states on reload (State Persistence)
+  // Recovery of Session states on reload (State Persistence)
   runSafe('Recover Persistent App State', () => {
     const savedMode = localStorage.getItem('nampogogo_app_mode');
     const savedTab = localStorage.getItem('nampogogo_active_tab');
@@ -245,7 +245,6 @@ function setupIntroModeSelection() {
     });
   }
 
-  // Quick mode button functions as location.reload()
   if (quickModeSwitchBtn) {
     quickModeSwitchBtn.addEventListener('click', () => {
       console.log("🔄 브라우저 새로고침 실행!");
@@ -254,14 +253,13 @@ function setupIntroModeSelection() {
   }
 }
 
-// 4. Render Dynamic Top Navigation for Tourists (Removed "My Info") and Approved Merchants
+// 4. Render Dynamic Top Navigation
 function renderDynamicNavigationDock() {
   const navDock = document.getElementById('dynamic-nav-dock');
   if (!navDock) return;
   navDock.innerHTML = '';
 
   if (appMode === 'tourist') {
-    // Render only two tabs (explore & log). Profile is embedded in explore tab now
     navDock.innerHTML = `
       <button class="nav-btn active" data-tab="tourist-explore">
         <i data-lucide="search"></i>
@@ -450,7 +448,7 @@ function renderUpdateLogs() {
   });
 }
 
-// 7. Tourist Auth System (Integrates Login flow toggles inside exploration tab)
+// 7. Tourist Auth System
 function setupAuthSystem() {
   const authForm = document.getElementById('nampo-auth-form');
   const btnLogout = document.getElementById('btn-action-logout');
@@ -460,11 +458,9 @@ function setupAuthSystem() {
   if (btnShortcut) {
     btnShortcut.addEventListener('click', () => {
       if (currentUser) {
-        // Toggle logout profile view
         const profLogout = document.getElementById('tourist-profile-logout-card');
         if (profLogout) profLogout.classList.toggle('hidden');
       } else {
-        // Toggle login panel visibility
         if (embeddedLoginCard) embeddedLoginCard.classList.toggle('hidden');
       }
     });
@@ -532,7 +528,6 @@ function setupAuthSystem() {
     });
   }
 
-  // Bind the bottom QR scanner trigger
   const generalQrBtn = document.getElementById('btn-trigger-general-qr-scan');
   if (generalQrBtn) {
     generalQrBtn.addEventListener('click', () => {
@@ -549,7 +544,6 @@ function setupAuthSystem() {
   updateAuthUIs();
 }
 
-// 100% Fail-Safe Null-Guarded Auth UI State Syncer
 function updateAuthUIs() {
   const dashboardHeading = document.getElementById('user-status-heading');
   const dashboardDesc = document.getElementById('user-status-desc');
@@ -575,8 +569,6 @@ function updateAuthUIs() {
     if (btnShortcut) btnShortcut.textContent = "My Account";
 
     if (touristLoggedUsername) touristLoggedUsername.textContent = currentUser;
-    
-    // Do not auto-show logout card unless they press Account switch, keep UI clean
     if (profileLogoutCard) profileLogoutCard.classList.add('hidden');
   } else {
     if (dashboardHeading) dashboardHeading.textContent = "Guest User";
@@ -605,7 +597,6 @@ function renderPartnersList() {
     filtered = filtered.filter(p => p.subCategory === activeSubcatFilter);
   }
 
-  // Multi-sorting algorithm
   filtered.sort((a, b) => {
     const partnerA = a.isPartner ? 1 : 0;
     const partnerB = b.isPartner ? 1 : 0;
@@ -694,7 +685,7 @@ function openPartnerDetail(id) {
   const p = partnersList.find(item => item.id === id);
   if (!p) return;
 
-  lastViewedPartnerId = p.id; // cache last viewed shop for check-in button
+  lastViewedPartnerId = p.id;
 
   const contentWrap = document.getElementById('partner-modal-body-content');
   if (!contentWrap) return;
@@ -719,7 +710,7 @@ function openPartnerDetail(id) {
   if (p.priceList && Array.isArray(p.priceList)) {
     p.priceList.forEach(item => {
       const menuImgStr = item.image ? `<br><img src="${item.image}" style="width:60px; height:45px; border-radius:4px; margin-top:4px; object-fit:cover;">` : '';
-      const catText = item.categoryText ? `<span style="font-size:9px; background:var(--bg-gray-soft); padding:2px 6px; border-radius:4px; margin-right:4px;">${item.categoryText}</span>` : '';
+      const catText = item.categoryText ? `<span style="font-size:9px; background:rgba(255,255,255,0.06); padding:2px 6px; border-radius:4px; margin-right:4px; color:var(--secondary);">${item.categoryText}</span>` : '';
       pricingRows += `
         <tr>
           <td>${catText}${item.name[currentLang] || item.name['en']}${menuImgStr}</td>
@@ -922,8 +913,7 @@ function openPartnerDetail(id) {
       </div>
     </div>
 
-    <!-- 스탬프 획득 및 QR 스캔 이동 배치 -->
-    <button class="btn btn-secondary btn-block" id="btn-trigger-qr-scan" style="margin-top: 18px;">
+    <button class="btn btn-secondary btn-block" id="btn-trigger-qr-scan" style="margin-top: 18px; border-radius:var(--radius-pill);">
       <i data-lucide="scan-line"></i> 
       <span>${isStamped ? (getTranslation(currentLang, 'alreadyStamped') || 'Stamped') : (getTranslation(currentLang, 'scanBtnText') || 'Scan QR')}</span>
     </button>
@@ -982,7 +972,6 @@ function openPartnerDetail(id) {
       if (!currentUser) {
         alert("Please login first to check-in.");
         if (partnerDetailModal) partnerDetailModal.classList.remove('active');
-        // Open embedded login card
         const embeddedLoginCard = document.getElementById('tourist-embedded-login-card');
         if (embeddedLoginCard) embeddedLoginCard.classList.remove('hidden');
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1257,7 +1246,7 @@ function openSNSCardModal() {
   }
 }
 
-// 12. Merchant Control System
+// 12. Merchant Refactored Control System
 function setupMerchantSystem() {
   const btnShowRegister = document.getElementById('btn-show-merchant-register');
   const btnShowLogin = document.getElementById('btn-show-merchant-login');
@@ -1268,7 +1257,6 @@ function setupMerchantSystem() {
   const registerCard = document.getElementById('merchant-register-card');
   const loginCard = document.getElementById('merchant-login-card');
 
-  // Welcome sub-screens switcher
   if (btnShowRegister && registerCard && welcomeAuthCard) {
     btnShowRegister.addEventListener('click', () => {
       welcomeAuthCard.classList.add('hidden');
@@ -1298,7 +1286,6 @@ function setupMerchantSystem() {
   const loginFormSubmit = document.getElementById('merchant-login-form-submit');
   const applyForm = document.getElementById('merchant-apply-form');
 
-  // Business Hours input switcher
   const hourRadios = document.querySelectorAll('input[name="hours-input-type"]');
   const hoursSameBlock = document.getElementById('hours-block-same');
   const hoursEachBlock = document.getElementById('hours-block-each');
@@ -1317,7 +1304,6 @@ function setupMerchantSystem() {
     });
   }
 
-  // Register Handler
   if (joinForm) {
     joinForm.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -1337,7 +1323,6 @@ function setupMerchantSystem() {
         return;
       }
 
-      // Add user & auto login
       const newUser = { id: usernameInput, pw: passwordInput, role: 'merchant' };
       registeredUsers.push(newUser);
       localStorage.setItem('nampogogo_users', JSON.stringify(registeredUsers));
@@ -1356,7 +1341,6 @@ function setupMerchantSystem() {
     });
   }
 
-  // Login Handler (strictly forbids logging in if not registered)
   if (loginFormSubmit) {
     loginFormSubmit.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -1395,7 +1379,6 @@ function setupMerchantSystem() {
     });
   }
 
-  // Mini logout button actions for all tabs
   const authLogoutBtn = document.getElementById('btn-merchant-logout-auth');
   const dashLogoutBtn = document.getElementById('btn-merchant-logout-dashboard');
   const uploadLogoutBtn = document.getElementById('btn-merchant-logout-upload');
@@ -1406,17 +1389,15 @@ function setupMerchantSystem() {
     localStorage.removeItem('nampogogo_user');
     localStorage.removeItem('nampogogo_user_role');
     
-    // Reset temporary uploader cache
     tempSignboardBase64 = "";
     tempInsideBase64List = [];
     tempVideosBase64List = [];
     dynamicMenuItems = [];
 
-    // Clear state persistence on logout
     localStorage.removeItem('nampogogo_app_mode');
     localStorage.removeItem('nampogogo_active_tab');
 
-    alert("로그아웃 되었습니다.");
+    alert("로그아웃 되었었습니다.");
     updateMerchantAuthUI();
     renderDynamicNavigationDock();
     switchTabPanel('merchant-auth');
@@ -1426,7 +1407,6 @@ function setupMerchantSystem() {
   if (dashLogoutBtn) dashLogoutBtn.addEventListener('click', performMerchantLogout);
   if (uploadLogoutBtn) uploadLogoutBtn.addEventListener('click', performMerchantLogout);
 
-  // Partnership Apply submit
   if (applyForm) {
     applyForm.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -1436,7 +1416,6 @@ function setupMerchantSystem() {
       const subcat = document.getElementById('apply-subcategory').value;
       const phoneVal = document.getElementById('apply-phone').value.trim();
 
-      // Put to pending state
       localStorage.setItem(`nampogogo_merchant_status_${currentUser}`, 'pending');
       localStorage.setItem(`nampogogo_merchant_addr_${currentUser}`, addr);
       localStorage.setItem(`nampogogo_merchant_subcat_${currentUser}`, subcat);
@@ -1447,7 +1426,6 @@ function setupMerchantSystem() {
     });
   }
 
-  // Admin instant approval simulator button
   const simApproveBtn = document.getElementById('btn-demo-approve-instantly');
   if (simApproveBtn) {
     simApproveBtn.addEventListener('click', () => {
@@ -1460,7 +1438,6 @@ function setupMerchantSystem() {
       localStorage.setItem(`nampogogo_merchant_status_${currentUser}`, 'approved');
       localStorage.setItem(`nampogogo_merchant_approved_${currentUser}`, 'true');
 
-      // Create Store details object dynamically if it doesn't exist
       const storeId = currentUser.toLowerCase().replace('owner_', 'partner_');
       let storeObj = partnersList.find(p => p.id === storeId);
       
@@ -1504,10 +1481,8 @@ function setupMerchantSystem() {
     });
   }
 
-  // Strictly Regulated File upload verification bindings
   setupFormUploadValidators();
 
-  // [+] Add menu row click binder
   const addMenuBtn = document.getElementById('btn-merchant-add-menu-row');
   if (addMenuBtn) {
     addMenuBtn.addEventListener('click', () => {
@@ -1515,7 +1490,6 @@ function setupMerchantSystem() {
     });
   }
 
-  // Save merchant uploader form complete
   const saveStoreBtn = document.getElementById('btn-save-merchant-form');
   if (saveStoreBtn) {
     saveStoreBtn.addEventListener('click', (e) => {
@@ -1524,7 +1498,6 @@ function setupMerchantSystem() {
     });
   }
 
-  // Success Feedback modal confirm button
   const successConfirmBtn = document.getElementById('btn-success-feedback-confirm');
   const successModal = document.getElementById('merchant-success-feedback-modal');
   if (successConfirmBtn && successModal) {
@@ -1554,7 +1527,7 @@ function addNewMenuFormRow(initialData = null) {
   rowDiv.className = 'menu-upload-row';
   rowDiv.id = rowId;
   rowDiv.style.marginBottom = '12px';
-  rowDiv.style.borderBottom = '1px dashed var(--border-medium)';
+  rowDiv.style.borderBottom = '1px dashed rgba(255,255,255,0.06)';
   rowDiv.style.paddingBottom = '12px';
   rowDiv.style.position = 'relative';
 
@@ -1577,7 +1550,6 @@ function addNewMenuFormRow(initialData = null) {
     </div>
   `;
 
-  // Bind change events for value capture
   const catInput = rowDiv.querySelector('.menu-cat-field');
   const nameInput = rowDiv.querySelector('.menu-name-field');
   const priceInput = rowDiv.querySelector('.menu-price-field');
@@ -1585,13 +1557,13 @@ function addNewMenuFormRow(initialData = null) {
   const previewWrap = rowDiv.querySelector('.menu-preview-area');
   const removeBtn = rowDiv.querySelector('.btn-remove-menu-row');
 
-  // Debounced input capture to prevent typing lag
+  // Debounced input value capture
   const debouncedValCapture = debounce(() => {
     item.category = catInput.value.trim();
     item.name = nameInput.value.trim();
     item.price = priceInput.value.trim();
     triggerDraftAutoSave();
-  }, 300);
+  }, 250);
 
   catInput.addEventListener('input', debouncedValCapture);
   nameInput.addEventListener('input', debouncedValCapture);
@@ -1639,7 +1611,7 @@ function renderDynamicMenuRows(priceList = []) {
   }
 }
 
-// Strictly Regulated File upload verification bindings (Cumulative additions, preserves existing base64 on check fails)
+// Strictly Regulated File upload verification bindings
 function setupFormUploadValidators() {
   const signboardInput = document.getElementById('merchant-file-signboard');
   const insideInput = document.getElementById('merchant-files-inside');
@@ -1732,9 +1704,9 @@ function setupFormUploadValidators() {
 // Debounced Auto Save wrapper to prevent text lag
 const debouncedAutoSave = debounce(() => {
   triggerDraftAutoSave();
-}, 400);
+}, 300);
 
-// Auto Save draft system (Active for 24 hours)
+// Auto Save draft system (Active for 24 hours - ONLY saves text metadata to prevent stringify lag!)
 function triggerDraftAutoSave() {
   if (!currentUser || currentUserRole !== 'merchant') return;
 
@@ -1747,6 +1719,11 @@ function triggerDraftAutoSave() {
     hoursVal = days.map(d => document.getElementById(`h-${d}`)?.value || "").join('|');
   }
 
+  // Filter menu items metadata only (omitting imageBase64 to save storage write load and avoid key lags)
+  const menuMeta = dynamicMenuItems.map(i => {
+    return { id: i.id, category: i.category, name: i.name, price: i.price };
+  });
+
   const draftObj = {
     category: document.querySelector('input[name="m-upload-category"]:checked')?.value || 'food',
     benefit: document.getElementById('m-upload-benefit')?.value || "",
@@ -1757,18 +1734,10 @@ function triggerDraftAutoSave() {
     kakao: document.getElementById('messenger-kakao')?.value || "",
     hoursType: hoursType,
     hoursVal: hoursVal,
-    
-    // Dynamic Menu Items capture
-    menuItems: dynamicMenuItems,
-
+    menuItems: menuMeta,
     parking: document.querySelector('input[name="m-upload-parking"]:checked')?.value || '유',
     payments: Array.from(document.querySelectorAll('input[name="m-upload-payment"]:checked')).map(el => el.value),
-    languages: Array.from(document.querySelectorAll('input[name="m-upload-languages"]:checked')).map(el => el.value),
-
-    // Base64 photos backup
-    signboard: tempSignboardBase64,
-    inside: tempInsideBase64List,
-    videos: tempVideosBase64List
+    languages: Array.from(document.querySelectorAll('input[name="m-upload-languages"]:checked')).map(el => el.value)
   };
 
   const wrap = {
@@ -1799,7 +1768,6 @@ function loadDraftRecovery() {
   const draft = wrap.data;
   if (!draft) return;
 
-  // Restore Text Inputs
   const benefitInput = document.getElementById('m-upload-benefit');
   const phoneInput = document.getElementById('m-upload-phone');
   const wechatInput = document.getElementById('messenger-wechat');
@@ -1814,7 +1782,6 @@ function loadDraftRecovery() {
   if (lineInput) lineInput.value = draft.line || "";
   if (kakaoInput) kakaoInput.value = draft.kakao || "";
 
-  // Restore Radios
   document.querySelectorAll('input[name="m-upload-category"]').forEach(r => {
     r.checked = r.value === draft.category;
   });
@@ -1822,7 +1789,6 @@ function loadDraftRecovery() {
     r.checked = r.value === draft.parking;
   });
 
-  // Hours
   document.querySelectorAll('input[name="hours-input-type"]').forEach(r => {
     r.checked = r.value === draft.hoursType;
   });
@@ -1845,9 +1811,9 @@ function loadDraftRecovery() {
     });
   }
 
-  // Restore dynamic menus
+  // Restore dynamic menus meta only (leaving existing photo base64 untouched)
   const container = document.getElementById('merchant-dynamic-menu-list');
-  if (container && draft.menuItems) {
+  if (container && draft.menuItems && draft.menuItems.length > 0) {
     container.innerHTML = '';
     dynamicMenuItems = [];
     draft.menuItems.forEach(item => {
@@ -1855,13 +1821,12 @@ function loadDraftRecovery() {
         categoryText: item.category,
         name: { kr: item.name },
         price: item.price,
-        image: item.imageBase64
+        image: "" // photo remains blank or preserved from store save
       };
       addNewMenuFormRow(initialSeed);
     });
   }
 
-  // Payments & Languages checkboxes
   document.querySelectorAll('input[name="m-upload-payment"]').forEach(box => {
     box.checked = (draft.payments || []).includes(box.value);
   });
@@ -1869,173 +1834,181 @@ function loadDraftRecovery() {
     box.checked = (draft.languages || []).includes(box.value);
   });
 
-  // Restore Media Base64 values
-  tempSignboardBase64 = draft.signboard || "";
-  tempInsideBase64List = draft.inside || [];
-  tempVideosBase64List = draft.videos || [];
-
-  // Re-render Preview areas
-  const signboardArea = document.getElementById('signboard-preview-area');
-  const insideArea = document.getElementById('inside-preview-area');
-  const videoArea = document.getElementById('video-preview-area');
-
-  if (signboardArea) {
-    signboardArea.innerHTML = tempSignboardBase64 ? `<div class="preview-thumb-box" style="background-image: url('${tempSignboardBase64}')"></div>` : '';
-  }
-  if (insideArea) {
-    insideArea.innerHTML = '';
-    tempInsideBase64List.forEach(data => {
-      const box = document.createElement('div');
-      box.className = 'preview-thumb-box';
-      box.style.backgroundImage = `url('${data}')`;
-      insideArea.appendChild(box);
-    });
-  }
-  if (videoArea) {
-    videoArea.innerHTML = '';
-    tempVideosBase64List.forEach(() => {
-      const box = document.createElement('div');
-      box.className = 'preview-thumb-box video';
-      box.innerHTML = '▶';
-      videoArea.appendChild(box);
-    });
-  }
-
-  // Show recovery notice
   if (alertBox) {
     alertBox.style.display = 'block';
     setTimeout(() => {
       alertBox.style.display = 'none';
-    }, 4500);
+    }, 3000);
   }
 }
 
-// Final Save Store Details Submission (Failure report and cumulative media saving)
+// Final Save Store Details Submission (100% try-catch crash protection & automatic Create-if-not-exist)
 function saveStoreDetailsComplete() {
-  const store = findMerchantStore();
   const errorReportPanel = document.getElementById('upload-error-report');
   
-  if (!store) {
-    alert("오류: 제휴 상점을 찾을 수 없습니다.");
-    return;
-  }
-
   if (errorReportPanel) {
     errorReportPanel.innerHTML = '';
     errorReportPanel.classList.add('hidden');
   }
 
-  let failedReasons = [];
-
-  // 1. Signboard media validation
-  if (!tempSignboardBase64) {
-    failedReasons.push("대표(간판/대문) 사진 1장 등록이 누락되었습니다. (1장 필수)");
-  }
-  
-  // 2. Inside photos validation
-  if (tempInsideBase64List.length < 2) {
-    failedReasons.push(`매장 내부 전경 사진이 부족합니다. 최소 2장 이상이 필요합니다. (현재: ${tempInsideBase64List.length}장)`);
-  }
-
-  // 3. Messenger validation
-  const wechat = document.getElementById('messenger-wechat').value.trim();
-  const whatsapp = document.getElementById('messenger-whatsapp').value.trim();
-  const line = document.getElementById('messenger-line').value.trim();
-  const kakao = document.getElementById('messenger-kakao').value.trim();
-
-  if (!wechat && !whatsapp && !line && !kakao) {
-    failedReasons.push("개인 메신저 연락망(위챗, 왓츠앱, 라인, 카톡) 중 최소 1개 이상을 필히 기입하셔야 합니다.");
-  }
-
-  // Show detailed fail reports if any checks fail
-  if (failedReasons.length > 0) {
-    if (errorReportPanel) {
-      errorReportPanel.innerHTML = `
-        <h5>⚠️ [매장 정보 등록 실패] 가이드라인 미준수 항목</h5>
-        <ul>
-          ${failedReasons.map(r => `<li>${r}</li>`).join('')}
-        </ul>
-        <p style="font-size:9px; color:var(--text-muted); margin-top:8px;">기존에 통과하여 업로드해 둔 사진들은 지워지지 않고 보존되었습니다. 누락된 항목만 다시 작성 및 추가 첨부해 주세요.</p>
-      `;
-      errorReportPanel.classList.remove('hidden');
+  try {
+    let store = findMerchantStore();
+    
+    // Create new store object if it doesn't exist for the merchant (Zero crash guarantee)
+    if (!store && currentUser) {
+      const storeId = currentUser.toLowerCase().replace('owner_', 'partner_');
+      store = {
+        id: storeId,
+        name: { kr: `${currentUser} 매장`, en: `${currentUser} Store`, ch: `${currentUser} 铺`, jp: `${currentUser} 店` },
+        category: "food",
+        subCategory: "food",
+        isPartner: true,
+        image: "",
+        gallery: [],
+        rating: 5.0,
+        scores: { hygiene: 5.0, taste: 5.0, service: 5.0, cleanliness: 5.0 },
+        posX: 129.034789,
+        posY: 35.097489,
+        mapLinkNaver: "https://map.naver.com",
+        mapLinkGoogle: "https://maps.google.com",
+        distanceValue: "150m",
+        address: { kr: "부산 중구 남포동 제휴 매장" },
+        phone: "",
+        hours: "11:00 - 22:00",
+        priceList: [],
+        menuForeign: { kr: "외국어 메뉴판 구비" },
+        benefits: { kr: "제휴 할인 제공" },
+        seoDescription: `${currentUser} 제휴 매장`,
+        seoKeywords: `남포동 ${currentUser}`,
+        reviews: [],
+        payments: ["신용카드"],
+        parking: "유"
+      };
+      partnersList.unshift(store);
+      savePartnersToStorage();
     }
-    alert("⚠️ 가이드라인 미준수로 업로드가 실패되었습니다. 아래 미준수 리포트를 확인하고 수정해 주세요.");
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    return;
-  }
 
-  // Hours parsing
-  const hoursType = document.querySelector('input[name="hours-input-type"]:checked').value;
-  let finalHours = "";
-  if (hoursType === 'same') {
-    finalHours = document.getElementById('hours-input-same-val').value.trim();
-  } else {
-    const mon = document.getElementById('h-mon').value.trim();
-    const tue = document.getElementById('h-tue').value.trim();
-    const wed = document.getElementById('h-wed').value.trim();
-    const thu = document.getElementById('h-thu').value.trim();
-    const fri = document.getElementById('h-fri').value.trim();
-    const sat = document.getElementById('h-sat').value.trim();
-    const sun = document.getElementById('h-sun').value.trim();
-    finalHours = `월: ${mon}, 화: ${tue}, 수: ${wed}, 목: ${thu}, 금: ${fri}, 토: ${sat}, 일: ${sun}`;
-  }
-
-  // Apply inputs to store object
-  const categoryVal = document.querySelector('input[name="m-upload-category"]:checked').value;
-  store.subCategory = categoryVal;
-  store.category = (categoryVal === 'massage' || categoryVal === 'cafe') ? categoryVal : 'food';
-
-  store.benefits[currentLang] = document.getElementById('m-upload-benefit').value.trim();
-  store.phone = document.getElementById('m-upload-phone').value.trim();
-  store.hours = finalHours;
-
-  // Personal messengers lists
-  store.messenger = { wechat, whatsapp, line, kakao };
-
-  // Menu items list mapping from Dynamic rows
-  store.priceList = [];
-  dynamicMenuItems.forEach(item => {
-    if (item.name && item.price) {
-      store.priceList.push({
-        name: { kr: item.name, en: item.name, ch: item.name, jp: item.name },
-        price: item.price,
-        image: item.imageBase64 || "",
-        categoryText: item.category || ""
-      });
+    if (!store) {
+      alert("⚠️ 오류: 제휴 사업자 세션이 불안정합니다. 로그인을 다시 진행해 주세요.");
+      return;
     }
-  });
 
-  store.parking = document.querySelector('input[name="m-upload-parking"]:checked').value;
-  store.payments = Array.from(document.querySelectorAll('input[name="m-upload-payment"]:checked')).map(el => el.value);
+    let failedReasons = [];
 
-  // Signboard as cover image
-  store.image = tempSignboardBase64;
+    // 1. Signboard media validation
+    if (!tempSignboardBase64) {
+      failedReasons.push("대표(간판/대문) 사진 1장 등록이 누락되었습니다. (1장 필수)");
+    }
+    
+    // 2. Inside photos validation
+    if (tempInsideBase64List.length < 2) {
+      failedReasons.push(`매장 내부 전경 사진이 부족합니다. 최소 2장 이상이 필요합니다. (현재: ${tempInsideBase64List.length}장)`);
+    }
 
-  // Inside files & Videos mapped to gallery array
-  store.gallery = [];
-  tempInsideBase64List.forEach(data => {
-    store.gallery.push({ type: 'image', data: data });
-  });
-  tempVideosBase64List.forEach(data => {
-    store.gallery.push({ type: 'video', data: data });
-  });
+    // 3. Messenger validation
+    const wechat = document.getElementById('messenger-wechat')?.value.trim() || "";
+    const whatsapp = document.getElementById('messenger-whatsapp')?.value.trim() || "";
+    const line = document.getElementById('messenger-line')?.value.trim() || "";
+    const kakao = document.getElementById('messenger-kakao')?.value.trim() || "";
 
-  // Save changes to storage
-  savePartnersToStorage();
+    if (!wechat && !whatsapp && !line && !kakao) {
+      failedReasons.push("개인 메신저 연락망(위챗, 왓츠앱, 라인, 카톡) 중 최소 1개 이상을 필히 기입하셔야 합니다.");
+    }
 
-  // Clear draft
-  localStorage.removeItem(`nampogogo_draft_store_${currentUser}`);
+    // Show detailed fail reports if any checks fail
+    if (failedReasons.length > 0) {
+      if (errorReportPanel) {
+        errorReportPanel.innerHTML = `
+          <h5>⚠️ [매장 정보 등록 실패] 가이드라인 미준수 항목</h5>
+          <ul>
+            ${failedReasons.map(r => `<li>${r}</li>`).join('')}
+          </ul>
+          <p style="font-size:9px; color:var(--text-body); margin-top:8px;">기존에 통과하여 업로드해 둔 사진들은 지워지지 않고 보존되었습니다. 누락된 항목만 다시 작성 및 추가 첨부해 주세요.</p>
+        `;
+        errorReportPanel.classList.remove('hidden');
+      }
+      alert("⚠️ 가이드라인 미준수로 업로드가 실패되었습니다. 아래 미준수 리포트를 확인하고 수정해 주세요.");
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
 
-  // ⚡ INSTANT DEPLOYMENT: Instantly update in-memory cache and re-render tourist view
-  renderPartnersList();
+    // Hours parsing with safe null-guards
+    const hoursTypeVal = document.querySelector('input[name="hours-input-type"]:checked')?.value || "same";
+    let finalHours = "";
+    if (hoursTypeVal === 'same') {
+      finalHours = document.getElementById('hours-input-same-val')?.value.trim() || "11:00 - 22:00";
+    } else {
+      const mon = document.getElementById('h-mon')?.value.trim() || "11:00 - 22:00";
+      const tue = document.getElementById('h-tue')?.value.trim() || "11:00 - 22:00";
+      const wed = document.getElementById('h-wed')?.value.trim() || "11:00 - 22:00";
+      const thu = document.getElementById('h-thu')?.value.trim() || "11:00 - 22:00";
+      const fri = document.getElementById('h-fri')?.value.trim() || "11:00 - 22:00";
+      const sat = document.getElementById('h-sat')?.value.trim() || "11:00 - 23:00";
+      const sun = document.getElementById('h-sun')?.value.trim() || "11:00 - 22:00";
+      finalHours = `월: ${mon}, 화: ${tue}, 수: ${wed}, 목: ${thu}, 금: ${fri}, 토: ${sat}, 일: ${sun}`;
+    }
 
-  // Success Feedback modal reveal instead of generic alert
-  const successModal = document.getElementById('merchant-success-feedback-modal');
-  if (successModal) {
-    successModal.classList.add('active');
-  } else {
-    alert("🎉 매장 상세 메뉴 및 미디어가 성공적으로 게시되었습니다!");
-    switchTabPanel('merchant-manage');
+    // Apply inputs to store object with safe checked reading
+    const categoryVal = document.querySelector('input[name="m-upload-category"]:checked')?.value || "food";
+    store.subCategory = categoryVal;
+    store.category = (categoryVal === 'massage' || categoryVal === 'cafe') ? categoryVal : 'food';
+
+    store.benefits[currentLang] = document.getElementById('m-upload-benefit')?.value.trim() || "제휴 혜택 제공";
+    store.phone = document.getElementById('m-upload-phone')?.value.trim() || "";
+    store.hours = finalHours;
+
+    // Personal messengers lists
+    store.messenger = { wechat, whatsapp, line, kakao };
+
+    // Menu items list mapping from Dynamic rows
+    store.priceList = [];
+    dynamicMenuItems.forEach(item => {
+      if (item.name && item.price) {
+        store.priceList.push({
+          name: { kr: item.name, en: item.name, ch: item.name, jp: item.name },
+          price: item.price,
+          image: item.imageBase64 || "",
+          categoryText: item.category || ""
+        });
+      }
+    });
+
+    store.parking = document.querySelector('input[name="m-upload-parking"]:checked')?.value || "유";
+    store.payments = Array.from(document.querySelectorAll('input[name="m-upload-payment"]:checked')).map(el => el.value);
+    store.languages = Array.from(document.querySelectorAll('input[name="m-upload-languages"]:checked')).map(el => el.value);
+
+    // Signboard as cover image
+    store.image = tempSignboardBase64;
+
+    // Inside files & Videos mapped to gallery array
+    store.gallery = [];
+    tempInsideBase64List.forEach(data => {
+      store.gallery.push({ type: 'image', data: data });
+    });
+    tempVideosBase64List.forEach(data => {
+      store.gallery.push({ type: 'video', data: data });
+    });
+
+    // Save changes to storage
+    savePartnersToStorage();
+
+    // Clear draft
+    localStorage.removeItem(`nampogogo_draft_store_${currentUser}`);
+
+    // INSTANT DEPLOYMENT: Instantly update in-memory cache and re-render tourist view
+    renderPartnersList();
+
+    // Success Feedback modal reveal instead of generic alert
+    const successModal = document.getElementById('merchant-success-feedback-modal');
+    if (successModal) {
+      successModal.classList.add('active');
+    } else {
+      alert("🎉 매장 상세 메뉴 및 미디어가 성공적으로 게시되었습니다!");
+      switchTabPanel('merchant-manage');
+    }
+  } catch (err) {
+    console.error("🚨 런타임 오류가 발생했습니다:", err);
+    alert(`❌ 매장 정보 등록 중 오류가 발생했습니다:\n[에러내용] ${err.message}\n관리자에게 문의바랍니다.`);
   }
 }
 
@@ -2062,10 +2035,7 @@ function renderMerchantDashboard() {
   const stampCountEl = document.getElementById('merchant-stamps-val');
   if (stampCountEl) stampCountEl.textContent = `${stampCount}건`;
 
-  // Draw monthly SVG Trend line chart (Toss Style)
   drawMonthlyTrendChart(stampCount);
-
-  // Review list rendering with owner reply feature
   renderMerchantReviewsManager(store);
 }
 
@@ -2074,18 +2044,14 @@ function drawMonthlyTrendChart(stampCount) {
   const svg = document.getElementById('merchant-monthly-chart-svg');
   if (!svg) return;
 
-  // Months label
   const months = ["2월", "3월", "4월", "5월", "6월", "7월"];
-  // Mock monthly metrics + real current stamp count
   const visitorsData = [45, 62, 85, 92, 110, 120 + stampCount];
   const stampsData = [8, 12, 18, 22, 28, stampCount];
 
   const maxVal = 160;
 
-  // Clear previous SVG
   svg.innerHTML = '';
 
-  // Draw grid lines
   for (let i = 0; i <= 4; i++) {
     const y = 20 + i * 30;
     const gridVal = Math.round(maxVal - (i * maxVal / 4));
@@ -2095,7 +2061,6 @@ function drawMonthlyTrendChart(stampCount) {
     `;
   }
 
-  // Draw months axis text
   months.forEach((m, idx) => {
     const x = 50 + idx * 60;
     svg.innerHTML += `
@@ -2104,7 +2069,6 @@ function drawMonthlyTrendChart(stampCount) {
     `;
   });
 
-  // Calculate coordinates
   const getCoords = (data) => {
     return data.map((val, idx) => {
       const x = 50 + idx * 60;
@@ -2116,21 +2080,18 @@ function drawMonthlyTrendChart(stampCount) {
   const vCoords = getCoords(visitorsData);
   const sCoords = getCoords(stampsData);
 
-  // Draw Visitors Path
   let vPathD = `M ${vCoords[0].x} ${vCoords[0].y}`;
   for (let i = 1; i < vCoords.length; i++) {
     vPathD += ` L ${vCoords[i].x} ${vCoords[i].y}`;
   }
   svg.innerHTML += `<path d="${vPathD}" class="chart-line-visitor"></path>`;
 
-  // Draw Stamps Path
   let sPathD = `M ${sCoords[0].x} ${sCoords[0].y}`;
   for (let i = 1; i < sCoords.length; i++) {
     sPathD += ` L ${sCoords[i].x} ${sCoords[i].y}`;
   }
   svg.innerHTML += `<path d="${sPathD}" class="chart-line-stamps"></path>`;
 
-  // Draw points
   vCoords.forEach(pt => {
     svg.innerHTML += `<circle cx="${pt.x}" cy="${pt.y}" class="chart-point-visitor" title="방문객: ${pt.val}명"></circle>`;
   });
@@ -2153,7 +2114,7 @@ function renderMerchantReviewsManager(store) {
   if (countBadge) countBadge.textContent = `${reviews.length}건`;
 
   if (reviews.length === 0) {
-    listContainer.innerHTML = `<p class="empty-state text-center" style="font-size:11px; padding:20px; color:var(--text-muted);">아직 등록된 고객 리뷰가 없습니다.</p>`;
+    listContainer.innerHTML = `<p class="empty-state text-center" style="font-size:11px; padding:20px; color:var(--text-body);">아직 등록된 고객 리뷰가 없습니다.</p>`;
     if (notifBanner) notifBanner.classList.add('hidden');
     return;
   }
@@ -2196,7 +2157,7 @@ function renderMerchantReviewsManager(store) {
         <span>👤 <strong>${rev.username}</strong> 고객님</span>
         <span class="text-warning">★ ${rev.rating.toFixed(1)}</span>
       </div>
-      <p style="font-size:11px; color:var(--text-body); line-height:1.4;">${rev.content[currentLang] || rev.content['en']}</p>
+      <p style="font-size:11px; color:#f1f5f9; line-height:1.4;">${rev.content[currentLang] || rev.content['en']}</p>
       ${revPhotosMarkup}
       ${replyMarkup}
     `;
@@ -2204,7 +2165,6 @@ function renderMerchantReviewsManager(store) {
     listContainer.appendChild(item);
   });
 
-  // Show notification banner if there are unanswered reviews
   if (unansweredCount > 0) {
     if (notifBanner && notifCount) {
       notifCount.textContent = unansweredCount;
@@ -2214,7 +2174,6 @@ function renderMerchantReviewsManager(store) {
     if (notifBanner) notifBanner.classList.add('hidden');
   }
 
-  // Bind reply submit buttons
   document.querySelectorAll('.btn-save-reply').forEach(btn => {
     btn.addEventListener('click', (e) => {
       const index = parseInt(e.currentTarget.getAttribute('data-idx'));
@@ -2243,7 +2202,6 @@ function updateMerchantAuthUI() {
   const miniProfileBar = document.getElementById('merchant-mini-profile-header');
   const miniUsername = document.getElementById('merchant-mini-username');
 
-  // Hide all initially
   if (welcomeAuthCard) welcomeAuthCard.classList.add('hidden');
   if (registerCard) registerCard.classList.add('hidden');
   if (loginCard) loginCard.classList.add('hidden');
@@ -2262,7 +2220,7 @@ function updateMerchantAuthUI() {
 
     const isApproved = localStorage.getItem(`nampogogo_merchant_approved_${currentUser}`) === 'true';
     if (isApproved) {
-      // Handled by dynamic navigations, hide apply components
+      // Approved
     } else {
       const status = localStorage.getItem(`nampogogo_merchant_status_${currentUser}`);
       if (status === 'pending') {
@@ -2277,16 +2235,22 @@ function updateMerchantAuthUI() {
 function findMerchantStore() {
   if (!currentUser || currentUserRole !== 'merchant') return null;
   const storeId = currentUser.toLowerCase().replace('owner_', 'partner_');
-  return partnersList.find(p => p.id === storeId) || partnersList[0];
+  return partnersList.find(p => p.id === storeId) || null;
 }
 
 // 🛡️ 100% Data Preservation on Load (Form Editing Recovery)
 function renderMerchantManagementForm() {
   const store = findMerchantStore();
-  if (!store) return;
-
+  
   const uploadUsername = document.getElementById('merchant-upload-username');
-  if (uploadUsername) uploadUsername.textContent = currentUser;
+  if (uploadUsername) uploadUsername.textContent = currentUser || "Guest";
+
+  if (!store) {
+    // Fresh start, draw 3 empty rows
+    renderDynamicMenuRows([]);
+    loadDraftRecovery();
+    return;
+  }
 
   // 1. Populate basic Text values
   const benefitInput = document.getElementById('m-upload-benefit');
