@@ -7,4 +7,3 @@
 alembic.ini
 migrations/
 Dockerfile
-requirements.txt
