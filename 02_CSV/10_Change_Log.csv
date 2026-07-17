@@ -43,6 +43,7 @@ CHG-038-A2,v16.9,Nampo GoGo Netlify 전체 웹사이트 신규 배포 패키지 
 CHG-038-B,v17.0,공개 정책 URL 앱 설정 반영 및 RELEASE-001 정책 Gate 재검증 [COMPLETED],5대 약관/고객지원 URL 및 임시 메일 klounge@kakao.com Flutter ProductionConfig 바인딩 완료, profile_screen 설정/정책/이용약관/고객지원 외부 URL 연동 완료, REL-001-POLICY 게이트 완료 및 REL-001-DATABASE 오류 정정 (AAB 빌드 미실행 상태),2026-07-17
 CHG-038-C,v17.1,Backend 운영 배포 구조·Production Database·Secret·Backup 운영정보 준비 [BACKEND_INPUTS_REQUIRED],백엔드 Dockerfile/docker-compose/nginx/백업복원 스크립트 정적 검사 통과, ALLOWED_ORIGINS Netlify 주소 보정 적용, docs 하위 4대 운영 계획/체크리스트 생성 완료 및 5대 Gate REQUIRED_BEFORE_RELEASE 셋업 (실배포 미실행 상태),2026-07-17
 CHG-038-C1,v17.2,GitHub 비공개 저장소 초기화 및 최초 안전 Push [AUTHENTICATION_REQUIRED],Git 초기화 및 main 브랜치 설정 완료, .gitignore 보안 필터링으로 기밀/빌드 자산 차단 완료, 최초 커밋 생성 및 origin 원격지 연결 완료, git push origin main 백그라운드 구동 후 GitHub Credential 인증 대기 상태 식별 (Force Push 없음, Secret 유출 없음),2026-07-17
+CHG-038-C2-R1,v17.3,Nampo GoGo Railway Backend 최초 배포 실패를 수정 [COMPLETED],Railway runner stage의 groupadd/useradd 반복 빌드 실패를 제거하고 numeric UID/GID 10001:10001 non-root 실행 방식으로 변경 (로컬 Docker 미구동에 따라 로컬 빌드는 미실행),2026-07-18
 
 
 

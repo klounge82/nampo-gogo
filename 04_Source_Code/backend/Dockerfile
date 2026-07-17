@@ -12,21 +12,20 @@ FROM python:3.12-slim AS runner
 
 WORKDIR /app
 
-# Create non-root system user and set home directory
-RUN groupadd -g 10001 appgroup && \
-    useradd -u 10001 -g appgroup -m -s /bin/bash appuser
+# Set writeable home directory for non-root user
+ENV HOME=/tmp
 
-# Copy installed site-packages from builder
-COPY --from=builder /root/.local /home/appuser/.local
-ENV PATH=/home/appuser/.local/bin:$PATH
+# Copy installed site-packages from builder with numeric ownership
+COPY --from=builder --chown=10001:10001 /root/.local /tmp/.local
+ENV PATH=/tmp/.local/bin:$PATH
 
 # Copy application source code (excluding test files via .dockerignore or selective copy)
-COPY app ./app
+COPY --chown=10001:10001 app ./app
 
 # Ensure correct file permissions for non-root user
-RUN chown -R appuser:appgroup /app
+RUN chown -R 10001:10001 /app
 
-USER appuser
+USER 10001:10001
 
 EXPOSE 18080
 
