@@ -1,0 +1,8 @@
+# key.properties.example
+# Copy this file to 'key.properties' in the same folder and fill with actual properties.
+# WARNING: DO NOT COMMIT 'key.properties' TO VERSION CONTROL!
+
+storePassword=YOUR_STORE_PASSWORD
+keyPassword=YOUR_KEY_PASSWORD
+keyAlias=YOUR_KEY_ALIAS
+storeFile=PATH_TO_YOUR_KEYSTORE

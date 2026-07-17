@@ -1,0 +1,14 @@
+﻿SecurityID,PolicyName,Target,PolicyDetail,Priority,Scope,RelatedFeature,RelatedAPI,Notes
+SEC-001,HTTPS 강제,전체 시스템,모든 통신은 HTTPS만 허용,최고,전체 API,FEA-001~010,API-001~010,필수
+SEC-002,JWT 인증,회원/사장님/직원/관리자,Access/Refresh Token 기반 인증,최고,인증 API,FEA-001,"API-001,API-002",토큰 만료 정책 포함
+SEC-003,비밀번호 해시,회원정보,비밀번호는 복호화 불가 해시로 저장,최고,AUTH_DB,FEA-001,"API-001,API-002",원문 저장 금지
+SEC-004,개인정보 암호화,휴대전화·생년월일 등,민감정보는 암호화하여 저장,최고,USER_DB,FEA-001,API-002,마스킹 조회
+SEC-005,API Key 보호,외부 서비스 연동,환경변수 또는 Secret Manager 사용,최고,외부 API,"FEA-002,003","API-003,API-004",코드/CSV 저장 금지
+SEC-006,최소 권한 원칙,전체 역할,사용자별 필요한 최소 권한만 허용,최고,권한 전체,FEA-008~010,"API-009,API-010",RBAC 적용
+SEC-007,Rate Limit,공개·인증 API,과도한 요청 및 봇 공격 제한,높음,전체 API,FEA-001~010,API-001~010,임계값 운영 설정
+SEC-008,QR 위변조 방지,QR 인증,QR ID·토큰·서명 서버 검증,최고,인증 모듈,FEA-006,API-007,개인정보 미포함
+SEC-009,GPS 보호,위치 인증,원본 GPS 로그는 30일 보관 후 삭제,최고,위치 로그,FEA-006,API-007,익명 통계만 장기 보관
+SEC-010,Device Fingerprint,부정 이용 탐지,암호화된 기기 식별값을 보조 정보로 사용,높음,쿠폰·미션,FEA-004~006,"API-006,API-007",추적 목적 금지
+SEC-011,감사 로그,관리자·권한 변경,누가 언제 무엇을 변경했는지 수정 불가 로그 저장,최고,LOG_DB,FEA-008~010,"API-009,API-010",삭제 금지
+SEC-012,파일 접근 통제,이미지·사업자등록증,공개 파일과 민감 파일 접근 권한 분리,높음,File Storage,FEA-008,"API-009,API-010",사업자등록증 비공개
+SEC-013,백업 및 복구,DB·로그·설정,정기 자동 백업과 복구 절차 유지,최고,전체 데이터,FEA-001~010,API-001~010,복구 테스트 필요

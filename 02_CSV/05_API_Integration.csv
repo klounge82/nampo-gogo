@@ -1,0 +1,11 @@
+﻿API_ID,Method,Endpoint,Description,Role,Request,Response,RelatedFeature,Database,Auth
+API-001,POST,/auth/login,로그인,All,"email,password",JWT Token,FEA-001,AUTH_DB,JWT
+API-002,POST,/auth/signup,회원가입,Guest,user info,User ID,FEA-001,USER_DB,None
+API-003,GET,/stores,매장 조회,All,query,Store List,FEA-003,STORE_DB,Optional
+API-004,GET,/ai/recommend,AI 추천,Member,location,Recommendations,FEA-002,USER_DB,JWT
+API-005,GET,/missions,미션 조회,Member,-,Mission List,FEA-004,MISSION_DB,JWT
+API-006,POST,/missions/join,미션 참여,Member,mission_id,Join Result,FEA-004,MISSION_DB,JWT
+API-007,POST,/coupons/use,쿠폰 사용,Member,coupon_id,Use Result,"FEA-005,006",COUPON_DB,JWT
+API-008,POST,/reviews,리뷰 작성,Member,review,Saved,FEA-007,REVIEW_DB,JWT
+API-009,GET,/owner/dashboard,사장님 대시보드,Owner,-,Dashboard,"FEA-008,009",STORE_DB,JWT
+API-010,GET,/admin/dashboard,관리자 대시보드,Admin,-,Dashboard,FEA-010,CORE_DB,JWT

@@ -1,0 +1,10 @@
+**/test_*.py
+**/*.pyc
+**/__pycache__
+.venv
+.git
+.env*
+alembic.ini
+migrations/
+Dockerfile
+requirements.txt

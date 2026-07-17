@@ -1,0 +1,41 @@
+﻿FileName,Type,Purpose,ReadOrder,Area
+00_Project_Constitution.md,MD,프로젝트 헌법,최우선,전체
+01_Master_Project.md,MD,마스터 문서,2,전체
+02_Project_Overview.md,MD,프로젝트 개요,3,기획
+03_Requirement_Specification.docx,DOCX,요구사항,4,기획
+04_Functional_Specification.docx,DOCX,기능명세,5,개발
+05_User_Flow.docx,DOCX,사용자 흐름,6,UX
+06_Screen_Flow.docx,DOCX,화면 흐름,7,UI
+07_Feature_Specification.docx,DOCX,기능 상세,8,개발
+08_Database_Design.docx,DOCX,DB 설계,9,백엔드
+09_API_Specification.docx,DOCX,API 설계,10,백엔드
+10_Role_Permission.docx,DOCX,권한,11,보안
+11_Security_Policy.docx,DOCX,보안,12,보안
+12_Performance_Requirement.docx,DOCX,성능,13,인프라
+13_Test_Checklist.docx,DOCX,테스트,14,QA
+14_Business_Rule_Book.docx,DOCX,운영 규칙,15,운영
+15_Glossary.docx,DOCX,용어,16,전체
+16_Decision_Log.docx,DOCX,의사결정,17,PM
+17_Change_Log.docx,DOCX,변경이력,18,PM
+18_Project_Diary.docx,DOCX,프로젝트 일지,19,PM
+19_Founder_Notes.docx,DOCX,창립자 노트,20,전체
+20_Success_Metrics.docx,DOCX,성공지표,21,운영
+21_Failure_Log.docx,DOCX,실패기록,22,운영
+22_Expansion_Strategy.docx,DOCX,확장전략,23,전략
+23_Expansion_Project.docx,DOCX,확장기능,24,전략
+24_AI_Developer_Package.md,MD,AI 개발지침,25,개발
+25_README_START_HERE.md,MD,시작안내,1,전체
+01_Project_Overview.csv,CSV,구조화 데이터,CSV-1,개발/AI
+02_Requirement_Specification.csv,CSV,구조화 데이터,CSV-2,개발/AI
+03_Feature_Specification.csv,CSV,구조화 데이터,CSV-3,개발/AI
+04_Database_Model.csv,CSV,구조화 데이터,CSV-4,개발/AI
+05_API_Integration.csv,CSV,구조화 데이터,CSV-5,개발/AI
+06_Role_Permission.csv,CSV,구조화 데이터,CSV-6,개발/AI
+07_Security_Policy.csv,CSV,구조화 데이터,CSV-7,개발/AI
+08_Test_Checklist.csv,CSV,구조화 데이터,CSV-8,개발/AI
+09_Decision_Log.csv,CSV,구조화 데이터,CSV-9,개발/AI
+10_Change_Log.csv,CSV,구조화 데이터,CSV-10,개발/AI
+11_Success_Metrics.csv,CSV,구조화 데이터,CSV-11,개발/AI
+12_Expansion_Project.csv,CSV,구조화 데이터,CSV-12,개발/AI
+13_AI_Developer_Data.csv,CSV,구조화 데이터,CSV-13,개발/AI
+14_Project_Index.csv,CSV,구조화 데이터,CSV-14,개발/AI

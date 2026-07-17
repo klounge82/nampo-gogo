@@ -1,0 +1,26 @@
+남포 GoGo 청사진 v2.0 - 최종 패키지
+
+권장 순서
+1. 25_README_START_HERE.md
+2. 00_Project_Constitution.md
+3. 01_Master_Project.md
+4. Project Overview
+5. Requirement / Functional Specification
+6. Database / API
+7. AI_Developer_Package.md
+8. CSV 전체
+
+폴더 설명
+01_Documents : 문서 26개
+02_CSV : CSV 14개
+03_AI_Instructions : AI 개발 실행용
+04_Source_Code : 개발 소스
+05_Assets : 이미지/아이콘
+99_Archive : 백업
+
+체크리스트
+[ ] 문서 복사
+[ ] CSV 복사
+[ ] Git 저장소 생성
+[ ] AI 개발 에이전트 실행
+[ ] 프로젝트 초기화

@@ -1,0 +1,70 @@
+# Nampo GoGo Project Root Gitignore
+
+# Env and Secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Android signing
+key.properties
+*.jks
+*.keystore
+*.p12
+*.pfx
+
+# Firebase and Service Accounts
+google-services.json
+GoogleService-Info.plist
+service-account*.json
+firebase-adminsdk*.json
+credentials.json
+
+# Certificates and keys
+*.pem
+*.key
+*.crt
+
+# Databases, backups and dumps
+*.db
+*.sqlite
+*.sqlite3
+*.sql
+*.dump
+*.backup
+*.bak
+backups/
+backup/
+db_backups/
+postgres-data/
+docker-data/
+
+# Uploads, Media and Runtime assets
+uploads/
+media/
+runtime/
+logs/
+*.log
+
+# Python cache & Venv
+.venv/
+venv/
+__pycache__/
+.pytest_cache/
+
+# Dart & Flutter Build systems
+.dart_tool/
+build/
+android/.gradle/
+android/local.properties
+ios/Pods/
+
+# IDE files and OS metadata
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Release temporary folders
+05_Release/Netlify_Policy_Update/
+05_Release/Nampo_GoGo_Netlify_Final/

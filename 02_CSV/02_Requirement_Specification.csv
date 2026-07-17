@@ -1,0 +1,11 @@
+﻿RequirementID,Requirement,User,Priority,Release
+REQ-001,회원가입,관광객,필수,MVP
+REQ-002,로그인,전체 사용자,필수,MVP
+REQ-003,AI 추천,관광객,필수,MVP
+REQ-004,매장 검색,관광객,필수,MVP
+REQ-005,미션,관광객,필수,MVP
+REQ-006,쿠폰,관광객/사장님,필수,MVP
+REQ-007,QR/GPS 인증,관광객/직원,필수,MVP
+REQ-008,리뷰,관광객,권장,MVP
+REQ-009,관리자 기능,관리자,필수,MVP
+REQ-010,권한 관리,사장님/관리자,필수,MVP

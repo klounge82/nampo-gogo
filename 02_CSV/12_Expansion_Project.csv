@@ -1,0 +1,11 @@
+﻿ExpansionID,Feature,Priority,TargetVersion,Dependency
+EXP-001,AI 여행 비서,중,v3.0,AI 추천
+EXP-002,AR 관광 콘텐츠,중,v3.0,지도
+EXP-003,지역 축제 연동,상,v2.x,이벤트
+EXP-004,지역 화폐 연동,중,v3.0,결제
+EXP-005,숙박 예약 연동,중,v3.x,외부 API
+EXP-006,교통 예약 연동,중,v3.x,외부 API
+EXP-007,글로벌 결제,하,v4.0,결제
+EXP-008,AI 음성 가이드,중,v3.x,AI
+EXP-009,스마트워치 지원,하,v4.0,알림
+EXP-010,CarPlay/Android Auto,하,v4.x,지도

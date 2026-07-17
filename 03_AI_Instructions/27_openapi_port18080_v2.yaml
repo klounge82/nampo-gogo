@@ -1,0 +1,982 @@
+openapi: 3.0.3
+info:
+  title: Nampo GoGo API
+  version: 2.1.0
+  description: |
+    남포 GoGo 청사진 v2.1용 OpenAPI 명세입니다.
+    MVP 범위만 포함하며 Expansion Project 기능은 제외합니다.
+servers:
+  - url: https://api.example.com/api/v1
+    description: Production
+  - url: http://localhost:18080/api/v1
+    description: Local development (alternate port)
+
+tags:
+  - name: Auth
+  - name: Users
+  - name: Stores
+  - name: Missions
+  - name: Coupons
+  - name: Verifications
+  - name: Reviews
+  - name: Recommendations
+  - name: Notifications
+  - name: Owner
+  - name: Staff
+  - name: Admin
+
+paths:
+  /auth/social/login:
+    post:
+      tags: [Auth]
+      summary: 소셜 로그인
+      operationId: socialLogin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SocialLoginRequest'
+      responses:
+        '200':
+          description: 로그인 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/profile/complete:
+    post:
+      tags: [Auth]
+      summary: 추가 회원정보 등록
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileCompleteRequest'
+      responses:
+        '200':
+          description: 프로필 등록 완료
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: 로그아웃
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 로그아웃 완료
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /auth/token/refresh:
+    post:
+      tags: [Auth]
+      summary: 액세스 토큰 갱신
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        '200':
+          description: 토큰 갱신 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+
+  /users/me:
+    get:
+      tags: [Users]
+      summary: 내 정보 조회
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 사용자 정보
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    patch:
+      tags: [Users]
+      summary: 내 정보 수정
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+      responses:
+        '200':
+          description: 수정 완료
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /users/dashboard:
+    get:
+      tags: [Users]
+      summary: 마이페이지 통합 조회
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 대시보드 정보
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDashboard'
+
+  /stores:
+    get:
+      tags: [Stores]
+      summary: 매장 목록 조회
+      parameters:
+        - in: query
+          name: category
+          schema:
+            type: string
+            enum: [FOOD, SERVICE, TOURISM, ETC]
+        - in: query
+          name: latitude
+          schema:
+            type: number
+            format: double
+        - in: query
+          name: longitude
+          schema:
+            type: number
+            format: double
+        - in: query
+          name: openNow
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: 매장 목록
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StoreSummary'
+
+  /stores/{storeId}:
+    get:
+      tags: [Stores]
+      summary: 매장 상세 조회
+      parameters:
+        - $ref: '#/components/parameters/StoreId'
+      responses:
+        '200':
+          description: 매장 상세
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreDetail'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /stores/nearby:
+    get:
+      tags: [Stores]
+      summary: 주변 매장 조회
+      parameters:
+        - in: query
+          name: latitude
+          required: true
+          schema:
+            type: number
+            format: double
+        - in: query
+          name: longitude
+          required: true
+          schema:
+            type: number
+            format: double
+        - in: query
+          name: radiusMeters
+          schema:
+            type: integer
+            default: 1000
+      responses:
+        '200':
+          description: 주변 매장 목록
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StoreSummary'
+
+  /missions:
+    get:
+      tags: [Missions]
+      summary: 공개 미션 목록
+      responses:
+        '200':
+          description: 미션 목록
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MissionSummary'
+
+  /missions/{missionId}:
+    get:
+      tags: [Missions]
+      summary: 미션 상세 조회
+      parameters:
+        - $ref: '#/components/parameters/MissionId'
+      responses:
+        '200':
+          description: 미션 상세
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MissionDetail'
+
+  /missions/{missionId}/participations:
+    post:
+      tags: [Missions]
+      summary: 미션 참여 시작
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/MissionId'
+      responses:
+        '201':
+          description: 참여 생성
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MissionParticipation'
+
+  /coupons:
+    get:
+      tags: [Coupons]
+      summary: 공개 쿠폰 목록
+      responses:
+        '200':
+          description: 쿠폰 목록
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CouponSummary'
+
+  /coupons/{couponId}/issue:
+    post:
+      tags: [Coupons]
+      summary: 쿠폰 발급
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CouponId'
+      responses:
+        '201':
+          description: 쿠폰 발급 완료
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserCoupon'
+        '409':
+          description: 발급 한도 초과 또는 중복 발급
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /verifications/gps:
+    post:
+      tags: [Verifications]
+      summary: GPS 방문 인증
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GpsVerificationRequest'
+      responses:
+        '200':
+          description: GPS 인증 결과
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationResult'
+
+  /verifications/qr/scan:
+    post:
+      tags: [Verifications]
+      summary: QR 인증
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QrVerificationRequest'
+      responses:
+        '200':
+          description: QR 인증 결과
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationResult'
+
+  /stores/{storeId}/reviews:
+    get:
+      tags: [Reviews]
+      summary: 매장 리뷰 목록
+      parameters:
+        - $ref: '#/components/parameters/StoreId'
+      responses:
+        '200':
+          description: 리뷰 목록
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Review'
+    post:
+      tags: [Reviews]
+      summary: 리뷰 작성
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/StoreId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewCreateRequest'
+      responses:
+        '201':
+          description: 리뷰 작성 완료
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+
+  /recommendations:
+    post:
+      tags: [Recommendations]
+      summary: AI 추천 생성
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecommendationRequest'
+      responses:
+        '200':
+          description: 추천 결과
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecommendationResponse'
+
+  /notifications:
+    get:
+      tags: [Notifications]
+      summary: 내 알림 목록
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 알림 목록
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+
+  /owner/dashboard:
+    get:
+      tags: [Owner]
+      summary: 사장님 대시보드
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 사장님 대시보드 정보
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OwnerDashboard'
+
+  /staff/coupons/redeem:
+    post:
+      tags: [Staff]
+      summary: 직원 쿠폰 사용 처리
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CouponRedeemRequest'
+      responses:
+        '200':
+          description: 쿠폰 사용 처리 완료
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /admin/dashboard:
+    get:
+      tags: [Admin]
+      summary: 관리자 대시보드
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 관리자 대시보드 정보
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminDashboard'
+
+  /admin/settings:
+    get:
+      tags: [Admin]
+      summary: 운영 설정 조회
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 운영 설정
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminSettings'
+    patch:
+      tags: [Admin]
+      summary: 운영 설정 변경
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminSettingsUpdate'
+      responses:
+        '200':
+          description: 설정 변경 완료
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminSettings'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    StoreId:
+      in: path
+      name: storeId
+      required: true
+      schema:
+        type: string
+    MissionId:
+      in: path
+      name: missionId
+      required: true
+      schema:
+        type: string
+    CouponId:
+      in: path
+      name: couponId
+      required: true
+      schema:
+        type: string
+
+  responses:
+    Unauthorized:
+      description: 인증 실패
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: 리소스를 찾을 수 없음
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    SocialLoginRequest:
+      type: object
+      required: [provider, authCode, language]
+      properties:
+        provider:
+          type: string
+          enum: [GOOGLE, APPLE, LINE, KAKAO, NAVER, WECHAT]
+        authCode:
+          type: string
+        language:
+          type: string
+        deviceId:
+          type: string
+
+    ProfileCompleteRequest:
+      type: object
+      required: [nickname, country, language]
+      properties:
+        nickname:
+          type: string
+        phone:
+          type: string
+        country:
+          type: string
+        language:
+          type: string
+        birthDate:
+          type: string
+          format: date
+        gender:
+          type: string
+        marketingConsent:
+          type: boolean
+
+    AuthResponse:
+      type: object
+      properties:
+        userId:
+          type: string
+        role:
+          type: string
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        profileCompleted:
+          type: boolean
+
+    User:
+      type: object
+      properties:
+        userId:
+          type: string
+        nickname:
+          type: string
+        country:
+          type: string
+        language:
+          type: string
+        role:
+          type: string
+        status:
+          type: string
+
+    UserUpdateRequest:
+      type: object
+      properties:
+        nickname:
+          type: string
+        country:
+          type: string
+        language:
+          type: string
+        marketingConsent:
+          type: boolean
+
+    UserDashboard:
+      type: object
+      properties:
+        profile:
+          $ref: '#/components/schemas/User'
+        activeMissionCount:
+          type: integer
+        usableCouponCount:
+          type: integer
+        unreadNotificationCount:
+          type: integer
+        recentReviews:
+          type: array
+          items:
+            $ref: '#/components/schemas/Review'
+
+    StoreSummary:
+      type: object
+      properties:
+        storeId:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+        imageUrl:
+          type: string
+        distanceMeters:
+          type: integer
+        rating:
+          type: number
+          format: float
+        openNow:
+          type: boolean
+        hasCoupon:
+          type: boolean
+        hasMission:
+          type: boolean
+
+    StoreDetail:
+      allOf:
+        - $ref: '#/components/schemas/StoreSummary'
+        - type: object
+          properties:
+            description:
+              type: string
+            address:
+              type: string
+            phone:
+              type: string
+            supportedLanguages:
+              type: array
+              items:
+                type: string
+            latitude:
+              type: number
+              format: double
+            longitude:
+              type: number
+              format: double
+
+    MissionSummary:
+      type: object
+      properties:
+        missionId:
+          type: string
+        title:
+          type: string
+        rewardSummary:
+          type: string
+        startAt:
+          type: string
+          format: date-time
+        endAt:
+          type: string
+          format: date-time
+
+    MissionDetail:
+      allOf:
+        - $ref: '#/components/schemas/MissionSummary'
+        - type: object
+          properties:
+            description:
+              type: string
+            verificationMode:
+              type: string
+              enum: [GPS_ONLY, QR_ONLY, GPS_OR_QR, GPS_AND_QR]
+            steps:
+              type: array
+              items:
+                type: object
+                properties:
+                  stepId:
+                    type: string
+                  order:
+                    type: integer
+                  storeId:
+                    type: string
+                  verificationType:
+                    type: string
+
+    MissionParticipation:
+      type: object
+      properties:
+        participationId:
+          type: string
+        missionId:
+          type: string
+        status:
+          type: string
+        progress:
+          type: integer
+
+    CouponSummary:
+      type: object
+      properties:
+        couponId:
+          type: string
+        storeId:
+          type: string
+        name:
+          type: string
+        couponType:
+          type: string
+        discountValue:
+          type: number
+        remainingCount:
+          type: integer
+
+    UserCoupon:
+      type: object
+      properties:
+        userCouponId:
+          type: string
+        couponId:
+          type: string
+        status:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+
+    GpsVerificationRequest:
+      type: object
+      required: [storeId, latitude, longitude, requestId]
+      properties:
+        storeId:
+          type: string
+        missionParticipationId:
+          type: string
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        accuracyMeters:
+          type: number
+        requestId:
+          type: string
+
+    QrVerificationRequest:
+      type: object
+      required: [qrId, token, requestId]
+      properties:
+        qrId:
+          type: string
+        token:
+          type: string
+        missionParticipationId:
+          type: string
+        requestId:
+          type: string
+
+    VerificationResult:
+      type: object
+      properties:
+        verificationId:
+          type: string
+        result:
+          type: string
+          enum: [SUCCESS, FAILED]
+        reason:
+          type: string
+        missionProgress:
+          type: integer
+        rewardGranted:
+          type: boolean
+
+    ReviewCreateRequest:
+      type: object
+      required: [rating, content, verificationId]
+      properties:
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        content:
+          type: string
+        verificationId:
+          type: string
+        imageUrls:
+          type: array
+          items:
+            type: string
+
+    Review:
+      type: object
+      properties:
+        reviewId:
+          type: string
+        userId:
+          type: string
+        storeId:
+          type: string
+        rating:
+          type: integer
+        content:
+          type: string
+        verifiedVisit:
+          type: boolean
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    RecommendationRequest:
+      type: object
+      required: [latitude, longitude, language]
+      properties:
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        language:
+          type: string
+        category:
+          type: string
+        transportMode:
+          type: string
+          enum: [WALK, TRANSIT]
+        personalizationEnabled:
+          type: boolean
+
+    RecommendationResponse:
+      type: object
+      properties:
+        recommendationId:
+          type: string
+        results:
+          type: array
+          items:
+            type: object
+            properties:
+              rank:
+                type: integer
+              store:
+                $ref: '#/components/schemas/StoreSummary'
+              score:
+                type: number
+              reason:
+                type: string
+
+    Notification:
+      type: object
+      properties:
+        notificationId:
+          type: string
+        type:
+          type: string
+        title:
+          type: string
+        body:
+          type: string
+        read:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    OwnerDashboard:
+      type: object
+      properties:
+        storeCount:
+          type: integer
+        todayVisitCount:
+          type: integer
+        todayCouponUseCount:
+          type: integer
+        activeMissionCount:
+          type: integer
+        averageRating:
+          type: number
+
+    CouponRedeemRequest:
+      type: object
+      required: [userCouponId, storeId, requestId]
+      properties:
+        userCouponId:
+          type: string
+        storeId:
+          type: string
+        requestId:
+          type: string
+
+    AdminDashboard:
+      type: object
+      properties:
+        pendingStoreCount:
+          type: integer
+        pendingMissionCount:
+          type: integer
+        pendingCouponCount:
+          type: integer
+        reportCount:
+          type: integer
+
+    AdminSettings:
+      type: object
+      properties:
+        version:
+          type: integer
+        gpsRadiusMeters:
+          type: integer
+        maxConcurrentMissions:
+          type: integer
+        reviewReportThreshold:
+          type: integer
+
+    AdminSettingsUpdate:
+      type: object
+      properties:
+        gpsRadiusMeters:
+          type: integer
+        maxConcurrentMissions:
+          type: integer
+        reviewReportThreshold:
+          type: integer
+        changeReason:
+          type: string
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        requestId:
+          type: string

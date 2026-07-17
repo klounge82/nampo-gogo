@@ -1,0 +1,11 @@
+﻿KPI_ID,Metric,Target,Cycle,Owner,Source,Notes
+KPI-001,DAU,1000+,일,운영팀,Analytics,MVP 이후
+KPI-002,MAU,10000+,월,운영팀,Analytics,성장지표
+KPI-003,회원가입 전환율,30%+,월,마케팅,USER_DB,비회원→회원
+KPI-004,미션 참여율,40%+,월,운영팀,MISSION_DB,활성도
+KPI-005,쿠폰 사용률,25%+,월,운영팀,COUPON_DB,혜택 활용
+KPI-006,리뷰 작성률,20%+,월,운영팀,REVIEW_DB,콘텐츠
+KPI-007,재방문율,35%+,월,운영팀,Analytics,충성도
+KPI-008,사장님 만족도,4.5/5,분기,운영팀,설문,
+KPI-009,관광객 만족도,4.5/5,분기,운영팀,설문,
+KPI-010,AI 추천 만족도,85%+,월,AI팀,Feedback,

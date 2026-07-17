@@ -1,0 +1,11 @@
+﻿FeatureID,Feature,Purpose,User,Input,Output,Priority,MVP,RelatedAPI,RelatedDB,Security
+FEA-001,회원가입/로그인,서비스 시작,관광객,회원정보,로그인 완료,높음,Y,"API-001,API-002","AUTH_DB,USER_DB",높음
+FEA-002,AI 추천,맞춤 추천,관광객,위치/관심사,추천 목록,높음,Y,API-004,USER_DB,보통
+FEA-003,매장 검색,매장 탐색,관광객,검색어,매장 목록,높음,Y,API-003,STORE_DB,보통
+FEA-004,미션,방문 유도,관광객,미션 선택,보상,높음,Y,"API-005,API-006",MISSION_DB,보통
+FEA-005,쿠폰,혜택 제공,관광객/사장님,쿠폰 요청,사용 완료,높음,Y,API-007,COUPON_DB,높음
+FEA-006,QR/GPS 인증,방문 인증,관광객/직원,QR/GPS,인증 성공,높음,Y,API-007,LOG_DB,높음
+FEA-007,리뷰,후기 작성,관광객,평점/내용,리뷰 등록,중간,Y,API-008,REVIEW_DB,보통
+FEA-008,매장 관리,매장 운영,사장님,매장정보,저장,높음,Y,API-009,STORE_DB,높음
+FEA-009,직원 권한,권한 관리,사장님,권한설정,권한 반영,높음,Y,API-009,PERMISSION_DB,높음
+FEA-010,관리자,플랫폼 운영,관리자,승인정보,승인/반려,높음,Y,API-010,CORE_DB,최고

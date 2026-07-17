@@ -1,0 +1,11 @@
+﻿EntityID,Database,Table,PrimaryKey,ForeignKey,Relation,Security,Backup
+ENT-001,CORE_DB,regions,region_id,-,STORE,보통,Y
+ENT-002,AUTH_DB,users_auth,auth_id,user_id,USER,높음,Y
+ENT-003,USER_DB,users,user_id,region_id,"MISSION,REVIEW",높음,Y
+ENT-004,STORE_DB,stores,store_id,owner_id,"COUPON,MISSION",높음,Y
+ENT-005,MISSION_DB,missions,mission_id,store_id,USER,보통,Y
+ENT-006,COUPON_DB,coupons,coupon_id,store_id,USER,높음,Y
+ENT-007,REVIEW_DB,reviews,review_id,user_id,STORE,보통,Y
+ENT-008,PERMISSION_DB,roles,role_id,user_id,AUTH,높음,Y
+ENT-009,NOTIFICATION_DB,notifications,notification_id,user_id,USER,보통,N
+ENT-010,LOG_DB,audit_logs,log_id,user_id,ALL,최고,Y

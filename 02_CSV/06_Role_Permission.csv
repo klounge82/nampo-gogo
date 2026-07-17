@@ -1,0 +1,6 @@
+﻿RoleID,Role,View,Create,Update,Delete,Approve,Policy,Analytics
+ROLE-001,Guest,Y,N,N,N,N,N,N
+ROLE-002,Member,Y,Y,Y,Y,N,N,N
+ROLE-003,Owner,Y,Y,Y,Y,Y,N,Y
+ROLE-004,Staff,Y,N,제한,N,쿠폰승인,N,N
+ROLE-005,Admin,Y,Y,Y,Y,Y,Y,Y

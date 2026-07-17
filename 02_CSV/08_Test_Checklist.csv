@@ -1,0 +1,13 @@
+﻿TestID,Category,Scenario,ExpectedResult,Priority,Stage
+TEST-001,회원,회원가입,회원 생성 성공,높음,MVP
+TEST-002,회원,로그인,JWT 발급,높음,MVP
+TEST-003,AI,AI 추천,추천 목록 반환,높음,MVP
+TEST-004,매장,매장 검색,검색 결과 표시,높음,MVP
+TEST-005,미션,미션 참여,참여 성공,높음,MVP
+TEST-006,쿠폰,쿠폰 사용,중복 사용 방지,높음,MVP
+TEST-007,인증,QR/GPS,정상 위치 인증,최고,MVP
+TEST-008,리뷰,리뷰 작성,리뷰 저장,보통,MVP
+TEST-009,보안,권한 검증,권한 없는 접근 차단,최고,MVP
+TEST-010,성능,API 응답,1초 이내,높음,MVP
+TEST-011,현장,실매장 테스트,현장 동작 확인,높음,출시전
+TEST-012,UX,Human Happiness,사용자 만족도 확인,보통,출시후
