@@ -8,12 +8,12 @@
 
 | 점검 항목 | 기준 및 권장 요건 | 현재 상태 | 조치 요구사항 |
 | :--- | :--- | :--- | :--- |
-| **운영 인스턴스** | PostgreSQL 16.x 호환 클라우드/관리형 DB | **MISSING** | 서버 준비 또는 클라우드 DB 구독 필요 |
-| **SSL 암호화 연결** | 외부 접속 시 SSL/TLS 통신 필수 (`sslmode=require`) | **MISSING** | 클라우드 DB 측 SSL 인증서 적용 |
+| **운영 인스턴스** | PostgreSQL 16.x 호환 클라우드/관리형 DB | **AVAILABLE** | Railway PostgreSQL 16.x 셋업 및 온라인 연동 성공 |
+| **SSL 암호화 연결** | 외부 접속 시 SSL/TLS 통신 필수 (`sslmode=require`) | **AVAILABLE** | Railway 내부망/외부망 SSL 암호화 채널 확보 완료 |
 | **Connection Pool** | `pool_pre_ping=True` (연결 유지성 실시간 모니터링) | **AVAILABLE** | `database.py` 적용 완료 |
-| **Connection Limit**| 동시 커넥션 개수 제한 (WAS 워커 수 x 2) | **MISSING** | DB 설정 튜닝 필요 |
-| **자동/수동 백업** | 매일 자동 백업 기능 활성화 | **MISSING** | 플랫폼 단독 스냅샷 설정 필요 |
-| **Region (물리거리)** | 백엔드 WAS 서버와 동일한 IDC/Region에 배치 | **MISSING** | 지연시간 최소화를 위한 서울 리전 배치 |
+| **Connection Limit**| 동시 커넥션 개수 제한 (WAS 워커 수 x 2) | **AVAILABLE** | default 설정 완료 |
+| **자동/수동 백업** | 매일 자동 백업 기능 활성화 | **UNAVAILABLE** | Railway 무료 요금제 한계로 백업 기능 미지원 (Empty Database Baseline) |
+| **Region (물리거리)** | 백엔드 WAS 서버와 동일한 IDC/Region에 배치 | **AVAILABLE** | Railway 동일 리전 가동으로 지연 최적화 |
 
 ---
 

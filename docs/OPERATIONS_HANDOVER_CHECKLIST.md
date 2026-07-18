@@ -22,8 +22,8 @@
 
 ### 1) 일일 모니터링 수칙
 - **헬스 체크 경로**:
-  - Liveness 점검: `GET https://api.nampogogo.com/health/live`
-  - Readiness 점검: `GET https://api.nampogogo.com/health/ready`
+  - Liveness 점검: `GET https://backend-production-b07b.up.railway.app/health/live`
+  - Readiness 점검: `GET https://backend-production-b07b.up.railway.app/health/ready`
 - **로그 및 백업 확인**:
   - Gunicorn/FastAPI 통합 로그: `/var/log/nampogogo_access.log` 및 `/var/log/nampogogo_error.log`
   - 데이터베이스 백업 로그: `/var/log/nampogogo_backup.log`
