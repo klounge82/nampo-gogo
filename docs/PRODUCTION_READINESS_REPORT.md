@@ -49,3 +49,4 @@
 3. **서드파티 연동**: 실제 Production Firebase 및 Google Maps Release API Key 발급/제한.
 4. **스토어 정책**: **[COMPLETED]** 개인정보처리방침/이용약관/계정삭제/고객지원 URL 5종 Netlify 실배포 및 Flutter 앱 `ProductionConfig` 바인딩 완료.
 5. **운영 데이터베이스**: **[REQUIRED_BEFORE_RELEASE]** 실제 Production 데이터베이스 서버 호스팅 기동 및 백엔드 설정 연결 확보.
+6. **백엔드 실 배포 및 주소 연동**: **[COMPLETED]** Railway HTTPS Backend(https://backend-production-b07b.up.railway.app) 최초 배포 및 Flutter 앱 Production API 운영주소 연결, live/ready 헬스체크 검증 완료.

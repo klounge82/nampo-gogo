@@ -45,6 +45,9 @@ CHG-038-C,v17.1,Backend 운영 배포 구조·Production Database·Secret·Backu
 CHG-038-C1,v17.2,GitHub 비공개 저장소 초기화 및 최초 안전 Push [AUTHENTICATION_REQUIRED],Git 초기화 및 main 브랜치 설정 완료, .gitignore 보안 필터링으로 기밀/빌드 자산 차단 완료, 최초 커밋 생성 및 origin 원격지 연결 완료, git push origin main 백그라운드 구동 후 GitHub Credential 인증 대기 상태 식별 (Force Push 없음, Secret 유출 없음),2026-07-17
 CHG-038-C2-R1,v17.3,Nampo GoGo Railway Backend 최초 배포 실패를 수정 [COMPLETED],Railway runner stage의 groupadd/useradd 반복 빌드 실패를 제거하고 numeric UID/GID 10001:10001 non-root 실행 방식으로 변경 (로컬 Docker 미구동에 따라 로컬 빌드는 미실행),2026-07-18
 CHG-038-C2-R2,v17.4,Nampo GoGo Railway Backend Docker 빌드의 requirements.txt 누락 오류를 조사하고 최소 수정 [COMPLETED],04_Source_Code/backend/.dockerignore 파일 내에 requirements.txt 가 제외 규칙으로 등록되어 빌드 컨텍스트 누락이 유발된 것으로 판정하여 해당 규칙 제거 및 깃 허브 push 완료 (로컬 Docker 미구동에 따라 로컬 빌드는 미실행),2026-07-18
+CHG-038-C2-R3,v17.5,Nampo GoGo Railway Backend 실행 시 발생한 PostgreSQL 드라이버 누락 오류를 최소 수정 [COMPLETED],postgresql 동기식 커넥션을 위해 psycopg2-binary==2.9.12 패키지를 requirements.txt 에 추가 및 깃허브 push 완료 (로컬 Docker 미구동에 따라 로컬 빌드는 미실행),2026-07-18
+CHG-038-D,v18.0,Flutter Production API 운영주소 연결 및 Release 안전검증 [READY_FOR_REVIEW],Flutter Production API 기본주소를 Railway HTTPS Backend 주소로 연결 및 release 모드 로컬 주소(localhost 등) 차단 가드 이식 완료, 112개 info 경고 외 analyze/test 통과 확인,2026-07-18
+
 
 
 

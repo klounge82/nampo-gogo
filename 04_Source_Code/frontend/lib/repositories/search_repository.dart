@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/foundation.dart';
+import '../config/api_config.dart';
 
 class SearchRepository {
   final Dio _dio;
@@ -9,7 +10,7 @@ class SearchRepository {
   static const String _recentSearchKey = 'nampo_gogo_recent_searches_json';
 
   SearchRepository({Dio? dio})
-      : _dio = dio ?? Dio(BaseOptions(baseUrl: 'http://10.0.2.2:18080'));
+      : _dio = dio ?? Dio(BaseOptions(baseUrl: ApiConfig.baseUrl));
 
   // GET /search
   Future<Map<String, dynamic>> search({

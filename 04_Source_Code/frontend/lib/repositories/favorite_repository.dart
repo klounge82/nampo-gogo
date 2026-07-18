@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/foundation.dart';
+import '../config/api_config.dart';
 
 class FavoriteRepository {
   final Dio _dio;
@@ -9,7 +10,7 @@ class FavoriteRepository {
   static const String _localFavKey = 'nampo_gogo_local_favorites_json';
 
   FavoriteRepository({Dio? dio})
-      : _dio = dio ?? Dio(BaseOptions(baseUrl: 'http://10.0.2.2:18080'));
+      : _dio = dio ?? Dio(BaseOptions(baseUrl: ApiConfig.baseUrl));
 
   // POST /favorites (Add)
   Future<Map<String, dynamic>> addFavorite(String targetType, String targetId, {String? token}) async {

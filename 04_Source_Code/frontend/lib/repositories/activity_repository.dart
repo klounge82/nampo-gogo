@@ -1,11 +1,12 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import '../config/api_config.dart';
 
 class ActivityRepository {
   final Dio _dio;
 
   ActivityRepository({Dio? dio})
-      : _dio = dio ?? Dio(BaseOptions(baseUrl: 'http://10.0.2.2:18080'));
+      : _dio = dio ?? Dio(BaseOptions(baseUrl: ApiConfig.baseUrl));
 
   // GET /activity
   Future<List<dynamic>> getActivities({

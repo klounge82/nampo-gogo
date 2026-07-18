@@ -24,7 +24,7 @@ class ProductionConfig {
   static bool get isDevelopment => environment == AppEnvironment.development;
 
   // API Base URL
-  static const String _rawApiUrl = String.fromEnvironment('API_BASE_URL', defaultValue: '');
+  static const String _rawApiUrl = String.fromEnvironment('API_BASE_URL', defaultValue: 'https://backend-production-b07b.up.railway.app');
 
   static String get apiBaseUrl {
     final url = _rawApiUrl.trim();

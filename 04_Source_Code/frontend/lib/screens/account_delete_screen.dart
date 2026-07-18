@@ -80,7 +80,7 @@ class _AccountDeleteScreenState extends State<AccountDeleteScreen> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black80,
+                    color: Colors.black87,
                   ),
                 ),
                 const SizedBox(height: 30),

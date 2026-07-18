@@ -2,11 +2,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import '../services/locale_storage_service.dart';
+import '../config/api_config.dart';
 
 class LocaleProvider with ChangeNotifier {
   final LocaleStorageService _storage = LocaleStorageService();
   final Dio _dio = Dio(BaseOptions(
-    baseUrl: 'http://10.0.2.2:18080',
+    baseUrl: ApiConfig.baseUrl,
     connectTimeout: const Duration(seconds: 5),
   ));
 

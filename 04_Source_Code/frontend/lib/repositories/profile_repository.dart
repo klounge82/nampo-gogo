@@ -4,13 +4,14 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import '../models/user.dart';
 import '../services/auth_service.dart';
+import '../config/api_config.dart';
 
 class ProfileRepository {
   final Dio _dio;
   final AuthService _authService;
 
   ProfileRepository({Dio? dio, AuthService? authService})
-      : _dio = dio ?? Dio(BaseOptions(baseUrl: 'http://10.0.2.2:18080')),
+      : _dio = dio ?? Dio(BaseOptions(baseUrl: ApiConfig.baseUrl)),
         _authService = authService ?? AuthService();
 
   Future<Options> _getHeaders() async {

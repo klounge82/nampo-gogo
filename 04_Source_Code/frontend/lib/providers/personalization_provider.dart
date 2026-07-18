@@ -1,11 +1,12 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import '../config/api_config.dart';
 
 class PersonalizationProvider extends ChangeNotifier {
   final Dio _dio;
 
   PersonalizationProvider({Dio? dio})
-      : _dio = dio ?? Dio(BaseOptions(baseUrl: 'http://10.0.2.2:18080'));
+      : _dio = dio ?? Dio(BaseOptions(baseUrl: ApiConfig.baseUrl));
 
   bool _usePersonalization = true;
   bool _preferNewPlaces = true;

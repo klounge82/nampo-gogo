@@ -1,13 +1,14 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import '../models/notification_model.dart';
+import '../config/api_config.dart';
 
 class NotificationRepository {
   final Dio _dio;
 
   NotificationRepository({Dio? dio})
       : _dio = dio ?? Dio(BaseOptions(
-          baseUrl: 'http://10.0.2.2:18080',
+          baseUrl: ApiConfig.baseUrl,
           connectTimeout: const Duration(seconds: 5),
           receiveTimeout: const Duration(seconds: 3),
         ));
