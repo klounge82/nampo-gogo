@@ -19,11 +19,14 @@ ENV HOME=/tmp
 COPY --from=builder --chown=10001:10001 /root/.local /tmp/.local
 ENV PATH=/tmp/.local/bin:$PATH
 
-# Copy application source code (excluding test files via .dockerignore or selective copy)
+# Copy application source code and migrations config
 COPY --chown=10001:10001 app ./app
+COPY --chown=10001:10001 alembic.ini ./alembic.ini
+COPY --chown=10001:10001 migrations ./migrations
 
 # Ensure correct file permissions for non-root user
 RUN chown -R 10001:10001 /app
+
 
 USER 10001:10001
 
