@@ -4,6 +4,4 @@
 .venv
 .git
 .env*
-alembic.ini
-migrations/
 Dockerfile
