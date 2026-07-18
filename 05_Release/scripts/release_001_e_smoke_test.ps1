@@ -6,8 +6,8 @@ param(
 )
 
 $dateStr = Get-Date -Format "yyyyMMddHHmmss"
-$testEmail = "release001e.$dateStr@example.com"
-$testNickname = "REL001E_TEST_$dateStr"
+$testEmail = "release001e.retry.$dateStr@example.com"
+$testNickname = "REL001E_RETRY_$dateStr"
 $testPassword = "Sec16_Pwd!@#$dateStr" # Strict 16+ chars secure password
 $testToken = ""
 $userId = ""
