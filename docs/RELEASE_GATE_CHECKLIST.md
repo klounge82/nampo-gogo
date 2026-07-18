@@ -35,9 +35,9 @@
 | **REL-GATE-RUN-04** | Google Maps | 구글 콘솔 SHA-1 패키지 사용량 제한 릴리즈 키 매핑 | **REQUIRED_BEFORE_RELEASE** | Maps Key 빌드 파라미터 적용 필요 |
 | **REL-001-DOMAIN**  | Network  | Backend API Domain과 HTTPS 암호화 확보 | **COMPLETED** | Railway HTTPS Endpoint 실주소 연동 및 헬스 통과 완료 |
 | **REL-001-SECRET**  | Security | Production Secret 안전 주입 상태 | **REQUIRED_BEFORE_RELEASE** | JWT_SECRET, DB 패스워드 등 안전 보관소 등록 필요 |
-| **REL-001-DATABASE**| Database | 실제 Production 데이터베이스 서버 기동 및 연결 확보 | **REQUIRED_BEFORE_RELEASE** | 운영 DB 서버 호스팅 셋업 및 config 연동 필요 |
+| **REL-001-DATABASE**| Database | 실제 Production 데이터베이스 서버 기동 및 연결 확보 | **BLOCKED** | 수동 백업 미확보로 Alembic Migration 실행 블록 상태 (MIGRATION_BLOCKED_BACKUP_REQUIRED) |
 | **REL-001-STORAGE** | Storage  | 사용자 이미지 영구 보관 (Persistent Disk) 매핑 | **REQUIRED_BEFORE_RELEASE** | 컨테이너 볼륨 Persistent Storage 연동 필요 |
-| **REL-001-BACKEND** | Backend  | Backend 실제 호스팅 및 실 배포 기동 완료 | **READY** | Gunicorn/Uvicorn 백엔드 컨테이너 실서버 구동 및 헬스 통과 완료 |
+| **REL-001-BACKEND** | Backend  | Backend 실제 호스팅 및 실 배포 기동 완료 | **BLOCKED** | 원격 DB 테이블 부재로 인한 API 500 오류 발생 상태 |
 | **REL-GATE-RUN-06** | Operations | 실 백업 자동 크론 구동 및 UptimeRobot 활성화 | **REQUIRED_BEFORE_RELEASE** | 스케줄러 등록 및 모니터링 링크 확인 |
 
 *(상태값 정의 기준: `COMPLETED`, `READY`, `REQUIRED_BEFORE_RELEASE`, `BLOCKED`, `NOT_APPLICABLE`)*

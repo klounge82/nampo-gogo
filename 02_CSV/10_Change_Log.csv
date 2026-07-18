@@ -47,6 +47,8 @@ CHG-038-C2-R1,v17.3,Nampo GoGo Railway Backend 최초 배포 실패를 수정 [C
 CHG-038-C2-R2,v17.4,Nampo GoGo Railway Backend Docker 빌드의 requirements.txt 누락 오류를 조사하고 최소 수정 [COMPLETED],04_Source_Code/backend/.dockerignore 파일 내에 requirements.txt 가 제외 규칙으로 등록되어 빌드 컨텍스트 누락이 유발된 것으로 판정하여 해당 규칙 제거 및 깃 허브 push 완료 (로컬 Docker 미구동에 따라 로컬 빌드는 미실행),2026-07-18
 CHG-038-C2-R3,v17.5,Nampo GoGo Railway Backend 실행 시 발생한 PostgreSQL 드라이버 누락 오류를 최소 수정 [COMPLETED],postgresql 동기식 커넥션을 위해 psycopg2-binary==2.9.12 패키지를 requirements.txt 에 추가 및 깃허브 push 완료 (로컬 Docker 미구동에 따라 로컬 빌드는 미실행),2026-07-18
 CHG-038-D,v18.0,Flutter Production API 운영주소 연결 및 Release 안전검증 [READY_FOR_REVIEW],Flutter Production API 기본주소를 Railway HTTPS Backend 주소로 연결 및 release 모드 로컬 주소(localhost 등) 차단 가드 이식 완료, 112개 info 경고 외 analyze/test 통과 확인,2026-07-18
+CHG-038-E,v18.1,Production Database Migration 안전검증 및 실제 API Smoke Test [BLOCKED_BACKUP_REQUIRED],수동 백업 덤프 생성 불가로 Alembic 마이그레이션 적용 보류 처리 및 원격 DB 스키마 부재에 따른 API 호출 500 에러 감지 (로컬 분석 및 스크립트화 완료),2026-07-18
+
 
 
 
