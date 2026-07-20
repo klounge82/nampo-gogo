@@ -40,3 +40,11 @@
 - **JWT_SECRET 및 DB 비밀번호**: `.env.production` 파일은 Git 버전 관리에 절대 포함하지 않으며, 접근 권한이 통제된 보안 서버 내에만 적치하여 로딩.
 - **Android Signing Key**: 실제 릴리즈 빌드를 유도하는 `key.properties` 파일 및 `.jks` 파일은 빌드 서버 로컬 디스크 내의 격리된 절대 경로에 배치하고 Git ignore 처리.
 - **Firebase 및 Maps Key**: API 키의 도용 방지를 위해 Google Cloud Console 및 Firebase Console 에서 반드시 `com.nampogogo.app` 패키지 제한 및 SHA 서명 지문 결합 제한을 필수로 적용하여 관리할 것.
+
+---
+
+## 4. 실 배포 API 검증 및 인수인계 현황 (`RELEASE-001-E-RETRY-02`)
+- **Backend 배포 상태**: Railway ACTIVE 배포 완료 (`https://backend-production-b07b.up.railway.app`).
+- **테이블명 불일치 이슈**: `UserAuth` -> `user_auths` 해소 완료.
+- **인증 및 계정 관리 API**: 회원가입, 중복 방어(400), 로그인, 내 정보 조회(`GET /users/me`), 계정 논리 탈퇴(`DELETE /users/me`) 및 탈퇴 사용자 로그인 차단(403) 정상 검증 완료.
+- **매장 시드 데이터**: 현재 `stores` 0건으로 매장 Seed Data 투입 작업(`RELEASE-001-E-SEED-01`) 예정.

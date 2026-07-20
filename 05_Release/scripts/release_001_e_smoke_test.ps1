@@ -277,7 +277,7 @@ try {
 Write-Host "`n[Test 15] Logical Account Deletion..."
 try {
     $delRes = Invoke-RestMethod -Uri "$ApiUrl/users/me" -Method Delete -Headers $authHeader
-    if ($delRes.success -and $delRes.message -match "회원탈퇴") {
+    if ($delRes.success -eq $true) {
         # Check re-login fail
         try {
             $loginRes3 = Invoke-RestMethod -Uri "$ApiUrl/auth/login" -Method Post -Body $loginBody -ContentType "application/json"

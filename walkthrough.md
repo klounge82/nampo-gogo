@@ -1,60 +1,47 @@
-# Walkthrough - UserAuth SQLAlchemy 모델과 Production Migration 테이블명 불일치 수정 (RELEASE-001-E-REMEDY-02)
+# Walkthrough - 회원가입·로그인·현재 사용자 API 재검증 및 매장 Seed Data 필요성 판정 (RELEASE-001-E-RETRY-02)
 
-본 문서는 `RELEASE-001-E-REMEDY-02` 작업에 따른 변경 사항, 테스트 방법 및 검증 결과를 기록한 문서입니다.
-
----
-
-## 1. 개요 및 변경 사항 (Changes Made)
-
-운영 환경 배포 및 마이그레이션 적용 후, 회원가입 API 호출 시 `relation "users_auth" does not exist` 에러와 함께 HTTP 500 응답이 발생하는 블로커 이슈가 식별되었습니다.
-이는 SQLAlchemy `UserAuth` 모델의 테이블명(`users_auth`)과 실제 운영 DB의 테이블명(`user_auths`)이 상이하여 발생한 현상입니다.
-
-실제 DB 스키마 및 Alembic 마이그레이션 이력(`001_initial_schema.py`)에서 `user_auths`가 표준으로 적용되어 있으므로, SQLAlchemy 모델의 정의를 다음과 같이 수정하여 일관성을 확보했습니다.
-
-### 수정 파일:
-- **[MODIFY]** [models.py](file:///D:/dev/Nampo_GoGo_Project/04_Source_Code/backend/app/models.py#L55)
-  - `UserAuth` 모델의 `__tablename__` 값을 기존 `"users_auth"`에서 `"user_auths"`로 변경하였습니다.
+본 문서는 `RELEASE-001-E-REMEDY-02` 작업에 따른 `UserAuth` 테이블명 정합 완료 후, 실제 운영 Railway API에서 진행된 `RELEASE-001-E-RETRY-02` 스모크 테스트 및 검증 결과를 기록한 종합 문서입니다.
 
 ---
 
-## 2. 테스트 및 검증 결과 (Validation Results)
+## 1. 개요 및 변경 사항 (Overview)
 
-### 1) Python 컴파일 및 Alembic 마이그레이션 점검
-로컬 환경에서 Python 컴파일 검사 및 Alembic 상태 점검을 성공적으로 수행하였습니다.
-- **Python 컴파일 결과**: 구문 오류 없음 (`python -m compileall app` 성공)
-- **Alembic HEAD 상태**: 단일 HEAD (`001_initial_schema`가 최신 HEAD로 정상 작동)
-
-### 2) 데이터베이스 스키마 및 모델 무결성 회귀 테스트 추가
-[test_db_schema.py](file:///D:/dev/Nampo_GoGo_Project/04_Source_Code/backend/test_db_schema.py) 파일을 작성하여 회귀 테스트를 보완하였습니다. 검증 항목은 다음과 같습니다.
-1. `UserAuth.__table__.name`이 최종 기준인 `'user_auths'`와 일치하는가?
-2. SQLAlchemy Metadata에 인증 테이블이 중복으로 존재하지 않는가? (`users_auth`와 `user_auths` 동시 생성 차단)
-3. 외래키(Foreign Key) 제약 조건이 실제 `users.id` 테이블을 정상적으로 바라보고 있는가?
-4. 백엔드 `app/` 코드 내에 더 이상 존재하지 않는 테이블명인 `'users_auth'` 문자열을 참조하는 로직이 없는가?
-
-### 3) 테스트 실행 결과
-- `test_production_guards.py` 및 신규 추가된 `test_db_schema.py`가 모두 에러 없이 **PASS** 하였습니다.
-```
-=== STARTING PRODUCTION GUARDS UNIT TESTS ===
-[PASS] APP_ENV correctly set to production.
-[PASS] CORS allowed_origins correctly restricted.
-=== ALL PRODUCTION GUARDS UNIT TESTS PASSED ===
-
-=== STARTING DATABASE SCHEMA VERIFICATION TESTS ===
-UserAuth table name: user_auths
-[PASS] UserAuth.__table__.name matches 'user_auths'.
-[PASS] No duplicate authentication tables in Metadata.
-[PASS] Foreign Key constraint target is correct ('users.id').
-[PASS] No invalid 'users_auth' references in app directory.
-=== ALL DATABASE SCHEMA VERIFICATION TESTS PASSED ===
-```
+Railway ACTIVE 운영 서버(`https://backend-production-b07b.up.railway.app`)를 대상으로 인증 Flow 전체(회원가입, 중복 가입 방어, 로그인, 현재 사용자 Profile 조회, 계정 탈퇴)와 매장 데이터 존재 여부를 실제 API 호출을 통해 재검증했습니다.
 
 ---
 
-## 3. 관련 문서 갱신
+## 2. API 스모크 테스트 실행 결과 (Smoke Test Results)
 
-- **[MODIFY]** [RELEASE_GATE_CHECKLIST.md](file:///D:/dev/Nampo_GoGo_Project/docs/RELEASE_GATE_CHECKLIST.md#L40)
-  - `REL-001-BACKEND` 항목의 상태를 `BLOCKED`에서 `COMPLETED`로 업데이트하였습니다.
-- **[MODIFY]** [PRODUCTION_READINESS_REPORT.md](file:///D:/dev/Nampo_GoGo_Project/docs/PRODUCTION_READINESS_REPORT.md#L52)
-  - 백엔드 실 배포 및 주소 연동 준비 상태를 `COMPLETED`로 변경하고 테이블명 불일치 해소를 기록했습니다.
-- **[MODIFY]** [10_Change_Log.csv](file:///D:/dev/Nampo_GoGo_Project/02_CSV/10_Change_Log.csv#L53)
-  - `CHG-038-E-R2` 작업 내역을 반영하여 상태를 `READY_FOR_DEPLOY`로 갱신했습니다.
+`05_Release/scripts/release_001_e_smoke_test.ps1` 및 파이썬 검증 스크립트를 통해 전체 15개 항목에 대한 검증을 수행했습니다.
+
+| 테스트 번호 | 검증 항목 | 대상 API / Endpoint | 결과 | 상세 비고 |
+| :--- | :--- | :--- | :--- | :--- |
+| **Test 1** | Health Checks | `GET /health/live`, `GET /health/ready` | **PASSED** | status=ok, environment=production, database=connected |
+| **Test 2** | 회원가입 (Sign Up) | `POST /auth/signup` | **PASSED** | HTTP 500 오류 해소, `relation "users_auth" does not exist` 발생하지 않음 |
+| **Test 3** | 중복 회원가입 방어 | `POST /auth/signup` | **PASSED** | 동일 이메일 재가입 시 HTTP 400 정상 차단 |
+| **Test 4** | 로그인 (Login) | `POST /auth/login` | **PASSED** | Access Token (Bearer) 발급 정상 |
+| **Test 5** | 현재 사용자 프로필 조회 | `GET /users/me` | **PASSED** | HTTP 200 OK, 비밀번호/해시 미노출 보안 검증 |
+| **Test 6** | 잘못된 Token 방어 | `GET /users/me` | **PASSED** | HTTP 401 Unauthorized 거절 |
+| **Test 7 & 8** | 매장 목록 및 상세 | `GET /stores` | **SKIPPED** | 매장 데이터 0건 (`NO_STORE_DATA` / `SKIPPED_NO_STORE_DATA`) |
+| **Test 9~11** | 즐겨찾기 CRUD | `POST/DELETE /favorites` | **SKIPPED** | 매장 데이터 미존재로 Skip |
+| **Test 12~13**| 미션 검증 & 리뷰 | `POST /stores/{id}/reviews` | **SKIPPED** | 매장 데이터 미존재로 Skip |
+| **Test 14** | 재로그인 및 데이터 유지 | `POST /auth/login` | **PASSED** | 재로그인 및 유저 정보 유지 확인 |
+| **Test 15** | 계정 논리 탈퇴 (Withdraw) | `DELETE /users/me` | **PASSED** | 탈퇴 성공 후 해당 계정 재로그인 시 HTTP 403 차단 |
+
+---
+
+## 3. Flutter 클라이언트 검증 결과 (Frontend Checks)
+
+Backend API 정합 완료 후 Flutter 클라이언트 분석 및 테스트를 수행하였습니다.
+- `flutter pub get`: Got dependencies! 성공
+- `flutter analyze`: **0 Errors** (110 info/warning 경고 항목만 존재)
+- `flutter test`: **All tests passed!**
+
+---
+
+## 4. 최종 판단 및 다음 단계 (Final Status & Next Steps)
+
+- **최종 상태**: **`NO_STORE_DATA`**
+  - 회원가입, 로그인, 현재 사용자 조회, 계정 탈퇴 등 모든 인증 API는 HTTP 500 없이 100% 정상 가동함을 확인했습니다.
+  - 다만 `GET /stores` 호출 결과 운영 DB의 `stores` 테이블이 비어 있어(0건), 즐겨찾기/리뷰/미션 관련 E2E 테스트가 진행되지 못했습니다.
+- **다음 작업 ID**: **`RELEASE-001-E-SEED-01`** (매장 Seed Data 투입 작업)

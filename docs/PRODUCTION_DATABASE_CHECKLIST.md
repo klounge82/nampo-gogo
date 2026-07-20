@@ -29,4 +29,11 @@
 
 ## 3. Database 복구 가이드라인 (Restore)
 - **무조건적 덮어쓰기 금지**: 운영 DB 훼손 시 기존 DB를 바로 드롭하지 않고, 임시 복구용 데이터베이스(`nampo_recovery_db`)를 별도 생성하여 우선 restore 할 것을 강력 권장합니다.
-- **RESTORE 강제 가드**: `db_restore.sh` 수행 시 Target 이 `production` 인 경우, 반드시 `--confirm-production-restore` 옵션을 직접 입력하도록 설계하여 관리자 실수에 따른 대형 사고를 방지합니다.
+- **RESTORE 강제 가드**: `db_restore.sh` 수행 시 Target 이 `production` 인 경우, 반드시 `--confirm-production-restore` 옵션을 실제 입력하도록 설계하여 관리자 실수에 따른 대형 사고를 방지합니다.
+
+---
+
+## 4. 테이블 정합성 및 실 API Smoke Test 검증 상태
+- **테이블 정합성 (`UserAuth`)**: `user_auths`로 정합성 맞춤 완료 (`RELEASE-001-E-REMEDY-02`).
+- **인증 API 스모크 테스트**: 회원가입, 중복 방어(HTTP 400), 로그인, `/users/me` 프로필 조회, 계정 논리 탈퇴(`DELETE /users/me`) 및 탈퇴 후 접근 차단(HTTP 403) 100% 정상 작동.
+- **초기 시드 데이터 상태**: 현재 `stores` 테이블 데이터 0건 (`NO_STORE_DATA`), 추후 매장/리뷰/즐겨찾기 E2E 검증을 위해 Seed Data 투입 필요 (`RELEASE-001-E-SEED-01`).
