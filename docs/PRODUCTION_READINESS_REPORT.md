@@ -49,4 +49,4 @@
 3. **서드파티 연동**: 실제 Production Firebase 및 Google Maps Release API Key 발급/제한.
 4. **스토어 정책**: **[COMPLETED]** 개인정보처리방침/이용약관/계정삭제/고객지원 URL 5종 Netlify 실배포 및 Flutter 앱 `ProductionConfig` 바인딩 완료.
 5. **운영 데이터베이스**: **[COMPLETED]** 실제 Production 데이터베이스 서버 호스팅 및 초기 Alembic Migration(001_initial_schema) 실행 완료.
-6. **백엔드 실 배포 및 주소 연동**: **[BLOCKED]** Railway HTTPS Backend 최초 배포 및 Flutter 앱 API 연결 완료, 단 회원가입 시 users_auth 와 user_auths 간의 테이블명 불일치로 인한 API 500 오류 해결 필요.
+6. **백엔드 실 배포 및 주소 연동**: **[COMPLETED]** Railway HTTPS Backend 최초 배포 및 Flutter 앱 API 연결 완료. 회원가입 시 users_auth 와 user_auths 간의 테이블명 불일치 오류 해결 완료.

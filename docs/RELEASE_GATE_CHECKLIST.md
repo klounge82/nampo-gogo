@@ -37,7 +37,7 @@
 | **REL-001-SECRET**  | Security | Production Secret 안전 주입 상태 | **REQUIRED_BEFORE_RELEASE** | JWT_SECRET, DB 패스워드 등 안전 보관소 등록 필요 |
 | **REL-001-DATABASE**| Database | 실제 Production 데이터베이스 서버 기동 및 연결 확보 | **COMPLETED** | 초기 Alembic Migration(001_initial_schema) 적용 완료 |
 | **REL-001-STORAGE** | Storage  | 사용자 이미지 영구 보관 (Persistent Disk) 매핑 | **REQUIRED_BEFORE_RELEASE** | 컨테이너 볼륨 Persistent Storage 연동 필요 |
-| **REL-001-BACKEND** | Backend  | Backend 실제 호스팅 및 실 배포 기동 완료 | **BLOCKED** | 회원가입 시 users_auth 와 user_auths 간의 테이블명 불일치로 인한 API 500 에러 발생 |
+| **REL-001-BACKEND** | Backend  | Backend 실제 호스팅 및 실 배포 기동 완료 | **COMPLETED** | - |
 | **REL-GATE-RUN-06** | Operations | 실 백업 자동 크론 구동 및 UptimeRobot 활성화 | **REQUIRED_BEFORE_RELEASE** | 스케줄러 등록 및 모니터링 링크 확인 |
 
 *(상태값 정의 기준: `COMPLETED`, `READY`, `REQUIRED_BEFORE_RELEASE`, `BLOCKED`, `NOT_APPLICABLE`)*

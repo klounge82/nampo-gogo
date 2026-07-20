@@ -52,7 +52,7 @@ class User(Base):
     payments = relationship("Payment", back_populates="user", cascade="all, delete-orphan")
 
 class UserAuth(Base):
-    __tablename__ = "users_auth"
+    __tablename__ = "user_auths"
 
     auth_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, unique=True)

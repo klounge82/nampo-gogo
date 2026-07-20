@@ -50,6 +50,7 @@ CHG-038-D,v18.0,Flutter Production API 운영주소 연결 및 Release 안전검
 CHG-038-E,v18.1,Production Database Migration 안전검증 및 실제 API Smoke Test [BLOCKED_BACKUP_REQUIRED],수동 백업 덤프 생성 불가로 Alembic 마이그레이션 적용 보류 처리 및 원격 DB 스키마 부재에 따른 API 호출 500 에러 감지 (로컬 분석 및 스크립트화 완료),2026-07-18
 CHG-038-E-R1A,v18.2,Railway 백업 미지원 요금제의 빈 운영 DB 초기 Migration 안전 준비 [READY_FOR_REVIEW],초기 앱 테이블 및 데이터 0건 Baseline 문서화 완료, Dockerfile에 alembic.ini 및 migrations 복사 추가 완료, 컨테이너 Pre-Deploy 명령(alembic upgrade head) 확정 완료,2026-07-18
 CHG-038-E-RETRY,v18.3,Production Migration 적용 확인 및 핵심 API 실제 Smoke Test 재실행 [BLOCKED_API_ERROR],Alembic 마이그레이션 적용 배포 완료 후 회원가입 API 테스트 도중 users_auth 테이블명 불일치로 인한 500 에러 발생 식별 및 블로커 등록,2026-07-18
+CHG-038-E-R2,v18.4,UserAuth SQLAlchemy 모델과 Production Migration 테이블명 불일치 수정 [READY_FOR_DEPLOY],Alembic 초기 Migration에서 생성된 인증 테이블명과 SQLAlchemy UserAuth 모델의 __tablename__ 불일치로 회원가입 API가 HTTP 500을 반환한 문제를 해결하기 위해 모델 또는 신규 비파괴 Migration으로 테이블명을 일치시킴,2026-07-18
 
 
 

@@ -8,6 +8,7 @@ def test_production_guards():
     os.environ["APP_ENV"] = "production"
     os.environ["PAYMENT_MODE"] = "live"
     os.environ["ALLOWED_ORIGINS"] = "https://nampogogo.com,https://admin.nampogogo.com"
+    os.environ["JWT_SECRET"] = "dummy_secret_for_testing_production_guards"
     
     # Import main under simulated environment variables
     try:
