@@ -23,6 +23,7 @@ ENV PATH=/tmp/.local/bin:$PATH
 COPY --chown=10001:10001 app ./app
 COPY --chown=10001:10001 alembic.ini ./alembic.ini
 COPY --chown=10001:10001 migrations ./migrations
+COPY --chown=10001:10001 scripts ./scripts
 
 # Ensure correct file permissions for non-root user
 RUN chown -R 10001:10001 /app
