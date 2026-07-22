@@ -7,11 +7,15 @@ import '../providers/auth_provider.dart';
 class ReviewWriteScreen extends StatefulWidget {
   final String storeId;
   final String storeName;
+  final String? verificationId;
+  final String? guestId;
 
   const ReviewWriteScreen({
     super.key,
     required this.storeId,
     required this.storeName,
+    this.verificationId,
+    this.guestId,
   });
 
   @override
@@ -21,7 +25,7 @@ class ReviewWriteScreen extends StatefulWidget {
 class _ReviewWriteScreenState extends State<ReviewWriteScreen> {
   final ReviewRepository _reviewRepository = ReviewRepository();
   final TextEditingController _contentController = TextEditingController();
-  
+
   int _rating = 5;
   bool _isSubmitting = false;
   String _inputText = '';
@@ -60,8 +64,10 @@ class _ReviewWriteScreenState extends State<ReviewWriteScreen> {
         rating: _rating,
         content: cleanContent,
         userId: userId,
+        guestId: widget.guestId,
+        verificationId: widget.verificationId,
       );
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -70,12 +76,21 @@ class _ReviewWriteScreenState extends State<ReviewWriteScreen> {
             behavior: SnackBarBehavior.floating,
           ),
         );
-        Navigator.of(context).pop(true); // Return true to trigger refresh on list
+        Navigator.of(
+          context,
+        ).pop(true); // Return true to trigger refresh on list
       }
     } catch (e) {
       setState(() => _isSubmitting = false);
-      final cleanMsg = e.toString().replaceAll('Exception:', '').trim();
-      _showWarningDialog('제출 실패', cleanMsg);
+      final cleanMsg = e
+          .toString()
+          .replaceAll('Exception:', '')
+          .replaceAll('DioException', '')
+          .trim();
+      _showWarningDialog(
+        '제출 실패',
+        cleanMsg.isEmpty ? '리뷰를 등록하지 못했습니다. 잠시 후 다시 시도해 주세요.' : cleanMsg,
+      );
     }
   }
 
@@ -83,7 +98,13 @@ class _ReviewWriteScreenState extends State<ReviewWriteScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.secondary)),
+        title: Text(
+          title,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: AppColors.secondary,
+          ),
+        ),
         content: Text(message),
         actions: [
           TextButton(
@@ -102,7 +123,10 @@ class _ReviewWriteScreenState extends State<ReviewWriteScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('리뷰 작성', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          '리뷰 작성',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
         elevation: 0.5,
@@ -115,7 +139,11 @@ class _ReviewWriteScreenState extends State<ReviewWriteScreen> {
             // Store Title Info
             Text(
               '${widget.storeName}',
-              style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+              style: const TextStyle(
+                fontSize: 18.0,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
             ),
             const SizedBox(height: 4.0),
             const Text(
@@ -123,9 +151,16 @@ class _ReviewWriteScreenState extends State<ReviewWriteScreen> {
               style: TextStyle(fontSize: 12.0, color: AppColors.textSecondary),
             ),
             const SizedBox(height: 24.0),
-            
+
             // Star Input Widget
-            const Text('별점 평가', style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+            const Text(
+              '별점 평가',
+              style: TextStyle(
+                fontSize: 14.0,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
             const SizedBox(height: 8.0),
             Center(
               child: Row(
@@ -134,7 +169,9 @@ class _ReviewWriteScreenState extends State<ReviewWriteScreen> {
                   final starVal = index + 1;
                   final isFilled = starVal <= _rating;
                   return IconButton(
-                    onPressed: _isSubmitting ? null : () => setState(() => _rating = starVal),
+                    onPressed: _isSubmitting
+                        ? null
+                        : () => setState(() => _rating = starVal),
                     icon: Icon(
                       isFilled ? Icons.star : Icons.star_border,
                       color: isFilled ? Colors.amber : Colors.grey.shade400,
@@ -147,7 +184,14 @@ class _ReviewWriteScreenState extends State<ReviewWriteScreen> {
             const SizedBox(height: 24.0),
 
             // Content Area
-            const Text('리뷰 본문', style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+            const Text(
+              '리뷰 본문',
+              style: TextStyle(
+                fontSize: 14.0,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
             const SizedBox(height: 8.0),
             TextField(
               controller: _contentController,
@@ -156,8 +200,12 @@ class _ReviewWriteScreenState extends State<ReviewWriteScreen> {
               enabled: !_isSubmitting,
               style: const TextStyle(fontSize: 13.0),
               decoration: InputDecoration(
-                hintText: '리뷰 내용은 최소 10자 이상 작성해야 합니다. 광고성이나 악의적인 허위 사실 유포 시 리뷰가 삭제될 수 있습니다.',
-                hintStyle: const TextStyle(fontSize: 12.0, color: AppColors.textHint),
+                hintText:
+                    '리뷰 내용은 최소 10자 이상 작성해야 합니다. 광고성이나 악의적인 허위 사실 유포 시 리뷰가 삭제될 수 있습니다.',
+                hintStyle: const TextStyle(
+                  fontSize: 12.0,
+                  color: AppColors.textHint,
+                ),
                 fillColor: AppColors.surface,
                 filled: true,
                 border: OutlineInputBorder(
@@ -166,12 +214,15 @@ class _ReviewWriteScreenState extends State<ReviewWriteScreen> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.0),
-                  borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                  borderSide: const BorderSide(
+                    color: AppColors.primary,
+                    width: 1.5,
+                  ),
                 ),
                 contentPadding: const EdgeInsets.all(16.0),
               ),
             ),
-            
+
             // Text count info
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -179,8 +230,10 @@ class _ReviewWriteScreenState extends State<ReviewWriteScreen> {
                 Text(
                   '${_inputText.trim().length} / 최소 10자',
                   style: TextStyle(
-                    fontSize: 11.0, 
-                    color: _inputText.trim().length >= 10 ? Colors.green : AppColors.textHint
+                    fontSize: 11.0,
+                    color: _inputText.trim().length >= 10
+                        ? Colors.green
+                        : AppColors.textHint,
                   ),
                 ),
               ],
@@ -196,18 +249,27 @@ class _ReviewWriteScreenState extends State<ReviewWriteScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   disabledBackgroundColor: Colors.grey.shade300,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
                   elevation: 0,
                 ),
                 child: _isSubmitting
                     ? const SizedBox(
                         width: 20.0,
                         height: 20.0,
-                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.0),
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2.0,
+                        ),
                       )
                     : const Text(
                         '리뷰 등록 완료',
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14.0),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14.0,
+                        ),
                       ),
               ),
             ),

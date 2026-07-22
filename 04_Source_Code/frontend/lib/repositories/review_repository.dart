@@ -72,7 +72,7 @@ class ReviewRepository {
   ];
 
   ReviewRepository({ReviewService? reviewService})
-      : _reviewService = reviewService ?? ReviewService();
+    : _reviewService = reviewService ?? ReviewService();
 
   // Create Review
   Future<Review> createReview({
@@ -80,6 +80,8 @@ class ReviewRepository {
     required int rating,
     required String content,
     String? userId,
+    String? guestId,
+    String? verificationId,
     List<String>? imageUrls,
   }) async {
     try {
@@ -88,28 +90,35 @@ class ReviewRepository {
         rating: rating,
         content: content,
         userId: userId,
+        guestId: guestId,
+        verificationId: verificationId,
         imageUrls: imageUrls,
       );
       return Review.fromJson(res);
     } catch (e) {
       if (kDebugMode) {
-        print('ReviewRepository: Failed to create review online. Simulating offline. Error: $e');
+        print(
+          'ReviewRepository: Failed to create review online. Simulating offline. Error: $e',
+        );
       }
 
       final newId = 'rev_mock_${DateTime.now().millisecondsSinceEpoch}';
       final newRev = Review(
         id: newId,
-        userId: userId ?? 'usr_mock_999',
+        userId: userId,
+        guestId: guestId,
         storeId: storeId,
         rating: rating,
         content: content,
         isDeleted: false,
+        verificationId: verificationId,
+        verificationBadge: verificationId != null ? 'QR 방문 인증' : null,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
         user: User(
           id: userId ?? 'usr_mock_999',
           email: 'tester@gogo.com',
-          nickname: '나(오프라인)',
+          nickname: userId != null ? '남포고고동이' : '게스트',
           role: 'member',
           status: 'active',
           currentPoints: 0,
@@ -118,7 +127,7 @@ class ReviewRepository {
         ),
         store: Place(
           id: storeId,
-          name: storeId.contains('jagal') ? '자갈치 신선 횟집' : '남포 숯불갈비',
+          name: storeId.contains('jagal') ? '자갈치 신선 횟집' : 'K-Lounge',
           category: '음식점',
           rating: 4.5,
           address: '부산 중구 남포길 1',
@@ -133,30 +142,139 @@ class ReviewRepository {
     }
   }
 
-  // Fetch Store Reviews
-  Future<List<Review>> getStoreReviews(String storeId, {int skip = 0, int limit = 10}) async {
+  // QR Verification
+  Future<Map<String, dynamic>> verifyStoreQR({
+    required String storeId,
+    required String qrToken,
+    String? userId,
+    String? guestId,
+  }) async {
     try {
-      final list = await _reviewService.fetchStoreReviews(storeId, skip: skip, limit: limit);
-      return list.map((json) => Review.fromJson(json as Map<String, dynamic>)).toList();
+      return await _reviewService.verifyStoreQR(
+        storeId: storeId,
+        qrToken: qrToken,
+        userId: userId,
+        guestId: guestId,
+      );
     } catch (e) {
       if (kDebugMode) {
-        print('ReviewRepository: Failed to load store reviews. Simulating offline. Error: $e');
+        print('ReviewRepository: verifyStoreQR error: $e');
       }
-      return _mockReviews.where((r) => r.storeId == storeId && !r.isDeleted).toList();
+      rethrow;
+    }
+  }
+
+  // Attraction Location Verification
+  Future<Map<String, dynamic>> verifyAttractionLocation({
+    required String storeId,
+    required double latitude,
+    required double longitude,
+    String? userId,
+    String? guestId,
+  }) async {
+    try {
+      return await _reviewService.verifyAttractionLocation(
+        storeId: storeId,
+        latitude: latitude,
+        longitude: longitude,
+        userId: userId,
+        guestId: guestId,
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('ReviewRepository: verifyAttractionLocation error: $e');
+      }
+      rethrow;
+    }
+  }
+
+  // Attraction Manual Visit Verification
+  Future<Map<String, dynamic>> verifyAttractionManualVisit({
+    required String storeId,
+    required DateTime visitDate,
+    String? userId,
+    String? guestId,
+  }) async {
+    try {
+      return await _reviewService.verifyAttractionManualVisit(
+        storeId: storeId,
+        visitDate: visitDate,
+        userId: userId,
+        guestId: guestId,
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('ReviewRepository: verifyAttractionManualVisit error: $e');
+      }
+      rethrow;
+    }
+  }
+
+  // Active Verification Lookup
+  Future<Map<String, dynamic>?> getActiveVerification({
+    required String storeId,
+    String? userId,
+    String? guestId,
+  }) async {
+    return await _reviewService.getActiveVerification(
+      storeId: storeId,
+      userId: userId,
+      guestId: guestId,
+    );
+  }
+
+  // Fetch Store Reviews
+  Future<List<Review>> getStoreReviews(
+    String storeId, {
+    int skip = 0,
+    int limit = 10,
+  }) async {
+    try {
+      final list = await _reviewService.fetchStoreReviews(
+        storeId,
+        skip: skip,
+        limit: limit,
+      );
+      return list
+          .map((json) => Review.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      if (kDebugMode) {
+        print(
+          'ReviewRepository: Failed to load store reviews. Simulating offline. Error: $e',
+        );
+      }
+      return _mockReviews
+          .where((r) => r.storeId == storeId && !r.isDeleted)
+          .toList();
     }
   }
 
   // Fetch My Reviews
-  Future<List<Review>> getMyReviews({String? userId, int skip = 0, int limit = 10}) async {
+  Future<List<Review>> getMyReviews({
+    String? userId,
+    int skip = 0,
+    int limit = 10,
+  }) async {
     try {
-      final list = await _reviewService.fetchMyReviews(userId: userId, skip: skip, limit: limit);
-      return list.map((json) => Review.fromJson(json as Map<String, dynamic>)).toList();
+      final list = await _reviewService.fetchMyReviews(
+        userId: userId,
+        skip: skip,
+        limit: limit,
+      );
+      return list
+          .map((json) => Review.fromJson(json as Map<String, dynamic>))
+          .toList();
     } catch (e) {
       if (kDebugMode) {
-        print('ReviewRepository: Failed to load my reviews. Simulating offline. Error: $e');
+        print(
+          'ReviewRepository: Failed to load my reviews. Simulating offline. Error: $e',
+        );
       }
       final targetUid = userId ?? 'usr_mock_999';
-      return _mockReviews.where((r) => r.userId == targetUid && !r.isDeleted).toList();
+      return _mockReviews
+          .where((r) => r.userId == targetUid && !r.isDeleted)
+          .toList();
     }
   }
 
@@ -177,7 +295,9 @@ class ReviewRepository {
       return Review.fromJson(res);
     } catch (e) {
       if (kDebugMode) {
-        print('ReviewRepository: Failed to update review. Simulating offline. Error: $e');
+        print(
+          'ReviewRepository: Failed to update review. Simulating offline. Error: $e',
+        );
       }
 
       final index = _mockReviews.indexWhere((r) => r.id == reviewId);
@@ -209,7 +329,9 @@ class ReviewRepository {
       return res['success'] as bool? ?? false;
     } catch (e) {
       if (kDebugMode) {
-        print('ReviewRepository: Failed to delete review. Simulating offline. Error: $e');
+        print(
+          'ReviewRepository: Failed to delete review. Simulating offline. Error: $e',
+        );
       }
 
       final index = _mockReviews.indexWhere((r) => r.id == reviewId);

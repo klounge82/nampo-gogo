@@ -37,11 +37,15 @@ class ReviewImage {
 
 class Review {
   final String id;
-  final String userId;
+  final String? userId;
+  final String? guestId;
   final String storeId;
   final int rating;
   final String content;
   final bool isDeleted;
+  final String? verificationId;
+  final String? verificationMethod;
+  final String? verificationBadge;
   final DateTime createdAt;
   final DateTime updatedAt;
   final User user;
@@ -50,11 +54,15 @@ class Review {
 
   Review({
     required this.id,
-    required this.userId,
+    this.userId,
+    this.guestId,
     required this.storeId,
     required this.rating,
     required this.content,
     required this.isDeleted,
+    this.verificationId,
+    this.verificationMethod,
+    this.verificationBadge,
     required this.createdAt,
     required this.updatedAt,
     required this.user,
@@ -70,11 +78,15 @@ class Review {
 
     return Review(
       id: json['id'] as String? ?? '',
-      userId: json['user_id'] as String? ?? '',
+      userId: json['user_id'] as String?,
+      guestId: json['guest_id'] as String?,
       storeId: json['store_id'] as String? ?? '',
       rating: json['rating'] as int? ?? 5,
       content: json['content'] as String? ?? '',
       isDeleted: json['is_deleted'] as bool? ?? false,
+      verificationId: json['verification_id'] as String?,
+      verificationMethod: json['verification_method'] as String?,
+      verificationBadge: json['verification_badge'] as String?,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : DateTime.now(),
@@ -93,10 +105,14 @@ class Review {
     return {
       'id': id,
       'user_id': userId,
+      'guest_id': guestId,
       'store_id': storeId,
       'rating': rating,
       'content': content,
       'is_deleted': isDeleted,
+      'verification_id': verificationId,
+      'verification_method': verificationMethod,
+      'verification_badge': verificationBadge,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
       'user': user.toJson(),

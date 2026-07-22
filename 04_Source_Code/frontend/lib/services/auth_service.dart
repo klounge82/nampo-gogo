@@ -6,22 +6,24 @@ class AuthService {
   final FlutterSecureStorage _storage;
 
   AuthService({FlutterSecureStorage? storage})
-      : _storage = storage ?? const FlutterSecureStorage();
+    : _storage = storage ?? const FlutterSecureStorage();
 
   // Keys for storage
   static const String _keyAccessToken = 'access_token';
   static const String _keyRefreshToken = 'refresh_token';
 
   // Helper to get Dio client config from ApiService
-  Dio get _dio => Dio(BaseOptions(
-        baseUrl: ApiConfig.baseUrl,
-        connectTimeout: ApiConfig.connectTimeout,
-        receiveTimeout: ApiConfig.receiveTimeout,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      ));
+  Dio get _dio => Dio(
+    BaseOptions(
+      baseUrl: ApiConfig.baseUrl,
+      connectTimeout: ApiConfig.connectTimeout,
+      receiveTimeout: ApiConfig.receiveTimeout,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    ),
+  );
 
   // Signup API Call
   Future<Map<String, dynamic>> signUp({
@@ -30,12 +32,11 @@ class AuthService {
     required String nickname,
   }) async {
     try {
-      final response = await _dio.post('/auth/signup', data: {
-        'email': email,
-        'password': password,
-        'nickname': nickname,
-      });
-      
+      final response = await _dio.post(
+        '/auth/signup',
+        data: {'email': email, 'password': password, 'nickname': nickname},
+      );
+
       if (response.statusCode == 201 && response.data != null) {
         return response.data as Map<String, dynamic>;
       }
@@ -51,18 +52,24 @@ class AuthService {
     required String password,
   }) async {
     try {
-      final response = await _dio.post('/auth/login', data: {
-        'email': email,
-        'password': password,
-      });
+      final response = await _dio.post(
+        '/auth/login',
+        data: {'email': email, 'password': password},
+      );
 
       if (response.statusCode == 200 && response.data != null) {
         final data = response.data as Map<String, dynamic>;
-        
+
         // Save tokens securely
-        await _storage.write(key: _keyAccessToken, value: data['access_token'] as String);
-        await _storage.write(key: _keyRefreshToken, value: data['refresh_token'] as String);
-        
+        await _storage.write(
+          key: _keyAccessToken,
+          value: data['access_token'] as String,
+        );
+        await _storage.write(
+          key: _keyRefreshToken,
+          value: data['refresh_token'] as String,
+        );
+
         return data;
       }
       throw Exception('로그인 실패: 잘못된 응답');
@@ -82,11 +89,17 @@ class AuthService {
 
       if (response.statusCode == 200 && response.data != null) {
         final data = response.data as Map<String, dynamic>;
-        
+
         // Save new tokens
-        await _storage.write(key: _keyAccessToken, value: data['access_token'] as String);
-        await _storage.write(key: _keyRefreshToken, value: data['refresh_token'] as String);
-        
+        await _storage.write(
+          key: _keyAccessToken,
+          value: data['access_token'] as String,
+        );
+        await _storage.write(
+          key: _keyRefreshToken,
+          value: data['refresh_token'] as String,
+        );
+
         return data;
       }
       throw Exception('토큰 갱신 실패');
@@ -102,7 +115,7 @@ class AuthService {
       if (refreshToken == null) {
         return null; // No session stored
       }
-      
+
       // Attempt to refresh & validate session
       final sessionData = await refreshTokens(refreshToken);
       return sessionData;
@@ -119,7 +132,22 @@ class AuthService {
     await _storage.delete(key: _keyRefreshToken);
   }
 
+  static const String _keyGuestId = 'guest_id';
+
+  // Persistent Guest ID in secure storage
+  Future<String> getOrCreateGuestId() async {
+    String? guestId = await _storage.read(key: _keyGuestId);
+    if (guestId == null || guestId.isEmpty) {
+      guestId =
+          'guest_${DateTime.now().millisecondsSinceEpoch}_${(1000 + (DateTime.now().microsecondsSinceEpoch % 9000))}';
+      await _storage.write(key: _keyGuestId, value: guestId);
+    }
+    return guestId;
+  }
+
   // Read stored tokens if exists (read-only helper)
-  Future<String?> getAccessToken() async => await _storage.read(key: _keyAccessToken);
-  Future<String?> getRefreshToken() async => await _storage.read(key: _keyRefreshToken);
+  Future<String?> getAccessToken() async =>
+      await _storage.read(key: _keyAccessToken);
+  Future<String?> getRefreshToken() async =>
+      await _storage.read(key: _keyRefreshToken);
 }

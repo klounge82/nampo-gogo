@@ -52,6 +52,8 @@ class User(Base):
     payments = relationship("Payment", back_populates="user", cascade="all, delete-orphan")
     # One-to-many relationship with StoreOwner
     store_ownerships = relationship("StoreOwner", back_populates="user", cascade="all, delete-orphan")
+    # One-to-many relationship with VisitVerification
+    verifications = relationship("VisitVerification", back_populates="user", cascade="all, delete-orphan")
 
 class UserAuth(Base):
     __tablename__ = "user_auths"
@@ -87,6 +89,9 @@ class Store(Base):
     operating_hours = Column(String(100), nullable=True, default="09:00 - 22:00")
     phone_number = Column(String(50), nullable=True, default="051-123-4567")
     homepage_url = Column(String(255), nullable=True)
+    review_verification_type = Column(String(50), nullable=True, default="BUSINESS_QR") # 'BUSINESS_QR', 'ATTRACTION_LOCATION', 'OPEN_REVIEW'
+    review_location_radius_m = Column(Integer, nullable=True, default=300)
+    manual_visit_allowed = Column(Boolean, nullable=True, default=True)
     created_at = Column(DateTime, nullable=False, server_default=func.now())
 
     # One-to-many relationship with Mission
@@ -99,6 +104,8 @@ class Store(Base):
     recommend_items = relationship("UserRecommendationItem", back_populates="store", cascade="all, delete-orphan")
     # One-to-many relationship with StoreOwner
     owners = relationship("StoreOwner", back_populates="store", cascade="all, delete-orphan")
+    # One-to-many relationship with VisitVerification
+    verifications = relationship("VisitVerification", back_populates="store", cascade="all, delete-orphan")
 
 class StoreOwner(Base):
     __tablename__ = "store_owners"
@@ -208,19 +215,47 @@ class Review(Base):
     __tablename__ = "reviews"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    user_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=True)
+    guest_id = Column(String(255), nullable=True)
     store_id = Column(String(36), ForeignKey("stores.id", ondelete="CASCADE"), nullable=False)
     rating = Column(Integer, nullable=False) # 1 to 5
     content = Column(Text, nullable=False)
     is_deleted = Column(Boolean, nullable=False, default=False)
     is_hidden = Column(Boolean, nullable=False, default=False) # Admin Hide option (ADMIN-001)
+    verification_id = Column(String(36), ForeignKey("visit_verifications.id", ondelete="SET NULL"), nullable=True)
+    verification_method = Column(String(50), nullable=True)
+    verification_badge = Column(String(100), nullable=True)
     created_at = Column(DateTime, nullable=False, server_default=func.now())
     updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
 
     # Relationships
     user = relationship("User", back_populates="reviews")
     store = relationship("Store", back_populates="reviews")
+    verification = relationship("VisitVerification", back_populates="reviews")
     images = relationship("ReviewImage", back_populates="review", cascade="all, delete-orphan")
+
+class VisitVerification(Base):
+    __tablename__ = "visit_verifications"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    store_id = Column(String(36), ForeignKey("stores.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=True)
+    guest_id = Column(String(255), nullable=True)
+    verification_method = Column(String(50), nullable=False) # 'BUSINESS_QR', 'ATTRACTION_GPS', 'ATTRACTION_MANUAL', 'OPEN'
+    qr_code_id = Column(String(36), nullable=True)
+    qr_token_hash = Column(String(255), nullable=True)
+    verified_at = Column(DateTime, nullable=False, server_default=func.now())
+    expires_at = Column(DateTime, nullable=False)
+    review_used_at = Column(DateTime, nullable=True)
+    visit_date = Column(DateTime, nullable=True)
+    measured_distance_m = Column(Float, nullable=True)
+    status = Column(String(50), nullable=False, default="ACTIVE") # 'ACTIVE', 'USED', 'EXPIRED', 'REVOKED'
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+
+    # Relationships
+    store = relationship("Store", back_populates="verifications")
+    user = relationship("User", back_populates="verifications")
+    reviews = relationship("Review", back_populates="verification")
 
 class ReviewImage(Base):
     __tablename__ = "review_images"

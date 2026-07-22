@@ -66,6 +66,9 @@ class StoreBase(BaseModel):
     operating_hours: Optional[str] = "09:00 - 22:00"
     phone_number: Optional[str] = "051-123-4567"
     homepage_url: Optional[str] = None
+    review_verification_type: Optional[str] = "BUSINESS_QR"
+    review_location_radius_m: Optional[int] = 300
+    manual_visit_allowed: Optional[bool] = True
 
 class StoreCreate(StoreBase):
     pass
@@ -170,6 +173,44 @@ class ReservationOut(BaseModel):
         from_attributes = True
         orm_mode = True
 
+# --- VISIT VERIFICATION SCHEMAS ---
+
+class QRVerifyRequest(BaseModel):
+    qr_token: str
+    guest_id: Optional[str] = None
+    user_id: Optional[str] = None
+
+class LocationVerifyRequest(BaseModel):
+    latitude: float
+    longitude: float
+    guest_id: Optional[str] = None
+    user_id: Optional[str] = None
+
+class ManualVisitVerifyRequest(BaseModel):
+    visit_date: datetime
+    visit_time_slot: Optional[str] = None
+    companion_type: Optional[str] = None
+    guest_id: Optional[str] = None
+    user_id: Optional[str] = None
+
+class VisitVerificationOut(BaseModel):
+    id: str
+    store_id: str
+    user_id: Optional[str] = None
+    guest_id: Optional[str] = None
+    verification_method: str
+    verified_at: datetime
+    expires_at: datetime
+    review_used_at: Optional[datetime] = None
+    visit_date: Optional[datetime] = None
+    measured_distance_m: Optional[float] = None
+    status: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+        orm_mode = True
+
 # --- REVIEW SCHEMAS ---
 
 class ReviewImageOut(BaseModel):
@@ -186,6 +227,8 @@ class ReviewCreate(BaseModel):
     rating: int # 1 to 5
     content: str
     user_id: Optional[str] = None
+    guest_id: Optional[str] = None
+    verification_id: Optional[str] = None
     image_urls: Optional[List[str]] = None
 
 class ReviewUpdate(BaseModel):
@@ -195,15 +238,19 @@ class ReviewUpdate(BaseModel):
 
 class ReviewOut(BaseModel):
     id: str
-    user_id: str
+    user_id: Optional[str] = None
+    guest_id: Optional[str] = None
     store_id: str
     rating: int
     content: str
     is_deleted: bool
     is_hidden: bool
+    verification_id: Optional[str] = None
+    verification_method: Optional[str] = None
+    verification_badge: Optional[str] = None
     created_at: datetime
     updated_at: datetime
-    user: UserOut
+    user: Optional[UserOut] = None
     images: List[ReviewImageOut] = []
     store: StoreOut
 

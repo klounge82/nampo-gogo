@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:geolocator/geolocator.dart';
 import '../constants/colors.dart';
 import '../models/place.dart';
 import '../repositories/place_repository.dart';
@@ -11,7 +12,9 @@ import '../widgets/favorite_button.dart';
 import 'auth_screen.dart';
 import '../models/review.dart' as model_review;
 import 'review_write_screen.dart';
+import 'qr_scanner_screen.dart';
 import '../services/map_service.dart';
+import '../services/auth_service.dart';
 
 class PlaceDetailScreen extends StatefulWidget {
   final String placeId;
@@ -434,23 +437,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                         ),
                         const SizedBox(width: 8.0),
                         TextButton(
-                          onPressed: () {
-                            Navigator.of(context)
-                                .push(
-                                  MaterialPageRoute(
-                                    builder: (_) => ReviewWriteScreen(
-                                      storeId: place.id,
-                                      storeName: place.name,
-                                    ),
-                                  ),
-                                )
-                                .then((value) {
-                                  if (value == true) {
-                                    _loadPlaceDetail();
-                                    _loadReviews();
-                                  }
-                                });
-                          },
+                          onPressed: () => _handleReviewGate(context, place),
                           child: const Text(
                             '후기 남기기',
                             style: TextStyle(
@@ -536,6 +523,81 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                                         ),
                                       ],
                                     ),
+                                    if (rev.verificationBadge != null &&
+                                        rev.verificationBadge!.isNotEmpty) ...[
+                                      const SizedBox(height: 4.0),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 6.0,
+                                          vertical: 2.0,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color:
+                                              rev.verificationMethod ==
+                                                  'BUSINESS_QR'
+                                              ? Colors.green.shade50
+                                              : (rev.verificationMethod ==
+                                                        'ATTRACTION_GPS'
+                                                    ? Colors.blue.shade50
+                                                    : Colors.grey.shade100),
+                                          borderRadius: BorderRadius.circular(
+                                            4.0,
+                                          ),
+                                          border: Border.all(
+                                            color:
+                                                rev.verificationMethod ==
+                                                    'BUSINESS_QR'
+                                                ? Colors.green.shade300
+                                                : (rev.verificationMethod ==
+                                                          'ATTRACTION_GPS'
+                                                      ? Colors.blue.shade300
+                                                      : Colors.grey.shade300),
+                                            width: 0.8,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              rev.verificationMethod ==
+                                                      'BUSINESS_QR'
+                                                  ? Icons.verified
+                                                  : (rev.verificationMethod ==
+                                                            'ATTRACTION_GPS'
+                                                        ? Icons.location_on
+                                                        : Icons.article),
+                                              size: 11.0,
+                                              color:
+                                                  rev.verificationMethod ==
+                                                      'BUSINESS_QR'
+                                                  ? Colors.green.shade700
+                                                  : (rev.verificationMethod ==
+                                                            'ATTRACTION_GPS'
+                                                        ? Colors.blue.shade700
+                                                        : Colors.grey.shade700),
+                                            ),
+                                            const SizedBox(width: 3.0),
+                                            Text(
+                                              rev.verificationBadge!,
+                                              style: TextStyle(
+                                                fontSize: 10.0,
+                                                fontWeight: FontWeight.bold,
+                                                color:
+                                                    rev.verificationMethod ==
+                                                        'BUSINESS_QR'
+                                                    ? Colors.green.shade800
+                                                    : (rev.verificationMethod ==
+                                                              'ATTRACTION_GPS'
+                                                          ? Colors.blue.shade800
+                                                          : Colors
+                                                                .grey
+                                                                .shade800),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
                                     const SizedBox(height: 8.0),
                                     Text(
                                       rev.content,
@@ -903,6 +965,372 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Future<void> _handleReviewGate(BuildContext context, Place place) async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final userId = authProvider.currentUser?.id;
+    final guestId = await AuthService().getOrCreateGuestId();
+
+    try {
+      final activeV = await _reviewRepository.getActiveVerification(
+        storeId: place.id,
+        userId: userId,
+        guestId: userId == null ? guestId : null,
+      );
+
+      if (activeV != null && mounted) {
+        final result = await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => ReviewWriteScreen(
+              storeId: place.id,
+              storeName: place.name,
+              verificationId: activeV['id'] as String?,
+              guestId: userId == null ? guestId : null,
+            ),
+          ),
+        );
+        if (result == true) {
+          _loadPlaceDetail();
+          _loadReviews();
+        }
+        return;
+      }
+
+      final vType = place.reviewVerificationType;
+
+      if (vType == 'BUSINESS_QR') {
+        _showBusinessQRGateDialog(context, place, userId, guestId);
+      } else if (vType == 'ATTRACTION_LOCATION') {
+        _showAttractionGateDialog(context, place, userId, guestId);
+      } else {
+        final result = await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => ReviewWriteScreen(
+              storeId: place.id,
+              storeName: place.name,
+              guestId: userId == null ? guestId : null,
+            ),
+          ),
+        );
+        if (result == true) {
+          _loadPlaceDetail();
+          _loadReviews();
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        _showWarningDialog('안내', '방문 인증 정보를 확인하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+      }
+    }
+  }
+
+  void _showBusinessQRGateDialog(
+    BuildContext context,
+    Place place,
+    String? userId,
+    String guestId,
+  ) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text(
+          'QR 방문 인증이 필요합니다.',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0),
+        ),
+        content: const Text(
+          '실제 방문 고객의 신뢰할 수 있는 리뷰를 위해 매장 QR 인증 후 리뷰를 작성할 수 있습니다.',
+          style: TextStyle(fontSize: 13.0, height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text(
+              '나중에',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.of(ctx).pop();
+              final qrValue = await Navigator.of(context).push<String>(
+                MaterialPageRoute(builder: (_) => const QrScannerScreen()),
+              );
+              if (qrValue != null && qrValue.isNotEmpty && mounted) {
+                _verifyAndNavigateQR(place, qrValue, userId, guestId);
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('QR 인증하기'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _verifyAndNavigateQR(
+    Place place,
+    String qrToken,
+    String? userId,
+    String guestId,
+  ) async {
+    try {
+      final vRes = await _reviewRepository.verifyStoreQR(
+        storeId: place.id,
+        qrToken: qrToken,
+        userId: userId,
+        guestId: userId == null ? guestId : null,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('방문 인증이 완료되었습니다. 이제 리뷰를 작성할 수 있습니다.'),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+
+        final result = await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => ReviewWriteScreen(
+              storeId: place.id,
+              storeName: place.name,
+              verificationId: vRes['id'] as String?,
+              guestId: userId == null ? guestId : null,
+            ),
+          ),
+        );
+        if (result == true) {
+          _loadPlaceDetail();
+          _loadReviews();
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        final cleanMsg = e
+            .toString()
+            .replaceAll('Exception:', '')
+            .replaceAll('DioException', '')
+            .trim();
+        _showWarningDialog(
+          'QR 인증 실패',
+          cleanMsg.isEmpty ? '유효하지 않은 QR 코드입니다.' : cleanMsg,
+        );
+      }
+    }
+  }
+
+  void _showAttractionGateDialog(
+    BuildContext context,
+    Place place,
+    String? userId,
+    String guestId,
+  ) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text(
+          '방문 확인 방법',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0),
+        ),
+        content: const Text(
+          '관광지는 QR 코드 없이 현재 위치 또는 방문 날짜를 확인한 후 후기를 작성할 수 있습니다.',
+          style: TextStyle(fontSize: 13.0, height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text(
+              '나중에',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              _verifyLocationGPS(place, userId, guestId);
+            },
+            child: const Text(
+              '현재 위치로 확인',
+              style: TextStyle(
+                color: AppColors.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              _pickManualVisitDate(place, userId, guestId);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('방문 날짜 입력'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _verifyLocationGPS(
+    Place place,
+    String? userId,
+    String guestId,
+  ) async {
+    try {
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      if (permission == LocationPermission.deniedForever ||
+          permission == LocationPermission.denied) {
+        if (mounted) {
+          _showWarningDialog(
+            '위치 확인 불가',
+            '현재 위치 권한이 제공되지 않았습니다. 방문 날짜 직접 입력을 이용해 후기를 작성할 수 있습니다.',
+          );
+        }
+        return;
+      }
+
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.medium,
+        timeLimit: const Duration(seconds: 10),
+      );
+
+      final vRes = await _reviewRepository.verifyAttractionLocation(
+        storeId: place.id,
+        latitude: position.latitude,
+        longitude: position.longitude,
+        userId: userId,
+        guestId: userId == null ? guestId : null,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('현재 위치로 방문이 확인되었습니다. 이제 후기를 작성할 수 있습니다.'),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+
+        final result = await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => ReviewWriteScreen(
+              storeId: place.id,
+              storeName: place.name,
+              verificationId: vRes['id'] as String?,
+              guestId: userId == null ? guestId : null,
+            ),
+          ),
+        );
+        if (result == true) {
+          _loadPlaceDetail();
+          _loadReviews();
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        final cleanMsg = e
+            .toString()
+            .replaceAll('Exception:', '')
+            .replaceAll('DioException', '')
+            .trim();
+        _showWarningDialog(
+          '위치 확인 실패',
+          cleanMsg.isEmpty
+              ? '현재 위치에서 방문을 확인하기 어렵습니다. 방문 날짜를 직접 입력하여 후기를 작성할 수 있습니다.'
+              : cleanMsg,
+        );
+      }
+    }
+  }
+
+  Future<void> _pickManualVisitDate(
+    Place place,
+    String? userId,
+    String guestId,
+  ) async {
+    final now = DateTime.now();
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: now,
+      firstDate: now.subtract(const Duration(days: 90)),
+      lastDate: now,
+      helpText: '방문 날짜 선택',
+      cancelText: '취소',
+      confirmText: '확인',
+    );
+
+    if (pickedDate != null && mounted) {
+      try {
+        final vRes = await _reviewRepository.verifyAttractionManualVisit(
+          storeId: place.id,
+          visitDate: pickedDate,
+          userId: userId,
+          guestId: userId == null ? guestId : null,
+        );
+
+        if (mounted) {
+          final result = await Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => ReviewWriteScreen(
+                storeId: place.id,
+                storeName: place.name,
+                verificationId: vRes['id'] as String?,
+                guestId: userId == null ? guestId : null,
+              ),
+            ),
+          );
+          if (result == true) {
+            _loadPlaceDetail();
+            _loadReviews();
+          }
+        }
+      } catch (e) {
+        if (mounted) {
+          final cleanMsg = e
+              .toString()
+              .replaceAll('Exception:', '')
+              .replaceAll('DioException', '')
+              .trim();
+          _showWarningDialog(
+            '방문 확인 실패',
+            cleanMsg.isEmpty ? '방문 날짜를 확인하지 못했습니다.' : cleanMsg,
+          );
+        }
+      }
+    }
+  }
+
+  void _showWarningDialog(String title, String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0),
+        ),
+        content: Text(
+          message,
+          style: const TextStyle(fontSize: 13.0, height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('확인', style: TextStyle(color: AppColors.primary)),
+          ),
+        ],
       ),
     );
   }
