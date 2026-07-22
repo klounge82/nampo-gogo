@@ -1391,6 +1391,29 @@ def validate_and_update_reservation_status(
     )
     return res
 
+def require_store_owner_or_admin(operator: models.User, store_id: str, db: Session) -> models.User:
+    if operator.role == "admin":
+        return operator
+
+    if operator.role == "owner":
+        ownership = db.query(models.StoreOwner).filter(
+            models.StoreOwner.user_id == operator.id,
+            models.StoreOwner.store_id == store_id,
+            models.StoreOwner.status == "active"
+        ).first()
+
+        if not ownership:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="해당 매장에 대한 운영 권한이 없습니다."
+            )
+        return operator
+
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="이용 권한이 없습니다."
+    )
+
 @app.get("/admin/reservations", response_model=List[schemas.ReservationOut], tags=["Admin"])
 def get_admin_reservations(skip: int = 0, limit: int = 20, admin: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
     return db.query(models.StoreReservation).order_by(models.StoreReservation.reservation_time.desc()).offset(skip).limit(limit).all()
@@ -1405,6 +1428,7 @@ def update_reservation_status_admin(
     res = db.query(models.StoreReservation).filter(models.StoreReservation.id == reservation_id).first()
     if not res:
         raise HTTPException(status_code=404, detail="해당 예약을 찾을 수 없습니다.")
+    require_store_owner_or_admin(operator, res.store_id, db)
     return validate_and_update_reservation_status(res, req.status, operator, db)
 
 @app.patch("/reservations/{reservation_id}/status", response_model=schemas.ReservationOut, tags=["Reservations"])
@@ -1417,6 +1441,7 @@ def update_reservation_status(
     res = db.query(models.StoreReservation).filter(models.StoreReservation.id == reservation_id).first()
     if not res:
         raise HTTPException(status_code=404, detail="해당 예약을 찾을 수 없습니다.")
+    require_store_owner_or_admin(operator, res.store_id, db)
     return validate_and_update_reservation_status(res, req.status, operator, db)
 
 @app.get("/admin/reviews", response_model=List[schemas.ReviewOut], tags=["Admin"])

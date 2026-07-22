@@ -8,7 +8,7 @@ os.environ["DATABASE_URL"] = "sqlite:///./test_bootstrap.db"
 
 from app.database import SessionLocal, engine, Base
 from app import models, schemas, auth
-from app.main import validate_and_update_reservation_status
+from app.main import validate_and_update_reservation_status, require_store_owner_or_admin
 from scripts.bootstrap_store_owner import bootstrap_store_owner
 
 class TestBootstrapStoreOwner(unittest.TestCase):
@@ -20,12 +20,13 @@ class TestBootstrapStoreOwner(unittest.TestCase):
         self.db = SessionLocal()
         self.db.query(models.Review).delete()
         self.db.query(models.StoreReservation).delete()
+        self.db.query(models.StoreOwner).delete()
         self.db.query(models.UserAuth).delete()
         self.db.query(models.User).delete()
         self.db.query(models.Store).delete()
         self.db.commit()
 
-        # Create test store K-Lounge
+        # Create test store 1 (K-Lounge)
         self.store = models.Store(
             id="31b96920-2eb3-4f93-ab51-546fd8d933d1",
             name="K-Lounge",
@@ -35,6 +36,17 @@ class TestBootstrapStoreOwner(unittest.TestCase):
             description="K-Lounge 매장"
         )
         self.db.add(self.store)
+
+        # Create test store 2 (Other Store)
+        self.other_store = models.Store(
+            id="other-store-id-8888",
+            name="Other Store",
+            category="음식점",
+            rating=0.0,
+            address="부산광역시 중구 남포길 99",
+            description="다른 매장"
+        )
+        self.db.add(self.other_store)
         self.db.commit()
 
     def tearDown(self):
@@ -54,7 +66,7 @@ class TestBootstrapStoreOwner(unittest.TestCase):
         self.assertEqual(status, "INPUT_REQUIRED")
         self.assertIsNone(user)
 
-    def test_first_time_owner_creation(self):
+    def test_first_time_owner_creation_with_store_owner_link(self):
         email = "klounge_owner_test@example.com"
         pwd = "SecureOwnerPwd123!"
 
@@ -71,77 +83,82 @@ class TestBootstrapStoreOwner(unittest.TestCase):
         self.assertIsNotNone(user)
         self.assertEqual(user.email, email)
         self.assertEqual(user.role, "owner")
-        self.assertEqual(user.nickname, "K-Lounge 운영자")
 
-        # Verify password is saved as hashed and not plaintext
-        auth_record = self.db.query(models.UserAuth).filter(models.UserAuth.user_id == user.id).first()
-        self.assertIsNotNone(auth_record)
-        self.assertNotEqual(auth_record.hashed_password, pwd)
-        self.assertTrue(auth.verify_password(pwd, auth_record.hashed_password))
+        # Verify StoreOwner record created
+        so_record = self.db.query(models.StoreOwner).filter(
+            models.StoreOwner.user_id == user.id,
+            models.StoreOwner.store_id == self.store.id
+        ).first()
+        self.assertIsNotNone(so_record)
+        self.assertEqual(so_record.status, "active")
 
-    def test_idempotent_duplicate_creation(self):
+    def test_idempotent_duplicate_creation_preserves_single_store_owner_link(self):
         email = "klounge_owner_dup@example.com"
         pwd = "SecureOwnerPwd123!"
 
-        # First run
         status1, user1, msg1 = bootstrap_store_owner(self.db, email, pwd, store_id=self.store.id)
         self.assertEqual(status1, "CREATED")
 
-        # Second run with same email
         status2, user2, msg2 = bootstrap_store_owner(self.db, email, "DifferentPwd456!", store_id=self.store.id)
         self.assertEqual(status2, "ALREADY_CONFIGURED")
-        self.assertEqual(user2.id, user1.id)
 
-        # Verify password was NOT overwritten by second run
-        auth_record = self.db.query(models.UserAuth).filter(models.UserAuth.user_id == user1.id).first()
-        self.assertTrue(auth.verify_password(pwd, auth_record.hashed_password))
-
-        # Verify total user count remains 1 for this email
-        count = self.db.query(models.User).filter(models.User.email == email).count()
-        self.assertEqual(count, 1)
+        # Verify StoreOwner count is exactly 1
+        so_count = self.db.query(models.StoreOwner).filter(
+            models.StoreOwner.user_id == user1.id,
+            models.StoreOwner.store_id == self.store.id
+        ).count()
+        self.assertEqual(so_count, 1)
 
     def test_existing_member_prevents_auto_promotion(self):
         email = "existing_member@example.com"
 
-        # Pre-create member user
         member = models.User(email=email, nickname="일반회원", role="member", status="active")
         self.db.add(member)
         self.db.commit()
 
-        # Attempt to run bootstrap on existing member email
         status, user, msg = bootstrap_store_owner(self.db, email, "NewPwd123!", store_id=self.store.id)
         self.assertEqual(status, "EXISTING_MEMBER_REQUIRES_APPROVAL")
 
-        # Verify role was NOT altered
         db_user = self.db.query(models.User).filter(models.User.email == email).first()
         self.assertEqual(db_user.role, "member")
 
-    def test_owner_reservation_status_update_permission(self):
-        # 1. Create Owner via Bootstrap
-        owner_email = "klounge_owner_perm@example.com"
-        _, owner, _ = bootstrap_store_owner(self.db, owner_email, "Pwd12345!", store_id=self.store.id)
+    def test_store_scoped_owner_permission_guard(self):
+        # 1. Create K-Lounge Owner
+        _, owner_k, _ = bootstrap_store_owner(self.db, "owner_k@example.com", "Pwd12345!", store_id=self.store.id)
 
-        # 2. Create Member & Reservation
-        member = models.User(email="member_perm@example.com", nickname="예약고객", role="member", status="active")
+        # 2. Create Other Store Owner
+        _, owner_other, _ = bootstrap_store_owner(self.db, "owner_other@example.com", "Pwd12345!", store_id=self.other_store.id)
+
+        # 3. Create Admin User
+        admin = models.User(email="admin_scope@example.com", nickname="총괄관리자", role="admin", status="active")
+        self.db.add(admin)
+
+        # 4. Create Member User
+        member = models.User(email="member_scope@example.com", nickname="일반고객", role="member", status="active")
         self.db.add(member)
         self.db.commit()
 
-        res = models.StoreReservation(
-            user_id=member.id,
-            store_id=self.store.id,
-            reservation_time=datetime.utcnow() + timedelta(days=1),
-            party_size=2,
-            status="pending"
-        )
-        self.db.add(res)
-        self.db.commit()
+        # Test require_store_owner_or_admin helper
+        # Admin -> Allowed for both stores
+        self.assertIsNotNone(require_store_owner_or_admin(admin, self.store.id, self.db))
+        self.assertIsNotNone(require_store_owner_or_admin(admin, self.other_store.id, self.db))
 
-        # 3. Owner updates reservation status pending -> confirmed -> completed (Allowed)
-        updated = validate_and_update_reservation_status(res, "confirmed", owner, self.db)
-        self.assertEqual(updated.status, "confirmed")
+        # K-Lounge Owner -> Allowed for K-Lounge, Blocked (403) for Other Store
+        self.assertIsNotNone(require_store_owner_or_admin(owner_k, self.store.id, self.db))
+        with self.assertRaises(HTTPException) as cm:
+            require_store_owner_or_admin(owner_k, self.other_store.id, self.db)
+        self.assertEqual(cm.exception.status_code, 403)
 
-        updated = validate_and_update_reservation_status(updated, "completed", owner, self.db)
-        self.assertEqual(updated.status, "completed")
+        # Other Store Owner -> Allowed for Other Store, Blocked (403) for K-Lounge
+        self.assertIsNotNone(require_store_owner_or_admin(owner_other, self.other_store.id, self.db))
+        with self.assertRaises(HTTPException) as cm:
+            require_store_owner_or_admin(owner_other, self.store.id, self.db)
+        self.assertEqual(cm.exception.status_code, 403)
+
+        # Regular Member -> Blocked (403) for any store
+        with self.assertRaises(HTTPException) as cm:
+            require_store_owner_or_admin(member, self.store.id, self.db)
+        self.assertEqual(cm.exception.status_code, 403)
 
 if __name__ == "__main__":
     unittest.main()

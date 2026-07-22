@@ -50,6 +50,8 @@ class User(Base):
     recommendation_feedbacks = relationship("RecommendationFeedback", back_populates="user", cascade="all, delete-orphan")
     # One-to-many relationship with Payment
     payments = relationship("Payment", back_populates="user", cascade="all, delete-orphan")
+    # One-to-many relationship with StoreOwner
+    store_ownerships = relationship("StoreOwner", back_populates="user", cascade="all, delete-orphan")
 
 class UserAuth(Base):
     __tablename__ = "user_auths"
@@ -95,6 +97,25 @@ class Store(Base):
     reviews = relationship("Review", back_populates="store", cascade="all, delete-orphan")
     # One-to-many relationship with UserRecommendationItem
     recommend_items = relationship("UserRecommendationItem", back_populates="store", cascade="all, delete-orphan")
+    # One-to-many relationship with StoreOwner
+    owners = relationship("StoreOwner", back_populates="store", cascade="all, delete-orphan")
+
+class StoreOwner(Base):
+    __tablename__ = "store_owners"
+    __table_args__ = (
+        UniqueConstraint("store_id", "user_id", name="uq_store_owner"),
+    )
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    store_id = Column(String(36), ForeignKey("stores.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    status = Column(String(50), nullable=False, default="active") # 'active', 'inactive'
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+    updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
+
+    # Relationships
+    user = relationship("User", back_populates="store_ownerships")
+    store = relationship("Store", back_populates="owners")
 
 class Mission(Base):
     __tablename__ = "missions"

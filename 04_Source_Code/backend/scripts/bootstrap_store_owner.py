@@ -60,7 +60,21 @@ def bootstrap_store_owner(
 
         if existing_user:
             if existing_user.role in ["owner", "admin"]:
-                msg = f"계정 '{clean_email}'은(는) 이미 '{existing_user.role}' 권한으로 설정되어 있습니다."
+                if target_store:
+                    existing_so = db.query(models.StoreOwner).filter(
+                        models.StoreOwner.user_id == existing_user.id,
+                        models.StoreOwner.store_id == target_store.id
+                    ).first()
+                    if not existing_so:
+                        new_so = models.StoreOwner(
+                            store_id=target_store.id,
+                            user_id=existing_user.id,
+                            status="active"
+                        )
+                        db.add(new_so)
+                        db.commit()
+                store_name = target_store.name if target_store else "매장"
+                msg = f"계정 '{clean_email}'은(는) 이미 '{existing_user.role}' 권한으로 매장('{store_name}')과 연결되어 있습니다."
                 logger.info(msg)
                 return "ALREADY_CONFIGURED", existing_user, msg
 
@@ -88,10 +102,21 @@ def bootstrap_store_owner(
             hashed_password=hashed_pwd
         )
         db.add(new_auth)
+
+        # Connect to target store via StoreOwner
+        if target_store:
+            new_so = models.StoreOwner(
+                store_id=target_store.id,
+                user_id=new_user.id,
+                status="active"
+            )
+            db.add(new_so)
+
         db.commit()
         db.refresh(new_user)
 
-        msg = f"운영자 계정 '{clean_email}'이(가) 성공적으로 생성되었습니다 (Role: {assigned_role})."
+        store_name = target_store.name if target_store else "매장"
+        msg = f"운영자 계정 '{clean_email}' 및 매장 '{store_name}' 소유권 연결이 성공적으로 생성되었습니다 (Role: {assigned_role})."
         logger.info(msg)
         return "CREATED", new_user, msg
 

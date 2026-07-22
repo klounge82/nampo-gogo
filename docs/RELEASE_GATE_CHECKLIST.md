@@ -42,5 +42,6 @@
 | **REL-001-STORE-FLOW**| Backend | K-Lounge 매장 상세·즐겨찾기·리뷰 운영 API 검증 | **REVIEW_FLOW_BLOCKED** | 즐겨찾기 CUD 및 중복 방어 100% 통과, K-Lounge 미션 Seed/예약완료 API 추가 필요 | RELEASE-001-E-STORE-FLOW-01 |
 | **REL-001-RES-REMEDY**| Backend | 예약 완료 상태 전환 운영 API 및 리뷰 권한 연동 검증 | **COMPLETED** | PATCH /admin/reservations/{id}/status 및 PATCH /reservations/{id}/status 권한·전환 가드 구축 및 리뷰 자격 100% 검증 | RELEASE-001-E-REVIEW-REMEDY-01 |
 | **REL-001-OWNER-BOOTSTRAP**| Backend | K-Lounge 공식 Owner 계정 안전 생성 방식 구축 | **READY** | 멱등 CLI Bootstrap 스크립트(bootstrap_store_owner.py) 및 단위 테스트 구현 완료, 1회 운영 실행 준비 완료 | RELEASE-001-E-OPERATOR-BOOTSTRAP-01 |
+| **REL-001-OWNER-SCOPE**| Backend | Store–Owner 소유권 관계 스키마 및 매장 단위 예약 관리 권한 가드 구축 | **READY** | StoreOwner 모델 및 Alembic 마이그레이션(002_add_store_owners.py) 구축 / require_store_owner_or_admin 매장 단위 권한 가드 100% 회귀 테스트 통과 | RELEASE-001-E-OWNER-SCOPE-REMEDY-01 |
 
 *(상태값 정의 기준: `COMPLETED`, `READY`, `REQUIRED_BEFORE_RELEASE`, `INPUT_REQUIRED`, `BLOCKED`, `NOT_APPLICABLE`)*

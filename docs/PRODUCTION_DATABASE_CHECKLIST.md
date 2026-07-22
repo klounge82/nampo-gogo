@@ -37,3 +37,10 @@
 - **테이블 정합성 (`UserAuth`)**: `user_auths`로 정합성 맞춤 완료 (`RELEASE-001-E-REMEDY-02`).
 - **인증 API 스모크 테스트**: 회원가입, 중복 방어(HTTP 400), 로그인, `/users/me` 프로필 조회, 계정 논리 탈퇴(`DELETE /users/me`) 및 탈퇴 후 접근 차단(HTTP 403) 100% 정상 작동.
 - **초기 시드 데이터 상태**: 현재 `stores` 테이블 데이터 0건 (`NO_STORE_DATA`), 추후 매장/리뷰/즐겨찾기 E2E 검증을 위해 Seed Data 투입 필요 (`RELEASE-001-E-SEED-01`).
+
+---
+
+## 5. Store–Owner 관계 스키마 확장 (RELEASE-001-E-OWNER-SCOPE-REMEDY-01)
+- **신규 테이블**: `store_owners` (Alembic migration: `002_add_store_owners.py`)
+- **제약조건**: `UniqueConstraint("store_id", "user_id", name="uq_store_owner")` 및 Foreign Key Cascade (`CASCADE`)
+- **운영 DB 미실행 안전 상태**: 로컬 마이그레이션 빌드 및 단일 헤드(`002_add_store_owners (head)`) 검증 완료. 운영 DB 적용은 `RELEASE-001-E-OWNER-SCOPE-MIGRATE-01`에서 수행 예정.

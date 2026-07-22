@@ -260,6 +260,23 @@ class ReservationStatusUpdate(BaseModel):
 class ReviewHideUpdate(BaseModel):
     is_hidden: bool
 
+class StoreOwnerCreate(BaseModel):
+    store_id: str
+    user_id: str
+    status: Optional[str] = "active"
+
+class StoreOwnerOut(BaseModel):
+    id: str
+    store_id: str
+    user_id: str
+    status: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+        orm_mode = True
+
 # --- AI RECOMMENDATION SCHEMAS ---
 
 class RecommendationRequest(BaseModel):
