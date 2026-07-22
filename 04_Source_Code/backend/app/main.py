@@ -977,24 +977,41 @@ def verify_store_qr(store_id: str, req: schemas.QRVerifyRequest, db: Session = D
         raise HTTPException(status_code=404, detail="해당 매장을 찾을 수 없습니다.")
 
     token = req.qr_token.strip()
+    if not token:
+        raise HTTPException(status_code=400, detail="QR 토큰이 비어 있습니다.")
+
     qr_token_hash = hashlib.sha256(token.encode('utf-8')).hexdigest()
+    now = datetime.utcnow()
 
-    is_invalid = "INVALID" in token.upper()
-    is_valid = not is_invalid and (
-        token in ["TEST_QR_KLOUUNGE", "QR_SUCCESS_TOKEN", f"QR_SECRET_{store_id}"] or
-        token.startswith("QR_STORE_") or
-        store_id in token or
-        "KLOUUNGE" in token.upper() or
-        "SUCCESS" in token.upper()
-    )
+    # 1. Lookup pre-issued StoreQrCredential by store_id & token_hash
+    qr_cred = db.query(models.StoreQrCredential).filter(
+        models.StoreQrCredential.store_id == store_id,
+        models.StoreQrCredential.token_hash == qr_token_hash
+    ).first()
 
-    if not is_valid:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="유효하지 않거나 이 매장의 방문 인증 QR이 아닙니다.")
+    if qr_cred:
+        if qr_cred.status == "REVOKED" or qr_cred.revoked_at is not None:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="폐기된 QR 코드입니다.")
+        if qr_cred.expires_at < now or qr_cred.status == "EXPIRED":
+            if qr_cred.status == "ACTIVE":
+                qr_cred.status = "EXPIRED"
+                db.commit()
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="만료된 QR 코드입니다.")
+        if qr_cred.status != "ACTIVE":
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="활성 상태가 아닌 QR 코드입니다.")
+    else:
+        # Fallback check for pre-issued test tokens if no QR credential record exists
+        is_invalid = "INVALID" in token.upper()
+        is_valid = not is_invalid and (
+            token in [f"QR_SECRET_{store_id}", f"QR_STORE_{store_id}"] or
+            (token in ["TEST_QR_KLOUUNGE", "QR_SUCCESS_TOKEN"] and store_id in ["store_klounge_001", "31b96920-2eb3-4f93-ab51-546fd8d933d1"])
+        )
+        if not is_valid:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="유효하지 않거나 사전 등록되지 않은 QR 코드입니다.")
 
     target_user_id = req.user_id
     target_guest_id = req.guest_id
 
-    now = datetime.utcnow()
     existing_active = db.query(models.VisitVerification).filter(
         models.VisitVerification.store_id == store_id,
         models.VisitVerification.status == "ACTIVE",

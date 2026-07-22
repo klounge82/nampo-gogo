@@ -106,6 +106,24 @@ class Store(Base):
     owners = relationship("StoreOwner", back_populates="store", cascade="all, delete-orphan")
     # One-to-many relationship with VisitVerification
     verifications = relationship("VisitVerification", back_populates="store", cascade="all, delete-orphan")
+    # One-to-many relationship with StoreQrCredential
+    qr_credentials = relationship("StoreQrCredential", back_populates="store", cascade="all, delete-orphan")
+
+class StoreQrCredential(Base):
+    __tablename__ = "store_qr_credentials"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    store_id = Column(String(36), ForeignKey("stores.id", ondelete="CASCADE"), nullable=False, index=True)
+    token_hash = Column(String(255), nullable=False, index=True)
+    issued_at = Column(DateTime, nullable=False, server_default=func.now())
+    expires_at = Column(DateTime, nullable=False)
+    status = Column(String(50), nullable=False, default="ACTIVE") # 'ACTIVE', 'EXPIRED', 'REVOKED'
+    purpose = Column(String(50), nullable=False, default="REVIEW_VISIT") # 'REVIEW_VISIT', 'TEST_REVIEW_VISIT'
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+    revoked_at = Column(DateTime, nullable=True)
+
+    # Relationships
+    store = relationship("Store", back_populates="qr_credentials")
 
 class StoreOwner(Base):
     __tablename__ = "store_owners"

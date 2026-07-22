@@ -664,3 +664,24 @@ class PaymentOut(BaseModel):
     class Config:
         from_attributes = True
         orm_mode = True
+
+class StoreQrCredentialCreate(BaseModel):
+    store_id: str
+    token_string: str
+    valid_hours: int = 6
+    purpose: str = "REVIEW_VISIT"
+
+class StoreQrCredentialOut(BaseModel):
+    id: str
+    store_id: str
+    token_hash: str
+    issued_at: datetime
+    expires_at: datetime
+    status: str
+    purpose: str
+    created_at: datetime
+    revoked_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+        orm_mode = True

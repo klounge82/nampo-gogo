@@ -210,5 +210,87 @@ class TestReviewVerification(unittest.TestCase):
         self.assertEqual(res_man_rev.status_code, 201)
         self.assertEqual(res_man_rev.json()["verification_badge"], "일반 방문 후기")
 
+    def test_store_qr_credential_security_and_expiry_flow(self):
+        import hashlib
+        # 1. Reject unregistered random token
+        res_unreg = self.client.post(
+            f"/stores/{self.business_store.id}/verify-qr",
+            json={"qr_token": "UNREGISTERED_ATTACK_TOKEN_XYZ", "guest_id": "guest_sec_01"}
+        )
+        self.assertEqual(res_unreg.status_code, 403)
+
+        # 2. Register valid StoreQrCredential (valid for 6 hours)
+        valid_token = "SECURE_TEST_QR_TOKEN_2026"
+        valid_hash = hashlib.sha256(valid_token.encode('utf-8')).hexdigest()
+        now = datetime.utcnow()
+        active_cred = models.StoreQrCredential(
+            store_id=self.business_store.id,
+            token_hash=valid_hash,
+            issued_at=now,
+            expires_at=now + timedelta(hours=6),
+            status="ACTIVE",
+            purpose="TEST_REVIEW_VISIT"
+        )
+        self.db.add(active_cred)
+
+        # Register expired StoreQrCredential (expired 1 hour ago)
+        expired_token = "EXPIRED_TEST_QR_TOKEN_2026"
+        expired_hash = hashlib.sha256(expired_token.encode('utf-8')).hexdigest()
+        expired_cred = models.StoreQrCredential(
+            store_id=self.business_store.id,
+            token_hash=expired_hash,
+            issued_at=now - timedelta(hours=7),
+            expires_at=now - timedelta(hours=1),
+            status="ACTIVE",
+            purpose="TEST_REVIEW_VISIT"
+        )
+        self.db.add(expired_cred)
+
+        # Register revoked StoreQrCredential
+        revoked_token = "REVOKED_TEST_QR_TOKEN_2026"
+        revoked_hash = hashlib.sha256(revoked_token.encode('utf-8')).hexdigest()
+        revoked_cred = models.StoreQrCredential(
+            store_id=self.business_store.id,
+            token_hash=revoked_hash,
+            issued_at=now,
+            expires_at=now + timedelta(hours=6),
+            status="REVOKED",
+            revoked_at=now,
+            purpose="TEST_REVIEW_VISIT"
+        )
+        self.db.add(revoked_cred)
+        self.db.commit()
+
+        # 3. Verify valid QR token succeeds and creates 72-hour VisitVerification
+        res_valid = self.client.post(
+            f"/stores/{self.business_store.id}/verify-qr",
+            json={"qr_token": valid_token, "guest_id": "guest_sec_01"}
+        )
+        self.assertEqual(res_valid.status_code, 201)
+        v_data = res_valid.json()
+        self.assertEqual(v_data["verification_method"], "BUSINESS_QR")
+        self.assertEqual(v_data["status"], "ACTIVE")
+
+        # 4. Verify expired QR token is rejected with 403
+        res_expired = self.client.post(
+            f"/stores/{self.business_store.id}/verify-qr",
+            json={"qr_token": expired_token, "guest_id": "guest_sec_02"}
+        )
+        self.assertEqual(res_expired.status_code, 403)
+
+        # 5. Verify revoked QR token is rejected with 403
+        res_revoked = self.client.post(
+            f"/stores/{self.business_store.id}/verify-qr",
+            json={"qr_token": revoked_token, "guest_id": "guest_sec_03"}
+        )
+        self.assertEqual(res_revoked.status_code, 403)
+
+        # 6. Verify QR token for business_store is rejected when attempted on attraction_store
+        res_wrong_store = self.client.post(
+            f"/stores/{self.attraction_store.id}/verify-qr",
+            json={"qr_token": valid_token, "guest_id": "guest_sec_04"}
+        )
+        self.assertEqual(res_wrong_store.status_code, 403)
+
 if __name__ == "__main__":
     unittest.main()
