@@ -1,6 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:frontend/config/production_config.dart';
 import 'package:frontend/models/place.dart';
 import 'package:frontend/models/review.dart';
+import 'package:frontend/screens/qr_scanner_screen.dart';
 
 void main() {
   group('Review Verification Policy Unit Tests', () {
@@ -85,6 +88,20 @@ void main() {
         expect(review.verificationId, equals('v_abc_123'));
         expect(review.verificationMethod, equals('BUSINESS_QR'));
         expect(review.verificationBadge, equals('QR 방문 인증'));
+      },
+    );
+
+    test('ProductionConfig.enableQrMock defaults to false', () {
+      expect(ProductionConfig.enableQrMock, isFalse);
+    });
+
+    testWidgets(
+      'QrScannerScreen hides mock button when enableQrMock is false',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(const MaterialApp(home: QrScannerScreen()));
+
+        expect(find.text('QR 코드 스캔'), findsOneWidget);
+        expect(find.text('에뮬레이터 모의 스캔 (인증성공)'), findsNothing);
       },
     );
   });
