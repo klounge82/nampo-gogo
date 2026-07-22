@@ -1342,23 +1342,82 @@ def update_coupon_status(coupon_id: str, req: schemas.CouponStatusUpdate, admin:
     log_admin_action(db, admin.id, "UPDATE_COUPON_STATUS", coupon_id, f"Changed coupon status from {old_status} to {req.status}")
     return coupon
 
+VALID_RESERVATION_STATUSES = {"pending", "confirmed", "cancelled", "completed"}
+
+def validate_and_update_reservation_status(
+    res: models.StoreReservation,
+    new_status: str,
+    operator: models.User,
+    db: Session
+) -> models.StoreReservation:
+    if new_status not in VALID_RESERVATION_STATUSES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"유효하지 않은 예약 상태입니다: {new_status}"
+        )
+
+    old_status = res.status
+    if old_status == new_status:
+        return res
+
+    if old_status in ["completed", "cancelled"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"이미 '{old_status}' 처리된 예약의 상태는 변경할 수 없습니다."
+        )
+
+    valid_next = {
+        "pending": ["confirmed", "cancelled", "completed"],
+        "confirmed": ["completed", "cancelled"]
+    }
+
+    allowed_targets = valid_next.get(old_status, [])
+    if new_status not in allowed_targets:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"허용되지 않은 예약 상태 전환입니다. ({old_status} -> {new_status})"
+        )
+
+    res.status = new_status
+    db.commit()
+    db.refresh(res)
+
+    log_admin_action(
+        db,
+        operator.id,
+        "UPDATE_RESERVATION_STATUS",
+        res.id,
+        f"Changed status from {old_status} to {new_status}"
+    )
+    return res
+
 @app.get("/admin/reservations", response_model=List[schemas.ReservationOut], tags=["Admin"])
 def get_admin_reservations(skip: int = 0, limit: int = 20, admin: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
     return db.query(models.StoreReservation).order_by(models.StoreReservation.reservation_time.desc()).offset(skip).limit(limit).all()
 
 @app.patch("/admin/reservations/{reservation_id}/status", response_model=schemas.ReservationOut, tags=["Admin"])
-def update_reservation_status_admin(reservation_id: str, req: schemas.ReservationStatusUpdate, admin: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
+def update_reservation_status_admin(
+    reservation_id: str,
+    req: schemas.ReservationStatusUpdate,
+    operator: models.User = Depends(get_owner_or_admin_user),
+    db: Session = Depends(get_db)
+):
     res = db.query(models.StoreReservation).filter(models.StoreReservation.id == reservation_id).first()
     if not res:
         raise HTTPException(status_code=404, detail="해당 예약을 찾을 수 없습니다.")
-    
-    old_status = res.status
-    res.status = req.status
-    db.commit()
-    db.refresh(res)
-    
-    log_admin_action(db, admin.id, "UPDATE_RESERVATION_STATUS", reservation_id, f"Changed status from {old_status} to {req.status}")
-    return res
+    return validate_and_update_reservation_status(res, req.status, operator, db)
+
+@app.patch("/reservations/{reservation_id}/status", response_model=schemas.ReservationOut, tags=["Reservations"])
+def update_reservation_status(
+    reservation_id: str,
+    req: schemas.ReservationStatusUpdate,
+    operator: models.User = Depends(get_owner_or_admin_user),
+    db: Session = Depends(get_db)
+):
+    res = db.query(models.StoreReservation).filter(models.StoreReservation.id == reservation_id).first()
+    if not res:
+        raise HTTPException(status_code=404, detail="해당 예약을 찾을 수 없습니다.")
+    return validate_and_update_reservation_status(res, req.status, operator, db)
 
 @app.get("/admin/reviews", response_model=List[schemas.ReviewOut], tags=["Admin"])
 def get_admin_reviews(skip: int = 0, limit: int = 20, admin: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):

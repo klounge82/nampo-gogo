@@ -40,5 +40,6 @@
 | **REL-001-BACKEND** | Backend  | Backend 실제 호스팅 및 실 배포 기동 완료 | **COMPLETED** | UserAuth 테이블명 정합 완료 및 인증 API Smoke Test 100% 통과 |
 | **REL-001-SEED**    | Database  | Production 최초 운영 매장 K-Lounge Seed 등록 실행 | **COMPLETED** | K-Lounge 운영 매장 1건 정상 등록 및 상세 조회 통과 | RELEASE-001-E-SEED-02 |
 | **REL-001-STORE-FLOW**| Backend | K-Lounge 매장 상세·즐겨찾기·리뷰 운영 API 검증 | **REVIEW_FLOW_BLOCKED** | 즐겨찾기 CUD 및 중복 방어 100% 통과, K-Lounge 미션 Seed/예약완료 API 추가 필요 | RELEASE-001-E-STORE-FLOW-01 |
+| **REL-001-RES-REMEDY**| Backend | 예약 완료 상태 전환 운영 API 및 리뷰 권한 연동 검증 | **COMPLETED** | PATCH /admin/reservations/{id}/status 및 PATCH /reservations/{id}/status 권한·전환 가드 구축 및 리뷰 자격 100% 검증 | RELEASE-001-E-REVIEW-REMEDY-01 |
 
 *(상태값 정의 기준: `COMPLETED`, `READY`, `REQUIRED_BEFORE_RELEASE`, `INPUT_REQUIRED`, `BLOCKED`, `NOT_APPLICABLE`)*

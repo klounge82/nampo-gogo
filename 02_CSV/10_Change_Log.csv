@@ -55,6 +55,7 @@ CHG-038-E-RETRY-02,v18.5,회원가입·로그인·현재 사용자 API 재검증
 CHG-038-E-SEED-01,v18.6,Production 최초 운영 매장 Seed Data 안전 구축 및 K-Lounge 등록 준비 [READY_FOR_SEED],사용자 확정 K-Lounge 매장 정보 주입 완료 및 Docker scripts 추가, 멱등 Seed 스크립트/회귀테스트 100% 통과 (운영 DB Seed 미실행 유지),2026-07-21
 CHG-038-E-SEED-02,v18.7,Railway 운영 PostgreSQL K-Lounge 최초 매장 Seed 1회 실행 점검 [RAILWAY_CLI_REQUIRED],로컬 시스템 환경 내 Railway CLI(railway) 미설치 식별로 인한 안전 게이트 차단 및 CLI 설치 요구 상태 보고,2026-07-21
 CHG-038-E-STORE-FLOW-01,v18.8,K-Lounge 기반 매장 상세·즐겨찾기·리뷰 운영 API 검증 [REVIEW_FLOW_BLOCKED],즐겨찾기 CUD 및 중복 방어 100% 통과 / 계정탈퇴 403 차단 검증 완료 / 리뷰 작성 권한 403 방어 확인 및 K-Lounge 미션/예약완료 API 부재로 리뷰 검증 블록,2026-07-22
+CHG-038-E-REVIEW-R1,v18.9,예약 완료 상태 전환 운영 흐름 구축 및 리뷰 API 최종 검증 준비 [READY_FOR_REVIEW_RETRY],예약 상태 변경 API(PATCH /admin/reservations/{id}/status 및 PATCH /reservations/{id}/status) 구축 및 admin/owner 권한 제한 및 상태전환 가드/리뷰 자격 100% 검증 완료,2026-07-22
 
 
 
