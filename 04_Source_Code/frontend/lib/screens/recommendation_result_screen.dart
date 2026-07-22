@@ -1,6 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
+import 'package:provider/provider.dart';
 import '../constants/colors.dart';
 import '../repositories/recommendation_repository.dart';
+import '../providers/auth_provider.dart';
+import '../providers/favorite_provider.dart';
 import '../widgets/recommendation_feedback_widget.dart';
 import 'place_detail_screen.dart';
 
@@ -15,6 +20,7 @@ class RecommendationResultScreen extends StatefulWidget {
   final bool usePersonalization;
   final bool excludeVisited;
   final bool preferRewards;
+  final RecommendationModel? initialCourse;
 
   const RecommendationResultScreen({
     super.key,
@@ -28,6 +34,7 @@ class RecommendationResultScreen extends StatefulWidget {
     this.usePersonalization = false,
     this.excludeVisited = false,
     this.preferRewards = false,
+    this.initialCourse,
   });
 
   @override
@@ -41,12 +48,18 @@ class _RecommendationResultScreenState
 
   RecommendationModel? _recommendation;
   bool _isLoading = true;
+  bool _isSaving = false;
   String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
-    _fetchCourse();
+    if (widget.initialCourse != null) {
+      _recommendation = widget.initialCourse;
+      _isLoading = false;
+    } else {
+      _fetchCourse();
+    }
   }
 
   Future<void> _fetchCourse() async {
@@ -73,7 +86,7 @@ class _RecommendationResultScreenState
       });
     } catch (e) {
       setState(() {
-        _errorMessage = e.toString();
+        _errorMessage = '추천 코스를 가져오지 못했습니다.';
       });
     } finally {
       setState(() => _isLoading = false);
@@ -81,30 +94,62 @@ class _RecommendationResultScreenState
   }
 
   Future<void> _saveCourse() async {
-    if (_recommendation == null || _recommendation!.isSaved) return;
+    if (_recommendation == null || _isSaving) return;
+
+    final bool targetState = !_recommendation!.isSaved;
+    setState(() => _isSaving = true);
 
     try {
       final updated = await _repository.saveCourse(
-        _recommendation!.id,
-        isSaved: true,
+        _recommendation!,
+        isSaved: targetState,
+        userId: widget.userId,
       );
       setState(() {
         _recommendation = updated;
       });
+
       if (mounted) {
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        final token = authProvider.accessToken;
+        Provider.of<FavoriteProvider>(context, listen: false).toggleFavorite(
+          targetType: 'RECOMMENDATION',
+          targetId: _recommendation!.id,
+          token: token,
+        );
+
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('📂 추천 코스가 보관함에 저장되었습니다.'),
-            backgroundColor: Colors.green,
+          SnackBar(
+            content: Text(
+              targetState ? '📂 추천 코스가 보관함에 저장되었습니다.' : '코스 저장이 해제되었습니다.',
+            ),
+            backgroundColor: targetState ? Colors.green : Colors.grey.shade700,
             behavior: SnackBarBehavior.floating,
           ),
         );
       }
     } catch (e) {
+      if (kDebugMode) {
+        if (e is DioException) {
+          print(
+            '[CourseSave Error] status: ${e.response?.statusCode}, method: ${e.requestOptions.method}, path: ${e.requestOptions.path}',
+          );
+        } else {
+          print('[CourseSave Error] $e');
+        }
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('저장 실패: $e'), backgroundColor: Colors.red),
+          const SnackBar(
+            content: Text('코스를 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
         );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
       }
     }
   }
@@ -467,11 +512,20 @@ class _RecommendationResultScreenState
               child: SizedBox(
                 height: 46.0,
                 child: ElevatedButton.icon(
-                  onPressed: _saveCourse,
-                  icon: Icon(
-                    isSaved ? Icons.bookmark : Icons.bookmark_border,
-                    size: 18.0,
-                  ),
+                  onPressed: _isSaving ? null : _saveCourse,
+                  icon: _isSaving
+                      ? const SizedBox(
+                          width: 18.0,
+                          height: 18.0,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.0,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Icon(
+                          isSaved ? Icons.bookmark : Icons.bookmark_border,
+                          size: 18.0,
+                        ),
                   label: Text(
                     isSaved ? '보관함 저장됨' : '이 코스 보관함 저장',
                     style: const TextStyle(

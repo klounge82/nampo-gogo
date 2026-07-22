@@ -5,7 +5,7 @@ import '../providers/auth_provider.dart';
 import '../providers/locale_provider.dart';
 import '../widgets/favorite_button.dart';
 import 'place_detail_screen.dart';
-import 'recommendation_result_screen.dart'; // Deep links to recommendation course details
+import 'saved_courses_screen.dart';
 
 class FavoritesScreen extends StatefulWidget {
   const FavoritesScreen({super.key});
@@ -14,7 +14,8 @@ class FavoritesScreen extends StatefulWidget {
   State<FavoritesScreen> createState() => _FavoritesScreenState();
 }
 
-class _FavoritesScreenState extends State<FavoritesScreen> with SingleTickerProviderStateMixin {
+class _FavoritesScreenState extends State<FavoritesScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -40,13 +41,16 @@ class _FavoritesScreenState extends State<FavoritesScreen> with SingleTickerProv
   Widget build(BuildContext context) {
     final favProvider = context.watch<FavoriteProvider>();
 
-    // Divide items by type
-    final places = favProvider.favoriteItems.where((item) => item['target_type'] == 'PLACE').toList();
-    final recs = favProvider.favoriteItems.where((item) => item['target_type'] == 'RECOMMENDATION').toList();
+    final places = favProvider.favoriteItems
+        .where((item) => item['target_type'] == 'PLACE')
+        .toList();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('즐겨찾기 보관함', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          '즐겨찾기 보관함',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
@@ -55,38 +59,46 @@ class _FavoritesScreenState extends State<FavoritesScreen> with SingleTickerProv
           ],
         ),
       ),
-      body: favProvider.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : TabBarView(
-              controller: _tabController,
-              children: [
-                _buildListView(places, 'PLACE'),
-                _buildListView(recs, 'RECOMMENDATION'),
-              ],
-            ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          favProvider.isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _buildListView(places, 'PLACE'),
+          const SavedCoursesListView(isTabMode: true),
+        ],
+      ),
     );
   }
 
   Widget _buildListView(List<dynamic> items, String type) {
     if (items.isEmpty) {
+      final bool isPlace = type == 'PLACE';
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              type == 'PLACE' ? Icons.store_mall_directory : Icons.route,
+              isPlace ? Icons.store_mall_directory : Icons.route_outlined,
               size: 64,
               color: Colors.grey,
             ),
             const SizedBox(height: 16),
-            const Text(
-              '저장된 항목이 없습니다.',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey),
+            Text(
+              isPlace ? '저장된 장소가 없습니다.' : '아직 저장한 코스가 없습니다.',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey,
+              ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              '관심 있는 장소나 코스를 하트 아이콘으로 추가해 보세요.',
-              style: TextStyle(fontSize: 12, color: Colors.grey),
+            Text(
+              isPlace
+                  ? '관심 있는 장소를 하트 아이콘으로 추가해 보세요.'
+                  : '추천 코스 결과에서 ‘이 코스 보관함 저장’을 눌러 추가해 보세요.',
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
+              textAlign: TextAlign.center,
             ),
           ],
         ),
@@ -143,30 +155,44 @@ class _FavoritesScreenState extends State<FavoritesScreen> with SingleTickerProv
                   children: [
                     if (cat != null && cat.isNotEmpty)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.grey[200],
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: Text(cat, style: const TextStyle(fontSize: 9, color: Colors.grey)),
+                        child: Text(
+                          cat,
+                          style: const TextStyle(
+                            fontSize: 9,
+                            color: Colors.grey,
+                          ),
+                        ),
                       ),
                     if (rating > 0.0) ...[
                       const SizedBox(width: 8),
                       const Icon(Icons.star, color: Colors.amber, size: 12),
-                      Text(' $rating', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                      Text(
+                        ' $rating',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ],
                   ],
                 ),
               ],
             ),
-            trailing: FavoriteButton(
-              targetType: type,
-              targetId: targetId,
-            ),
+            trailing: FavoriteButton(targetType: type, targetId: targetId),
             onTap: () {
               if (type == 'PLACE') {
                 Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => PlaceDetailScreen(placeId: targetId)),
+                  MaterialPageRoute(
+                    builder: (_) => PlaceDetailScreen(placeId: targetId),
+                  ),
                 );
               }
             },
