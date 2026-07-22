@@ -43,5 +43,6 @@
 | **REL-001-RES-REMEDY**| Backend | 예약 완료 상태 전환 운영 API 및 리뷰 권한 연동 검증 | **COMPLETED** | PATCH /admin/reservations/{id}/status 및 PATCH /reservations/{id}/status 권한·전환 가드 구축 및 리뷰 자격 100% 검증 | RELEASE-001-E-REVIEW-REMEDY-01 |
 | **REL-001-OWNER-BOOTSTRAP**| Backend | K-Lounge 공식 Owner 계정 안전 생성 방식 구축 | **READY** | 멱등 CLI Bootstrap 스크립트(bootstrap_store_owner.py) 및 단위 테스트 구현 완료, 1회 운영 실행 준비 완료 | RELEASE-001-E-OPERATOR-BOOTSTRAP-01 |
 | **REL-001-OWNER-SCOPE**| Backend | Store–Owner 소유권 관계 스키마 및 매장 단위 예약 관리 권한 가드 구축 | **READY** | StoreOwner 모델 및 Alembic 마이그레이션(002_add_store_owners.py) 구축 / require_store_owner_or_admin 매장 단위 권한 가드 100% 회귀 테스트 통과 | RELEASE-001-E-OWNER-SCOPE-REMEDY-01 |
+| **REL-001-REVIEW-RETRY**| Backend | 완료 예약 기반 리뷰 작성·조회·수정·삭제 운영 API 최종 검증 | **COMPLETED** | K-Lounge Owner 계정 로그인·예약상태 전환(pending->confirmed->completed) 및 완료 예약 기반 리뷰 CUD/4xx 예외방어 100% 운영 검증 완료 (GET /reviews/me 빈 배열 반환 잔여 경고) | RELEASE-001-E-REVIEW-RETRY-01 |
 
 *(상태값 정의 기준: `COMPLETED`, `READY`, `REQUIRED_BEFORE_RELEASE`, `INPUT_REQUIRED`, `BLOCKED`, `NOT_APPLICABLE`)*
