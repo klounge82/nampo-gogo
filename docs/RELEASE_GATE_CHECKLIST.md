@@ -38,6 +38,7 @@
 | **REL-001-DATABASE**| Database | 실제 Production 데이터베이스 서버 기동 및 연결 확보 | **COMPLETED** | 초기 Alembic Migration(001_initial_schema) 적용 완료 |
 | **REL-001-STORAGE** | Storage  | 사용자 이미지 영구 보관 (Persistent Disk) 매핑 | **REQUIRED_BEFORE_RELEASE** | 컨테이너 볼륨 Persistent Storage 연동 필요 |
 | **REL-001-BACKEND** | Backend  | Backend 실제 호스팅 및 실 배포 기동 완료 | **COMPLETED** | UserAuth 테이블명 정합 완료 및 인증 API Smoke Test 100% 통과 |
-| **REL-001-SEED**    | Database  | Production 최초 운영 매장 K-Lounge Seed 등록 실행 | **RAILWAY_CLI_REQUIRED** | Railway CLI 미설치 환경 식별. 원격 backend SSH 실행을 위한 Railway CLI 설치/인증 필요 | RELEASE-001-E-SEED-02 |
+| **REL-001-SEED**    | Database  | Production 최초 운영 매장 K-Lounge Seed 등록 실행 | **COMPLETED** | K-Lounge 운영 매장 1건 정상 등록 및 상세 조회 통과 | RELEASE-001-E-SEED-02 |
+| **REL-001-STORE-FLOW**| Backend | K-Lounge 매장 상세·즐겨찾기·리뷰 운영 API 검증 | **REVIEW_FLOW_BLOCKED** | 즐겨찾기 CUD 및 중복 방어 100% 통과, K-Lounge 미션 Seed/예약완료 API 추가 필요 | RELEASE-001-E-STORE-FLOW-01 |
 
 *(상태값 정의 기준: `COMPLETED`, `READY`, `REQUIRED_BEFORE_RELEASE`, `INPUT_REQUIRED`, `BLOCKED`, `NOT_APPLICABLE`)*
