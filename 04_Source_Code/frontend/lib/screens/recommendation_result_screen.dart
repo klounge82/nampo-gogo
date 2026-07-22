@@ -31,10 +31,12 @@ class RecommendationResultScreen extends StatefulWidget {
   });
 
   @override
-  State<RecommendationResultScreen> createState() => _RecommendationResultScreenState();
+  State<RecommendationResultScreen> createState() =>
+      _RecommendationResultScreenState();
 }
 
-class _RecommendationResultScreenState extends State<RecommendationResultScreen> {
+class _RecommendationResultScreenState
+    extends State<RecommendationResultScreen> {
   final RecommendationRepository _repository = RecommendationRepository();
 
   RecommendationModel? _recommendation;
@@ -82,7 +84,10 @@ class _RecommendationResultScreenState extends State<RecommendationResultScreen>
     if (_recommendation == null || _recommendation!.isSaved) return;
 
     try {
-      final updated = await _repository.saveCourse(_recommendation!.id, isSaved: true);
+      final updated = await _repository.saveCourse(
+        _recommendation!.id,
+        isSaved: true,
+      );
       setState(() {
         _recommendation = updated;
       });
@@ -136,47 +141,63 @@ class _RecommendationResultScreenState extends State<RecommendationResultScreen>
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('추천 코스 결과', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          '추천 코스 결과',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
         elevation: 0.5,
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            )
           : _errorMessage != null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('추천 코스 생성을 실패하였습니다: $_errorMessage'),
-                      const SizedBox(height: 16.0),
-                      ElevatedButton(onPressed: _fetchCourse, child: const Text('다시 추천받기')),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('추천 코스 생성을 실패하였습니다: $_errorMessage'),
+                  const SizedBox(height: 16.0),
+                  ElevatedButton(
+                    onPressed: _fetchCourse,
+                    child: const Text('다시 추천받기'),
                   ),
-                )
-              : _recommendation == null || _recommendation!.items.isEmpty
-                  ? const Center(child: Text('조건에 부합하는 코스를 찾을 수 없습니다.'))
-                  : Column(
-                      children: [
-                        // Course overview Banner
-                        _buildOverviewBanner(),
+                ],
+              ),
+            )
+          : _recommendation == null || _recommendation!.items.isEmpty
+          ? const Center(child: Text('조건에 부합하는 코스를 찾을 수 없습니다.'))
+          : Column(
+              children: [
+                // Course overview Banner
+                _buildOverviewBanner(),
 
-                        // Places timeline sequence
-                        Expanded(
-                          child: ListView.builder(
-                            padding: const EdgeInsets.all(16.0),
-                            itemCount: _recommendation!.items.length,
-                            itemBuilder: (context, index) {
-                              final item = _recommendation!.items[index];
-                              return _buildTimelineItem(item, index == _recommendation!.items.length - 1);
-                            },
-                          ),
-                        ),
-
-                        // Actions footer
-                        _buildFooterActions(),
-                      ],
+                // Places timeline sequence
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.only(
+                      left: 16.0,
+                      right: 16.0,
+                      top: 16.0,
+                      bottom: 24.0,
                     ),
+                    itemCount: _recommendation!.items.length,
+                    itemBuilder: (context, index) {
+                      final item = _recommendation!.items[index];
+                      return _buildTimelineItem(
+                        item,
+                        index == _recommendation!.items.length - 1,
+                      );
+                    },
+                  ),
+                ),
+
+                // Actions footer
+                _buildFooterActions(),
+              ],
+            ),
     );
   }
 
@@ -189,7 +210,10 @@ class _RecommendationResultScreenState extends State<RecommendationResultScreen>
     for (int i = 0; i < itemsCount - 1; i++) {
       final p1 = _recommendation!.items[i].store;
       final p2 = _recommendation!.items[i + 1].store;
-      if (p1.latitude != null && p1.longitude != null && p2.latitude != null && p2.longitude != null) {
+      if (p1.latitude != null &&
+          p1.longitude != null &&
+          p2.latitude != null &&
+          p2.longitude != null) {
         // Simple planar approximation
         final dy = (p2.latitude! - p1.latitude!) * 111.0;
         final dx = (p2.longitude! - p1.longitude!) * 88.0;
@@ -197,7 +221,9 @@ class _RecommendationResultScreenState extends State<RecommendationResultScreen>
       }
     }
     totalDist = totalDist > 0 ? (totalDist * 10).clamp(0.4, 4.2) : 0.8;
-    final int totalTimeMin = ((totalDist * 1000) / walkSpeed).round() + (itemsCount * 30); // 30 mins per place stay
+    final int totalTimeMin =
+        ((totalDist * 1000) / walkSpeed).round() +
+        (itemsCount * 30); // 30 mins per place stay
 
     return Container(
       width: double.infinity,
@@ -209,7 +235,10 @@ class _RecommendationResultScreenState extends State<RecommendationResultScreen>
           if (widget.usePersonalization) ...[
             Container(
               margin: const EdgeInsets.only(bottom: 8.0),
-              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 10.0,
+                vertical: 4.0,
+              ),
               decoration: BoxDecoration(
                 color: Colors.amber.shade700.withAlpha(30),
                 borderRadius: BorderRadius.circular(20.0),
@@ -218,11 +247,19 @@ class _RecommendationResultScreenState extends State<RecommendationResultScreen>
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.auto_awesome, size: 12.0, color: Colors.amber.shade800),
+                  Icon(
+                    Icons.auto_awesome,
+                    size: 12.0,
+                    color: Colors.amber.shade800,
+                  ),
                   const SizedBox(width: 4.0),
                   Text(
                     '개인화 맞춤 코스 반영',
-                    style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: Colors.amber.shade800),
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.amber.shade800,
+                    ),
                   ),
                 ],
               ),
@@ -232,18 +269,33 @@ class _RecommendationResultScreenState extends State<RecommendationResultScreen>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '${widget.travelType == "SOLO" ? "나홀로" : widget.travelType == "COUPLE" ? "커플" : "가족/친구"} 남포동 나들이',
-                style: const TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                '${widget.travelType == "SOLO"
+                    ? "나홀로"
+                    : widget.travelType == "COUPLE"
+                    ? "커플"
+                    : "가족/친구"} 남포동 나들이',
+                style: const TextStyle(
+                  fontSize: 15.0,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8.0,
+                  vertical: 4.0,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.primary.withAlpha(20),
                   borderRadius: BorderRadius.circular(6.0),
                 ),
                 child: Text(
                   widget.transportMode == 'WALK' ? '도보 코스' : '차량/대중교통',
-                  style: const TextStyle(fontSize: 10.0, fontWeight: FontWeight.bold, color: AppColors.primary),
+                  style: const TextStyle(
+                    fontSize: 10.0,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                  ),
                 ),
               ),
             ],
@@ -251,7 +303,10 @@ class _RecommendationResultScreenState extends State<RecommendationResultScreen>
           const SizedBox(height: 8.0),
           Text(
             '총 이동거리: ${totalDist.toStringAsFixed(1)} km  |  예상 소요시간: 약 $totalTimeMin분 ($itemsCount개 매장)',
-            style: const TextStyle(fontSize: 12.0, color: AppColors.textSecondary),
+            style: const TextStyle(
+              fontSize: 12.0,
+              color: AppColors.textSecondary,
+            ),
           ),
         ],
       ),
@@ -276,7 +331,11 @@ class _RecommendationResultScreenState extends State<RecommendationResultScreen>
                 alignment: Alignment.center,
                 child: Text(
                   '${item.visitOrder}',
-                  style: const TextStyle(color: Colors.white, fontSize: 12.0, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12.0,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               if (!isLast)
@@ -304,7 +363,8 @@ class _RecommendationResultScreenState extends State<RecommendationResultScreen>
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (_) => PlaceDetailScreen(placeId: item.store.id),
+                        builder: (_) =>
+                            PlaceDetailScreen(placeId: item.store.id),
                       ),
                     );
                   },
@@ -319,38 +379,60 @@ class _RecommendationResultScreenState extends State<RecommendationResultScreen>
                           children: [
                             Text(
                               item.store.name,
-                              style: const TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                              style: const TextStyle(
+                                fontSize: 14.0,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textPrimary,
+                              ),
                             ),
                             Text(
                               item.store.category,
-                              style: const TextStyle(fontSize: 11.0, color: AppColors.textHint),
+                              style: const TextStyle(
+                                fontSize: 11.0,
+                                color: AppColors.textHint,
+                              ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 4.0),
                         Text(
                           item.store.address,
-                          style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
+                          style: const TextStyle(
+                            fontSize: 11.5,
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                         const SizedBox(height: 8.0),
                         Text(
                           item.store.description,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 12.0, color: AppColors.textSecondary, height: 1.35),
+                          style: const TextStyle(
+                            fontSize: 12.0,
+                            color: AppColors.textSecondary,
+                            height: 1.35,
+                          ),
                         ),
                         const Divider(height: 20.0, color: AppColors.border),
-                        
+
                         // Recommendation reason
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(Icons.psychology_alt_outlined, size: 14.0, color: AppColors.secondary),
+                            const Icon(
+                              Icons.psychology_alt_outlined,
+                              size: 14.0,
+                              color: AppColors.secondary,
+                            ),
                             const SizedBox(width: 6.0),
                             Expanded(
                               child: Text(
                                 _translateReason(item.recommendReasonCode),
-                                style: const TextStyle(fontSize: 11.0, color: AppColors.secondary, fontWeight: FontWeight.w600),
+                                style: const TextStyle(
+                                  fontSize: 11.0,
+                                  color: AppColors.secondary,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                           ],
@@ -371,34 +453,47 @@ class _RecommendationResultScreenState extends State<RecommendationResultScreen>
 
   Widget _buildFooterActions() {
     final bool isSaved = _recommendation?.isSaved ?? false;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        border: Border(top: BorderSide(color: AppColors.border)),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: SizedBox(
-              height: 44.0,
-              child: ElevatedButton.icon(
-                onPressed: _saveCourse,
-                icon: Icon(isSaved ? Icons.bookmark : Icons.bookmark_border, size: 18.0),
-                label: Text(
-                  isSaved ? '보관함 저장됨' : '이 코스 보관함 저장',
-                  style: const TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: isSaved ? Colors.grey : AppColors.secondary,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+    return SafeArea(
+      top: false,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
+          border: Border(top: BorderSide(color: AppColors.border)),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: SizedBox(
+                height: 46.0,
+                child: ElevatedButton.icon(
+                  onPressed: _saveCourse,
+                  icon: Icon(
+                    isSaved ? Icons.bookmark : Icons.bookmark_border,
+                    size: 18.0,
+                  ),
+                  label: Text(
+                    isSaved ? '보관함 저장됨' : '이 코스 보관함 저장',
+                    style: const TextStyle(
+                      fontSize: 13.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isSaved
+                        ? Colors.grey
+                        : AppColors.secondary,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

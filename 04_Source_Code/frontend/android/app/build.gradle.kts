@@ -12,6 +12,14 @@ android {
     compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
+    val localProperties = Properties()
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localPropertiesFile.inputStream().use { stream ->
+            localProperties.load(stream)
+        }
+    }
+
     val keystoreProperties = Properties()
     val keystorePropertiesFile = rootProject.file("key.properties")
     if (keystorePropertiesFile.exists()) {
@@ -36,8 +44,12 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
 
-        // Inject Maps API Key from property or env
-        val mapsKey = (project.findProperty("MAPS_API_KEY") as String?) ?: System.getenv("MAPS_API_KEY") ?: "MOCK_KEY"
+        // Inject Google Maps API Key from key.properties, local.properties, Gradle project property, or env
+        val mapsKey = keystoreProperties.getProperty("MAPS_API_KEY")
+            ?: localProperties.getProperty("MAPS_API_KEY")
+            ?: (project.findProperty("MAPS_API_KEY") as String?)
+            ?: System.getenv("MAPS_API_KEY")
+            ?: ""
         manifestPlaceholders["MAPS_API_KEY"] = mapsKey
     }
 

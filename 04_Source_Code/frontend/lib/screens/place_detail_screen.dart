@@ -26,7 +26,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
   final PlaceRepository _placeRepository = PlaceRepository();
   final ReviewRepository _reviewRepository = ReviewRepository();
   final MapService _mapService = MapService();
-  
+
   Place? _place;
   List<model_review.Review> _reviews = [];
   bool _isLoading = true;
@@ -110,38 +110,54 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            )
           : _errorMessage != null
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.error_outline, size: 48.0, color: Colors.redAccent),
-                        const SizedBox(height: 12.0),
-                        Text(
-                          _errorMessage!,
-                          style: const TextStyle(color: AppColors.textSecondary),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 16.0),
-                        ElevatedButton(
-                          onPressed: _loadPlaceDetail,
-                          style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-                          child: const Text('다시 시도', style: TextStyle(color: Colors.white)),
-                        ),
-                      ],
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      size: 48.0,
+                      color: Colors.redAccent,
                     ),
-                  ),
-                )
-              : _buildContent(context, _place!),
+                    const SizedBox(height: 12.0),
+                    Text(
+                      _errorMessage!,
+                      style: const TextStyle(color: AppColors.textSecondary),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16.0),
+                    ElevatedButton(
+                      onPressed: _loadPlaceDetail,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                      ),
+                      child: const Text(
+                        '다시 시도',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : _buildContent(context, _place!),
+      bottomNavigationBar:
+          (_isLoading || _errorMessage != null || _place == null)
+          ? null
+          : _buildBottomActionBar(context),
     );
   }
 
   Widget _buildContent(BuildContext context, Place place) {
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.only(bottom: 24.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -172,7 +188,10 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                   left: 16.0,
                   right: 16.0,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10.0,
+                      vertical: 4.0,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.black.withAlpha(102),
                       borderRadius: BorderRadius.circular(8.0),
@@ -192,7 +211,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
               ],
             ),
           ),
-          
+
           // Main Body info
           Padding(
             padding: const EdgeInsets.all(18.0),
@@ -204,7 +223,10 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8.0,
+                        vertical: 4.0,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.primary.withAlpha(26),
                         borderRadius: BorderRadius.circular(4.0),
@@ -220,7 +242,11 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                     ),
                     Row(
                       children: [
-                        const Icon(Icons.star, color: AppColors.secondary, size: 18.0),
+                        const Icon(
+                          Icons.star,
+                          color: AppColors.secondary,
+                          size: 18.0,
+                        ),
                         const SizedBox(width: 4.0),
                         Text(
                           place.rating.toString(),
@@ -235,7 +261,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                   ],
                 ),
                 const SizedBox(height: 14.0),
-                
+
                 // Name
                 Text(
                   place.name,
@@ -246,7 +272,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                   ),
                 ),
                 const SizedBox(height: 16.0),
-                
+
                 // Description Card
                 const Text(
                   '장소 소개',
@@ -266,7 +292,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                   ),
                 ),
                 const SizedBox(height: 24.0),
-                
+
                 // Simulated Map Widget
                 const Text(
                   '위치 정보',
@@ -330,11 +356,16 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                             );
                           },
                           icon: const Icon(Icons.directions_walk, size: 14.0),
-                          label: const Text('도보 길찾기', style: TextStyle(fontSize: 11.5)),
+                          label: const Text(
+                            '도보 길찾기',
+                            style: TextStyle(fontSize: 11.5),
+                          ),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: AppColors.primary,
                             side: const BorderSide(color: AppColors.primary),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
                           ),
                         ),
@@ -349,12 +380,27 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                               destName: place.name,
                             );
                           },
-                          icon: const Icon(Icons.map, size: 14.0, color: Colors.white),
-                          label: const Text('네이버 지도', style: TextStyle(fontSize: 11.5, color: Colors.white, fontWeight: FontWeight.bold)),
+                          icon: const Icon(
+                            Icons.map,
+                            size: 14.0,
+                            color: Colors.white,
+                          ),
+                          label: const Text(
+                            '네이버 지도',
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF03C75A), // Naver Green
+                            backgroundColor: const Color(
+                              0xFF03C75A,
+                            ), // Naver Green
                             elevation: 0,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
                           ),
                         ),
@@ -363,7 +409,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                   ),
                 ],
                 const SizedBox(height: 24.0),
-                
+
                 // Reviews Section
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -380,23 +426,39 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                       children: [
                         Text(
                           '★ ${place.rating.toStringAsFixed(1)}',
-                          style: const TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold, color: Colors.amber),
+                          style: const TextStyle(
+                            fontSize: 13.0,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.amber,
+                          ),
                         ),
                         const SizedBox(width: 8.0),
                         TextButton(
                           onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => ReviewWriteScreen(storeId: place.id, storeName: place.name),
-                              ),
-                            ).then((value) {
-                              if (value == true) {
-                                _loadPlaceDetail();
-                                _loadReviews();
-                              }
-                            });
+                            Navigator.of(context)
+                                .push(
+                                  MaterialPageRoute(
+                                    builder: (_) => ReviewWriteScreen(
+                                      storeId: place.id,
+                                      storeName: place.name,
+                                    ),
+                                  ),
+                                )
+                                .then((value) {
+                                  if (value == true) {
+                                    _loadPlaceDetail();
+                                    _loadReviews();
+                                  }
+                                });
                           },
-                          child: const Text('후기 남기기', style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                          child: const Text(
+                            '후기 남기기',
+                            style: TextStyle(
+                              fontSize: 12.0,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -404,115 +466,91 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                 ),
                 const SizedBox(height: 6.0),
                 _isReviewsLoading
-                    ? const Center(child: Padding(padding: EdgeInsets.all(8.0), child: CircularProgressIndicator(color: AppColors.primary)))
+                    ? const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: CircularProgressIndicator(
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      )
                     : _reviews.isEmpty
-                        ? Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(vertical: 24.0),
-                            decoration: BoxDecoration(
-                              color: AppColors.surface,
-                              borderRadius: BorderRadius.circular(12.0),
-                              border: Border.all(color: AppColors.border),
+                    ? Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 24.0),
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          borderRadius: BorderRadius.circular(12.0),
+                          border: Border.all(color: AppColors.border),
+                        ),
+                        child: const Center(
+                          child: Text(
+                            '아직 작성된 후기가 없습니다.\n첫 번째 후기를 남겨보세요!',
+                            style: TextStyle(
+                              fontSize: 12.0,
+                              color: AppColors.textHint,
                             ),
-                            child: const Center(
-                              child: Text(
-                                '아직 작성된 후기가 없습니다.\n첫 번째 후기를 남겨보세요!',
-                                style: TextStyle(fontSize: 12.0, color: AppColors.textHint),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          )
-                        : Column(
-                            children: _reviews.map((rev) => Container(
-                              margin: const EdgeInsets.only(bottom: 12.0),
-                              padding: const EdgeInsets.all(14.0),
-                              decoration: BoxDecoration(
-                                color: AppColors.surface,
-                                borderRadius: BorderRadius.circular(12.0),
-                                border: Border.all(color: AppColors.border),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        rev.user.nickname,
-                                        style: const TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      )
+                    : Column(
+                        children: _reviews
+                            .map(
+                              (rev) => Container(
+                                margin: const EdgeInsets.only(bottom: 12.0),
+                                padding: const EdgeInsets.all(14.0),
+                                decoration: BoxDecoration(
+                                  color: AppColors.surface,
+                                  borderRadius: BorderRadius.circular(12.0),
+                                  border: Border.all(color: AppColors.border),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          rev.user.nickname,
+                                          style: const TextStyle(
+                                            fontSize: 12.0,
+                                            fontWeight: FontWeight.bold,
+                                            color: AppColors.textPrimary,
+                                          ),
+                                        ),
+                                        Row(
+                                          children: List.generate(
+                                            5,
+                                            (index) => Icon(
+                                              index < rev.rating
+                                                  ? Icons.star
+                                                  : Icons.star_border,
+                                              color: index < rev.rating
+                                                  ? Colors.amber
+                                                  : Colors.grey.shade300,
+                                              size: 13.0,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8.0),
+                                    Text(
+                                      rev.content,
+                                      style: const TextStyle(
+                                        fontSize: 12.5,
+                                        color: AppColors.textPrimary,
+                                        height: 1.35,
                                       ),
-                                      Row(
-                                        children: List.generate(5, (index) => Icon(
-                                          index < rev.rating ? Icons.star : Icons.star_border,
-                                          color: index < rev.rating ? Colors.amber : Colors.grey.shade300,
-                                          size: 13.0,
-                                        )),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8.0),
-                                  Text(
-                                    rev.content,
-                                    style: const TextStyle(fontSize: 12.5, color: AppColors.textPrimary, height: 1.35),
-                                  ),
-                                ],
+                                    ),
+                                  ],
+                                ),
                               ),
-                            )).toList(),
-                          ),
-                const SizedBox(height: 28.0),
-                
-                // Action Buttons
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () => _showActionFeedback('길찾기'),
-                        icon: const Icon(Icons.navigation_outlined, size: 18.0),
-                        label: const Text('길찾기', style: TextStyle(fontSize: 12.0)),
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: AppColors.primary),
-                          foregroundColor: AppColors.primary,
-                          padding: const EdgeInsets.symmetric(vertical: 12.0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
-                        ),
+                            )
+                            .toList(),
                       ),
-                    ),
-                    const SizedBox(width: 8.0),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () => _showReservationBottomSheet(context),
-                        icon: const Icon(Icons.calendar_today, size: 18.0),
-                        label: const Text('예약하기', style: TextStyle(fontSize: 12.0)),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.secondary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 12.0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8.0),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () => _showActionFeedback('미션 도전'),
-                        icon: const Icon(Icons.stars, size: 18.0),
-                        label: const Text('미션 도전', style: TextStyle(fontSize: 12.0)),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 12.0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
               ],
             ),
           ),
@@ -524,10 +562,12 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
   void _showReservationBottomSheet(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     if (!authProvider.isLoggedIn) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('예약을 위해 로그인이 필요합니다.')),
-      );
-      Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AuthScreen()));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('예약을 위해 로그인이 필요합니다.')));
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const AuthScreen()));
       return;
     }
 
@@ -555,23 +595,45 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('매장 예약 신청', style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold)),
+                  const Text(
+                    '매장 예약 신청',
+                    style: TextStyle(
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const SizedBox(height: 16.0),
-                  
+
                   // Party Size Selection
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('예약 인원', style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w500)),
+                      const Text(
+                        '예약 인원',
+                        style: TextStyle(
+                          fontSize: 14.0,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                       Row(
                         children: [
                           IconButton(
-                            onPressed: partySize > 1 ? () => setModalState(() => partySize--) : null,
+                            onPressed: partySize > 1
+                                ? () => setModalState(() => partySize--)
+                                : null,
                             icon: const Icon(Icons.remove_circle_outline),
                           ),
-                          Text('$partySize 명', style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold)),
+                          Text(
+                            '$partySize 명',
+                            style: const TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                           IconButton(
-                            onPressed: partySize < 8 ? () => setModalState(() => partySize++) : null,
+                            onPressed: partySize < 8
+                                ? () => setModalState(() => partySize++)
+                                : null,
                             icon: const Icon(Icons.add_circle_outline),
                           ),
                         ],
@@ -579,14 +641,23 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                     ],
                   ),
                   const Divider(),
-                  
+
                   // Date Picker
                   ListTile(
-                    leading: const Icon(Icons.calendar_today, color: AppColors.primary),
-                    title: const Text('예약 날짜', style: TextStyle(fontSize: 13.0)),
+                    leading: const Icon(
+                      Icons.calendar_today,
+                      color: AppColors.primary,
+                    ),
+                    title: const Text(
+                      '예약 날짜',
+                      style: TextStyle(fontSize: 13.0),
+                    ),
                     subtitle: Text(
                       '${selectedDate.year}.${selectedDate.month.toString().padLeft(2, '0')}.${selectedDate.day.toString().padLeft(2, '0')}',
-                      style: const TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontSize: 15.0,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () async {
@@ -602,14 +673,23 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                     },
                   ),
                   const Divider(),
-                  
+
                   // Time Picker
                   ListTile(
-                    leading: const Icon(Icons.access_time, color: AppColors.primary),
-                    title: const Text('예약 시간', style: TextStyle(fontSize: 13.0)),
+                    leading: const Icon(
+                      Icons.access_time,
+                      color: AppColors.primary,
+                    ),
+                    title: const Text(
+                      '예약 시간',
+                      style: TextStyle(fontSize: 13.0),
+                    ),
                     subtitle: Text(
                       '${selectedTime.hour.toString().padLeft(2, '0')}:${selectedTime.minute.toString().padLeft(2, '0')}',
-                      style: const TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontSize: 15.0,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () async {
@@ -623,7 +703,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                     },
                   ),
                   const SizedBox(height: 24.0),
-                  
+
                   // Submit
                   SizedBox(
                     width: double.infinity,
@@ -631,34 +711,60 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                     child: ElevatedButton(
                       onPressed: () async {
                         Navigator.of(bctx).pop();
-                        _submitReservation(context, partySize, selectedDate, selectedTime);
+                        _submitReservation(
+                          context,
+                          partySize,
+                          selectedDate,
+                          selectedTime,
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
                       ),
-                      child: const Text('예약 확정하기', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      child: const Text(
+                        '예약 확정하기',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                 ],
               ),
             );
-          }
+          },
         );
       },
     );
   }
 
-  Future<void> _submitReservation(BuildContext context, int partySize, DateTime date, TimeOfDay time) async {
+  Future<void> _submitReservation(
+    BuildContext context,
+    int partySize,
+    DateTime date,
+    TimeOfDay time,
+  ) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final userId = authProvider.currentUser?.id;
-    final finalTime = DateTime(date.year, date.month, date.day, time.hour, time.minute);
+    final finalTime = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      time.hour,
+      time.minute,
+    );
 
     // Show indicator
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
+      builder: (_) => const Center(
+        child: CircularProgressIndicator(color: AppColors.primary),
+      ),
     );
 
     try {
@@ -674,7 +780,11 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('🎉 예약 신청 완료', style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+          title: const Text(
+            '🎉 예약 신청 완료',
+            style: TextStyle(fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
           content: Text(
             '${_place!.name} 매장에 예약이 정상적으로 신청되었습니다.\n내 예약 내역에서 승인 상태를 확인해 주세요.',
             textAlign: TextAlign.center,
@@ -684,7 +794,9 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
             Center(
               child: ElevatedButton(
                 onPressed: () => Navigator.of(ctx).pop(),
-                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                ),
                 child: const Text('확인', style: TextStyle(color: Colors.white)),
               ),
             ),
@@ -696,12 +808,21 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('예약 실패', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.secondary)),
+          title: const Text(
+            '예약 실패',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: AppColors.secondary,
+            ),
+          ),
           content: Text(e.toString().replaceAll('Exception:', '').trim()),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('확인', style: TextStyle(color: AppColors.primary)),
+              child: const Text(
+                '확인',
+                style: TextStyle(color: AppColors.primary),
+              ),
             ),
           ],
         ),
@@ -720,5 +841,69 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
       default:
         return Icons.place;
     }
+  }
+
+  Widget _buildBottomActionBar(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
+          border: Border(top: BorderSide(color: AppColors.border)),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () => _showActionFeedback('길찾기'),
+                icon: const Icon(Icons.navigation_outlined, size: 18.0),
+                label: const Text('길찾기', style: TextStyle(fontSize: 12.0)),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: AppColors.primary),
+                  foregroundColor: AppColors.primary,
+                  padding: const EdgeInsets.symmetric(vertical: 12.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8.0),
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: () => _showReservationBottomSheet(context),
+                icon: const Icon(Icons.calendar_today, size: 18.0),
+                label: const Text('예약하기', style: TextStyle(fontSize: 12.0)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.secondary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8.0),
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: () => _showActionFeedback('미션 도전'),
+                icon: const Icon(Icons.stars, size: 18.0),
+                label: const Text('미션 도전', style: TextStyle(fontSize: 12.0)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
