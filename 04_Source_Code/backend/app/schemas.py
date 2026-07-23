@@ -256,6 +256,11 @@ class ReviewOut(BaseModel):
     user: Optional[UserOut] = None
     images: List[ReviewImageOut] = []
     store: StoreOut
+    is_owner: bool = False
+    can_edit: bool = False
+    can_delete: bool = False
+    can_restore: bool = False
+    can_rewrite: bool = False
 
     class Config:
         from_attributes = True

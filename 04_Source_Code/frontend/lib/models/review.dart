@@ -52,6 +52,12 @@ class Review {
   final List<ReviewImage> images;
   final Place? store;
 
+  final bool isOwner;
+  final bool canEdit;
+  final bool canDelete;
+  final bool canRestore;
+  final bool canRewrite;
+
   Review({
     required this.id,
     this.userId,
@@ -68,6 +74,11 @@ class Review {
     required this.user,
     this.images = const [],
     this.store,
+    this.isOwner = false,
+    this.canEdit = false,
+    this.canDelete = false,
+    this.canRestore = false,
+    this.canRewrite = false,
   });
 
   factory Review.fromJson(Map<String, dynamic> json) {
@@ -76,6 +87,9 @@ class Review {
         .map((img) => ReviewImage.fromJson(img as Map<String, dynamic>))
         .toList();
 
+    final isDel = json['is_deleted'] as bool? ?? false;
+    final isOwn = json['is_owner'] as bool? ?? false;
+
     return Review(
       id: json['id'] as String? ?? '',
       userId: json['user_id'] as String?,
@@ -83,7 +97,7 @@ class Review {
       storeId: json['store_id'] as String? ?? '',
       rating: json['rating'] as int? ?? 5,
       content: json['content'] as String? ?? '',
-      isDeleted: json['is_deleted'] as bool? ?? false,
+      isDeleted: isDel,
       verificationId: json['verification_id'] as String?,
       verificationMethod: json['verification_method'] as String?,
       verificationBadge: json['verification_badge'] as String?,
@@ -98,6 +112,11 @@ class Review {
       store: json['store'] != null
           ? Place.fromJson(json['store'] as Map<String, dynamic>)
           : null,
+      isOwner: isOwn,
+      canEdit: json['can_edit'] as bool? ?? (isOwn && !isDel),
+      canDelete: json['can_delete'] as bool? ?? (isOwn && !isDel),
+      canRestore: json['can_restore'] as bool? ?? (isOwn && isDel),
+      canRewrite: json['can_rewrite'] as bool? ?? (isOwn && isDel),
     );
   }
 
@@ -118,6 +137,57 @@ class Review {
       'user': user.toJson(),
       'images': images.map((img) => img.toJson()).toList(),
       if (store != null) 'store': store!.toJson(),
+      'is_owner': isOwner,
+      'can_edit': canEdit,
+      'can_delete': canDelete,
+      'can_restore': canRestore,
+      'can_rewrite': canRewrite,
     };
+  }
+
+  Review copyWith({
+    String? id,
+    String? userId,
+    String? guestId,
+    String? storeId,
+    int? rating,
+    String? content,
+    bool? isDeleted,
+    String? verificationId,
+    String? verificationMethod,
+    String? verificationBadge,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    User? user,
+    List<ReviewImage>? images,
+    Place? store,
+    bool? isOwner,
+    bool? canEdit,
+    bool? canDelete,
+    bool? canRestore,
+    bool? canRewrite,
+  }) {
+    return Review(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      guestId: guestId ?? this.guestId,
+      storeId: storeId ?? this.storeId,
+      rating: rating ?? this.rating,
+      content: content ?? this.content,
+      isDeleted: isDeleted ?? this.isDeleted,
+      verificationId: verificationId ?? this.verificationId,
+      verificationMethod: verificationMethod ?? this.verificationMethod,
+      verificationBadge: verificationBadge ?? this.verificationBadge,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      user: user ?? this.user,
+      images: images ?? this.images,
+      store: store ?? this.store,
+      isOwner: isOwner ?? this.isOwner,
+      canEdit: canEdit ?? this.canEdit,
+      canDelete: canDelete ?? this.canDelete,
+      canRestore: canRestore ?? this.canRestore,
+      canRewrite: canRewrite ?? this.canRewrite,
+    );
   }
 }

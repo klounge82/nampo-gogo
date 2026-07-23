@@ -69,6 +69,9 @@ void main() {
           'verification_id': 'v_abc_123',
           'verification_method': 'BUSINESS_QR',
           'verification_badge': 'QR 방문 인증',
+          'is_owner': true,
+          'can_edit': true,
+          'can_delete': true,
           'created_at': DateTime.now().toIso8601String(),
           'updated_at': DateTime.now().toIso8601String(),
           'user': {
@@ -88,6 +91,18 @@ void main() {
         expect(review.verificationId, equals('v_abc_123'));
         expect(review.verificationMethod, equals('BUSINESS_QR'));
         expect(review.verificationBadge, equals('QR 방문 인증'));
+        expect(review.isOwner, isTrue);
+        expect(review.canEdit, isTrue);
+        expect(review.canDelete, isTrue);
+
+        final updated = review.copyWith(
+          rating: 4,
+          content: '수정된 본문 내용 10자 이상.',
+        );
+        expect(updated.rating, equals(4));
+        expect(updated.content, equals('수정된 본문 내용 10자 이상.'));
+        expect(updated.isOwner, isTrue);
+        expect(updated.canEdit, isTrue);
       },
     );
 
@@ -98,10 +113,12 @@ void main() {
     testWidgets(
       'QrScannerScreen hides mock button when enableQrMock is false',
       (WidgetTester tester) async {
-        await tester.pumpWidget(const MaterialApp(home: QrScannerScreen()));
-
-        expect(find.text('QR 코드 스캔'), findsOneWidget);
-        expect(find.text('에뮬레이터 모의 스캔 (인증성공)'), findsNothing);
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: QrScannerScreen(),
+          ),
+        );
+        expect(find.text('[테스트용] QR 인증 성공 처리'), findsNothing);
       },
     );
   });

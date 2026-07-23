@@ -148,13 +148,25 @@ class ReviewService {
   // GET /stores/{store_id}/reviews
   Future<List<dynamic>> fetchStoreReviews(
     String storeId, {
+    String? userId,
+    String? guestId,
     int skip = 0,
     int limit = 10,
   }) async {
     try {
       final response = await _dio.get(
         '/stores/$storeId/reviews',
-        queryParameters: {'skip': skip, 'limit': limit},
+        queryParameters: {
+          if (userId != null) 'user_id': userId,
+          if (guestId != null) 'guest_id': guestId,
+          'skip': skip,
+          'limit': limit,
+        },
+        options: Options(
+          headers: {
+            if (guestId != null && guestId.isNotEmpty) 'x-guest-id': guestId,
+          },
+        ),
       );
       if (response.statusCode == 200 && response.data != null) {
         return response.data as List<dynamic>;
@@ -180,6 +192,11 @@ class ReviewService {
           if (guestId != null) 'guest_id': guestId,
           'include_deleted': includeDeleted,
         },
+        options: Options(
+          headers: {
+            if (guestId != null && guestId.isNotEmpty) 'x-guest-id': guestId,
+          },
+        ),
       );
       if (response.statusCode == 200 && response.data != null) {
         return response.data as Map<String, dynamic>;
@@ -208,6 +225,11 @@ class ReviewService {
           'skip': skip,
           'limit': limit,
         },
+        options: Options(
+          headers: {
+            if (guestId != null && guestId.isNotEmpty) 'x-guest-id': guestId,
+          },
+        ),
       );
       if (response.statusCode == 200 && response.data != null) {
         return response.data as List<dynamic>;
@@ -237,6 +259,11 @@ class ReviewService {
           if (guestId != null) 'guest_id': guestId,
           if (imageUrls != null) 'image_urls': imageUrls,
         },
+        options: Options(
+          headers: {
+            if (guestId != null && guestId.isNotEmpty) 'x-guest-id': guestId,
+          },
+        ),
       );
       if (response.statusCode == 200 && response.data != null) {
         return response.data as Map<String, dynamic>;
@@ -260,6 +287,11 @@ class ReviewService {
           if (userId != null) 'user_id': userId,
           if (guestId != null) 'guest_id': guestId,
         },
+        options: Options(
+          headers: {
+            if (guestId != null && guestId.isNotEmpty) 'x-guest-id': guestId,
+          },
+        ),
       );
       if (response.statusCode == 200 && response.data != null) {
         return response.data as Map<String, dynamic>;
@@ -283,6 +315,11 @@ class ReviewService {
           if (userId != null) 'user_id': userId,
           if (guestId != null) 'guest_id': guestId,
         },
+        options: Options(
+          headers: {
+            if (guestId != null && guestId.isNotEmpty) 'x-guest-id': guestId,
+          },
+        ),
       );
       if (response.statusCode == 200 && response.data != null) {
         return response.data as Map<String, dynamic>;
@@ -312,6 +349,11 @@ class ReviewService {
           if (guestId != null) 'guest_id': guestId,
           if (imageUrls != null) 'image_urls': imageUrls,
         },
+        options: Options(
+          headers: {
+            if (guestId != null && guestId.isNotEmpty) 'x-guest-id': guestId,
+          },
+        ),
       );
       if (response.statusCode == 200 && response.data != null) {
         return response.data as Map<String, dynamic>;

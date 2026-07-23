@@ -604,5 +604,108 @@ class TestReviewVerification(unittest.TestCase):
         self.assertEqual(res_my_del_exc.status_code, 200)
         self.assertIsNone(res_my_del_exc.json())
 
+    def test_multiple_edits_guest_ownership_persistence(self):
+        # 1. Verify QR and create initial review for guest_multi_01
+        token_str = "QR_SECRET_store_klounge_001"
+        res_v = self.client.post(
+            f"/stores/{self.business_store.id}/verify-qr",
+            json={"qr_token": token_str, "guest_id": "guest_multi_01"}
+        )
+        v_id = res_v.json()["id"]
+
+        res_cr = self.client.post(
+            f"/stores/{self.business_store.id}/reviews",
+            json={
+                "rating": 5,
+                "content": "최초 작성한 게스트 리뷰 내용 10자 이상입니다.",
+                "guest_id": "guest_multi_01",
+                "verification_id": v_id
+            }
+        )
+        self.assertEqual(res_cr.status_code, 201)
+        rev_id = res_cr.json()["id"]
+
+        # 2. First Edit
+        res_edit1 = self.client.patch(
+            f"/reviews/{rev_id}",
+            json={
+                "rating": 4,
+                "content": "첫 번째 수정 완료된 리뷰 내용 10자 이상.",
+                "guest_id": "guest_multi_01"
+            },
+            headers={"x-guest-id": "guest_multi_01"}
+        )
+        self.assertEqual(res_edit1.status_code, 200)
+        data1 = res_edit1.json()
+        self.assertEqual(data1["guest_id"], "guest_multi_01")
+        self.assertTrue(data1["is_owner"])
+        self.assertTrue(data1["can_edit"])
+        self.assertTrue(data1["can_delete"])
+
+        # 3. Second Edit
+        res_edit2 = self.client.patch(
+            f"/reviews/{rev_id}",
+            json={
+                "rating": 3,
+                "content": "두 번째 연속 수정 완료된 리뷰 내용 10자 이상.",
+                "guest_id": "guest_multi_01"
+            },
+            headers={"x-guest-id": "guest_multi_01"}
+        )
+        self.assertEqual(res_edit2.status_code, 200)
+        data2 = res_edit2.json()
+        self.assertEqual(data2["guest_id"], "guest_multi_01")
+        self.assertTrue(data2["is_owner"])
+        self.assertTrue(data2["can_edit"])
+
+        # 4. Third Edit
+        res_edit3 = self.client.patch(
+            f"/reviews/{rev_id}",
+            json={
+                "rating": 5,
+                "content": "세 번째 연속 수정 완료된 리뷰 내용 10자 이상.",
+                "guest_id": "guest_multi_01"
+            },
+            headers={"x-guest-id": "guest_multi_01"}
+        )
+        self.assertEqual(res_edit3.status_code, 200)
+        data3 = res_edit3.json()
+        self.assertEqual(data3["guest_id"], "guest_multi_01")
+        self.assertTrue(data3["is_owner"])
+        self.assertTrue(data3["can_edit"])
+
+        # 5. Query my-review -> maintains ownership flags
+        res_my = self.client.get(
+            f"/stores/{self.business_store.id}/my-review",
+            params={"guest_id": "guest_multi_01"},
+            headers={"x-guest-id": "guest_multi_01"}
+        )
+        self.assertEqual(res_my.status_code, 200)
+        my_data = res_my.json()
+        self.assertEqual(my_data["id"], rev_id)
+        self.assertEqual(my_data["guest_id"], "guest_multi_01")
+        self.assertTrue(my_data["is_owner"])
+        self.assertTrue(my_data["can_edit"])
+        self.assertTrue(my_data["can_delete"])
+
+        # 6. Reject edit/delete from different guest_id
+        res_unauth_edit = self.client.patch(
+            f"/reviews/{rev_id}",
+            json={
+                "rating": 1,
+                "content": "타인의 리뷰를 무단 수정하려는 공격 10자.",
+                "guest_id": "guest_hacker_999"
+            },
+            headers={"x-guest-id": "guest_hacker_999"}
+        )
+        self.assertEqual(res_unauth_edit.status_code, 403)
+
+        res_unauth_del = self.client.delete(
+            f"/reviews/{rev_id}",
+            params={"guest_id": "guest_hacker_999"},
+            headers={"x-guest-id": "guest_hacker_999"}
+        )
+        self.assertEqual(res_unauth_del.status_code, 403)
+
 if __name__ == "__main__":
     unittest.main()

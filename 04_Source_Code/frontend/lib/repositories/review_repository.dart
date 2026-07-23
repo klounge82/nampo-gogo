@@ -226,12 +226,16 @@ class ReviewRepository {
   // Fetch Store Reviews
   Future<List<Review>> getStoreReviews(
     String storeId, {
+    String? userId,
+    String? guestId,
     int skip = 0,
     int limit = 10,
   }) async {
     try {
       final list = await _reviewService.fetchStoreReviews(
         storeId,
+        userId: userId,
+        guestId: guestId,
         skip: skip,
         limit: limit,
       );

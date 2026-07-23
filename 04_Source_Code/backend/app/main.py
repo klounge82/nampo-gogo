@@ -2,7 +2,7 @@ from datetime import datetime, time, timedelta
 import math
 import hashlib
 from typing import Optional, List
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, Header
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -1444,29 +1444,84 @@ def create_review(store_id: str, req: schemas.ReviewCreate, db: Session = Depend
 
     return new_review
 
+def attach_ownership_flags(
+    review: models.Review,
+    user_id: Optional[str] = None,
+    guest_id: Optional[str] = None,
+    x_guest_id: Optional[str] = None
+) -> schemas.ReviewOut:
+    eff_guest_id = guest_id or x_guest_id
+    is_owner = False
+    if user_id and review.user_id == user_id:
+        is_owner = True
+    elif not user_id and eff_guest_id and review.guest_id == eff_guest_id:
+        is_owner = True
+
+    is_del = review.is_deleted or (review.deleted_at is not None)
+
+    return schemas.ReviewOut(
+        id=review.id,
+        user_id=review.user_id,
+        guest_id=review.guest_id,
+        store_id=review.store_id,
+        rating=review.rating,
+        content=review.content,
+        is_deleted=is_del,
+        is_hidden=review.is_hidden,
+        verification_id=review.verification_id,
+        verification_method=review.verification_method,
+        verification_badge=review.verification_badge,
+        created_at=review.created_at,
+        updated_at=review.updated_at,
+        deleted_at=review.deleted_at,
+        user=review.user,
+        images=review.images,
+        store=review.store,
+        is_owner=is_owner,
+        can_edit=is_owner and not is_del,
+        can_delete=is_owner and not is_del,
+        can_restore=is_owner and is_del,
+        can_rewrite=is_owner and is_del
+    )
+
 @app.get("/stores/{store_id}/reviews", response_model=List[schemas.ReviewOut], tags=["Reviews"])
-def get_store_reviews(store_id: str, skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    return db.query(models.Review).filter(
+def get_store_reviews(
+    store_id: str,
+    user_id: Optional[str] = None,
+    guest_id: Optional[str] = None,
+    x_guest_id: Optional[str] = Header(None, alias="x-guest-id"),
+    skip: int = 0,
+    limit: int = 10,
+    db: Session = Depends(get_db)
+):
+    reviews = db.query(models.Review).filter(
         models.Review.store_id == store_id,
         models.Review.is_deleted == False,
         models.Review.deleted_at == None,
         models.Review.is_hidden == False
     ).order_by(models.Review.created_at.desc()).offset(skip).limit(limit).all()
 
+    return [
+        attach_ownership_flags(r, user_id=user_id, guest_id=guest_id, x_guest_id=x_guest_id)
+        for r in reviews
+    ]
+
 @app.get("/reviews/me", response_model=List[schemas.ReviewOut], tags=["Reviews"])
 def get_my_reviews(
     user_id: Optional[str] = None,
     guest_id: Optional[str] = None,
+    x_guest_id: Optional[str] = Header(None, alias="x-guest-id"),
     include_deleted: bool = False,
     skip: int = 0,
     limit: int = 20,
     db: Session = Depends(get_db)
 ):
+    eff_guest_id = guest_id or x_guest_id
     query = db.query(models.Review)
     if user_id:
         query = query.filter(models.Review.user_id == user_id)
-    elif guest_id:
-        query = query.filter(models.Review.guest_id == guest_id)
+    elif eff_guest_id:
+        query = query.filter(models.Review.guest_id == eff_guest_id)
     else:
         user = db.query(models.User).first()
         if not user:
@@ -1482,41 +1537,58 @@ def get_my_reviews(
     else:
         query = query.filter(models.Review.is_hidden == False)
 
-    return query.order_by(models.Review.created_at.desc()).offset(skip).limit(limit).all()
+    revs = query.order_by(models.Review.created_at.desc()).offset(skip).limit(limit).all()
+    return [
+        attach_ownership_flags(r, user_id=user_id, guest_id=eff_guest_id)
+        for r in revs
+    ]
 
 @app.get("/stores/{store_id}/my-review", response_model=Optional[schemas.ReviewOut], tags=["Reviews"])
 def get_my_store_review(
     store_id: str,
     user_id: Optional[str] = None,
     guest_id: Optional[str] = None,
+    x_guest_id: Optional[str] = Header(None, alias="x-guest-id"),
     include_deleted: bool = True,
     db: Session = Depends(get_db)
 ):
-    if not user_id and not guest_id:
+    eff_guest_id = guest_id or x_guest_id
+    if not user_id and not eff_guest_id:
         return None
 
     query = db.query(models.Review).filter(models.Review.store_id == store_id)
     if user_id:
         query = query.filter(models.Review.user_id == user_id)
-    elif guest_id:
-        query = query.filter(models.Review.guest_id == guest_id)
+    elif eff_guest_id:
+        query = query.filter(models.Review.guest_id == eff_guest_id)
     else:
         return None
 
     if not include_deleted:
         query = query.filter(models.Review.is_deleted == False, models.Review.deleted_at == None)
 
-    return query.order_by(models.Review.created_at.desc()).first()
+    rev = query.order_by(models.Review.created_at.desc()).first()
+    if not rev:
+        return None
+
+    return attach_ownership_flags(rev, user_id=user_id, guest_id=eff_guest_id)
 
 @app.patch("/reviews/{review_id}", response_model=schemas.ReviewOut, tags=["Reviews"])
-def update_review(review_id: str, req: schemas.ReviewUpdate, db: Session = Depends(get_db)):
+def update_review(
+    review_id: str,
+    req: schemas.ReviewUpdate,
+    x_guest_id: Optional[str] = Header(None, alias="x-guest-id"),
+    db: Session = Depends(get_db)
+):
     review = db.query(models.Review).filter(models.Review.id == review_id).first()
     if not review:
         raise HTTPException(status_code=404, detail="해당 리뷰를 찾을 수 없습니다.")
 
+    eff_guest_id = req.guest_id or x_guest_id
+
     if req.user_id and review.user_id and review.user_id != req.user_id:
         raise HTTPException(status_code=403, detail="본인이 작성한 리뷰만 수정할 수 있습니다.")
-    if req.guest_id and review.guest_id and review.guest_id != req.guest_id:
+    if eff_guest_id and review.guest_id and review.guest_id != eff_guest_id:
         raise HTTPException(status_code=403, detail="본인이 작성한 리뷰만 수정할 수 있습니다.")
 
     if review.is_deleted or review.deleted_at is not None:
@@ -1552,17 +1624,25 @@ def update_review(review_id: str, req: schemas.ReviewUpdate, db: Session = Depen
         db.rollback()
         raise HTTPException(status_code=500, detail=f"리뷰 수정 중 오류 발생: {str(e)}")
 
-    return review
+    return attach_ownership_flags(review, user_id=req.user_id, guest_id=eff_guest_id)
 
 @app.delete("/reviews/{review_id}", tags=["Reviews"])
-def delete_review(review_id: str, user_id: Optional[str] = None, guest_id: Optional[str] = None, db: Session = Depends(get_db)):
+def delete_review(
+    review_id: str,
+    user_id: Optional[str] = None,
+    guest_id: Optional[str] = None,
+    x_guest_id: Optional[str] = Header(None, alias="x-guest-id"),
+    db: Session = Depends(get_db)
+):
     review = db.query(models.Review).filter(models.Review.id == review_id).first()
     if not review:
         raise HTTPException(status_code=404, detail="해당 리뷰를 찾을 수 없습니다.")
 
+    eff_guest_id = guest_id or x_guest_id
+
     if user_id and review.user_id and review.user_id != user_id:
         raise HTTPException(status_code=403, detail="본인이 작성한 리뷰만 삭제할 수 있습니다.")
-    if guest_id and review.guest_id and review.guest_id != guest_id:
+    if eff_guest_id and review.guest_id and review.guest_id != eff_guest_id:
         raise HTTPException(status_code=403, detail="본인이 작성한 리뷰만 삭제할 수 있습니다.")
 
     try:
@@ -1582,14 +1662,22 @@ def delete_review(review_id: str, user_id: Optional[str] = None, guest_id: Optio
     return {"success": True, "message": "리뷰가 삭제되었습니다.", "review_id": review_id}
 
 @app.post("/reviews/{review_id}/restore", response_model=schemas.ReviewOut, tags=["Reviews"])
-def restore_review(review_id: str, user_id: Optional[str] = None, guest_id: Optional[str] = None, db: Session = Depends(get_db)):
+def restore_review(
+    review_id: str,
+    user_id: Optional[str] = None,
+    guest_id: Optional[str] = None,
+    x_guest_id: Optional[str] = Header(None, alias="x-guest-id"),
+    db: Session = Depends(get_db)
+):
     review = db.query(models.Review).filter(models.Review.id == review_id).first()
     if not review:
         raise HTTPException(status_code=404, detail="해당 리뷰를 찾을 수 없습니다.")
 
+    eff_guest_id = guest_id or x_guest_id
+
     if user_id and review.user_id and review.user_id != user_id:
         raise HTTPException(status_code=403, detail="본인이 작성한 리뷰만 복구할 수 있습니다.")
-    if guest_id and review.guest_id and review.guest_id != guest_id:
+    if eff_guest_id and review.guest_id and review.guest_id != eff_guest_id:
         raise HTTPException(status_code=403, detail="본인이 작성한 리뷰만 복구할 수 있습니다.")
 
     try:
@@ -1607,17 +1695,24 @@ def restore_review(review_id: str, user_id: Optional[str] = None, guest_id: Opti
         db.rollback()
         raise HTTPException(status_code=500, detail=f"리뷰 복구 중 오류 발생: {str(e)}")
 
-    return review
+    return attach_ownership_flags(review, user_id=user_id, guest_id=eff_guest_id)
 
 @app.patch("/reviews/{review_id}/rewrite", response_model=schemas.ReviewOut, tags=["Reviews"])
-def rewrite_review(review_id: str, req: schemas.ReviewUpdate, db: Session = Depends(get_db)):
+def rewrite_review(
+    review_id: str,
+    req: schemas.ReviewUpdate,
+    x_guest_id: Optional[str] = Header(None, alias="x-guest-id"),
+    db: Session = Depends(get_db)
+):
     review = db.query(models.Review).filter(models.Review.id == review_id).first()
     if not review:
         raise HTTPException(status_code=404, detail="해당 리뷰를 찾을 수 없습니다.")
 
+    eff_guest_id = req.guest_id or x_guest_id
+
     if req.user_id and review.user_id and review.user_id != req.user_id:
         raise HTTPException(status_code=403, detail="본인이 작성한 리뷰만 다시 작성할 수 있습니다.")
-    if req.guest_id and review.guest_id and review.guest_id != req.guest_id:
+    if eff_guest_id and review.guest_id and review.guest_id != eff_guest_id:
         raise HTTPException(status_code=403, detail="본인이 작성한 리뷰만 다시 작성할 수 있습니다.")
 
     if req.rating is not None:
@@ -1653,7 +1748,7 @@ def rewrite_review(review_id: str, req: schemas.ReviewUpdate, db: Session = Depe
         db.rollback()
         raise HTTPException(status_code=500, detail=f"리뷰 다시 작성 중 오류 발생: {str(e)}")
 
-    return review
+    return attach_ownership_flags(review, user_id=req.user_id, guest_id=eff_guest_id)
 
 # --- ADMIN MVP APIs ---
 

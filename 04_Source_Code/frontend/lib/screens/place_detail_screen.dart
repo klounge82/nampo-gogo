@@ -76,7 +76,11 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
       _currentUserId = userId;
       _currentGuestId = guestId;
 
-      final list = await _reviewRepository.getStoreReviews(widget.placeId);
+      final list = await _reviewRepository.getStoreReviews(
+        widget.placeId,
+        userId: userId,
+        guestId: userId == null ? guestId : null,
+      );
       final myRev = await _reviewRepository.getMyStoreReview(
         storeId: widget.placeId,
         userId: userId,
@@ -715,6 +719,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                     : Column(
                         children: _reviews.map((rev) {
                           final isMyReview =
+                              rev.isOwner ||
                               (_currentUserId != null &&
                                   rev.userId == _currentUserId) ||
                               (_currentUserId == null &&
