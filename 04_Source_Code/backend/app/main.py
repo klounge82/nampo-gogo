@@ -1166,24 +1166,61 @@ def get_active_verification(store_id: str, user_id: Optional[str] = None, guest_
     now = datetime.utcnow()
     window_start = now - timedelta(hours=72)
 
-    # 1. Check if user/guest already submitted a review within 72h -> HTTP 409 Conflict
-    existing_review_query = db.query(models.Review).filter(
+    # 1. Check if user/guest already submitted an active (non-deleted) review within 72h -> HTTP 409 Conflict
+    existing_active_review_query = db.query(models.Review).filter(
         models.Review.store_id == store_id,
         models.Review.is_deleted == False,
+        models.Review.deleted_at == None,
         models.Review.created_at >= window_start
     )
     if user_id:
-        existing_review_query = existing_review_query.filter(models.Review.user_id == user_id)
+        existing_active_review_query = existing_active_review_query.filter(models.Review.user_id == user_id)
     else:
-        existing_review_query = existing_review_query.filter(models.Review.guest_id == guest_id)
+        existing_active_review_query = existing_active_review_query.filter(models.Review.guest_id == guest_id)
 
-    if existing_review_query.first():
+    if existing_active_review_query.first():
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="이미 이 매장의 방문 인증 리뷰를 작성했습니다. 새로운 방문 리뷰는 인증 후 72시간이 지난 뒤 작성할 수 있습니다."
+            detail="REVIEW_ALREADY_SUBMITTED:이미 이 매장의 방문 인증 리뷰를 작성했습니다. 기존 리뷰는 내 정보에서 수정할 수 있습니다."
         )
 
-    # 2. Query active unused VisitVerification
+    # 2. Check if user/guest submitted a soft-deleted review within 72h
+    existing_deleted_review_query = db.query(models.Review).filter(
+        models.Review.store_id == store_id,
+        (models.Review.is_deleted == True) | (models.Review.deleted_at != None),
+        models.Review.created_at >= window_start
+    )
+    if user_id:
+        existing_deleted_review_query = existing_deleted_review_query.filter(models.Review.user_id == user_id)
+    else:
+        existing_deleted_review_query = existing_deleted_review_query.filter(models.Review.guest_id == guest_id)
+
+    del_rev = existing_deleted_review_query.first()
+    if del_rev:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"DELETED_REVIEW_RESTORABLE:{del_rev.id}:삭제한 리뷰가 있습니다. 삭제한 리뷰를 바로 다시 작성할 수 있습니다."
+        )
+
+    # 3. Check if user/guest has a soft-deleted review older than 72h (72시간 이상 경과한 삭제 리뷰)
+    older_deleted_review_query = db.query(models.Review).filter(
+        models.Review.store_id == store_id,
+        (models.Review.is_deleted == True) | (models.Review.deleted_at != None),
+        models.Review.created_at < window_start
+    )
+    if user_id:
+        older_deleted_review_query = older_deleted_review_query.filter(models.Review.user_id == user_id)
+    else:
+        older_deleted_review_query = older_deleted_review_query.filter(models.Review.guest_id == guest_id)
+
+    del_rev_old = older_deleted_review_query.first()
+    if del_rev_old:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"DELETED_REVIEW_OPTION:{del_rev_old.id}:삭제한 리뷰를 다시 작성하거나 새로운 방문 리뷰를 작성할 수 있습니다."
+        )
+
+    # 4. Query active unused VisitVerification
     query = db.query(models.VisitVerification).filter(
         models.VisitVerification.store_id == store_id,
         models.VisitVerification.status == "ACTIVE",
@@ -1200,7 +1237,8 @@ def get_active_verification(store_id: str, user_id: Optional[str] = None, guest_
 def recalculate_store_rating(store_id: str, db: Session):
     avg_rating_query = db.query(func.avg(models.Review.rating)).filter(
         models.Review.store_id == store_id,
-        models.Review.is_deleted == False
+        models.Review.is_deleted == False,
+        models.Review.deleted_at == None
     ).scalar()
     
     store = db.query(models.Store).filter(models.Store.id == store_id).first()
@@ -1301,30 +1339,42 @@ def create_review(store_id: str, req: schemas.ReviewCreate, db: Session = Depend
 
     # 72h Duplicate check for user / guest
     window_start = datetime.utcnow() - timedelta(hours=72)
+
+    # Check active review
+    active_rev_q = db.query(models.Review).filter(
+        models.Review.store_id == store_id,
+        models.Review.is_deleted == False,
+        models.Review.deleted_at == None,
+        models.Review.created_at >= window_start
+    )
     if target_user_id:
-        existing_review = db.query(models.Review).filter(
-            models.Review.user_id == target_user_id,
-            models.Review.store_id == store_id,
-            models.Review.is_deleted == False,
-            models.Review.created_at >= window_start
-        ).first()
-        if existing_review:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="이미 해당 매장에 작성된 방문 인증 리뷰가 존재합니다. 새로운 리뷰는 72시간이 지난 뒤 작성할 수 있습니다."
-            )
+        active_rev_q = active_rev_q.filter(models.Review.user_id == target_user_id)
     elif target_guest_id:
-        existing_review = db.query(models.Review).filter(
-            models.Review.guest_id == target_guest_id,
-            models.Review.store_id == store_id,
-            models.Review.is_deleted == False,
-            models.Review.created_at >= window_start
-        ).first()
-        if existing_review:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="이미 해당 매장에 작성된 방문 인증 리뷰가 존재합니다. 새로운 리뷰는 72시간이 지난 뒤 작성할 수 있습니다."
-            )
+        active_rev_q = active_rev_q.filter(models.Review.guest_id == target_guest_id)
+
+    if active_rev_q.first():
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="REVIEW_ALREADY_SUBMITTED:이미 해당 매장에 작성된 방문 인증 리뷰가 존재합니다. 새로운 리뷰는 72시간이 지난 뒤 작성할 수 있습니다."
+        )
+
+    # Check soft-deleted review within 72h
+    del_rev_q = db.query(models.Review).filter(
+        models.Review.store_id == store_id,
+        (models.Review.is_deleted == True) | (models.Review.deleted_at != None),
+        models.Review.created_at >= window_start
+    )
+    if target_user_id:
+        del_rev_q = del_rev_q.filter(models.Review.user_id == target_user_id)
+    elif target_guest_id:
+        del_rev_q = del_rev_q.filter(models.Review.guest_id == target_guest_id)
+
+    del_rev = del_rev_q.first()
+    if del_rev:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"DELETED_REVIEW_RESTORABLE:{del_rev.id}:삭제한 리뷰가 있습니다. 삭제한 리뷰를 바로 다시 작성할 수 있습니다."
+        )
 
     # Badge text mapping
     badge_text = None
@@ -1346,6 +1396,7 @@ def create_review(store_id: str, req: schemas.ReviewCreate, db: Session = Depend
             rating=req.rating,
             content=req.content,
             is_deleted=False,
+            deleted_at=None,
             is_hidden=False,
             verification_id=verification.id if verification else None,
             verification_method=v_method,
@@ -1398,33 +1449,54 @@ def get_store_reviews(store_id: str, skip: int = 0, limit: int = 10, db: Session
     return db.query(models.Review).filter(
         models.Review.store_id == store_id,
         models.Review.is_deleted == False,
+        models.Review.deleted_at == None,
         models.Review.is_hidden == False
     ).order_by(models.Review.created_at.desc()).offset(skip).limit(limit).all()
 
 @app.get("/reviews/me", response_model=List[schemas.ReviewOut], tags=["Reviews"])
-def get_my_reviews(user_id: Optional[str] = None, skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    if not user_id:
+def get_my_reviews(
+    user_id: Optional[str] = None,
+    guest_id: Optional[str] = None,
+    include_deleted: bool = False,
+    skip: int = 0,
+    limit: int = 20,
+    db: Session = Depends(get_db)
+):
+    query = db.query(models.Review)
+    if user_id:
+        query = query.filter(models.Review.user_id == user_id)
+    elif guest_id:
+        query = query.filter(models.Review.guest_id == guest_id)
+    else:
         user = db.query(models.User).first()
         if not user:
             return []
-        target_user_id = user.id
-    else:
-        target_user_id = user_id
+        query = query.filter(models.Review.user_id == user.id)
 
-    return db.query(models.Review).filter(
-        models.Review.user_id == target_user_id,
-        models.Review.is_deleted == False,
-        models.Review.is_hidden == False
-    ).order_by(models.Review.created_at.desc()).offset(skip).limit(limit).all()
+    if not include_deleted:
+        query = query.filter(
+            models.Review.is_deleted == False,
+            models.Review.deleted_at == None,
+            models.Review.is_hidden == False
+        )
+    else:
+        query = query.filter(models.Review.is_hidden == False)
+
+    return query.order_by(models.Review.created_at.desc()).offset(skip).limit(limit).all()
 
 @app.patch("/reviews/{review_id}", response_model=schemas.ReviewOut, tags=["Reviews"])
 def update_review(review_id: str, req: schemas.ReviewUpdate, db: Session = Depends(get_db)):
-    review = db.query(models.Review).filter(
-        models.Review.id == review_id,
-        models.Review.is_deleted == False
-    ).first()
+    review = db.query(models.Review).filter(models.Review.id == review_id).first()
     if not review:
         raise HTTPException(status_code=404, detail="해당 리뷰를 찾을 수 없습니다.")
+
+    if req.user_id and review.user_id and review.user_id != req.user_id:
+        raise HTTPException(status_code=403, detail="본인이 작성한 리뷰만 수정할 수 있습니다.")
+    if req.guest_id and review.guest_id and review.guest_id != req.guest_id:
+        raise HTTPException(status_code=403, detail="본인이 작성한 리뷰만 수정할 수 있습니다.")
+
+    if review.is_deleted or review.deleted_at is not None:
+        raise HTTPException(status_code=400, detail="삭제된 리뷰는 다시 작성 또는 복구를 이용해 주세요.")
 
     if req.rating is not None:
         if req.rating < 1 or req.rating > 5:
@@ -1434,16 +1506,15 @@ def update_review(review_id: str, req: schemas.ReviewUpdate, db: Session = Depen
     if req.content is not None:
         if len(req.content.strip()) < 10:
             raise HTTPException(status_code=400, detail="리뷰 내용은 최소 10자 이상 작성해야 합니다.")
-        review.content = req.content
+        review.content = req.content.strip()
+
+    review.updated_at = datetime.utcnow()
 
     try:
         if req.image_urls is not None:
             db.query(models.ReviewImage).filter(models.ReviewImage.review_id == review_id).delete()
             for url in req.image_urls:
-                new_img = models.ReviewImage(
-                    review_id=review_id,
-                    image_url=url
-                )
+                new_img = models.ReviewImage(review_id=review_id, image_url=url)
                 db.add(new_img)
 
         db.add(review)
@@ -1460,16 +1531,21 @@ def update_review(review_id: str, req: schemas.ReviewUpdate, db: Session = Depen
     return review
 
 @app.delete("/reviews/{review_id}", tags=["Reviews"])
-def delete_review(review_id: str, db: Session = Depends(get_db)):
-    review = db.query(models.Review).filter(
-        models.Review.id == review_id,
-        models.Review.is_deleted == False
-    ).first()
+def delete_review(review_id: str, user_id: Optional[str] = None, guest_id: Optional[str] = None, db: Session = Depends(get_db)):
+    review = db.query(models.Review).filter(models.Review.id == review_id).first()
     if not review:
         raise HTTPException(status_code=404, detail="해당 리뷰를 찾을 수 없습니다.")
 
+    if user_id and review.user_id and review.user_id != user_id:
+        raise HTTPException(status_code=403, detail="본인이 작성한 리뷰만 삭제할 수 있습니다.")
+    if guest_id and review.guest_id and review.guest_id != guest_id:
+        raise HTTPException(status_code=403, detail="본인이 작성한 리뷰만 삭제할 수 있습니다.")
+
     try:
+        now = datetime.utcnow()
         review.is_deleted = True
+        review.deleted_at = now
+        review.updated_at = now
         db.add(review)
         db.commit()
 
@@ -1479,10 +1555,81 @@ def delete_review(review_id: str, db: Session = Depends(get_db)):
         db.rollback()
         raise HTTPException(status_code=500, detail=f"리뷰 삭제 중 오류 발생: {str(e)}")
 
-    return {
-        "success": True,
-        "message": "리뷰가 성공적으로 삭제되었습니다."
-    }
+    return {"success": True, "message": "리뷰가 삭제되었습니다.", "review_id": review_id}
+
+@app.post("/reviews/{review_id}/restore", response_model=schemas.ReviewOut, tags=["Reviews"])
+def restore_review(review_id: str, user_id: Optional[str] = None, guest_id: Optional[str] = None, db: Session = Depends(get_db)):
+    review = db.query(models.Review).filter(models.Review.id == review_id).first()
+    if not review:
+        raise HTTPException(status_code=404, detail="해당 리뷰를 찾을 수 없습니다.")
+
+    if user_id and review.user_id and review.user_id != user_id:
+        raise HTTPException(status_code=403, detail="본인이 작성한 리뷰만 복구할 수 있습니다.")
+    if guest_id and review.guest_id and review.guest_id != guest_id:
+        raise HTTPException(status_code=403, detail="본인이 작성한 리뷰만 복구할 수 있습니다.")
+
+    try:
+        now = datetime.utcnow()
+        review.is_deleted = False
+        review.deleted_at = None
+        review.updated_at = now
+        db.add(review)
+        db.commit()
+
+        recalculate_store_rating(review.store_id, db)
+        db.commit()
+        db.refresh(review)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"리뷰 복구 중 오류 발생: {str(e)}")
+
+    return review
+
+@app.patch("/reviews/{review_id}/rewrite", response_model=schemas.ReviewOut, tags=["Reviews"])
+def rewrite_review(review_id: str, req: schemas.ReviewUpdate, db: Session = Depends(get_db)):
+    review = db.query(models.Review).filter(models.Review.id == review_id).first()
+    if not review:
+        raise HTTPException(status_code=404, detail="해당 리뷰를 찾을 수 없습니다.")
+
+    if req.user_id and review.user_id and review.user_id != req.user_id:
+        raise HTTPException(status_code=403, detail="본인이 작성한 리뷰만 다시 작성할 수 있습니다.")
+    if req.guest_id and review.guest_id and review.guest_id != req.guest_id:
+        raise HTTPException(status_code=403, detail="본인이 작성한 리뷰만 다시 작성할 수 있습니다.")
+
+    if req.rating is not None:
+        if req.rating < 1 or req.rating > 5:
+            raise HTTPException(status_code=400, detail="평점은 1점에서 5점 사이여야 합니다.")
+        review.rating = req.rating
+
+    if req.content is not None:
+        if len(req.content.strip()) < 10:
+            raise HTTPException(status_code=400, detail="리뷰 내용은 최소 10자 이상 작성해야 합니다.")
+        review.content = req.content.strip()
+
+    now = datetime.utcnow()
+    review.is_deleted = False
+    review.deleted_at = None
+    review.updated_at = now
+
+    try:
+        if req.image_urls is not None:
+            db.query(models.ReviewImage).filter(models.ReviewImage.review_id == review_id).delete()
+            for url in req.image_urls:
+                new_img = models.ReviewImage(review_id=review_id, image_url=url)
+                db.add(new_img)
+
+        db.add(review)
+        db.commit()
+        db.refresh(review)
+
+        recalculate_store_rating(review.store_id, db)
+        db.commit()
+        db.refresh(review)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"리뷰 다시 작성 중 오류 발생: {str(e)}")
+
+    return review
 
 # --- ADMIN MVP APIs ---
 

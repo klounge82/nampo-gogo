@@ -245,6 +245,7 @@ class Review(Base):
     verification_badge = Column(String(100), nullable=True)
     created_at = Column(DateTime, nullable=False, server_default=func.now())
     updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
+    deleted_at = Column(DateTime, nullable=True)
 
     # Relationships
     user = relationship("User", back_populates="reviews")

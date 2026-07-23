@@ -5,6 +5,7 @@ import '../models/review.dart';
 import '../repositories/review_repository.dart';
 import '../providers/auth_provider.dart';
 import 'review_edit_screen.dart';
+import 'review_write_screen.dart';
 
 class MyReviewsScreen extends StatefulWidget {
   const MyReviewsScreen({super.key});
@@ -13,16 +14,28 @@ class MyReviewsScreen extends StatefulWidget {
   State<MyReviewsScreen> createState() => _MyReviewsScreenState();
 }
 
-class _MyReviewsScreenState extends State<MyReviewsScreen> {
+class _MyReviewsScreenState extends State<MyReviewsScreen>
+    with SingleTickerProviderStateMixin {
   final ReviewRepository _reviewRepository = ReviewRepository();
-  List<Review> _reviews = [];
+  late TabController _tabController;
+
+  List<Review> _activeReviews = [];
+  List<Review> _deletedReviews = [];
+
   bool _isLoading = true;
   String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
     _loadMyReviews();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadMyReviews() async {
@@ -35,9 +48,15 @@ class _MyReviewsScreenState extends State<MyReviewsScreen> {
     final userId = authProvider.currentUser?.id;
 
     try {
-      final list = await _reviewRepository.getMyReviews(userId: userId);
+      final allReviews = await _reviewRepository.getMyReviews(
+        userId: userId,
+        includeDeleted: true,
+        limit: 50,
+      );
+
       setState(() {
-        _reviews = list;
+        _activeReviews = allReviews.where((r) => !r.isDeleted).toList();
+        _deletedReviews = allReviews.where((r) => r.isDeleted).toList();
       });
     } catch (e) {
       setState(() {
@@ -49,7 +68,6 @@ class _MyReviewsScreenState extends State<MyReviewsScreen> {
   }
 
   Future<void> _deleteReview(String reviewId) async {
-    // Show indicator
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -58,26 +76,69 @@ class _MyReviewsScreenState extends State<MyReviewsScreen> {
       ),
     );
 
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final userId = authProvider.currentUser?.id;
+
     try {
-      final success = await _reviewRepository.deleteReview(reviewId);
+      final success = await _reviewRepository.deleteReview(
+        reviewId,
+        userId: userId,
+      );
       Navigator.of(context).pop(); // Dismiss indicator
 
       if (success) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('🛑 리뷰가 정상적으로 삭제되었습니다.'),
-            backgroundColor: Colors.red,
+          SnackBar(
+            content: const Text('리뷰가 삭제되었습니다.'),
+            backgroundColor: Colors.black87,
             behavior: SnackBarBehavior.floating,
+            action: SnackBarAction(
+              label: '실행 취소',
+              textColor: AppColors.primary,
+              onPressed: () => _restoreReview(reviewId),
+            ),
           ),
         );
         _loadMyReviews();
       } else {
-        _showErrorDialog('삭제 실패', '리뷰 삭제 중 서버 에러가 발생했습니다.');
+        _showErrorDialog('삭제 실패', '리뷰 삭제 중 오류가 발생했습니다.');
       }
     } catch (e) {
-      Navigator.of(context).pop(); // Dismiss indicator
+      Navigator.of(context).pop();
       final cleanMsg = e.toString().replaceAll('Exception:', '').trim();
       _showErrorDialog('삭제 실패', cleanMsg);
+    }
+  }
+
+  Future<void> _restoreReview(String reviewId) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(
+        child: CircularProgressIndicator(color: AppColors.primary),
+      ),
+    );
+
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final userId = authProvider.currentUser?.id;
+
+    try {
+      await _reviewRepository.restoreReview(reviewId, userId: userId);
+      Navigator.of(context).pop(); // Dismiss indicator
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('✅ 리뷰가 복구되었습니다.'),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      _loadMyReviews();
+    } catch (e) {
+      Navigator.of(context).pop();
+      final cleanMsg = e.toString().replaceAll('Exception:', '').trim();
+      _showErrorDialog('복구 실패', cleanMsg);
     }
   }
 
@@ -86,19 +147,19 @@ class _MyReviewsScreenState extends State<MyReviewsScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text(
-          '리뷰 삭제',
+          '리뷰를 삭제하시겠습니까?',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: AppColors.secondary,
           ),
         ),
         content: const Text(
-          '정말로 이 후기를 삭제하시겠습니까?\n삭제된 후기는 일반 목록에 더 이상 노출되지 않습니다.',
+          '삭제한 리뷰는 공개 목록에서 숨겨집니다.\n내가 작성한 리뷰에서 언제든 다시 작성하거나 복구할 수 있습니다.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('유지하기', style: TextStyle(color: Colors.grey)),
+            child: const Text('취소', style: TextStyle(color: Colors.grey)),
           ),
           TextButton(
             onPressed: () {
@@ -106,9 +167,46 @@ class _MyReviewsScreenState extends State<MyReviewsScreen> {
               _deleteReview(reviewId);
             },
             child: const Text(
-              '삭제하기',
+              '삭제',
               style: TextStyle(
                 color: AppColors.secondary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmRestore(String reviewId) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text(
+          '리뷰를 복구하시겠습니까?',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: AppColors.secondary,
+          ),
+        ),
+        content: const Text(
+          '기존 리뷰 내용과 방문 인증 배지가 그대로 복구됩니다.\nQR 코드를 다시 인증할 필요가 없습니다.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('취소', style: TextStyle(color: Colors.grey)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              _restoreReview(reviewId);
+            },
+            child: const Text(
+              '복구하기',
+              style: TextStyle(
+                color: AppColors.primary,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -152,6 +250,16 @@ class _MyReviewsScreenState extends State<MyReviewsScreen> {
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
         elevation: 0.5,
+        bottom: TabBar(
+          controller: _tabController,
+          labelColor: AppColors.primary,
+          unselectedLabelColor: AppColors.textSecondary,
+          indicatorColor: AppColors.primary,
+          tabs: [
+            Tab(text: '작성한 리뷰 (${_activeReviews.length})'),
+            Tab(text: '삭제한 리뷰 (${_deletedReviews.length})'),
+          ],
+        ),
       ),
       body: _isLoading
           ? const Center(
@@ -171,31 +279,45 @@ class _MyReviewsScreenState extends State<MyReviewsScreen> {
                 ],
               ),
             )
-          : _reviews.isEmpty
-          ? const Center(
-              child: Text(
-                '작성한 매장 후기가 없습니다.',
-                style: TextStyle(color: AppColors.textSecondary),
-              ),
-            )
-          : RefreshIndicator(
-              onRefresh: _loadMyReviews,
-              color: AppColors.primary,
-              child: ListView.builder(
-                padding: const EdgeInsets.all(16.0),
-                itemCount: _reviews.length,
-                itemBuilder: (context, index) {
-                  final item = _reviews[index];
-                  return _buildReviewCard(item);
-                },
-              ),
+          : TabBarView(
+              controller: _tabController,
+              children: [
+                _buildReviewList(_activeReviews, isDeletedTab: false),
+                _buildReviewList(_deletedReviews, isDeletedTab: true),
+              ],
             ),
     );
   }
 
-  Widget _buildReviewCard(Review review) {
+  Widget _buildReviewList(List<Review> list, {required bool isDeletedTab}) {
+    if (list.isEmpty) {
+      return Center(
+        child: Text(
+          isDeletedTab ? '삭제한 매장 후기가 없습니다.' : '작성한 매장 후기가 없습니다.',
+          style: const TextStyle(color: AppColors.textSecondary),
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: _loadMyReviews,
+      color: AppColors.primary,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16.0),
+        itemCount: list.length,
+        itemBuilder: (context, index) {
+          final item = list[index];
+          return _buildReviewCard(item, isDeletedTab: isDeletedTab);
+        },
+      ),
+    );
+  }
+
+  Widget _buildReviewCard(Review review, {required bool isDeletedTab}) {
     final dateStr =
         '${review.createdAt.year}.${review.createdAt.month.toString().padLeft(2, '0')}.${review.createdAt.day.toString().padLeft(2, '0')}';
+    final isEdited =
+        review.updatedAt.difference(review.createdAt).inSeconds > 2;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16.0),
@@ -216,17 +338,41 @@ class _MyReviewsScreenState extends State<MyReviewsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Store Name & Date
+            // Store Name & Date & Edited Badge
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  review.store?.name ?? '매장 후기',
-                  style: const TextStyle(
-                    fontSize: 15.0,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
+                Row(
+                  children: [
+                    Text(
+                      review.store?.name ?? '매장 후기',
+                      style: const TextStyle(
+                        fontSize: 15.0,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    if (!isDeletedTab && isEdited) ...[
+                      const SizedBox(width: 6.0),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4.0,
+                          vertical: 1.0,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade200,
+                          borderRadius: BorderRadius.circular(4.0),
+                        ),
+                        child: const Text(
+                          '수정됨',
+                          style: TextStyle(
+                            fontSize: 10.0,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
                 Text(
                   dateStr,
@@ -313,9 +459,11 @@ class _MyReviewsScreenState extends State<MyReviewsScreen> {
             // Content
             Text(
               review.content,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13.0,
-                color: AppColors.textPrimary,
+                color: isDeletedTab
+                    ? AppColors.textSecondary
+                    : AppColors.textPrimary,
                 height: 1.4,
               ),
             ),
@@ -324,37 +472,79 @@ class _MyReviewsScreenState extends State<MyReviewsScreen> {
             const SizedBox(height: 8.0),
 
             // Actions
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton.icon(
-                  onPressed: () async {
-                    final needRefresh = await Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => ReviewEditScreen(review: review),
-                      ),
-                    );
-                    if (needRefresh == true) {
-                      _loadMyReviews();
-                    }
-                  },
-                  icon: const Icon(Icons.edit_outlined, size: 14.0),
-                  label: const Text('수정', style: TextStyle(fontSize: 12.0)),
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppColors.primary,
+            if (!isDeletedTab)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton.icon(
+                    onPressed: () async {
+                      final needRefresh = await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => ReviewEditScreen(review: review),
+                        ),
+                      );
+                      if (needRefresh == true) {
+                        _loadMyReviews();
+                      }
+                    },
+                    icon: const Icon(Icons.edit_outlined, size: 14.0),
+                    label: const Text('수정', style: TextStyle(fontSize: 12.0)),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 8.0),
-                TextButton.icon(
-                  onPressed: () => _confirmDelete(review.id),
-                  icon: const Icon(Icons.delete_outline, size: 14.0),
-                  label: const Text('삭제', style: TextStyle(fontSize: 12.0)),
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppColors.secondary,
+                  const SizedBox(width: 8.0),
+                  TextButton.icon(
+                    onPressed: () => _confirmDelete(review.id),
+                    icon: const Icon(Icons.delete_outline, size: 14.0),
+                    label: const Text('삭제', style: TextStyle(fontSize: 12.0)),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.secondary,
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              )
+            else
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton.icon(
+                    onPressed: () => _confirmRestore(review.id),
+                    icon: const Icon(Icons.restore_outlined, size: 14.0),
+                    label: const Text('복구하기', style: TextStyle(fontSize: 12.0)),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                    ),
+                  ),
+                  const SizedBox(width: 8.0),
+                  TextButton.icon(
+                    onPressed: () async {
+                      final needRefresh = await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => ReviewWriteScreen(
+                            storeId: review.storeId,
+                            storeName: review.store?.name ?? '매장 후기 다시 작성',
+                            rewriteReviewId: review.id,
+                            initialRating: review.rating,
+                            initialContent: review.content,
+                          ),
+                        ),
+                      );
+                      if (needRefresh == true) {
+                        _loadMyReviews();
+                      }
+                    },
+                    icon: const Icon(Icons.rate_review_outlined, size: 14.0),
+                    label: const Text(
+                      '다시 작성',
+                      style: TextStyle(fontSize: 12.0),
+                    ),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                    ),
+                  ),
+                ],
+              ),
           ],
         ),
       ),

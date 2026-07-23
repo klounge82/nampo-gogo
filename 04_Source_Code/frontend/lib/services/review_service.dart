@@ -168,14 +168,18 @@ class ReviewService {
   // GET /reviews/me
   Future<List<dynamic>> fetchMyReviews({
     String? userId,
+    String? guestId,
+    bool includeDeleted = false,
     int skip = 0,
-    int limit = 10,
+    int limit = 20,
   }) async {
     try {
       final response = await _dio.get(
         '/reviews/me',
         queryParameters: {
           if (userId != null) 'user_id': userId,
+          if (guestId != null) 'guest_id': guestId,
+          if (includeDeleted) 'include_deleted': 'true',
           'skip': skip,
           'limit': limit,
         },
@@ -194,6 +198,8 @@ class ReviewService {
     String reviewId, {
     int? rating,
     String? content,
+    String? userId,
+    String? guestId,
     List<String>? imageUrls,
   }) async {
     try {
@@ -202,6 +208,8 @@ class ReviewService {
         data: {
           if (rating != null) 'rating': rating,
           if (content != null) 'content': content,
+          if (userId != null) 'user_id': userId,
+          if (guestId != null) 'guest_id': guestId,
           if (imageUrls != null) 'image_urls': imageUrls,
         },
       );
@@ -215,13 +223,75 @@ class ReviewService {
   }
 
   // DELETE /reviews/{review_id}
-  Future<Map<String, dynamic>> deleteReview(String reviewId) async {
+  Future<Map<String, dynamic>> deleteReview(
+    String reviewId, {
+    String? userId,
+    String? guestId,
+  }) async {
     try {
-      final response = await _dio.delete('/reviews/$reviewId');
+      final response = await _dio.delete(
+        '/reviews/$reviewId',
+        queryParameters: {
+          if (userId != null) 'user_id': userId,
+          if (guestId != null) 'guest_id': guestId,
+        },
+      );
       if (response.statusCode == 200 && response.data != null) {
         return response.data as Map<String, dynamic>;
       }
       throw Exception('리뷰 삭제 실패');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // POST /reviews/{review_id}/restore
+  Future<Map<String, dynamic>> restoreReview(
+    String reviewId, {
+    String? userId,
+    String? guestId,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '/reviews/$reviewId/restore',
+        queryParameters: {
+          if (userId != null) 'user_id': userId,
+          if (guestId != null) 'guest_id': guestId,
+        },
+      );
+      if (response.statusCode == 200 && response.data != null) {
+        return response.data as Map<String, dynamic>;
+      }
+      throw Exception('리뷰 복구 실패');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // PATCH /reviews/{review_id}/rewrite
+  Future<Map<String, dynamic>> rewriteReview(
+    String reviewId, {
+    int? rating,
+    String? content,
+    String? userId,
+    String? guestId,
+    List<String>? imageUrls,
+  }) async {
+    try {
+      final response = await _dio.patch(
+        '/reviews/$reviewId/rewrite',
+        data: {
+          if (rating != null) 'rating': rating,
+          if (content != null) 'content': content,
+          if (userId != null) 'user_id': userId,
+          if (guestId != null) 'guest_id': guestId,
+          if (imageUrls != null) 'image_urls': imageUrls,
+        },
+      );
+      if (response.statusCode == 200 && response.data != null) {
+        return response.data as Map<String, dynamic>;
+      }
+      throw Exception('리뷰 다시 작성 실패');
     } catch (e) {
       rethrow;
     }

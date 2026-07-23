@@ -253,12 +253,16 @@ class ReviewRepository {
   // Fetch My Reviews
   Future<List<Review>> getMyReviews({
     String? userId,
+    String? guestId,
+    bool includeDeleted = false,
     int skip = 0,
-    int limit = 10,
+    int limit = 20,
   }) async {
     try {
       final list = await _reviewService.fetchMyReviews(
         userId: userId,
+        guestId: guestId,
+        includeDeleted: includeDeleted,
         skip: skip,
         limit: limit,
       );
@@ -273,7 +277,11 @@ class ReviewRepository {
       }
       final targetUid = userId ?? 'usr_mock_999';
       return _mockReviews
-          .where((r) => r.userId == targetUid && !r.isDeleted)
+          .where(
+            (r) =>
+                r.userId == targetUid &&
+                (!includeDeleted ? !r.isDeleted : true),
+          )
           .toList();
     }
   }
@@ -283,6 +291,8 @@ class ReviewRepository {
     String reviewId, {
     int? rating,
     String? content,
+    String? userId,
+    String? guestId,
     List<String>? imageUrls,
   }) async {
     try {
@@ -290,6 +300,8 @@ class ReviewRepository {
         reviewId,
         rating: rating,
         content: content,
+        userId: userId,
+        guestId: guestId,
         imageUrls: imageUrls,
       );
       return Review.fromJson(res);
@@ -323,9 +335,17 @@ class ReviewRepository {
   }
 
   // Delete Review
-  Future<bool> deleteReview(String reviewId) async {
+  Future<bool> deleteReview(
+    String reviewId, {
+    String? userId,
+    String? guestId,
+  }) async {
     try {
-      final res = await _reviewService.deleteReview(reviewId);
+      final res = await _reviewService.deleteReview(
+        reviewId,
+        userId: userId,
+        guestId: guestId,
+      );
       return res['success'] as bool? ?? false;
     } catch (e) {
       if (kDebugMode) {
@@ -352,6 +372,54 @@ class ReviewRepository {
         return true;
       }
       throw Exception('리뷰를 찾을 수 없습니다.');
+    }
+  }
+
+  // Restore Review
+  Future<Review> restoreReview(
+    String reviewId, {
+    String? userId,
+    String? guestId,
+  }) async {
+    try {
+      final res = await _reviewService.restoreReview(
+        reviewId,
+        userId: userId,
+        guestId: guestId,
+      );
+      return Review.fromJson(res);
+    } catch (e) {
+      if (kDebugMode) {
+        print('ReviewRepository: Failed to restore review error: $e');
+      }
+      rethrow;
+    }
+  }
+
+  // Rewrite Review
+  Future<Review> rewriteReview(
+    String reviewId, {
+    int? rating,
+    String? content,
+    String? userId,
+    String? guestId,
+    List<String>? imageUrls,
+  }) async {
+    try {
+      final res = await _reviewService.rewriteReview(
+        reviewId,
+        rating: rating,
+        content: content,
+        userId: userId,
+        guestId: guestId,
+        imageUrls: imageUrls,
+      );
+      return Review.fromJson(res);
+    } catch (e) {
+      if (kDebugMode) {
+        print('ReviewRepository: Failed to rewrite review error: $e');
+      }
+      rethrow;
     }
   }
 }

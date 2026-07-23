@@ -10,6 +10,9 @@ class ReviewWriteScreen extends StatefulWidget {
   final String? verificationId;
   final String? guestId;
   final String? reviewVerificationType;
+  final String? rewriteReviewId;
+  final int? initialRating;
+  final String? initialContent;
 
   const ReviewWriteScreen({
     super.key,
@@ -18,6 +21,9 @@ class ReviewWriteScreen extends StatefulWidget {
     this.verificationId,
     this.guestId,
     this.reviewVerificationType,
+    this.rewriteReviewId,
+    this.initialRating,
+    this.initialContent,
   });
 
   @override
@@ -26,7 +32,7 @@ class ReviewWriteScreen extends StatefulWidget {
 
 class _ReviewWriteScreenState extends State<ReviewWriteScreen> {
   final ReviewRepository _reviewRepository = ReviewRepository();
-  final TextEditingController _contentController = TextEditingController();
+  late TextEditingController _contentController;
 
   int _rating = 5;
   bool _isSubmitting = false;
@@ -35,6 +41,14 @@ class _ReviewWriteScreenState extends State<ReviewWriteScreen> {
   @override
   void initState() {
     super.initState();
+    if (widget.initialRating != null) {
+      _rating = widget.initialRating!;
+    }
+    _contentController = TextEditingController(
+      text: widget.initialContent ?? '',
+    );
+    _inputText = widget.initialContent ?? '';
+
     _contentController.addListener(() {
       setState(() {
         _inputText = _contentController.text;
@@ -49,8 +63,11 @@ class _ReviewWriteScreenState extends State<ReviewWriteScreen> {
   }
 
   Future<void> _submitReview() async {
+    final isRewrite =
+        widget.rewriteReviewId != null && widget.rewriteReviewId!.isNotEmpty;
     final vType = widget.reviewVerificationType;
-    if (vType == 'BUSINESS_QR' &&
+    if (!isRewrite &&
+        vType == 'BUSINESS_QR' &&
         (widget.verificationId == null || widget.verificationId!.isEmpty)) {
       _showWarningDialog(
         'QR 방문 인증 필요',
@@ -71,32 +88,44 @@ class _ReviewWriteScreenState extends State<ReviewWriteScreen> {
     final userId = authProvider.currentUser?.id;
 
     try {
-      await _reviewRepository.createReview(
-        storeId: widget.storeId,
-        rating: _rating,
-        content: cleanContent,
-        userId: userId,
-        guestId: widget.guestId,
-        verificationId: widget.verificationId,
-      );
+      if (isRewrite) {
+        await _reviewRepository.rewriteReview(
+          widget.rewriteReviewId!,
+          rating: _rating,
+          content: cleanContent,
+          userId: userId,
+          guestId: widget.guestId,
+        );
+      } else {
+        await _reviewRepository.createReview(
+          storeId: widget.storeId,
+          rating: _rating,
+          content: cleanContent,
+          userId: userId,
+          guestId: widget.guestId,
+          verificationId: widget.verificationId,
+        );
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('✍️ 리뷰가 정상적으로 등록되었습니다.'),
+          SnackBar(
+            content: Text(
+              isRewrite ? '✍️ 리뷰를 성공적으로 다시 작성했습니다.' : '✍️ 리뷰가 정상적으로 등록되었습니다.',
+            ),
             backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
           ),
         );
-        Navigator.of(
-          context,
-        ).pop(true); // Return true to trigger refresh on list
+        Navigator.of(context).pop(true);
       }
     } catch (e) {
       setState(() => _isSubmitting = false);
       final rawStr = e.toString();
       final is409 = rawStr.contains('409') || rawStr.contains('이미');
-      final title = is409 ? '이미 등록된 리뷰입니다.' : '제출 실패';
+      final title = is409
+          ? '이미 등록된 리뷰입니다.'
+          : (isRewrite ? '다시 작성 실패' : '제출 실패');
       final message = is409
           ? '이 매장에 작성된 방문 후기가 이미 존재합니다.\n중복 리뷰는 등록되지 않았습니다.'
           : rawStr
@@ -105,7 +134,7 @@ class _ReviewWriteScreenState extends State<ReviewWriteScreen> {
                 .trim();
       _showWarningDialog(
         title,
-        message.isEmpty ? '리뷰를 등록하지 못했습니다. 잠시 후 다시 시도해 주세요.' : message,
+        message.isEmpty ? '리뷰를 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.' : message,
       );
     }
   }
@@ -134,14 +163,16 @@ class _ReviewWriteScreenState extends State<ReviewWriteScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isRewrite =
+        widget.rewriteReviewId != null && widget.rewriteReviewId!.isNotEmpty;
     final canSubmit = _inputText.trim().length >= 10 && !_isSubmitting;
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
-          '리뷰 작성',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          isRewrite ? '리뷰 다시 작성' : '리뷰 작성',
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
@@ -154,7 +185,7 @@ class _ReviewWriteScreenState extends State<ReviewWriteScreen> {
           children: [
             // Store Title Info
             Text(
-              '${widget.storeName}',
+              widget.storeName,
               style: const TextStyle(
                 fontSize: 18.0,
                 fontWeight: FontWeight.bold,
@@ -162,9 +193,14 @@ class _ReviewWriteScreenState extends State<ReviewWriteScreen> {
               ),
             ),
             const SizedBox(height: 4.0),
-            const Text(
-              '매장에 대한 신뢰할 수 있는 소중한 후기를 남겨주세요.',
-              style: TextStyle(fontSize: 12.0, color: AppColors.textSecondary),
+            Text(
+              isRewrite
+                  ? '삭제했던 리뷰 내용을 처음부터 새로 다시 작성합니다.'
+                  : '매장에 대한 신뢰할 수 있는 소중한 후기를 남겨주세요.',
+              style: const TextStyle(
+                fontSize: 12.0,
+                color: AppColors.textSecondary,
+              ),
             ),
             const SizedBox(height: 24.0),
 
@@ -279,9 +315,9 @@ class _ReviewWriteScreenState extends State<ReviewWriteScreen> {
                           strokeWidth: 2.0,
                         ),
                       )
-                    : const Text(
-                        '리뷰 등록 완료',
-                        style: TextStyle(
+                    : Text(
+                        isRewrite ? '다시 작성 완료' : '리뷰 등록 완료',
+                        style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 14.0,

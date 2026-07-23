@@ -235,6 +235,8 @@ class ReviewUpdate(BaseModel):
     rating: Optional[int] = None
     content: Optional[str] = None
     image_urls: Optional[List[str]] = None
+    user_id: Optional[str] = None
+    guest_id: Optional[str] = None
 
 class ReviewOut(BaseModel):
     id: str
@@ -250,6 +252,7 @@ class ReviewOut(BaseModel):
     verification_badge: Optional[str] = None
     created_at: datetime
     updated_at: datetime
+    deleted_at: Optional[datetime] = None
     user: Optional[UserOut] = None
     images: List[ReviewImageOut] = []
     store: StoreOut

@@ -437,5 +437,114 @@ class TestReviewVerification(unittest.TestCase):
         )
         self.assertEqual(res_get_act_after.status_code, 409)
 
+    def test_review_lifecycle_edit_soft_delete_restore_and_rewrite(self):
+        # 1. Setup QR verification and create initial review for guest_lifecycle_01
+        token_str = "QR_SECRET_store_klounge_001"
+        res_v = self.client.post(
+            f"/stores/{self.business_store.id}/verify-qr",
+            json={"qr_token": token_str, "guest_id": "guest_lifecycle_01"}
+        )
+        self.assertEqual(res_v.status_code, 201)
+        v_id = res_v.json()["id"]
+
+        res_create = self.client.post(
+            f"/stores/{self.business_store.id}/reviews",
+            json={
+                "rating": 3,
+                "content": "최초 작성된 라이프사이클 테스트 리뷰 10자 이상.",
+                "guest_id": "guest_lifecycle_01",
+                "verification_id": v_id
+            }
+        )
+        self.assertEqual(res_create.status_code, 201)
+        review_data = res_create.json()
+        rev_id = review_data["id"]
+        self.assertEqual(review_data["rating"], 3)
+        self.assertEqual(review_data["verification_id"], v_id)
+
+        # 2. Normal Edit (PATCH /reviews/{rev_id}) - Success
+        res_edit = self.client.patch(
+            f"/reviews/{rev_id}",
+            json={
+                "rating": 5,
+                "content": "수정된 라이프사이클 테스트 리뷰 10자 이상입니다.",
+                "guest_id": "guest_lifecycle_01"
+            }
+        )
+        self.assertEqual(res_edit.status_code, 200)
+        edited = res_edit.json()
+        self.assertEqual(edited["id"], rev_id)
+        self.assertEqual(edited["rating"], 5)
+        self.assertEqual(edited["verification_id"], v_id)
+
+        # Edit by unauthorized guest -> 403 Forbidden
+        res_edit_unauth = self.client.patch(
+            f"/reviews/{rev_id}",
+            json={
+                "rating": 1,
+                "content": "타인이 무단으로 해킹 시도하는 수정 10자 이상.",
+                "guest_id": "guest_other_999"
+            }
+        )
+        self.assertEqual(res_edit_unauth.status_code, 403)
+
+        # 3. Soft Delete (DELETE /reviews/{rev_id})
+        res_del = self.client.delete(
+            f"/reviews/{rev_id}",
+            params={"guest_id": "guest_lifecycle_01"}
+        )
+        self.assertEqual(res_del.status_code, 200)
+
+        # Verify review is soft deleted
+        res_store_revs = self.client.get(f"/stores/{self.business_store.id}/reviews")
+        self.assertEqual(len(res_store_revs.json()), 0)
+
+        # Verify VisitVerification remains USED (not reverted to ACTIVE)
+        db_v = self.db.query(models.VisitVerification).filter(models.VisitVerification.id == v_id).first()
+        self.assertEqual(db_v.status, "USED")
+        self.assertIsNotNone(db_v.review_used_at)
+
+        # 4. Active-verification check during soft-deleted state -> returns HTTP 409 Conflict with DELETED_REVIEW_RESTORABLE
+        res_act_del = self.client.get(
+            f"/stores/{self.business_store.id}/active-verification",
+            params={"guest_id": "guest_lifecycle_01"}
+        )
+        self.assertEqual(res_act_del.status_code, 409)
+        self.assertIn("DELETED_REVIEW_RESTORABLE", res_act_del.json()["detail"])
+
+        # 5. Restore Review (POST /reviews/{rev_id}/restore)
+        res_restore = self.client.post(
+            f"/reviews/{rev_id}/restore",
+            params={"guest_id": "guest_lifecycle_01"}
+        )
+        self.assertEqual(res_restore.status_code, 200)
+        restored = res_restore.json()
+        self.assertEqual(restored["id"], rev_id)
+        self.assertFalse(restored["is_deleted"])
+        self.assertEqual(restored["verification_id"], v_id)
+
+        # Verify review is visible in store reviews list again
+        res_store_revs_after = self.client.get(f"/stores/{self.business_store.id}/reviews")
+        self.assertEqual(len(res_store_revs_after.json()), 1)
+
+        # 6. Soft Delete again and Rewrite (PATCH /reviews/{rev_id}/rewrite)
+        self.client.delete(f"/reviews/{rev_id}", params={"guest_id": "guest_lifecycle_01"})
+
+        res_rewrite = self.client.patch(
+            f"/reviews/{rev_id}/rewrite",
+            json={
+                "rating": 4,
+                "content": "다시 작성 완료된 새로운 내용의 후기 10자 이상.",
+                "guest_id": "guest_lifecycle_01"
+            }
+        )
+        self.assertEqual(res_rewrite.status_code, 200)
+        rewritten = res_rewrite.json()
+        self.assertEqual(rewritten["id"], rev_id)
+        self.assertEqual(rewritten["rating"], 4)
+        self.assertEqual(rewritten["content"], "다시 작성 완료된 새로운 내용의 후기 10자 이상.")
+        self.assertEqual(rewritten["verification_id"], v_id)
+        self.assertFalse(rewritten["is_deleted"])
+
 if __name__ == "__main__":
     unittest.main()

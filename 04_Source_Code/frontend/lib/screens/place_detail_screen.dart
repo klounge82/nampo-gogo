@@ -12,6 +12,7 @@ import '../widgets/favorite_button.dart';
 import 'auth_screen.dart';
 import '../models/review.dart' as model_review;
 import 'review_write_screen.dart';
+import 'my_reviews_screen.dart';
 import 'qr_scanner_screen.dart';
 import '../services/map_service.dart';
 import '../services/auth_service.dart';
@@ -1025,14 +1026,168 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
     } catch (e) {
       if (mounted) {
         final rawStr = e.toString();
-        final is409 = rawStr.contains('409') || rawStr.contains('이미');
-        if (is409) {
-          _showWarningDialog(
-            '이미 리뷰를 작성했습니다.',
-            '이 매장에는 최근 72시간 이내에 인증 리뷰를 작성했습니다.\n새로운 방문 리뷰는 72시간이 지난 뒤 다시 인증해 작성할 수 있습니다.',
+        if (rawStr.contains('REVIEW_ALREADY_SUBMITTED')) {
+          showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: const Text(
+                '이미 리뷰를 작성했습니다.',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0),
+              ),
+              content: const Text(
+                '이 매장에는 최근 72시간 이내에 리뷰를 작성했습니다.\n기존 리뷰는 내 정보에서 수정할 수 있습니다.',
+                style: TextStyle(fontSize: 13.0, height: 1.4),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(ctx).pop();
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => MyReviewsScreen(),
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    '내 리뷰 보기',
+                    style: TextStyle(color: AppColors.primary),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  child: const Text(
+                    '확인',
+                    style: TextStyle(color: AppColors.textSecondary),
+                  ),
+                ),
+              ],
+            ),
+          );
+        } else if (rawStr.contains('DELETED_REVIEW_RESTORABLE')) {
+          final parts = rawStr.split(':');
+          String? delId;
+          if (parts.length >= 3) {
+            delId = parts[1].trim();
+          }
+          showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: const Text(
+                '삭제한 리뷰가 있습니다.',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0),
+              ),
+              content: const Text(
+                '삭제한 리뷰를 바로 다시 작성할 수 있습니다.\nQR 코드를 다시 인증하거나 기다릴 필요가 없습니다.',
+                style: TextStyle(fontSize: 13.0, height: 1.4),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  child: const Text(
+                    '나중에',
+                    style: TextStyle(color: AppColors.textSecondary),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    Navigator.of(ctx).pop();
+                    if (delId != null && delId.isNotEmpty) {
+                      final result = await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => ReviewWriteScreen(
+                            storeId: place.id,
+                            storeName: place.name,
+                            rewriteReviewId: delId,
+                            guestId: userId == null ? guestId : null,
+                            reviewVerificationType:
+                                place.reviewVerificationType,
+                          ),
+                        ),
+                      );
+                      if (result == true) {
+                        _loadPlaceDetail();
+                        _loadReviews();
+                      }
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('다시 작성'),
+                ),
+              ],
+            ),
+          );
+        } else if (rawStr.contains('DELETED_REVIEW_OPTION')) {
+          final parts = rawStr.split(':');
+          String? delId;
+          if (parts.length >= 3) {
+            delId = parts[1].trim();
+          }
+          showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: const Text(
+                '작성 방법을 선택해 주세요.',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0),
+              ),
+              content: const Text(
+                '삭제한 기존 리뷰를 다시 작성하거나,\n새로운 방문 인증 후 새 리뷰를 작성할 수 있습니다.',
+                style: TextStyle(fontSize: 13.0, height: 1.4),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () async {
+                    Navigator.of(ctx).pop();
+                    if (delId != null && delId.isNotEmpty) {
+                      final result = await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => ReviewWriteScreen(
+                            storeId: place.id,
+                            storeName: place.name,
+                            rewriteReviewId: delId,
+                            guestId: userId == null ? guestId : null,
+                            reviewVerificationType:
+                                place.reviewVerificationType,
+                          ),
+                        ),
+                      );
+                      if (result == true) {
+                        _loadPlaceDetail();
+                        _loadReviews();
+                      }
+                    }
+                  },
+                  child: const Text(
+                    '삭제 리뷰 다시 작성',
+                    style: TextStyle(color: AppColors.primary),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(ctx).pop();
+                    _showBusinessQRGateDialog(context, place, userId, guestId);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('새 방문 리뷰 작성'),
+                ),
+              ],
+            ),
           );
         } else {
-          _showWarningDialog('안내', '인증 상태를 확인하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+          final is409 = rawStr.contains('409') || rawStr.contains('이미');
+          if (is409) {
+            _showWarningDialog(
+              '이미 리뷰를 작성했습니다.',
+              '이 매장에는 최근 72시간 이내에 리뷰를 작성했습니다.\n기존 리뷰는 내 정보에서 수정할 수 있습니다.',
+            );
+          } else {
+            _showWarningDialog('안내', '인증 상태를 확인하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+          }
         }
       }
     }
