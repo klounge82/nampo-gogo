@@ -9,6 +9,7 @@ class ReviewWriteScreen extends StatefulWidget {
   final String storeName;
   final String? verificationId;
   final String? guestId;
+  final String? reviewVerificationType;
 
   const ReviewWriteScreen({
     super.key,
@@ -16,6 +17,7 @@ class ReviewWriteScreen extends StatefulWidget {
     required this.storeName,
     this.verificationId,
     this.guestId,
+    this.reviewVerificationType,
   });
 
   @override
@@ -47,6 +49,16 @@ class _ReviewWriteScreenState extends State<ReviewWriteScreen> {
   }
 
   Future<void> _submitReview() async {
+    final vType = widget.reviewVerificationType;
+    if (vType == 'BUSINESS_QR' &&
+        (widget.verificationId == null || widget.verificationId!.isEmpty)) {
+      _showWarningDialog(
+        'QR 방문 인증 필요',
+        '매장 QR 방문 인증이 필요합니다. 방문 인증 후 리뷰를 작성할 수 있습니다.',
+      );
+      return;
+    }
+
     final cleanContent = _contentController.text.trim();
     if (cleanContent.length < 10) {
       _showWarningDialog('글자 수 부족', '리뷰 내용은 최소 10자 이상 작성해야 제출할 수 있습니다.');

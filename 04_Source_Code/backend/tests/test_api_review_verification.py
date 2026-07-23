@@ -364,5 +364,78 @@ class TestReviewVerification(unittest.TestCase):
         )
         self.assertEqual(res_user.status_code, 201)
 
+    def test_business_qr_gate_enforcement_and_unverified_bypass_prevention(self):
+        # 1. Review submission without verification_id on BUSINESS_QR store -> Rejected with 403
+        res_no_v = self.client.post(
+            f"/stores/{self.business_store.id}/reviews",
+            json={
+                "rating": 5,
+                "content": "QR 인증 없이 무단으로 제출을 시도하는 리뷰 10자 이상.",
+                "guest_id": "guest_bypass_01"
+            }
+        )
+        self.assertEqual(res_no_v.status_code, 403)
+
+        # 2. Review submission with non-existent verification_id -> Rejected with 403
+        res_fake_v = self.client.post(
+            f"/stores/{self.business_store.id}/reviews",
+            json={
+                "rating": 5,
+                "content": "가짜 인증 ID로 제출을 시도하는 리뷰 10자 이상.",
+                "guest_id": "guest_bypass_01",
+                "verification_id": "non_existent_verification_id_999"
+            }
+        )
+        self.assertEqual(res_fake_v.status_code, 403)
+
+        # 3. Create valid QR verification for guest_bypass_01
+        token_str = "QR_SECRET_store_klounge_001"
+        res_v = self.client.post(
+            f"/stores/{self.business_store.id}/verify-qr",
+            json={"qr_token": token_str, "guest_id": "guest_bypass_01"}
+        )
+        self.assertEqual(res_v.status_code, 201)
+        valid_v_id = res_v.json()["id"]
+
+        # 4. Attempt to use guest_bypass_01's verification_id with guest_bypass_02 -> Rejected with 403
+        res_mismatch = self.client.post(
+            f"/stores/{self.business_store.id}/reviews",
+            json={
+                "rating": 5,
+                "content": "타인의 인증 ID를 도용해 제출 시도하는 리뷰 10자 이상.",
+                "guest_id": "guest_bypass_02",
+                "verification_id": valid_v_id
+            }
+        )
+        self.assertEqual(res_mismatch.status_code, 403)
+
+        # 5. Active verification GET endpoint returns active verification for guest_bypass_01
+        res_get_act = self.client.get(
+            f"/stores/{self.business_store.id}/active-verification",
+            params={"guest_id": "guest_bypass_01"}
+        )
+        self.assertEqual(res_get_act.status_code, 200)
+        self.assertIsNotNone(res_get_act.json())
+        self.assertEqual(res_get_act.json()["id"], valid_v_id)
+
+        # 6. Submit review with valid verification -> Success 201
+        res_sub = self.client.post(
+            f"/stores/{self.business_store.id}/reviews",
+            json={
+                "rating": 5,
+                "content": "정상적으로 QR 인증 후 작성하는 정성스러운 후기 10자 이상.",
+                "guest_id": "guest_bypass_01",
+                "verification_id": valid_v_id
+            }
+        )
+        self.assertEqual(res_sub.status_code, 201)
+
+        # 7. Active verification GET endpoint returns 409 Conflict after review submission
+        res_get_act_after = self.client.get(
+            f"/stores/{self.business_store.id}/active-verification",
+            params={"guest_id": "guest_bypass_01"}
+        )
+        self.assertEqual(res_get_act_after.status_code, 409)
+
 if __name__ == "__main__":
     unittest.main()

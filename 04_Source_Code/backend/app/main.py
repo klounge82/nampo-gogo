@@ -1160,7 +1160,30 @@ def verify_attraction_manual_visit(store_id: str, req: schemas.ManualVisitVerify
 
 @app.get("/stores/{store_id}/active-verification", response_model=Optional[schemas.VisitVerificationOut], tags=["VisitVerifications"])
 def get_active_verification(store_id: str, user_id: Optional[str] = None, guest_id: Optional[str] = None, db: Session = Depends(get_db)):
+    if not user_id and not guest_id:
+        return None
+
     now = datetime.utcnow()
+    window_start = now - timedelta(hours=72)
+
+    # 1. Check if user/guest already submitted a review within 72h -> HTTP 409 Conflict
+    existing_review_query = db.query(models.Review).filter(
+        models.Review.store_id == store_id,
+        models.Review.is_deleted == False,
+        models.Review.created_at >= window_start
+    )
+    if user_id:
+        existing_review_query = existing_review_query.filter(models.Review.user_id == user_id)
+    else:
+        existing_review_query = existing_review_query.filter(models.Review.guest_id == guest_id)
+
+    if existing_review_query.first():
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="이미 이 매장의 방문 인증 리뷰를 작성했습니다. 새로운 방문 리뷰는 인증 후 72시간이 지난 뒤 작성할 수 있습니다."
+        )
+
+    # 2. Query active unused VisitVerification
     query = db.query(models.VisitVerification).filter(
         models.VisitVerification.store_id == store_id,
         models.VisitVerification.status == "ACTIVE",
@@ -1169,10 +1192,8 @@ def get_active_verification(store_id: str, user_id: Optional[str] = None, guest_
     )
     if user_id:
         query = query.filter(models.VisitVerification.user_id == user_id)
-    elif guest_id:
-        query = query.filter(models.VisitVerification.guest_id == guest_id)
     else:
-        return None
+        query = query.filter(models.VisitVerification.guest_id == guest_id)
 
     return query.order_by(models.VisitVerification.verified_at.desc()).first()
 
@@ -1211,30 +1232,32 @@ def create_review(store_id: str, req: schemas.ReviewCreate, db: Session = Depend
     verification = None
 
     if v_type == "BUSINESS_QR":
-        if req.verification_id:
-            verification = db.query(models.VisitVerification).filter(
-                models.VisitVerification.id == req.verification_id,
-                models.VisitVerification.store_id == store_id
-            ).first()
-        else:
-            now = datetime.utcnow()
-            query = db.query(models.VisitVerification).filter(
-                models.VisitVerification.store_id == store_id,
-                models.VisitVerification.verification_method == "BUSINESS_QR",
-                models.VisitVerification.status == "ACTIVE",
-                models.VisitVerification.expires_at > now,
-                models.VisitVerification.review_used_at == None
+        if not req.verification_id or not req.verification_id.strip():
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="매장 QR 방문 인증이 필요합니다. 방문 인증 후 리뷰를 작성할 수 있습니다."
             )
-            if target_user_id:
-                query = query.filter(models.VisitVerification.user_id == target_user_id)
-            elif target_guest_id:
-                query = query.filter(models.VisitVerification.guest_id == target_guest_id)
-            verification = query.first()
+
+        verification = db.query(models.VisitVerification).filter(
+            models.VisitVerification.id == req.verification_id.strip(),
+            models.VisitVerification.store_id == store_id
+        ).first()
 
         if not verification:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="매장 QR 방문 인증이 필요합니다. 방문 인증 후 리뷰를 작성할 수 있습니다."
+                detail="유효한 방문 인증 정보를 찾을 수 없습니다. QR을 다시 스캔해 주세요."
+            )
+
+        if target_user_id and verification.user_id != target_user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="방문 인증의 사용자 정보가 일치하지 않습니다."
+            )
+        elif not target_user_id and target_guest_id and verification.guest_id != target_guest_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="방문 인증의 게스트 정보가 일치하지 않습니다."
             )
 
         if verification.status != "ACTIVE" or verification.review_used_at is not None:

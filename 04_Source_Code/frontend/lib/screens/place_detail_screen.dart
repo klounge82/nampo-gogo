@@ -989,6 +989,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
               storeName: place.name,
               verificationId: activeV['id'] as String?,
               guestId: userId == null ? guestId : null,
+              reviewVerificationType: place.reviewVerificationType,
             ),
           ),
         );
@@ -1012,6 +1013,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
               storeId: place.id,
               storeName: place.name,
               guestId: userId == null ? guestId : null,
+              reviewVerificationType: place.reviewVerificationType,
             ),
           ),
         );
@@ -1022,7 +1024,16 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
       }
     } catch (e) {
       if (mounted) {
-        _showWarningDialog('안내', '방문 인증 정보를 확인하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+        final rawStr = e.toString();
+        final is409 = rawStr.contains('409') || rawStr.contains('이미');
+        if (is409) {
+          _showWarningDialog(
+            '이미 리뷰를 작성했습니다.',
+            '이 매장에는 최근 72시간 이내에 인증 리뷰를 작성했습니다.\n새로운 방문 리뷰는 72시간이 지난 뒤 다시 인증해 작성할 수 있습니다.',
+          );
+        } else {
+          _showWarningDialog('안내', '인증 상태를 확인하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+        }
       }
     }
   }
@@ -1103,6 +1114,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
               storeName: place.name,
               verificationId: vRes['id'] as String?,
               guestId: userId == null ? guestId : null,
+              reviewVerificationType: place.reviewVerificationType,
             ),
           ),
         );
