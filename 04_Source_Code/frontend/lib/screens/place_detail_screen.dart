@@ -1113,14 +1113,18 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
       }
     } catch (e) {
       if (mounted) {
-        final cleanMsg = e
-            .toString()
-            .replaceAll('Exception:', '')
-            .replaceAll('DioException', '')
-            .trim();
+        final rawStr = e.toString();
+        final is409 = rawStr.contains('409') || rawStr.contains('이미');
+        final title = is409 ? '이미 리뷰를 작성했습니다.' : 'QR 인증 실패';
+        final message = is409
+            ? '이 매장의 현재 방문 인증으로 이미 리뷰를 작성했습니다.\n새로운 방문 리뷰는 72시간이 지난 뒤 다시 인증해 작성할 수 있습니다.'
+            : rawStr
+                  .replaceAll('Exception:', '')
+                  .replaceAll('DioException', '')
+                  .trim();
         _showWarningDialog(
-          'QR 인증 실패',
-          cleanMsg.isEmpty ? '유효하지 않은 QR 코드입니다.' : cleanMsg,
+          title,
+          message.isEmpty ? '유효하지 않은 QR 코드입니다.' : message,
         );
       }
     }

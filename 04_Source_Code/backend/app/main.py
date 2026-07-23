@@ -1012,6 +1012,45 @@ def verify_store_qr(store_id: str, req: schemas.QRVerifyRequest, db: Session = D
     target_user_id = req.user_id
     target_guest_id = req.guest_id
 
+    if not target_user_id and not target_guest_id:
+        raise HTTPException(status_code=400, detail="인증 주체(사용자 또는 게스트 ID)가 필요합니다.")
+
+    window_start = now - timedelta(hours=72)
+
+    # 1. Check if user/guest already used verification or submitted review for this store within 72h
+    existing_used_query = db.query(models.VisitVerification).filter(
+        models.VisitVerification.store_id == store_id,
+        models.VisitVerification.verified_at >= window_start,
+        (models.VisitVerification.status == "USED") | (models.VisitVerification.review_used_at != None)
+    )
+    if target_user_id:
+        existing_used_query = existing_used_query.filter(models.VisitVerification.user_id == target_user_id)
+    else:
+        existing_used_query = existing_used_query.filter(models.VisitVerification.guest_id == target_guest_id)
+
+    if existing_used_query.first():
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="이미 이 매장의 방문 인증 리뷰를 작성했습니다. 새로운 방문 리뷰는 인증 후 72시간이 지난 뒤 작성할 수 있습니다."
+        )
+
+    existing_review_query = db.query(models.Review).filter(
+        models.Review.store_id == store_id,
+        models.Review.is_deleted == False,
+        models.Review.created_at >= window_start
+    )
+    if target_user_id:
+        existing_review_query = existing_review_query.filter(models.Review.user_id == target_user_id)
+    else:
+        existing_review_query = existing_review_query.filter(models.Review.guest_id == target_guest_id)
+
+    if existing_review_query.first():
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="이미 이 매장의 방문 인증 리뷰를 작성했습니다. 새로운 방문 리뷰는 인증 후 72시간이 지난 뒤 작성할 수 있습니다."
+        )
+
+    # 2. Return existing ACTIVE verification if present within 72h
     existing_active = db.query(models.VisitVerification).filter(
         models.VisitVerification.store_id == store_id,
         models.VisitVerification.status == "ACTIVE",
@@ -1027,6 +1066,7 @@ def verify_store_qr(store_id: str, req: schemas.QRVerifyRequest, db: Session = D
     if active_v:
         return active_v
 
+    # 3. Create new VisitVerification
     expires_at = now + timedelta(hours=72)
     verification = models.VisitVerification(
         store_id=store_id,
@@ -1236,28 +1276,31 @@ def create_review(store_id: str, req: schemas.ReviewCreate, db: Session = Depend
                 detail="관광지 방문 확인(현재 위치 또는 방문 날짜 입력)이 필요합니다."
             )
 
-    # Duplicate check for user / guest
+    # 72h Duplicate check for user / guest
+    window_start = datetime.utcnow() - timedelta(hours=72)
     if target_user_id:
         existing_review = db.query(models.Review).filter(
             models.Review.user_id == target_user_id,
             models.Review.store_id == store_id,
-            models.Review.is_deleted == False
+            models.Review.is_deleted == False,
+            models.Review.created_at >= window_start
         ).first()
         if existing_review:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail="이미 해당 매장에 작성된 리뷰가 존재합니다."
+                detail="이미 해당 매장에 작성된 방문 인증 리뷰가 존재합니다. 새로운 리뷰는 72시간이 지난 뒤 작성할 수 있습니다."
             )
     elif target_guest_id:
         existing_review = db.query(models.Review).filter(
             models.Review.guest_id == target_guest_id,
             models.Review.store_id == store_id,
-            models.Review.is_deleted == False
+            models.Review.is_deleted == False,
+            models.Review.created_at >= window_start
         ).first()
         if existing_review:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail="이미 해당 매장에 작성된 리뷰가 존재합니다."
+                detail="이미 해당 매장에 작성된 방문 인증 리뷰가 존재합니다. 새로운 리뷰는 72시간이 지난 뒤 작성할 수 있습니다."
             )
 
     # Badge text mapping

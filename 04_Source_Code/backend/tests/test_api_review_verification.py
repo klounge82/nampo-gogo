@@ -292,5 +292,77 @@ class TestReviewVerification(unittest.TestCase):
         )
         self.assertEqual(res_wrong_store.status_code, 403)
 
+    def test_duplicate_qr_verification_and_review_guard_flow(self):
+        token_str = "QR_SECRET_store_klounge_001"
+
+        # 1. First QR scan for guest_dup_01 -> Success 201
+        res1 = self.client.post(
+            f"/stores/{self.business_store.id}/verify-qr",
+            json={"qr_token": token_str, "guest_id": "guest_dup_01"}
+        )
+        self.assertEqual(res1.status_code, 201)
+        v1_id = res1.json()["id"]
+
+        # 2. Rescan before writing review -> Returns same active verification (idempotent)
+        res2 = self.client.post(
+            f"/stores/{self.business_store.id}/verify-qr",
+            json={"qr_token": token_str, "guest_id": "guest_dup_01"}
+        )
+        self.assertEqual(res2.status_code, 201)
+        self.assertEqual(res2.json()["id"], v1_id)
+
+        # 3. Verify row count does not increase for rescan
+        v_count = self.db.query(models.VisitVerification).filter(
+            models.VisitVerification.guest_id == "guest_dup_01",
+            models.VisitVerification.store_id == self.business_store.id
+        ).count()
+        self.assertEqual(v_count, 1)
+
+        # 4. Submit first review -> Success 201 and marks verification USED
+        res_rev1 = self.client.post(
+            f"/stores/{self.business_store.id}/reviews",
+            json={
+                "rating": 5,
+                "content": "첫 번째 방문 인증으로 남기는 정성 가득한 후기 10자 이상.",
+                "guest_id": "guest_dup_01",
+                "verification_id": v1_id
+            }
+        )
+        self.assertEqual(res_rev1.status_code, 201)
+
+        # 5. Rescan after submitting review within 72h -> HTTP 409 Conflict
+        res_rescan_after = self.client.post(
+            f"/stores/{self.business_store.id}/verify-qr",
+            json={"qr_token": token_str, "guest_id": "guest_dup_01"}
+        )
+        self.assertEqual(res_rescan_after.status_code, 409)
+
+        # 6. Attempt second review submission for same guest -> HTTP 409 Conflict
+        res_rev2 = self.client.post(
+            f"/stores/{self.business_store.id}/reviews",
+            json={
+                "rating": 5,
+                "content": "두 번째 중복 제출을 시도하는 후기 10자 이상 내용입니다.",
+                "guest_id": "guest_dup_01",
+                "verification_id": v1_id
+            }
+        )
+        self.assertEqual(res_rev2.status_code, 409)
+
+        # 7. Another guest (guest_dup_02) CAN verify same QR credential successfully
+        res_guest2 = self.client.post(
+            f"/stores/{self.business_store.id}/verify-qr",
+            json={"qr_token": token_str, "guest_id": "guest_dup_02"}
+        )
+        self.assertEqual(res_guest2.status_code, 201)
+        self.assertNotEqual(res_guest2.json()["id"], v1_id)
+
+        # 8. Another logged-in user CAN verify same QR credential successfully
+        res_user = self.client.post(
+            f"/stores/{self.business_store.id}/verify-qr",
+            json={"qr_token": token_str, "user_id": self.test_user.id}
+        )
+        self.assertEqual(res_user.status_code, 201)
+
 if __name__ == "__main__":
     unittest.main()

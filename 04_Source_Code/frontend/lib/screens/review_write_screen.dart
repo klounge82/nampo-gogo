@@ -82,14 +82,18 @@ class _ReviewWriteScreenState extends State<ReviewWriteScreen> {
       }
     } catch (e) {
       setState(() => _isSubmitting = false);
-      final cleanMsg = e
-          .toString()
-          .replaceAll('Exception:', '')
-          .replaceAll('DioException', '')
-          .trim();
+      final rawStr = e.toString();
+      final is409 = rawStr.contains('409') || rawStr.contains('이미');
+      final title = is409 ? '이미 등록된 리뷰입니다.' : '제출 실패';
+      final message = is409
+          ? '이 매장에 작성된 방문 후기가 이미 존재합니다.\n중복 리뷰는 등록되지 않았습니다.'
+          : rawStr
+                .replaceAll('Exception:', '')
+                .replaceAll('DioException', '')
+                .trim();
       _showWarningDialog(
-        '제출 실패',
-        cleanMsg.isEmpty ? '리뷰를 등록하지 못했습니다. 잠시 후 다시 시도해 주세요.' : cleanMsg,
+        title,
+        message.isEmpty ? '리뷰를 등록하지 못했습니다. 잠시 후 다시 시도해 주세요.' : message,
       );
     }
   }
