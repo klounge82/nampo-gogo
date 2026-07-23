@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../constants/colors.dart';
 import '../providers/auth_provider.dart';
+import '../providers/app_mode_provider.dart';
+import 'business_application_screen.dart';
 import 'auth_screen.dart';
 import 'point_history_screen.dart';
 import 'coupon_list_screen.dart';
@@ -339,6 +341,28 @@ class ProfileScreen extends StatelessWidget {
                         }
                       },
                     ),
+                    if (isLoggedIn)
+                      _buildMenuItem(
+                        context,
+                        icon: user?.isApprovedBusiness == true
+                            ? Icons.swap_horiz
+                            : Icons.storefront,
+                        title: user?.isApprovedBusiness == true
+                            ? '사업자 모드로 전환'
+                            : '사업자 회원 신청',
+                        onTap: () {
+                          if (user?.isApprovedBusiness == true) {
+                            Provider.of<AppModeProvider>(context, listen: false)
+                                .switchMode(AppMode.business, user);
+                          } else {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => const BusinessApplicationScreen(),
+                              ),
+                            );
+                          }
+                        },
+                      ),
                     _buildMenuItem(
                       context,
                       icon: Icons.history,

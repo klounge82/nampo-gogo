@@ -388,6 +388,118 @@ def link_guest_data_to_user(
         "recommendations_linked": rec_count
     }
 
+def get_user_roles(db: Session, user_id: str) -> List[str]:
+    roles = db.query(models.UserRole.role).filter(models.UserRole.user_id == user_id).all()
+    role_list = [r[0] for r in roles]
+    if not role_list:
+        # Default fallback: add CUSTOMER role
+        new_role = models.UserRole(user_id=user_id, role="CUSTOMER")
+        db.add(new_role)
+        db.flush()
+        role_list = ["CUSTOMER"]
+    return role_list
+
+def get_user_capabilities(roles: List[str]) -> List[str]:
+    caps = set()
+    for r in roles:
+        caps.update(auth.ROLE_CAPABILITIES.get(r, set()))
+    return sorted(list(caps))
+
+def get_active_store_memberships(db: Session, user_id: str) -> List[schemas.BusinessMembershipOut]:
+    mems = db.query(models.BusinessMembership).filter(
+        models.BusinessMembership.user_id == user_id,
+        models.BusinessMembership.status == "ACTIVE"
+    ).all()
+    return [
+        schemas.BusinessMembershipOut(
+            id=m.id,
+            store_id=m.store_id,
+            membership_role=m.membership_role,
+            status=m.status,
+            created_at=m.created_at
+        )
+        for m in mems
+    ]
+
+def get_business_application_status(db: Session, user_id: str) -> str:
+    app_record = db.query(models.BusinessApplication).filter(
+        models.BusinessApplication.user_id == user_id
+    ).order_by(models.BusinessApplication.created_at.desc()).first()
+    return app_record.status if app_record else "NONE"
+
+def build_user_out_dict(db: Session, user: models.User) -> dict:
+    roles = get_user_roles(db, user.id)
+    caps = get_user_capabilities(roles)
+    app_status = get_business_application_status(db, user.id)
+    mems = get_active_store_memberships(db, user.id)
+
+    available_modes = ["CUSTOMER"]
+    if "BUSINESS" in roles and app_status in ["APPROVED", "NONE"] and len(mems) > 0:
+        available_modes.append("BUSINESS")
+    elif "BUSINESS" in roles and app_status == "APPROVED":
+        available_modes.append("BUSINESS")
+
+    if "ADMIN" in roles or user.role == "admin":
+        if "ADMIN" not in roles:
+            roles.append("ADMIN")
+        available_modes.append("ADMIN")
+
+    return {
+        "id": user.id,
+        "email": user.email,
+        "nickname": user.nickname,
+        "profile_image_url": user.profile_image_url,
+        "role": user.role,
+        "status": user.status,
+        "current_points": user.current_points,
+        "language_code": user.language_code,
+        "created_at": user.created_at,
+        "updated_at": user.updated_at,
+        "last_login_at": user.last_login_at,
+        "roles": roles,
+        "business_application_status": app_status,
+        "business_memberships": mems,
+        "capabilities": caps,
+        "available_app_modes": available_modes
+    }
+
+def require_capability(required_cap: str):
+    def dependency(
+        current_user: models.User = Depends(get_current_user),
+        db: Session = Depends(get_db)
+    ):
+        roles = get_user_roles(db, current_user.id)
+        caps = get_user_capabilities(roles)
+        if required_cap not in caps:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"해당 기능에 대한 접근 권한이 없습니다. (필요 권한: {required_cap})"
+            )
+        return current_user
+    return dependency
+
+def require_store_membership(
+    store_id: str,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    roles = get_user_roles(db, current_user.id)
+    if "ADMIN" in roles or current_user.role == "admin":
+        return True
+
+    m = db.query(models.BusinessMembership).filter(
+        models.BusinessMembership.user_id == current_user.id,
+        models.BusinessMembership.store_id == store_id,
+        models.BusinessMembership.status == "ACTIVE"
+    ).first()
+
+    if not m:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="해당 매장에 대한 활성 사업자 멤버십이 없습니다."
+        )
+    return m
+
 @app.post("/auth/signup", response_model=schemas.UserOut, status_code=status.HTTP_201_CREATED, tags=["Auth"])
 def signup(
     user_in: schemas.UserCreate,
@@ -409,6 +521,10 @@ def signup(
     )
     db.add(new_user)
     db.flush()
+
+    # Always grant CUSTOMER role by default
+    cust_role = models.UserRole(user_id=new_user.id, role="CUSTOMER")
+    db.add(cust_role)
 
     hashed_pwd = auth.get_password_hash(user_in.password)
     new_auth = models.UserAuth(
@@ -435,7 +551,7 @@ def signup(
         color="blue"
     )
     
-    return new_user
+    return build_user_out_dict(db, new_user)
 
 @app.post("/auth/login", response_model=schemas.Token, tags=["Auth"])
 def login(
@@ -480,8 +596,15 @@ def login(
         "access_token": access_token,
         "refresh_token": refresh_token,
         "token_type": "bearer",
-        "user": db_user
+        "user": build_user_out_dict(db, db_user)
     }
+
+@app.get("/auth/me", response_model=schemas.UserOut, tags=["Auth"])
+def get_me(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    return build_user_out_dict(db, current_user)
 
 @app.post("/auth/link-guest-data", response_model=schemas.GuestDataLinkResponse, tags=["Auth"])
 def link_guest_data(
@@ -520,8 +643,143 @@ def refresh_token(ref_token: str, db: Session = Depends(get_db)):
         "access_token": new_access,
         "refresh_token": new_refresh,
         "token_type": "bearer",
-        "user": db_user
+        "user": build_user_out_dict(db, db_user)
     }
+
+# ---------------------------------------------------------
+# Business Application & Approval Endpoints
+# ---------------------------------------------------------
+
+@app.post("/business/applications", response_model=schemas.BusinessApplicationOut, status_code=status.HTTP_201_CREATED, tags=["Business Application"])
+def apply_business_account(
+    req: schemas.BusinessApplicationCreate,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    # Check for existing PENDING application
+    existing_pending = db.query(models.BusinessApplication).filter(
+        models.BusinessApplication.user_id == current_user.id,
+        models.BusinessApplication.status == "PENDING"
+    ).first()
+
+    if existing_pending:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="이미 승인 대기 중인 사업자 신청건이 있습니다."
+        )
+
+    app_record = models.BusinessApplication(
+        user_id=current_user.id,
+        business_name=req.business_name,
+        business_registration_number=req.business_registration_number,
+        representative_name=req.representative_name,
+        phone=req.phone,
+        requested_store_id=req.requested_store_id,
+        status="PENDING"
+    )
+    db.add(app_record)
+    db.commit()
+    db.refresh(app_record)
+    return app_record
+
+@app.get("/business/applications/me", response_model=Optional[schemas.BusinessApplicationOut], tags=["Business Application"])
+def get_my_business_application(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    return db.query(models.BusinessApplication).filter(
+        models.BusinessApplication.user_id == current_user.id
+    ).order_by(models.BusinessApplication.created_at.desc()).first()
+
+@app.get("/admin/business/applications", response_model=List[schemas.BusinessApplicationOut], tags=["Admin Business Approval"])
+def list_business_applications(
+    status_filter: Optional[str] = None,
+    current_user: models.User = Depends(require_capability("business.approve")),
+    db: Session = Depends(get_db)
+):
+    query = db.query(models.BusinessApplication)
+    if status_filter:
+        query = query.filter(models.BusinessApplication.status == status_filter.upper())
+    return query.order_by(models.BusinessApplication.created_at.desc()).all()
+
+@app.post("/admin/business/applications/{application_id}/approve", response_model=schemas.BusinessApplicationOut, tags=["Admin Business Approval"])
+def approve_business_application(
+    application_id: str,
+    req: Optional[schemas.BusinessApplicationApproveRequest] = None,
+    current_user: models.User = Depends(require_capability("business.approve")),
+    db: Session = Depends(get_db)
+):
+    app_record = db.query(models.BusinessApplication).filter(
+        models.BusinessApplication.id == application_id
+    ).first()
+
+    if not app_record:
+        raise HTTPException(status_code=404, detail="해당 사업자 신청건을 찾을 수 없습니다.")
+
+    target_store_id = (req.store_id if req and req.store_id else None) or app_record.requested_store_id
+
+    # Atomic single transaction
+    app_record.status = "APPROVED"
+    app_record.reviewed_by = current_user.id
+    app_record.reviewed_at = datetime.utcnow()
+    db.add(app_record)
+
+    # 1. Add BUSINESS role
+    existing_role = db.query(models.UserRole).filter(
+        models.UserRole.user_id == app_record.user_id,
+        models.UserRole.role == "BUSINESS"
+    ).first()
+
+    if not existing_role:
+        new_role = models.UserRole(user_id=app_record.user_id, role="BUSINESS")
+        db.add(new_role)
+
+    # 2. Add OWNER membership if store_id exists
+    if target_store_id:
+        existing_mem = db.query(models.BusinessMembership).filter(
+            models.BusinessMembership.user_id == app_record.user_id,
+            models.BusinessMembership.store_id == target_store_id
+        ).first()
+
+        if not existing_mem:
+            new_mem = models.BusinessMembership(
+                user_id=app_record.user_id,
+                store_id=target_store_id,
+                membership_role="OWNER",
+                status="ACTIVE"
+            )
+            db.add(new_mem)
+        else:
+            existing_mem.status = "ACTIVE"
+            db.add(existing_mem)
+
+    db.commit()
+    db.refresh(app_record)
+    return app_record
+
+@app.post("/admin/business/applications/{application_id}/reject", response_model=schemas.BusinessApplicationOut, tags=["Admin Business Approval"])
+def reject_business_application(
+    application_id: str,
+    req: schemas.BusinessApplicationRejectRequest,
+    current_user: models.User = Depends(require_capability("business.approve")),
+    db: Session = Depends(get_db)
+):
+    app_record = db.query(models.BusinessApplication).filter(
+        models.BusinessApplication.id == application_id
+    ).first()
+
+    if not app_record:
+        raise HTTPException(status_code=404, detail="해당 사업자 신청건을 찾을 수 없습니다.")
+
+    app_record.status = "REJECTED"
+    app_record.rejection_reason = req.rejection_reason
+    app_record.reviewed_by = current_user.id
+    app_record.reviewed_at = datetime.utcnow()
+
+    db.add(app_record)
+    db.commit()
+    db.refresh(app_record)
+    return app_record
 
 # --- PLACE / STORE MVP APIs ---
 

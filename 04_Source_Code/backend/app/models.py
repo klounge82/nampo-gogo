@@ -54,6 +54,10 @@ class User(Base):
     store_ownerships = relationship("StoreOwner", back_populates="user", cascade="all, delete-orphan")
     # One-to-many relationship with VisitVerification
     verifications = relationship("VisitVerification", back_populates="user", cascade="all, delete-orphan")
+    # Role-based extensions
+    roles = relationship("UserRole", back_populates="user", cascade="all, delete-orphan")
+    business_applications = relationship("BusinessApplication", foreign_keys="BusinessApplication.user_id", back_populates="user", cascade="all, delete-orphan")
+    memberships = relationship("BusinessMembership", back_populates="user", cascade="all, delete-orphan")
 
 class UserAuth(Base):
     __tablename__ = "user_auths"
@@ -64,6 +68,60 @@ class UserAuth(Base):
 
     # Relationship back to User
     user = relationship("User", back_populates="auth")
+
+class UserRole(Base):
+    __tablename__ = "user_roles"
+    __table_args__ = (
+        UniqueConstraint("user_id", "role", name="uq_user_role"),
+    )
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    role = Column(String(50), nullable=False) # 'CUSTOMER', 'BUSINESS', 'ADMIN'
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+
+    # Relationship to User
+    user = relationship("User", back_populates="roles")
+
+class BusinessApplication(Base):
+    __tablename__ = "business_applications"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    business_name = Column(String(255), nullable=False)
+    business_registration_number = Column(String(100), nullable=False)
+    representative_name = Column(String(100), nullable=False)
+    phone = Column(String(50), nullable=False)
+    requested_store_id = Column(String(36), ForeignKey("stores.id", ondelete="SET NULL"), nullable=True)
+    status = Column(String(50), nullable=False, default="PENDING") # 'PENDING', 'APPROVED', 'REJECTED', 'SUSPENDED'
+    rejection_reason = Column(Text, nullable=True)
+    reviewed_by = Column(String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    reviewed_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+    updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
+
+    # Relationships
+    user = relationship("User", foreign_keys=[user_id], back_populates="business_applications")
+    reviewer = relationship("User", foreign_keys=[reviewed_by])
+    requested_store = relationship("Store")
+
+class BusinessMembership(Base):
+    __tablename__ = "business_memberships"
+    __table_args__ = (
+        UniqueConstraint("user_id", "store_id", name="uq_user_store_membership"),
+    )
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    store_id = Column(String(36), ForeignKey("stores.id", ondelete="CASCADE"), nullable=False, index=True)
+    membership_role = Column(String(50), nullable=False, default="OWNER") # 'OWNER', 'MANAGER', 'STAFF'
+    status = Column(String(50), nullable=False, default="ACTIVE") # 'ACTIVE', 'SUSPENDED', 'REVOKED'
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+    updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
+
+    # Relationships
+    user = relationship("User", back_populates="memberships")
+    store = relationship("Store", back_populates="memberships")
 
 class Store(Base):
     __tablename__ = "stores"
@@ -108,6 +166,8 @@ class Store(Base):
     verifications = relationship("VisitVerification", back_populates="store", cascade="all, delete-orphan")
     # One-to-many relationship with StoreQrCredential
     qr_credentials = relationship("StoreQrCredential", back_populates="store", cascade="all, delete-orphan")
+    # One-to-many relationship with BusinessMembership
+    memberships = relationship("BusinessMembership", back_populates="store", cascade="all, delete-orphan")
 
 class StoreQrCredential(Base):
     __tablename__ = "store_qr_credentials"

@@ -57,3 +57,29 @@ def decode_token(token: str) -> dict:
         return payload
     except JWTError:
         return {}
+
+ROLE_CAPABILITIES = {
+    "CUSTOMER": {
+        "place.read",
+        "favorite.manage",
+        "course.manage",
+        "review.manage",
+        "reservation.create",
+    },
+    "BUSINESS": {
+        "business.dashboard.read",
+        "store.own.read",
+        "store.own.update",
+        "product.own.manage",
+        "review.own.read",
+        "reservation.own.manage",
+        "recommendation.own.read",
+    },
+    "ADMIN": {
+        "business.approve",
+        "user.manage",
+        "store.manage_all",
+        "review.moderate",
+        "system.audit",
+    }
+}

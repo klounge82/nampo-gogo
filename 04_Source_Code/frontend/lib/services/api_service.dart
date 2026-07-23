@@ -57,4 +57,6 @@ class ApiService {
       rethrow;
     }
   }
+
+  Dio get dio => _dio;
 }

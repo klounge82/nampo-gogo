@@ -14,11 +14,15 @@ import 'providers/activity_provider.dart';
 import 'providers/personalization_provider.dart';
 import 'providers/analytics_provider.dart';
 import 'services/notification_service.dart';
+import 'providers/app_mode_provider.dart';
 import 'screens/main_navigation_screen.dart';
+import 'screens/business_app_shell.dart';
+import 'theme/customer_theme.dart';
+import 'theme/business_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Safe notification initialization
   final notifService = NotificationService();
   await notifService.initialize();
@@ -27,6 +31,8 @@ void main() async {
   // Load language settings on boot
   final localeProvider = LocaleProvider();
   await localeProvider.initLocale();
+
+  final appModeProvider = AppModeProvider();
 
   runApp(
     MultiProvider(
@@ -40,6 +46,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => PersonalizationProvider()),
         ChangeNotifierProvider(create: (_) => AnalyticsProvider()),
         ChangeNotifierProvider.value(value: localeProvider),
+        ChangeNotifierProvider.value(value: appModeProvider),
       ],
       child: const MyApp(),
     ),
@@ -52,6 +59,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localeProvider = context.watch<LocaleProvider>();
+    final modeProvider = context.watch<AppModeProvider>();
+
+    final activeTheme = modeProvider.isBusinessMode
+        ? BusinessTheme.themeData
+        : CustomerTheme.themeData;
 
     return MaterialApp(
       title: AppStrings.appName,
@@ -70,21 +82,26 @@ class MyApp extends StatelessWidget {
         Locale('zh'),
         Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans'),
       ],
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.primary,
-          primary: AppColors.primary,
-          secondary: AppColors.secondary,
-        ),
-        scaffoldBackgroundColor: AppColors.background,
-        appBarTheme: const AppBarTheme(
-          backgroundColor: AppColors.surface,
-          elevation: 0,
-          scrolledUnderElevation: 0,
-        ),
-      ),
-      home: const MainNavigationScreen(),
+      theme: activeTheme,
+      home: const RootNavigationSelector(),
     );
+  }
+}
+
+class RootNavigationSelector extends StatelessWidget {
+  const RootNavigationSelector({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final modeProvider = context.watch<AppModeProvider>();
+    final authProvider = context.watch<AuthProvider>();
+
+    // Initialize mode if needed
+    modeProvider.syncUser(authProvider.currentUser);
+
+    if (modeProvider.isBusinessMode) {
+      return const BusinessAppShell();
+    }
+    return const MainNavigationScreen();
   }
 }

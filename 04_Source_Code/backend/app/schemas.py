@@ -25,6 +25,47 @@ class GuestDataLinkResponse(BaseModel):
     favorites_linked: int = 0
     recommendations_linked: int = 0
 
+class BusinessMembershipOut(BaseModel):
+    id: str
+    store_id: str
+    membership_role: str
+    status: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class BusinessApplicationCreate(BaseModel):
+    business_name: str
+    business_registration_number: str
+    representative_name: str
+    phone: str
+    requested_store_id: Optional[str] = None
+
+class BusinessApplicationOut(BaseModel):
+    id: str
+    user_id: str
+    business_name: str
+    business_registration_number: str
+    representative_name: str
+    phone: str
+    requested_store_id: Optional[str] = None
+    status: str
+    rejection_reason: Optional[str] = None
+    reviewed_by: Optional[str] = None
+    reviewed_at: Optional[datetime] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class BusinessApplicationApproveRequest(BaseModel):
+    store_id: Optional[str] = None
+
+class BusinessApplicationRejectRequest(BaseModel):
+    rejection_reason: str
+
 class UserOut(UserBase):
     id: str
     role: str
@@ -34,6 +75,11 @@ class UserOut(UserBase):
     created_at: datetime
     updated_at: datetime
     last_login_at: Optional[datetime] = None
+    roles: List[str] = ["CUSTOMER"]
+    business_application_status: str = "NONE"
+    business_memberships: List[BusinessMembershipOut] = []
+    capabilities: List[str] = []
+    available_app_modes: List[str] = ["CUSTOMER"]
 
     class Config:
         from_attributes = True
