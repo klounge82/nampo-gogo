@@ -1484,6 +1484,30 @@ def get_my_reviews(
 
     return query.order_by(models.Review.created_at.desc()).offset(skip).limit(limit).all()
 
+@app.get("/stores/{store_id}/my-review", response_model=Optional[schemas.ReviewOut], tags=["Reviews"])
+def get_my_store_review(
+    store_id: str,
+    user_id: Optional[str] = None,
+    guest_id: Optional[str] = None,
+    include_deleted: bool = True,
+    db: Session = Depends(get_db)
+):
+    if not user_id and not guest_id:
+        return None
+
+    query = db.query(models.Review).filter(models.Review.store_id == store_id)
+    if user_id:
+        query = query.filter(models.Review.user_id == user_id)
+    elif guest_id:
+        query = query.filter(models.Review.guest_id == guest_id)
+    else:
+        return None
+
+    if not include_deleted:
+        query = query.filter(models.Review.is_deleted == False, models.Review.deleted_at == None)
+
+    return query.order_by(models.Review.created_at.desc()).first()
+
 @app.patch("/reviews/{review_id}", response_model=schemas.ReviewOut, tags=["Reviews"])
 def update_review(review_id: str, req: schemas.ReviewUpdate, db: Session = Depends(get_db)):
     review = db.query(models.Review).filter(models.Review.id == review_id).first()

@@ -165,6 +165,31 @@ class ReviewService {
     }
   }
 
+  // GET /stores/{store_id}/my-review
+  Future<Map<String, dynamic>?> fetchMyStoreReview({
+    required String storeId,
+    String? userId,
+    String? guestId,
+    bool includeDeleted = true,
+  }) async {
+    try {
+      final response = await _dio.get(
+        '/stores/$storeId/my-review',
+        queryParameters: {
+          if (userId != null) 'user_id': userId,
+          if (guestId != null) 'guest_id': guestId,
+          'include_deleted': includeDeleted,
+        },
+      );
+      if (response.statusCode == 200 && response.data != null) {
+        return response.data as Map<String, dynamic>;
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
   // GET /reviews/me
   Future<List<dynamic>> fetchMyReviews({
     String? userId,

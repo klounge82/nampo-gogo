@@ -33,6 +33,9 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
 
   Place? _place;
   List<model_review.Review> _reviews = [];
+  model_review.Review? _myReview;
+  String? _currentUserId;
+  String _currentGuestId = '';
   bool _isLoading = true;
   bool _isReviewsLoading = true;
   String? _errorMessage;
@@ -67,13 +70,165 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
   Future<void> _loadReviews() async {
     setState(() => _isReviewsLoading = true);
     try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final userId = authProvider.currentUser?.id;
+      final guestId = await AuthService().getOrCreateGuestId();
+      _currentUserId = userId;
+      _currentGuestId = guestId;
+
       final list = await _reviewRepository.getStoreReviews(widget.placeId);
+      final myRev = await _reviewRepository.getMyStoreReview(
+        storeId: widget.placeId,
+        userId: userId,
+        guestId: userId == null ? guestId : null,
+        includeDeleted: true,
+      );
+
+      _myReview = myRev;
+
+      if (myRev != null && !myRev.isDeleted) {
+        list.removeWhere((r) => r.id == myRev.id);
+        list.insert(0, myRev);
+      }
+
       setState(() {
         _reviews = list;
         _isReviewsLoading = false;
       });
     } catch (_) {
       setState(() => _isReviewsLoading = false);
+    }
+  }
+
+  Future<void> _navigateToEdit(model_review.Review rev) async {
+    final result = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ReviewWriteScreen(
+          storeId: _place!.id,
+          storeName: _place!.name,
+          editReviewId: rev.id,
+          initialRating: rev.rating,
+          initialContent: rev.content,
+          guestId: _currentUserId == null ? _currentGuestId : null,
+          reviewVerificationType: _place!.reviewVerificationType,
+        ),
+      ),
+    );
+    if (result == true) {
+      _loadPlaceDetail();
+      _loadReviews();
+    }
+  }
+
+  void _confirmDeleteReview(model_review.Review rev) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text(
+          '리뷰를 삭제하시겠습니까?',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0),
+        ),
+        content: const Text(
+          '삭제한 리뷰는 다른 사용자에게 표시되지 않습니다.\n이 후기란에서 언제든 복구하거나 다시 작성할 수 있습니다.',
+          style: TextStyle(fontSize: 13.0, height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text(
+              '취소',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              _deleteReview(rev.id);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('삭제'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _deleteReview(String reviewId) async {
+    try {
+      await _reviewRepository.deleteReview(
+        reviewId,
+        userId: _currentUserId,
+        guestId: _currentUserId == null ? _currentGuestId : null,
+      );
+      _loadPlaceDetail();
+      _loadReviews();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('리뷰가 삭제되었습니다.'),
+            behavior: SnackBarBehavior.floating,
+            action: SnackBarAction(
+              label: '실행 취소',
+              textColor: Colors.amber,
+              onPressed: () => _restoreMyReview(reviewId),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        _showWarningDialog('삭제 실패', '리뷰를 삭제하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+      }
+    }
+  }
+
+  Future<void> _restoreMyReview(String reviewId) async {
+    try {
+      await _reviewRepository.restoreReview(
+        reviewId,
+        userId: _currentUserId,
+        guestId: _currentUserId == null ? _currentGuestId : null,
+      );
+      _loadPlaceDetail();
+      _loadReviews();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('리뷰가 복구되었습니다.'),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        _showWarningDialog('복구 실패', '리뷰를 복구하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+      }
+    }
+  }
+
+  Future<void> _navigateToRewrite(model_review.Review rev) async {
+    final result = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ReviewWriteScreen(
+          storeId: _place!.id,
+          storeName: _place!.name,
+          rewriteReviewId: rev.id,
+          guestId: _currentUserId == null ? _currentGuestId : null,
+          reviewVerificationType: _place!.reviewVerificationType,
+        ),
+      ),
+    );
+    if (result == true) {
+      _loadPlaceDetail();
+      _loadReviews();
     }
   }
 
@@ -453,6 +608,81 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                   ],
                 ),
                 const SizedBox(height: 6.0),
+                if (_myReview != null && _myReview!.isDeleted)
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 12.0),
+                    padding: const EdgeInsets.all(14.0),
+                    decoration: BoxDecoration(
+                      color: Colors.amber.shade50,
+                      borderRadius: BorderRadius.circular(12.0),
+                      border: Border.all(color: Colors.amber.shade300),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: const [
+                            Icon(
+                              Icons.info_outline,
+                              color: Colors.amber,
+                              size: 18.0,
+                            ),
+                            SizedBox(width: 6.0),
+                            Text(
+                              '삭제한 내 후기가 있습니다.',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14.0,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6.0),
+                        const Text(
+                          '다른 사용자에게는 표시되지 않습니다. QR 인증이나 대기 없이 복구하거나 다시 작성할 수 있습니다.',
+                          style: TextStyle(
+                            fontSize: 12.0,
+                            color: AppColors.textSecondary,
+                            height: 1.35,
+                          ),
+                        ),
+                        const SizedBox(height: 12.0),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            OutlinedButton(
+                              onPressed: () => _restoreMyReview(_myReview!.id),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: AppColors.primary,
+                                side: const BorderSide(
+                                  color: AppColors.primary,
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12.0,
+                                  vertical: 8.0,
+                                ),
+                              ),
+                              child: const Text('복구'),
+                            ),
+                            const SizedBox(width: 8.0),
+                            ElevatedButton(
+                              onPressed: () => _navigateToRewrite(_myReview!),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12.0,
+                                  vertical: 8.0,
+                                ),
+                              ),
+                              child: const Text('다시 작성'),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                 _isReviewsLoading
                     ? const Center(
                         child: Padding(
@@ -483,22 +713,35 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                         ),
                       )
                     : Column(
-                        children: _reviews
-                            .map(
-                              (rev) => Container(
-                                margin: const EdgeInsets.only(bottom: 12.0),
-                                padding: const EdgeInsets.all(14.0),
-                                decoration: BoxDecoration(
-                                  color: AppColors.surface,
-                                  borderRadius: BorderRadius.circular(12.0),
-                                  border: Border.all(color: AppColors.border),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                        children: _reviews.map((rev) {
+                          final isMyReview =
+                              (_currentUserId != null &&
+                                  rev.userId == _currentUserId) ||
+                              (_currentUserId == null &&
+                                  _currentGuestId.isNotEmpty &&
+                                  rev.guestId == _currentGuestId);
+
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 12.0),
+                            padding: const EdgeInsets.all(14.0),
+                            decoration: BoxDecoration(
+                              color: AppColors.surface,
+                              borderRadius: BorderRadius.circular(12.0),
+                              border: Border.all(
+                                color: isMyReview
+                                    ? AppColors.primary.withValues(alpha: 0.4)
+                                    : AppColors.border,
+                                width: isMyReview ? 1.5 : 1.0,
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
                                           rev.user.nickname,
@@ -508,111 +751,206 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                                             color: AppColors.textPrimary,
                                           ),
                                         ),
-                                        Row(
-                                          children: List.generate(
-                                            5,
-                                            (index) => Icon(
-                                              index < rev.rating
-                                                  ? Icons.star
-                                                  : Icons.star_border,
-                                              color: index < rev.rating
-                                                  ? Colors.amber
-                                                  : Colors.grey.shade300,
-                                              size: 13.0,
+                                        if (isMyReview) ...[
+                                          const SizedBox(width: 6.0),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 6.0,
+                                              vertical: 2.0,
                                             ),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.primary
+                                                  .withValues(alpha: 0.1),
+                                              borderRadius:
+                                                  BorderRadius.circular(4.0),
+                                              border: Border.all(
+                                                color: AppColors.primary
+                                                    .withValues(alpha: 0.3),
+                                                width: 0.8,
+                                              ),
+                                            ),
+                                            child: const Text(
+                                              '내가 작성한 후기',
+                                              style: TextStyle(
+                                                fontSize: 10.0,
+                                                fontWeight: FontWeight.bold,
+                                                color: AppColors.primary,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                    if (isMyReview)
+                                      Row(
+                                        children: [
+                                          TextButton(
+                                            onPressed: () =>
+                                                _navigateToEdit(rev),
+                                            style: TextButton.styleFrom(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 6.0,
+                                                    vertical: 2.0,
+                                                  ),
+                                              minimumSize: Size.zero,
+                                              tapTargetSize:
+                                                  MaterialTapTargetSize
+                                                      .shrinkWrap,
+                                            ),
+                                            child: const Text(
+                                              '수정',
+                                              style: TextStyle(
+                                                fontSize: 11.5,
+                                                color: AppColors.primary,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 4.0),
+                                          TextButton(
+                                            onPressed: () =>
+                                                _confirmDeleteReview(rev),
+                                            style: TextButton.styleFrom(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 6.0,
+                                                    vertical: 2.0,
+                                                  ),
+                                              minimumSize: Size.zero,
+                                              tapTargetSize:
+                                                  MaterialTapTargetSize
+                                                      .shrinkWrap,
+                                            ),
+                                            child: const Text(
+                                              '삭제',
+                                              style: TextStyle(
+                                                fontSize: 11.5,
+                                                color: Colors.red,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    else
+                                      Row(
+                                        children: List.generate(
+                                          5,
+                                          (index) => Icon(
+                                            index < rev.rating
+                                                ? Icons.star
+                                                : Icons.star_border,
+                                            color: index < rev.rating
+                                                ? Colors.amber
+                                                : Colors.grey.shade300,
+                                            size: 13.0,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                if (isMyReview) ...[
+                                  const SizedBox(height: 4.0),
+                                  Row(
+                                    children: List.generate(
+                                      5,
+                                      (index) => Icon(
+                                        index < rev.rating
+                                            ? Icons.star
+                                            : Icons.star_border,
+                                        color: index < rev.rating
+                                            ? Colors.amber
+                                            : Colors.grey.shade300,
+                                        size: 13.0,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                                if (rev.verificationBadge != null &&
+                                    rev.verificationBadge!.isNotEmpty) ...[
+                                  const SizedBox(height: 4.0),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6.0,
+                                      vertical: 2.0,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color:
+                                          rev.verificationMethod ==
+                                              'BUSINESS_QR'
+                                          ? Colors.green.shade50
+                                          : (rev.verificationMethod ==
+                                                    'ATTRACTION_GPS'
+                                                ? Colors.blue.shade50
+                                                : Colors.grey.shade100),
+                                      borderRadius: BorderRadius.circular(4.0),
+                                      border: Border.all(
+                                        color:
+                                            rev.verificationMethod ==
+                                                'BUSINESS_QR'
+                                            ? Colors.green.shade300
+                                            : (rev.verificationMethod ==
+                                                      'ATTRACTION_GPS'
+                                                  ? Colors.blue.shade300
+                                                  : Colors.grey.shade300),
+                                        width: 0.8,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          rev.verificationMethod ==
+                                                  'BUSINESS_QR'
+                                              ? Icons.verified
+                                              : (rev.verificationMethod ==
+                                                        'ATTRACTION_GPS'
+                                                    ? Icons.location_on
+                                                    : Icons.article),
+                                          size: 11.0,
+                                          color:
+                                              rev.verificationMethod ==
+                                                  'BUSINESS_QR'
+                                              ? Colors.green.shade700
+                                              : (rev.verificationMethod ==
+                                                        'ATTRACTION_GPS'
+                                                    ? Colors.blue.shade700
+                                                    : Colors.grey.shade700),
+                                        ),
+                                        const SizedBox(width: 3.0),
+                                        Text(
+                                          rev.verificationBadge!,
+                                          style: TextStyle(
+                                            fontSize: 10.0,
+                                            fontWeight: FontWeight.bold,
+                                            color:
+                                                rev.verificationMethod ==
+                                                    'BUSINESS_QR'
+                                                ? Colors.green.shade800
+                                                : (rev.verificationMethod ==
+                                                          'ATTRACTION_GPS'
+                                                      ? Colors.blue.shade800
+                                                      : Colors.grey.shade800),
                                           ),
                                         ),
                                       ],
                                     ),
-                                    if (rev.verificationBadge != null &&
-                                        rev.verificationBadge!.isNotEmpty) ...[
-                                      const SizedBox(height: 4.0),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 6.0,
-                                          vertical: 2.0,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color:
-                                              rev.verificationMethod ==
-                                                  'BUSINESS_QR'
-                                              ? Colors.green.shade50
-                                              : (rev.verificationMethod ==
-                                                        'ATTRACTION_GPS'
-                                                    ? Colors.blue.shade50
-                                                    : Colors.grey.shade100),
-                                          borderRadius: BorderRadius.circular(
-                                            4.0,
-                                          ),
-                                          border: Border.all(
-                                            color:
-                                                rev.verificationMethod ==
-                                                    'BUSINESS_QR'
-                                                ? Colors.green.shade300
-                                                : (rev.verificationMethod ==
-                                                          'ATTRACTION_GPS'
-                                                      ? Colors.blue.shade300
-                                                      : Colors.grey.shade300),
-                                            width: 0.8,
-                                          ),
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(
-                                              rev.verificationMethod ==
-                                                      'BUSINESS_QR'
-                                                  ? Icons.verified
-                                                  : (rev.verificationMethod ==
-                                                            'ATTRACTION_GPS'
-                                                        ? Icons.location_on
-                                                        : Icons.article),
-                                              size: 11.0,
-                                              color:
-                                                  rev.verificationMethod ==
-                                                      'BUSINESS_QR'
-                                                  ? Colors.green.shade700
-                                                  : (rev.verificationMethod ==
-                                                            'ATTRACTION_GPS'
-                                                        ? Colors.blue.shade700
-                                                        : Colors.grey.shade700),
-                                            ),
-                                            const SizedBox(width: 3.0),
-                                            Text(
-                                              rev.verificationBadge!,
-                                              style: TextStyle(
-                                                fontSize: 10.0,
-                                                fontWeight: FontWeight.bold,
-                                                color:
-                                                    rev.verificationMethod ==
-                                                        'BUSINESS_QR'
-                                                    ? Colors.green.shade800
-                                                    : (rev.verificationMethod ==
-                                                              'ATTRACTION_GPS'
-                                                          ? Colors.blue.shade800
-                                                          : Colors
-                                                                .grey
-                                                                .shade800),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                    const SizedBox(height: 8.0),
-                                    Text(
-                                      rev.content,
-                                      style: const TextStyle(
-                                        fontSize: 12.5,
-                                        color: AppColors.textPrimary,
-                                        height: 1.35,
-                                      ),
-                                    ),
-                                  ],
+                                  ),
+                                ],
+                                const SizedBox(height: 8.0),
+                                Text(
+                                  rev.content,
+                                  style: const TextStyle(
+                                    fontSize: 12.5,
+                                    color: AppColors.textPrimary,
+                                    height: 1.35,
+                                  ),
                                 ),
-                              ),
-                            )
-                            .toList(),
+                              ],
+                            ),
+                          );
+                        }).toList(),
                       ),
               ],
             ),
@@ -975,6 +1313,93 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
     final userId = authProvider.currentUser?.id;
     final guestId = await AuthService().getOrCreateGuestId();
 
+    if (_myReview != null) {
+      if (!_myReview!.isDeleted) {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text(
+              '이미 작성한 리뷰가 있습니다.',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0),
+            ),
+            content: const Text(
+              '이 매장에는 이미 작성한 후기가 있습니다.\n작성한 후기를 직접 수정하시겠습니까?',
+              style: TextStyle(fontSize: 13.0, height: 1.4),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text(
+                  '확인',
+                  style: TextStyle(color: AppColors.textSecondary),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                  _navigateToEdit(_myReview!);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('내 리뷰 수정'),
+              ),
+            ],
+          ),
+        );
+        return;
+      } else {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text(
+              '삭제한 리뷰가 있습니다.',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0),
+            ),
+            content: const Text(
+              '이전에 작성했다가 삭제한 후기가 있습니다.\nQR 코드를 다시 스캔하지 않고 복구하거나 다시 작성할 수 있습니다.',
+              style: TextStyle(fontSize: 13.0, height: 1.4),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text(
+                  '나중에',
+                  style: TextStyle(color: AppColors.textSecondary),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                  _restoreMyReview(_myReview!.id);
+                },
+                child: const Text(
+                  '복구',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                  _navigateToRewrite(_myReview!);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('다시 작성'),
+              ),
+            ],
+          ),
+        );
+        return;
+      }
+    }
+
     try {
       final activeV = await _reviewRepository.getActiveVerification(
         storeId: place.id,
@@ -1043,9 +1468,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                   onPressed: () {
                     Navigator.of(ctx).pop();
                     Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => MyReviewsScreen(),
-                      ),
+                      MaterialPageRoute(builder: (_) => MyReviewsScreen()),
                     );
                   },
                   child: const Text(

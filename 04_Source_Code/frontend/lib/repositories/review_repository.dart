@@ -250,6 +250,30 @@ class ReviewRepository {
     }
   }
 
+  // Fetch My Review for a specific Store
+  Future<Review?> getMyStoreReview({
+    required String storeId,
+    String? userId,
+    String? guestId,
+    bool includeDeleted = true,
+  }) async {
+    try {
+      final json = await _reviewService.fetchMyStoreReview(
+        storeId: storeId,
+        userId: userId,
+        guestId: guestId,
+        includeDeleted: includeDeleted,
+      );
+      if (json == null) return null;
+      return Review.fromJson(json);
+    } catch (e) {
+      if (kDebugMode) {
+        print('ReviewRepository: Failed to fetch my store review: $e');
+      }
+      return null;
+    }
+  }
+
   // Fetch My Reviews
   Future<List<Review>> getMyReviews({
     String? userId,

@@ -546,5 +546,63 @@ class TestReviewVerification(unittest.TestCase):
         self.assertEqual(rewritten["verification_id"], v_id)
         self.assertFalse(rewritten["is_deleted"])
 
+    def test_get_my_store_review_endpoint(self):
+        # 1. Setup QR verification and review for guest_inline_01
+        token_str = "QR_SECRET_store_klounge_001"
+        res_v = self.client.post(
+            f"/stores/{self.business_store.id}/verify-qr",
+            json={"qr_token": token_str, "guest_id": "guest_inline_01"}
+        )
+        v_id = res_v.json()["id"]
+
+        res_cr = self.client.post(
+            f"/stores/{self.business_store.id}/reviews",
+            json={
+                "rating": 5,
+                "content": "게스트 인라인 매장 리뷰 테스트 10자 이상.",
+                "guest_id": "guest_inline_01",
+                "verification_id": v_id
+            }
+        )
+        self.assertEqual(res_cr.status_code, 201)
+        created_rev = res_cr.json()
+        rev_id = created_rev["id"]
+
+        # 2. Query GET /stores/{store_id}/my-review with guest_inline_01 -> Returns review
+        res_my_active = self.client.get(
+            f"/stores/{self.business_store.id}/my-review",
+            params={"guest_id": "guest_inline_01"}
+        )
+        self.assertEqual(res_my_active.status_code, 200)
+        self.assertEqual(res_my_active.json()["id"], rev_id)
+
+        # Query for non-existent guest -> Returns null
+        res_other_guest = self.client.get(
+            f"/stores/{self.business_store.id}/my-review",
+            params={"guest_id": "guest_other_999"}
+        )
+        self.assertEqual(res_other_guest.status_code, 200)
+        self.assertIsNone(res_other_guest.json())
+
+        # 3. Soft Delete review and test include_deleted flag
+        self.client.delete(f"/reviews/{rev_id}", params={"guest_id": "guest_inline_01"})
+
+        # include_deleted=True -> Returns soft-deleted review
+        res_my_del_inc = self.client.get(
+            f"/stores/{self.business_store.id}/my-review",
+            params={"guest_id": "guest_inline_01", "include_deleted": True}
+        )
+        self.assertEqual(res_my_del_inc.status_code, 200)
+        self.assertIsNotNone(res_my_del_inc.json())
+        self.assertTrue(res_my_del_inc.json()["is_deleted"])
+
+        # include_deleted=False -> Returns null
+        res_my_del_exc = self.client.get(
+            f"/stores/{self.business_store.id}/my-review",
+            params={"guest_id": "guest_inline_01", "include_deleted": False}
+        )
+        self.assertEqual(res_my_del_exc.status_code, 200)
+        self.assertIsNone(res_my_del_exc.json())
+
 if __name__ == "__main__":
     unittest.main()
