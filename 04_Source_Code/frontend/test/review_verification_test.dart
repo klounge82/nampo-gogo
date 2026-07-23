@@ -113,11 +113,7 @@ void main() {
     testWidgets(
       'QrScannerScreen hides mock button when enableQrMock is false',
       (WidgetTester tester) async {
-        await tester.pumpWidget(
-          const MaterialApp(
-            home: QrScannerScreen(),
-          ),
-        );
+        await tester.pumpWidget(const MaterialApp(home: QrScannerScreen()));
         expect(find.text('[테스트용] QR 인증 성공 처리'), findsNothing);
       },
     );

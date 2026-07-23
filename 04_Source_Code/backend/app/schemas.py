@@ -9,10 +9,21 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
+    guest_id: Optional[str] = None
 
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+    guest_id: Optional[str] = None
+
+class GuestDataLinkRequest(BaseModel):
+    guest_id: Optional[str] = None
+
+class GuestDataLinkResponse(BaseModel):
+    reviews_linked: int = 0
+    verifications_linked: int = 0
+    favorites_linked: int = 0
+    recommendations_linked: int = 0
 
 class UserOut(UserBase):
     id: str

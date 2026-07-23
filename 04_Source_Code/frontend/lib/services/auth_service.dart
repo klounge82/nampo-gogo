@@ -30,11 +30,22 @@ class AuthService {
     required String email,
     required String password,
     required String nickname,
+    String? guestId,
   }) async {
     try {
       final response = await _dio.post(
         '/auth/signup',
-        data: {'email': email, 'password': password, 'nickname': nickname},
+        data: {
+          'email': email,
+          'password': password,
+          'nickname': nickname,
+          if (guestId != null) 'guest_id': guestId,
+        },
+        options: Options(
+          headers: {
+            if (guestId != null && guestId.isNotEmpty) 'x-guest-id': guestId,
+          },
+        ),
       );
 
       if (response.statusCode == 201 && response.data != null) {
@@ -50,11 +61,21 @@ class AuthService {
   Future<Map<String, dynamic>> login({
     required String email,
     required String password,
+    String? guestId,
   }) async {
     try {
       final response = await _dio.post(
         '/auth/login',
-        data: {'email': email, 'password': password},
+        data: {
+          'email': email,
+          'password': password,
+          if (guestId != null) 'guest_id': guestId,
+        },
+        options: Options(
+          headers: {
+            if (guestId != null && guestId.isNotEmpty) 'x-guest-id': guestId,
+          },
+        ),
       );
 
       if (response.statusCode == 200 && response.data != null) {
@@ -143,6 +164,14 @@ class AuthService {
       await _storage.write(key: _keyGuestId, value: guestId);
     }
     return guestId;
+  }
+
+  // Rotate guest ID after account linking or logout
+  Future<String> rotateGuestId() async {
+    final newGuestId =
+        'guest_${DateTime.now().millisecondsSinceEpoch}_${(1000 + (DateTime.now().microsecondsSinceEpoch % 9000))}';
+    await _storage.write(key: _keyGuestId, value: newGuestId);
+    return newGuestId;
   }
 
   // Read stored tokens if exists (read-only helper)

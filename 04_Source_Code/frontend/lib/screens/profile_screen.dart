@@ -57,15 +57,19 @@ class ProfileScreen extends StatelessWidget {
             // Profile Card Header (Conditional login UI)
             Container(
               color: AppColors.surface,
-              padding: const EdgeInsets.symmetric(vertical: 28.0, horizontal: 20.0),
+              padding: const EdgeInsets.symmetric(
+                vertical: 28.0,
+                horizontal: 20.0,
+              ),
               child: Row(
                 children: [
                   CircleAvatar(
                     radius: 36.0,
-                    backgroundColor: isLoggedIn 
-                        ? AppColors.primary.withAlpha(26) 
+                    backgroundColor: isLoggedIn
+                        ? AppColors.primary.withAlpha(26)
                         : Colors.grey.withAlpha(26),
-                    backgroundImage: (isLoggedIn && user?.profileImageUrl != null)
+                    backgroundImage:
+                        (isLoggedIn && user?.profileImageUrl != null)
                         ? NetworkImage(user!.profileImageUrl!)
                         : null,
                     child: (isLoggedIn && user?.profileImageUrl != null)
@@ -96,19 +100,27 @@ class ProfileScreen extends StatelessWidget {
                               GestureDetector(
                                 onTap: () {
                                   Navigator.of(context).push(
-                                    MaterialPageRoute(builder: (_) => const ProfileEditScreen()),
+                                    MaterialPageRoute(
+                                      builder: (_) => const ProfileEditScreen(),
+                                    ),
                                   );
                                 },
-                                child: const Icon(Icons.edit, size: 18, color: Colors.blueAccent),
+                                child: const Icon(
+                                  Icons.edit,
+                                  size: 18,
+                                  color: Colors.blueAccent,
+                                ),
                               ),
                             ],
                           ],
                         ),
                         const SizedBox(height: 4.0),
                         Text(
-                          isLoggedIn 
-                              ? '${user?.email}' 
-                              : '로그인 후 더 많은 기능을 사용해 보세요.',
+                          isLoggedIn
+                              ? (user?.email != null
+                                    ? _maskEmail(user!.email)
+                                    : '')
+                              : '게스트 모드로 이용 중 (로그인 시 데이터 연결)',
                           style: const TextStyle(
                             fontSize: 13.0,
                             color: AppColors.textSecondary,
@@ -127,27 +139,46 @@ class ProfileScreen extends StatelessWidget {
                               borderRadius: BorderRadius.circular(20.0),
                             ),
                           ),
-                          child: const Text('로그아웃', style: TextStyle(fontSize: 12.0)),
-                        )
-                      : ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(builder: (_) => const AuthScreen()),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
+                          child: const Text(
+                            '로그아웃',
+                            style: TextStyle(fontSize: 12.0),
                           ),
-                          child: const Text('로그인', style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold)),
+                        )
+                      : Column(
+                          children: [
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => const AuthScreen(),
+                                  ),
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14.0,
+                                  vertical: 6.0,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20.0),
+                                ),
+                              ),
+                              child: const Text(
+                                '로그인',
+                                style: TextStyle(
+                                  fontSize: 12.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                 ],
               ),
             ),
-            
+
             // Assets Overview (Points, Coupons)
             Container(
               margin: const EdgeInsets.all(16.0),
@@ -167,7 +198,9 @@ class ProfileScreen extends StatelessWidget {
                     onTap: () {
                       if (isLoggedIn) {
                         Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const PointHistoryScreen()),
+                          MaterialPageRoute(
+                            builder: (_) => const PointHistoryScreen(),
+                          ),
                         );
                       } else {
                         Navigator.of(context).push(
@@ -176,11 +209,7 @@ class ProfileScreen extends StatelessWidget {
                       }
                     },
                   ),
-                  Container(
-                    width: 1.0,
-                    height: 40.0,
-                    color: AppColors.border,
-                  ),
+                  Container(width: 1.0, height: 40.0, color: AppColors.border),
                   _buildAssetColumn(
                     icon: Icons.confirmation_number,
                     iconColor: AppColors.secondary,
@@ -189,7 +218,9 @@ class ProfileScreen extends StatelessWidget {
                     onTap: () {
                       if (isLoggedIn) {
                         Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const UserCouponScreen()),
+                          MaterialPageRoute(
+                            builder: (_) => const UserCouponScreen(),
+                          ),
                         );
                       } else {
                         Navigator.of(context).push(
@@ -201,7 +232,7 @@ class ProfileScreen extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             // Menu List
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -227,18 +258,24 @@ class ProfileScreen extends StatelessWidget {
                         title: '관리자 시스템 대시보드',
                         onTap: () {
                           Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const AdminDashboardScreen()),
+                            MaterialPageRoute(
+                              builder: (_) => const AdminDashboardScreen(),
+                            ),
                           );
                         },
                       ),
-                    if (isLoggedIn && (authProvider.currentUser?.role == 'owner' || authProvider.currentUser?.role == 'admin'))
+                    if (isLoggedIn &&
+                        (authProvider.currentUser?.role == 'owner' ||
+                            authProvider.currentUser?.role == 'admin'))
                       _buildMenuItem(
                         context,
                         icon: Icons.analytics_outlined,
                         title: '비즈니스 통계 대시보드',
                         onTap: () {
                           Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const AnalyticsDashboardScreen()),
+                            MaterialPageRoute(
+                              builder: (_) => const AnalyticsDashboardScreen(),
+                            ),
                           );
                         },
                       ),
@@ -249,11 +286,15 @@ class ProfileScreen extends StatelessWidget {
                       onTap: () {
                         if (isLoggedIn) {
                           Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const CouponListScreen()),
+                            MaterialPageRoute(
+                              builder: (_) => const CouponListScreen(),
+                            ),
                           );
                         } else {
                           Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const AuthScreen()),
+                            MaterialPageRoute(
+                              builder: (_) => const AuthScreen(),
+                            ),
                           );
                         }
                       },
@@ -265,11 +306,15 @@ class ProfileScreen extends StatelessWidget {
                       onTap: () {
                         if (isLoggedIn) {
                           Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const MyReservationsScreen()),
+                            MaterialPageRoute(
+                              builder: (_) => const MyReservationsScreen(),
+                            ),
                           );
                         } else {
                           Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const AuthScreen()),
+                            MaterialPageRoute(
+                              builder: (_) => const AuthScreen(),
+                            ),
                           );
                         }
                       },
@@ -281,11 +326,15 @@ class ProfileScreen extends StatelessWidget {
                       onTap: () {
                         if (isLoggedIn) {
                           Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const MyReviewsScreen()),
+                            MaterialPageRoute(
+                              builder: (_) => const MyReviewsScreen(),
+                            ),
                           );
                         } else {
                           Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const AuthScreen()),
+                            MaterialPageRoute(
+                              builder: (_) => const AuthScreen(),
+                            ),
                           );
                         }
                       },
@@ -296,7 +345,9 @@ class ProfileScreen extends StatelessWidget {
                       title: '내 활동 기록',
                       onTap: () {
                         Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const ActivityScreen()),
+                          MaterialPageRoute(
+                            builder: (_) => const ActivityScreen(),
+                          ),
                         );
                       },
                     ),
@@ -307,11 +358,15 @@ class ProfileScreen extends StatelessWidget {
                       onTap: () {
                         if (isLoggedIn) {
                           Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const PaymentHistoryScreen()),
+                            MaterialPageRoute(
+                              builder: (_) => const PaymentHistoryScreen(),
+                            ),
                           );
                         } else {
                           Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const AuthScreen()),
+                            MaterialPageRoute(
+                              builder: (_) => const AuthScreen(),
+                            ),
                           );
                         }
                       },
@@ -322,7 +377,9 @@ class ProfileScreen extends StatelessWidget {
                       title: '즐겨찾기 보관함',
                       onTap: () {
                         Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const FavoritesScreen()),
+                          MaterialPageRoute(
+                            builder: (_) => const FavoritesScreen(),
+                          ),
                         );
                       },
                     ),
@@ -330,7 +387,8 @@ class ProfileScreen extends StatelessWidget {
                       context,
                       icon: Icons.feedback_outlined,
                       title: '내 피드백 & 문의',
-                      onTap: () => _launchURL(context, ProductionConfig.supportUrl),
+                      onTap: () =>
+                          _launchURL(context, ProductionConfig.supportUrl),
                     ),
                     _buildMenuItem(
                       context,
@@ -339,11 +397,16 @@ class ProfileScreen extends StatelessWidget {
                       onTap: () {
                         if (isLoggedIn) {
                           Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const NotificationSettingsScreen()),
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  const NotificationSettingsScreen(),
+                            ),
                           );
                         } else {
                           Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const AuthScreen()),
+                            MaterialPageRoute(
+                              builder: (_) => const AuthScreen(),
+                            ),
                           );
                         }
                       },
@@ -355,11 +418,15 @@ class ProfileScreen extends StatelessWidget {
                       onTap: () {
                         if (isLoggedIn) {
                           Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const SavedCoursesScreen()),
+                            MaterialPageRoute(
+                              builder: (_) => const SavedCoursesScreen(),
+                            ),
                           );
                         } else {
                           Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const AuthScreen()),
+                            MaterialPageRoute(
+                              builder: (_) => const AuthScreen(),
+                            ),
                           );
                         }
                       },
@@ -370,12 +437,14 @@ class ProfileScreen extends StatelessWidget {
                       title: l10n.languageSetting,
                       onTap: () {
                         Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const LanguageSettingsScreen()),
+                          MaterialPageRoute(
+                            builder: (_) => const LanguageSettingsScreen(),
+                          ),
                         );
                       },
                     ),
                   ]),
-                  
+
                   const Padding(
                     padding: EdgeInsets.only(left: 8.0, bottom: 8.0, top: 20.0),
                     child: Text(
@@ -392,31 +461,43 @@ class ProfileScreen extends StatelessWidget {
                       context,
                       icon: Icons.info_outline,
                       title: '서비스 소개',
-                      onTap: () => _launchURL(context, ProductionConfig.publicSiteUrl),
+                      onTap: () =>
+                          _launchURL(context, ProductionConfig.publicSiteUrl),
                     ),
                     _buildMenuItem(
                       context,
                       icon: Icons.shield_outlined,
                       title: '개인정보 처리방침',
-                      onTap: () => _launchURL(context, ProductionConfig.privacyPolicyUrl),
+                      onTap: () => _launchURL(
+                        context,
+                        ProductionConfig.privacyPolicyUrl,
+                      ),
                     ),
                     _buildMenuItem(
                       context,
                       icon: Icons.description_outlined,
                       title: '이용약관',
-                      onTap: () => _launchURL(context, ProductionConfig.termsOfServiceUrl),
+                      onTap: () => _launchURL(
+                        context,
+                        ProductionConfig.termsOfServiceUrl,
+                      ),
                     ),
                     _buildMenuItem(
                       context,
                       icon: Icons.support_agent_outlined,
                       title: '고객지원 센터',
-                      onTap: () => _launchURL(context, ProductionConfig.supportUrl),
+                      onTap: () =>
+                          _launchURL(context, ProductionConfig.supportUrl),
                     ),
                   ]),
-                  
+
                   if (isLoggedIn) ...[
                     const Padding(
-                      padding: EdgeInsets.only(left: 8.0, bottom: 8.0, top: 20.0),
+                      padding: EdgeInsets.only(
+                        left: 8.0,
+                        bottom: 8.0,
+                        top: 20.0,
+                      ),
                       child: Text(
                         '계정 관리',
                         style: TextStyle(
@@ -433,7 +514,9 @@ class ProfileScreen extends StatelessWidget {
                         title: '비밀번호 변경',
                         onTap: () {
                           Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const ChangePasswordScreen()),
+                            MaterialPageRoute(
+                              builder: (_) => const ChangePasswordScreen(),
+                            ),
                           );
                         },
                       ),
@@ -443,7 +526,9 @@ class ProfileScreen extends StatelessWidget {
                         title: '회원탈퇴',
                         onTap: () {
                           Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const AccountDeleteScreen()),
+                            MaterialPageRoute(
+                              builder: (_) => const AccountDeleteScreen(),
+                            ),
                           );
                         },
                       ),
@@ -521,10 +606,7 @@ class ProfileScreen extends StatelessWidget {
         leading: Icon(icon, color: AppColors.textPrimary, size: 22.0),
         title: Text(
           title,
-          style: const TextStyle(
-            fontSize: 14.0,
-            color: AppColors.textPrimary,
-          ),
+          style: const TextStyle(fontSize: 14.0, color: AppColors.textPrimary),
         ),
         trailing: const Icon(
           Icons.chevron_right,
@@ -570,5 +652,16 @@ class ProfileScreen extends StatelessWidget {
         backgroundColor: Colors.redAccent,
       ),
     );
+  }
+
+  String _maskEmail(String email) {
+    final parts = email.split('@');
+    if (parts.length != 2) return email;
+    final username = parts[0];
+    final domain = parts[1];
+    if (username.length <= 2) {
+      return '${username[0]}*@$domain';
+    }
+    return '${username.substring(0, 2)}${'*' * (username.length - 2)}@$domain';
   }
 }

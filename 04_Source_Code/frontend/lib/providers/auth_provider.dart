@@ -8,7 +8,7 @@ class AuthProvider extends ChangeNotifier {
   final AuthRepository _authRepository;
 
   AuthProvider({AuthRepository? authRepository})
-      : _authRepository = authRepository ?? AuthRepository();
+    : _authRepository = authRepository ?? AuthRepository();
 
   // Core Authentication States
   bool _isLoggedIn = false;
@@ -44,13 +44,13 @@ class AuthProvider extends ChangeNotifier {
   }
 
   // Login Flow
-  Future<bool> login({
-    required String email,
-    required String password,
-  }) async {
+  Future<bool> login({required String email, required String password}) async {
     _setLoading(true);
     try {
-      final session = await _authRepository.login(email: email, password: password);
+      final session = await _authRepository.login(
+        email: email,
+        password: password,
+      );
       _accessToken = session['access_token'] as String;
       _refreshToken = session['refresh_token'] as String;
       _currentUser = session['user'] as User;
@@ -96,7 +96,7 @@ class AuthProvider extends ChangeNotifier {
     try {
       // Deregister FCM token before clearing user session
       await _deregisterFCM();
-      
+
       await _authRepository.logout();
       _isLoggedIn = false;
       _currentUser = null;

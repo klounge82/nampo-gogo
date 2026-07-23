@@ -312,8 +312,88 @@ def root() -> dict[str, str]:
 
 # --- AUTH MVP APIs ---
 
+def link_guest_data_to_user(
+    db: Session,
+    user_id: str,
+    guest_id: Optional[str] = None
+) -> dict:
+    if not guest_id or not str(guest_id).strip():
+        return {
+            "reviews_linked": 0,
+            "verifications_linked": 0,
+            "favorites_linked": 0,
+            "recommendations_linked": 0
+        }
+
+    clean_guest_id = str(guest_id).strip()
+
+    # Security guard: Ensure this guest_id was not already claimed by a DIFFERENT user
+    existing_claim = db.query(models.Review).filter(
+        models.Review.guest_id == clean_guest_id,
+        models.Review.user_id.isnot(None),
+        models.Review.user_id != user_id
+    ).first()
+
+    if existing_claim:
+        print(f"[LINK_GUEST_GUARD] guest_id '{clean_guest_id}' was already linked to another user ({existing_claim.user_id}). Aborting re-linking.")
+        return {
+            "reviews_linked": 0,
+            "verifications_linked": 0,
+            "favorites_linked": 0,
+            "recommendations_linked": 0
+        }
+
+    # 1. Link Reviews
+    guest_reviews = db.query(models.Review).filter(
+        models.Review.guest_id == clean_guest_id
+    ).all()
+
+    rev_count = 0
+    for rev in guest_reviews:
+        if rev.user_id is None:
+            rev.user_id = user_id
+            db.add(rev)
+            rev_count += 1
+
+    # 2. Link VisitVerifications
+    guest_verifications = db.query(models.VisitVerification).filter(
+        models.VisitVerification.guest_id == clean_guest_id
+    ).all()
+
+    ver_count = 0
+    for ver in guest_verifications:
+        if ver.user_id is None:
+            ver.user_id = user_id
+            db.add(ver)
+            ver_count += 1
+
+    # 3. Link UserRecommendations
+    guest_recommendations = db.query(models.UserRecommendation).filter(
+        models.UserRecommendation.guest_id == clean_guest_id
+    ).all()
+
+    rec_count = 0
+    for rec in guest_recommendations:
+        if rec.user_id is None:
+            rec.user_id = user_id
+            db.add(rec)
+            rec_count += 1
+
+    db.flush()
+
+    return {
+        "reviews_linked": rev_count,
+        "verifications_linked": ver_count,
+        "favorites_linked": 0,
+        "recommendations_linked": rec_count
+    }
+
 @app.post("/auth/signup", response_model=schemas.UserOut, status_code=status.HTTP_201_CREATED, tags=["Auth"])
-def signup(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
+def signup(
+    user_in: schemas.UserCreate,
+    x_guest_id: Optional[str] = Header(None, alias="x-guest-id"),
+    db: Session = Depends(get_db)
+):
     db_user = db.query(models.User).filter(models.User.email == user_in.email).first()
     if db_user:
         raise HTTPException(
@@ -336,6 +416,11 @@ def signup(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
         hashed_password=hashed_pwd
     )
     db.add(new_auth)
+
+    target_guest_id = user_in.guest_id or x_guest_id
+    if target_guest_id:
+        link_guest_data_to_user(db=db, user_id=new_user.id, guest_id=target_guest_id)
+
     db.commit()
     db.refresh(new_user)
     
@@ -353,7 +438,11 @@ def signup(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
     return new_user
 
 @app.post("/auth/login", response_model=schemas.Token, tags=["Auth"])
-def login(login_in: schemas.UserLogin, db: Session = Depends(get_db)):
+def login(
+    login_in: schemas.UserLogin,
+    x_guest_id: Optional[str] = Header(None, alias="x-guest-id"),
+    db: Session = Depends(get_db)
+):
     db_user = db.query(models.User).filter(models.User.email == login_in.email).first()
     if not db_user:
         raise HTTPException(
@@ -375,6 +464,11 @@ def login(login_in: schemas.UserLogin, db: Session = Depends(get_db)):
         )
 
     db_user.last_login_at = datetime.utcnow()
+
+    target_guest_id = login_in.guest_id or x_guest_id
+    if target_guest_id:
+        link_guest_data_to_user(db=db, user_id=db_user.id, guest_id=target_guest_id)
+
     db.commit()
     db.refresh(db_user)
 
@@ -388,6 +482,18 @@ def login(login_in: schemas.UserLogin, db: Session = Depends(get_db)):
         "token_type": "bearer",
         "user": db_user
     }
+
+@app.post("/auth/link-guest-data", response_model=schemas.GuestDataLinkResponse, tags=["Auth"])
+def link_guest_data(
+    req: schemas.GuestDataLinkRequest,
+    x_guest_id: Optional[str] = Header(None, alias="x-guest-id"),
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    target_guest_id = req.guest_id or x_guest_id
+    stats = link_guest_data_to_user(db=db, user_id=current_user.id, guest_id=target_guest_id)
+    db.commit()
+    return schemas.GuestDataLinkResponse(**stats)
 
 @app.post("/auth/refresh", response_model=schemas.Token, tags=["Auth"])
 def refresh_token(ref_token: str, db: Session = Depends(get_db)):

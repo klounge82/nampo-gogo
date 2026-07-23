@@ -14,15 +14,18 @@ class _AuthScreenState extends State<AuthScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _passwordConfirmController = TextEditingController();
   final _nicknameController = TextEditingController();
-  
+
   bool _isLoginMode = true; // true: Login, false: SignUp
   bool _isPasswordVisible = false;
+  bool _isConfirmPasswordVisible = false;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _passwordConfirmController.dispose();
     _nicknameController.dispose();
     super.dispose();
   }
@@ -36,11 +39,17 @@ class _AuthScreenState extends State<AuthScreen> {
     final nickname = _nicknameController.text.trim();
 
     if (_isLoginMode) {
-      final success = await authProvider.login(email: email, password: password);
+      final success = await authProvider.login(
+        email: email,
+        password: password,
+      );
       if (mounted) {
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('로그인 성공! 반갑습니다.')),
+            const SnackBar(
+              content: Text('로그인 성공! 기존 게스트 데이터가 회원 계정에 안전하게 연결되었습니다.'),
+              backgroundColor: AppColors.primary,
+            ),
           );
           Navigator.of(context).pop(); // Go back
         } else {
@@ -56,7 +65,12 @@ class _AuthScreenState extends State<AuthScreen> {
         );
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('회원가입 성공! [${user.nickname}]님 로그인해 주세요.')),
+            SnackBar(
+              content: Text(
+                '회원가입 완료! [${user.nickname}]님, 기존 게스트 데이터가 안전하게 연결되었습니다. 로그인해 주세요.',
+              ),
+              backgroundColor: AppColors.primary,
+            ),
           );
           // Toggle mode to Login
           setState(() {
@@ -64,7 +78,7 @@ class _AuthScreenState extends State<AuthScreen> {
           });
         }
       } catch (e) {
-        _showErrorDialog('회원가입 실패', '회원 정보 등록 중 문제가 발생했습니다.');
+        _showErrorDialog('회원가입 실패', '이미 가입된 이메일이거나 회원가입 정보에 문제가 있습니다.');
       }
     }
   }
@@ -123,8 +137,8 @@ class _AuthScreenState extends State<AuthScreen> {
                   ),
                   const SizedBox(height: 16.0),
                   Text(
-                    _isLoginMode 
-                        ? '로그인하여 맞춤 추천과 재미있는 미션을 체험하세요!' 
+                    _isLoginMode
+                        ? '로그인하여 게스트 데이터를 회원 계정으로 연결하세요!'
                         : '남포 GoGo 회원가입을 환영합니다.',
                     style: const TextStyle(
                       fontSize: 14.0,
@@ -144,7 +158,9 @@ class _AuthScreenState extends State<AuthScreen> {
                       border: OutlineInputBorder(),
                     ),
                     validator: (value) {
-                      if (value == null || value.trim().isEmpty || !value.contains('@')) {
+                      if (value == null ||
+                          value.trim().isEmpty ||
+                          !value.contains('@')) {
                         return '올바른 이메일 주소를 입력해 주세요.';
                       }
                       return null;
@@ -157,11 +173,13 @@ class _AuthScreenState extends State<AuthScreen> {
                     controller: _passwordController,
                     obscureText: !_isPasswordVisible,
                     decoration: InputDecoration(
-                      labelText: '비밀번호',
+                      labelText: '비밀번호 (최소 8자 이상)',
                       prefixIcon: const Icon(Icons.lock_outline),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                          _isPasswordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
                         ),
                         onPressed: () {
                           setState(() {
@@ -172,16 +190,50 @@ class _AuthScreenState extends State<AuthScreen> {
                       border: const OutlineInputBorder(),
                     ),
                     validator: (value) {
-                      if (value == null || value.isEmpty || value.length < 6) {
-                        return '비밀번호는 최소 6자 이상이어야 합니다.';
+                      if (value == null || value.isEmpty || value.length < 8) {
+                        return '비밀번호는 최소 8자 이상이어야 합니다.';
                       }
                       return null;
                     },
                   ),
                   const SizedBox(height: 16.0),
 
-                  // Nickname (Only Signup Mode)
+                  // Password Confirmation (SignUp Mode Only)
                   if (!_isLoginMode) ...[
+                    TextFormField(
+                      controller: _passwordConfirmController,
+                      obscureText: !_isConfirmPasswordVisible,
+                      decoration: InputDecoration(
+                        labelText: '비밀번호 확인',
+                        prefixIcon: const Icon(Icons.lock_reset_outlined),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _isConfirmPasswordVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _isConfirmPasswordVisible =
+                                  !_isConfirmPasswordVisible;
+                            });
+                          },
+                        ),
+                        border: const OutlineInputBorder(),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return '비밀번호 확인을 입력해 주세요.';
+                        }
+                        if (value != _passwordController.text) {
+                          return '비밀번호가 일치하지 않습니다.';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16.0),
+
+                    // Nickname
                     TextFormField(
                       controller: _nicknameController,
                       decoration: const InputDecoration(
@@ -238,9 +290,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       });
                     },
                     child: Text(
-                      _isLoginMode 
-                          ? '계정이 없으신가요? 회원가입' 
-                          : '이미 계정이 있으신가요? 로그인',
+                      _isLoginMode ? '계정이 없으신가요? 회원가입' : '이미 계정이 있으신가요? 로그인',
                       style: const TextStyle(color: AppColors.primary),
                     ),
                   ),

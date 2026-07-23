@@ -305,6 +305,7 @@ class UserRecommendation(Base):
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=True)
+    guest_id = Column(String(255), nullable=True)
     travel_type = Column(String(50), nullable=False) # 'SOLO', 'COUPLE', 'FAMILY', 'FRIENDS'
     travel_duration = Column(String(50), nullable=False) # 'TWO_HOURS', 'HALF_DAY', 'FULL_DAY'
     transport_mode = Column(String(50), nullable=False) # 'WALK', 'TRANSIT', 'DRIVE'
