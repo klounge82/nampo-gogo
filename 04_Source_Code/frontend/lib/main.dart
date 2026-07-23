@@ -17,6 +17,7 @@ import 'services/notification_service.dart';
 import 'providers/app_mode_provider.dart';
 import 'screens/main_navigation_screen.dart';
 import 'screens/business_app_shell.dart';
+import 'screens/business_pending_shell.dart';
 import 'theme/customer_theme.dart';
 import 'theme/business_theme.dart';
 
@@ -95,9 +96,16 @@ class RootNavigationSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final modeProvider = context.watch<AppModeProvider>();
     final authProvider = context.watch<AuthProvider>();
+    final user = authProvider.currentUser;
 
     // Initialize mode if needed
-    modeProvider.syncUser(authProvider.currentUser);
+    modeProvider.syncUser(user);
+
+    if (user != null &&
+        user.businessApplicationStatus == 'PENDING' &&
+        modeProvider.isBusinessMode) {
+      return const BusinessPendingShell();
+    }
 
     if (modeProvider.isBusinessMode) {
       return const BusinessAppShell();

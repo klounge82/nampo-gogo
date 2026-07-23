@@ -26,31 +26,43 @@ class AuthRepository {
     required String nickname,
     String? guestId,
   }) async {
-    try {
-      final gId = guestId ?? await _authService.getOrCreateGuestId();
-      final res = await _authService.signUp(
-        email: email,
-        password: password,
-        nickname: nickname,
-        guestId: gId,
-      );
-      await _authService.rotateGuestId();
-      return User.fromJson(res);
-    } catch (e) {
-      if (kDebugMode) {
-        print('AuthRepository: Signup failed. Falling back to Mock. Error: $e');
-      }
-      // Fallback: Return a local mock user
-      return User(
-        id: 'usr_mock_${email.hashCode}',
-        email: email,
-        nickname: '$nickname (Mock)',
-        role: 'member',
-        status: 'active',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
-    }
+    final gId = guestId ?? await _authService.getOrCreateGuestId();
+    final res = await _authService.signUp(
+      email: email,
+      password: password,
+      nickname: nickname,
+      guestId: gId,
+    );
+    await _authService.rotateGuestId();
+    return User.fromJson(res);
+  }
+
+  // Business Sign Up
+  Future<User> signUpBusiness({
+    required String email,
+    required String password,
+    required String nickname,
+    required String businessName,
+    required String businessRegistrationNumber,
+    required String representativeName,
+    required String phone,
+    String? requestedStoreId,
+    String? guestId,
+  }) async {
+    final gId = guestId ?? await _authService.getOrCreateGuestId();
+    final res = await _authService.signUpBusiness(
+      email: email,
+      password: password,
+      nickname: nickname,
+      businessName: businessName,
+      businessRegistrationNumber: businessRegistrationNumber,
+      representativeName: representativeName,
+      phone: phone,
+      requestedStoreId: requestedStoreId,
+      guestId: gId,
+    );
+    await _authService.rotateGuestId();
+    return User.fromJson(res);
   }
 
   // Login
@@ -73,18 +85,8 @@ class AuthRepository {
         'user': User.fromJson(res['user'] as Map<String, dynamic>),
       };
     } catch (e) {
-      if (kDebugMode) {
-        print('AuthRepository: Login failed. Falling back to Mock. Error: $e');
-      }
-      // Fallback Mock Login
-      return {
-        'access_token': 'mock_access_token_123',
-        'refresh_token': 'mock_refresh_token_123',
-        'user': _mockUser.copyWith(
-          email: email,
-          nickname: '${email.split('@')[0]} (Mock)',
-        ),
-      };
+      await _authService.clearSession();
+      rethrow;
     }
   }
 
@@ -100,24 +102,7 @@ class AuthRepository {
         'user': User.fromJson(res['user'] as Map<String, dynamic>),
       };
     } catch (e) {
-      if (kDebugMode) {
-        print(
-          'AuthRepository: AutoLogin failed. Checking stored token values fallback. Error: $e',
-        );
-      }
-
-      // Attempt to check if token exists locally, fallback if offline
-      final accessToken = await _authService.getAccessToken();
-      final refreshToken = await _authService.getRefreshToken();
-
-      if (accessToken != null && refreshToken != null) {
-        // Safe offline session recovery
-        return {
-          'access_token': accessToken,
-          'refresh_token': refreshToken,
-          'user': _mockUser,
-        };
-      }
+      await _authService.clearSession();
       return null;
     }
   }

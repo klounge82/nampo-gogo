@@ -89,7 +89,7 @@ class TestAuthGuestLinking(unittest.TestCase):
                 "password": "wrong_password_999"
             }
         )
-        self.assertEqual(res_wrong.status_code, 400)
+        self.assertEqual(res_wrong.status_code, 401)
 
         # 3. Correct Password
         res_ok = self.client.post(

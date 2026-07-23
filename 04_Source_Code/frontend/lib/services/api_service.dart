@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../config/api_config.dart';
 
 class ApiService {
@@ -23,6 +24,23 @@ class ApiService {
       );
       
       final dio = Dio(baseOptions);
+      
+      const storage = FlutterSecureStorage();
+      dio.interceptors.add(
+        InterceptorsWrapper(
+          onRequest: (options, handler) async {
+            try {
+              final token = await storage.read(key: 'access_token');
+              if (token != null &&
+                  token.isNotEmpty &&
+                  !options.headers.containsKey('Authorization')) {
+                options.headers['Authorization'] = 'Bearer $token';
+              }
+            } catch (_) {}
+            return handler.next(options);
+          },
+        ),
+      );
       
       // Add simple logging interceptor for debugging
       dio.interceptors.add(LogInterceptor(

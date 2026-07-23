@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class BusinessTheme {
   static const Color primaryTeal = Color(0xFF006699);
   static const Color secondarySlate = Color(0xFF00A896);
+  static const Color darkSlate = Color(0xFF0F172A);
   static const Color bgDark = Color(0xFFF1F5F9);
 
   static ThemeData get themeData {

@@ -43,6 +43,35 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  // Business Sign Up Flow
+  Future<User> signUpBusiness({
+    required String email,
+    required String password,
+    required String nickname,
+    required String businessName,
+    required String businessRegistrationNumber,
+    required String representativeName,
+    required String phone,
+    String? requestedStoreId,
+  }) async {
+    _setLoading(true);
+    try {
+      final user = await _authRepository.signUpBusiness(
+        email: email,
+        password: password,
+        nickname: nickname,
+        businessName: businessName,
+        businessRegistrationNumber: businessRegistrationNumber,
+        representativeName: representativeName,
+        phone: phone,
+        requestedStoreId: requestedStoreId,
+      );
+      return user;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   // Login Flow
   Future<bool> login({required String email, required String password}) async {
     _setLoading(true);

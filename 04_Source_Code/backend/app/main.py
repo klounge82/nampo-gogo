@@ -553,6 +553,77 @@ def signup(
     
     return build_user_out_dict(db, new_user)
 
+@app.post("/auth/signup/business", response_model=schemas.UserOut, status_code=status.HTTP_201_CREATED, tags=["Auth"])
+def signup_business(
+    user_in: schemas.BusinessSignupCreate,
+    x_guest_id: Optional[str] = Header(None, alias="x-guest-id"),
+    db: Session = Depends(get_db)
+):
+    db_user = db.query(models.User).filter(models.User.email == user_in.email).first()
+    if db_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="이미 가입된 계정입니다. 로그인 후 사업자회원 신청을 진행해 주세요."
+        )
+
+    try:
+        new_user = models.User(
+            email=user_in.email,
+            nickname=user_in.nickname,
+            role="member",
+            status="active"
+        )
+        db.add(new_user)
+        db.flush()
+
+        cust_role = models.UserRole(user_id=new_user.id, role="CUSTOMER")
+        db.add(cust_role)
+
+        hashed_pwd = auth.get_password_hash(user_in.password)
+        new_auth = models.UserAuth(
+            user_id=new_user.id,
+            hashed_password=hashed_pwd
+        )
+        db.add(new_auth)
+
+        app_record = models.BusinessApplication(
+            user_id=new_user.id,
+            business_name=user_in.business_name,
+            business_registration_number=user_in.business_registration_number,
+            representative_name=user_in.representative_name,
+            phone=user_in.phone,
+            requested_store_id=user_in.requested_store_id,
+            status="PENDING"
+        )
+        db.add(app_record)
+
+        target_guest_id = user_in.guest_id or x_guest_id
+        if target_guest_id:
+            link_guest_data_to_user(db=db, user_id=new_user.id, guest_id=target_guest_id)
+
+        db.commit()
+        db.refresh(new_user)
+
+        create_activity_log(
+            db=db,
+            user_id=new_user.id,
+            activity_type="BUSINESS_SIGNUP",
+            title="사업자 회원가입 및 신청 접수",
+            description=f"{new_user.nickname}님의 사업자 회원 신청이 접수되었습니다.",
+            icon="business",
+            color="teal"
+        )
+
+        return build_user_out_dict(db, new_user)
+    except Exception as e:
+        db.rollback()
+        if isinstance(e, HTTPException):
+            raise e
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="신청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요."
+        )
+
 @app.post("/auth/login", response_model=schemas.Token, tags=["Auth"])
 def login(
     login_in: schemas.UserLogin,
@@ -562,14 +633,14 @@ def login(
     db_user = db.query(models.User).filter(models.User.email == login_in.email).first()
     if not db_user:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="이메일 또는 비밀번호가 잘못되었습니다."
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="이메일 또는 비밀번호가 올바르지 않습니다."
         )
 
     if not db_user.auth or not auth.verify_password(login_in.password, db_user.auth.hashed_password):
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="이메일 또는 비밀번호가 잘못되었습니다."
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="이메일 또는 비밀번호가 올바르지 않습니다."
         )
 
     if db_user.status in ["blocked", "withdrawn"]:
@@ -780,6 +851,279 @@ def reject_business_application(
     db.commit()
     db.refresh(app_record)
     return app_record
+
+# ---------------------------------------------------------
+# Approved Business Management Endpoints (Store, Products, Reviews)
+# ---------------------------------------------------------
+
+@app.get("/business/store/me", tags=["Business Management"])
+def get_my_managed_store(
+    current_user: models.User = Depends(require_capability("business.dashboard.read")),
+    db: Session = Depends(get_db)
+):
+    mem = db.query(models.BusinessMembership).filter(
+        models.BusinessMembership.user_id == current_user.id,
+        models.BusinessMembership.status == "ACTIVE"
+    ).first()
+    if not mem:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="활성화된 사업자 매장 권한이 없습니다."
+        )
+    store = db.query(models.Store).filter(models.Store.id == mem.store_id).first()
+    if not store:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="연결된 매장 정보를 찾을 수 없습니다."
+        )
+    return {
+        "store": {
+            "id": store.id,
+            "name": store.name,
+            "category": store.category,
+            "rating": store.rating,
+            "address": store.address,
+            "description": store.description,
+            "image_url": store.image_url,
+            "phone_number": store.phone_number,
+            "operating_hours": store.operating_hours,
+            "status": store.status,
+            "review_verification_type": store.review_verification_type,
+            "review_location_radius_m": store.review_location_radius_m,
+            "manual_visit_allowed": store.manual_visit_allowed
+        },
+        "membership_role": mem.membership_role,
+        "membership_status": mem.status
+    }
+
+@app.patch("/business/store/me", tags=["Business Management"])
+def update_my_managed_store(
+    update_data: dict,
+    current_user: models.User = Depends(require_capability("business.dashboard.read")),
+    db: Session = Depends(get_db)
+):
+    mem = db.query(models.BusinessMembership).filter(
+        models.BusinessMembership.user_id == current_user.id,
+        models.BusinessMembership.status == "ACTIVE"
+    ).first()
+    if not mem:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="활성화된 사업자 매장 권한이 없습니다."
+        )
+    if mem.membership_role not in ["OWNER", "MANAGER"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="매장 정보 수정 권한이 없습니다. (OWNER 또는 MANAGER 권한 필요)"
+        )
+    store = db.query(models.Store).filter(models.Store.id == mem.store_id).first()
+    if not store:
+        raise HTTPException(status_code=404, detail="매장을 찾을 수 없습니다.")
+
+    allowed_fields = ["name", "description", "phone_number", "address", "operating_hours", "status", "image_url"]
+    for k, v in update_data.items():
+        if k in allowed_fields and hasattr(store, k):
+            setattr(store, k, v)
+    db.commit()
+    db.refresh(store)
+    return {
+        "id": store.id,
+        "name": store.name,
+        "category": store.category,
+        "rating": store.rating,
+        "address": store.address,
+        "description": store.description,
+        "image_url": store.image_url,
+        "phone_number": store.phone_number,
+        "operating_hours": store.operating_hours,
+        "status": store.status
+    }
+
+@app.get("/business/products", response_model=List[schemas.ProductOut], tags=["Business Products"])
+def list_business_products(
+    store_id: Optional[str] = None,
+    current_user: models.User = Depends(require_capability("business.dashboard.read")),
+    db: Session = Depends(get_db)
+):
+    mems = db.query(models.BusinessMembership).filter(
+        models.BusinessMembership.user_id == current_user.id,
+        models.BusinessMembership.status == "ACTIVE"
+    ).all()
+    allowed_store_ids = [m.store_id for m in mems]
+    if not allowed_store_ids:
+        raise HTTPException(status_code=403, detail="접근 가능한 매장이 없습니다.")
+
+    target_store_id = store_id or allowed_store_ids[0]
+    if target_store_id not in allowed_store_ids:
+        raise HTTPException(status_code=403, detail="해당 매장의 상품에 접근할 권한이 없습니다.")
+
+    products = db.query(models.Product).filter(
+        models.Product.store_id == target_store_id
+    ).order_by(models.Product.display_order.asc(), models.Product.created_at.desc()).all()
+    return products
+
+@app.post("/business/products", response_model=schemas.ProductOut, status_code=status.HTTP_201_CREATED, tags=["Business Products"])
+def create_business_product(
+    prod_in: schemas.ProductCreate,
+    store_id: Optional[str] = None,
+    current_user: models.User = Depends(require_capability("business.dashboard.read")),
+    db: Session = Depends(get_db)
+):
+    mems = db.query(models.BusinessMembership).filter(
+        models.BusinessMembership.user_id == current_user.id,
+        models.BusinessMembership.status == "ACTIVE"
+    ).all()
+    allowed_mems = {m.store_id: m.membership_role for m in mems}
+    if not allowed_mems:
+        raise HTTPException(status_code=403, detail="접근 가능한 매장이 없습니다.")
+
+    target_store_id = store_id or list(allowed_mems.keys())[0]
+    if target_store_id not in allowed_mems:
+        raise HTTPException(status_code=403, detail="해당 매장에 상품을 등록할 권한이 없습니다.")
+
+    if allowed_mems[target_store_id] not in ["OWNER", "MANAGER"]:
+        raise HTTPException(status_code=403, detail="상품 등록 권한이 없습니다. (STAFF 제외)")
+
+    if prod_in.price < 0:
+        raise HTTPException(status_code=400, detail="상품 가격은 0 이상이어야 합니다.")
+    if prod_in.sale_price is not None and prod_in.sale_price > prod_in.price:
+        raise HTTPException(status_code=400, detail="할인가는 정상가 이하이어야 합니다.")
+
+    product = models.Product(
+        store_id=target_store_id,
+        name=prod_in.name,
+        description=prod_in.description,
+        price=prod_in.price,
+        sale_price=prod_in.sale_price,
+        duration_minutes=prod_in.duration_minutes,
+        category=prod_in.category,
+        image_url=prod_in.image_url,
+        display_order=prod_in.display_order,
+        status=prod_in.status
+    )
+    db.add(product)
+    db.commit()
+    db.refresh(product)
+    return product
+
+@app.patch("/business/products/{product_id}", response_model=schemas.ProductOut, tags=["Business Products"])
+def update_business_product(
+    product_id: str,
+    prod_in: schemas.ProductUpdate,
+    current_user: models.User = Depends(require_capability("business.dashboard.read")),
+    db: Session = Depends(get_db)
+):
+    product = db.query(models.Product).filter(models.Product.id == product_id).first()
+    if not product:
+        raise HTTPException(status_code=404, detail="상품을 찾을 수 없습니다.")
+
+    mem = db.query(models.BusinessMembership).filter(
+        models.BusinessMembership.user_id == current_user.id,
+        models.BusinessMembership.store_id == product.store_id,
+        models.BusinessMembership.status == "ACTIVE"
+    ).first()
+    if not mem or mem.membership_role not in ["OWNER", "MANAGER"]:
+        raise HTTPException(status_code=403, detail="해당 매장의 상품을 수정할 권한이 없습니다.")
+
+    update_dict = prod_in.dict(exclude_unset=True)
+    if "price" in update_dict and update_dict["price"] is not None:
+        if update_dict["price"] < 0:
+            raise HTTPException(status_code=400, detail="상품 가격은 0 이상이어야 합니다.")
+    
+    check_price = update_dict.get("price", product.price)
+    check_sale = update_dict.get("sale_price", product.sale_price)
+    if check_sale is not None and check_sale > check_price:
+        raise HTTPException(status_code=400, detail="할인가는 정상가 이하이어야 합니다.")
+
+    for k, v in update_dict.items():
+        setattr(product, k, v)
+    db.commit()
+    db.refresh(product)
+    return product
+
+@app.delete("/business/products/{product_id}", tags=["Business Products"])
+def delete_business_product(
+    product_id: str,
+    current_user: models.User = Depends(require_capability("business.dashboard.read")),
+    db: Session = Depends(get_db)
+):
+    product = db.query(models.Product).filter(models.Product.id == product_id).first()
+    if not product:
+        raise HTTPException(status_code=404, detail="상품을 찾을 수 없습니다.")
+
+    mem = db.query(models.BusinessMembership).filter(
+        models.BusinessMembership.user_id == current_user.id,
+        models.BusinessMembership.store_id == product.store_id,
+        models.BusinessMembership.status == "ACTIVE"
+    ).first()
+    if not mem or mem.membership_role not in ["OWNER", "MANAGER"]:
+        raise HTTPException(status_code=403, detail="해당 매장의 상품을 삭제/중지할 권한이 없습니다.")
+
+    # Soft delete -> set status INACTIVE
+    product.status = "INACTIVE"
+    db.commit()
+    return {"message": "상품이 비활성화되었습니다.", "product_id": product_id, "status": "INACTIVE"}
+
+@app.get("/business/reviews", tags=["Business Reviews"])
+def get_business_reviews(
+    store_id: Optional[str] = None,
+    photo_only: bool = False,
+    sort: str = "latest",
+    current_user: models.User = Depends(require_capability("business.dashboard.read")),
+    db: Session = Depends(get_db)
+):
+    mems = db.query(models.BusinessMembership).filter(
+        models.BusinessMembership.user_id == current_user.id,
+        models.BusinessMembership.status == "ACTIVE"
+    ).all()
+    allowed_store_ids = [m.store_id for m in mems]
+    if not allowed_store_ids:
+        raise HTTPException(status_code=403, detail="접근 가능한 매장이 없습니다.")
+
+    target_store_id = store_id or allowed_store_ids[0]
+    if target_store_id not in allowed_store_ids:
+        raise HTTPException(status_code=403, detail="해당 매장의 리뷰를 조회할 권한이 없습니다.")
+
+    query = db.query(models.Review).filter(models.Review.store_id == target_store_id)
+    if hasattr(models.Review, 'is_deleted'):
+        query = query.filter(models.Review.is_deleted == False)
+    if hasattr(models.Review, 'is_hidden'):
+        query = query.filter(models.Review.is_hidden == False)
+
+    if photo_only:
+        query = query.filter(models.Review.images.any())
+
+    all_reviews = query.all()
+    total_count = len(all_reviews)
+    avg_rating = round(sum(r.rating for r in all_reviews) / total_count, 1) if total_count > 0 else 0.0
+
+    if sort == "rating_desc":
+        all_reviews.sort(key=lambda r: (r.rating, r.created_at), reverse=True)
+    elif sort == "rating_asc":
+        all_reviews.sort(key=lambda r: (r.rating, -r.created_at.timestamp()))
+    else:
+        all_reviews.sort(key=lambda r: r.created_at, reverse=True)
+
+    reviews_out = []
+    for r in all_reviews:
+        nickname = r.user.nickname if r.user else "방문자"
+        img_url = r.images[0].image_url if r.images and len(r.images) > 0 else None
+        reviews_out.append({
+            "id": r.id,
+            "rating": r.rating,
+            "content": r.content,
+            "image_url": img_url,
+            "nickname": nickname,
+            "visit_verified": bool(r.verification_id),
+            "created_at": r.created_at
+        })
+
+    return {
+        "store_id": target_store_id,
+        "total_count": total_count,
+        "average_rating": avg_rating,
+        "reviews": reviews_out
+    }
 
 # --- PLACE / STORE MVP APIs ---
 

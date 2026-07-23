@@ -168,6 +168,28 @@ class Store(Base):
     qr_credentials = relationship("StoreQrCredential", back_populates="store", cascade="all, delete-orphan")
     # One-to-many relationship with BusinessMembership
     memberships = relationship("BusinessMembership", back_populates="store", cascade="all, delete-orphan")
+    # One-to-many relationship with Product
+    products = relationship("Product", back_populates="store", cascade="all, delete-orphan")
+
+class Product(Base):
+    __tablename__ = "products"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    store_id = Column(String(36), ForeignKey("stores.id", ondelete="CASCADE"), nullable=False, index=True)
+    name = Column(String(100), nullable=False)
+    description = Column(Text, nullable=True)
+    price = Column(Integer, nullable=False)
+    sale_price = Column(Integer, nullable=True)
+    duration_minutes = Column(Integer, nullable=True)
+    category = Column(String(50), nullable=True)
+    image_url = Column(String(500), nullable=True)
+    display_order = Column(Integer, nullable=False, default=0)
+    status = Column(String(50), nullable=False, default="ACTIVE") # 'DRAFT', 'ACTIVE', 'SOLD_OUT', 'INACTIVE'
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+    updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
+
+    # Relationship to Store
+    store = relationship("Store", back_populates="products")
 
 class StoreQrCredential(Base):
     __tablename__ = "store_qr_credentials"

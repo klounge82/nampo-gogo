@@ -52,6 +52,54 @@ class AuthService {
         return response.data as Map<String, dynamic>;
       }
       throw Exception('회원가입 실패: 서버 응답 오류');
+    } on DioException catch (e) {
+      final msg = e.response?.data is Map ? e.response?.data['detail'] : null;
+      throw Exception(msg?.toString() ?? '회원가입 처리 중 오류가 발생했습니다.');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Business Signup API Call
+  Future<Map<String, dynamic>> signUpBusiness({
+    required String email,
+    required String password,
+    required String nickname,
+    required String businessName,
+    required String businessRegistrationNumber,
+    required String representativeName,
+    required String phone,
+    String? requestedStoreId,
+    String? guestId,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '/auth/signup/business',
+        data: {
+          'email': email,
+          'password': password,
+          'nickname': nickname,
+          'business_name': businessName,
+          'business_registration_number': businessRegistrationNumber,
+          'representative_name': representativeName,
+          'phone': phone,
+          if (requestedStoreId != null) 'requested_store_id': requestedStoreId,
+          if (guestId != null) 'guest_id': guestId,
+        },
+        options: Options(
+          headers: {
+            if (guestId != null && guestId.isNotEmpty) 'x-guest-id': guestId,
+          },
+        ),
+      );
+
+      if ((response.statusCode == 200 || response.statusCode == 201) && response.data != null) {
+        return response.data as Map<String, dynamic>;
+      }
+      throw Exception('사업자 회원가입 실패: 서버 응답 오류');
+    } on DioException catch (e) {
+      final msg = e.response?.data is Map ? e.response?.data['detail'] : null;
+      throw Exception(msg?.toString() ?? '사업자 회원가입 처리 중 오류가 발생했습니다.');
     } catch (e) {
       rethrow;
     }
@@ -93,7 +141,13 @@ class AuthService {
 
         return data;
       }
-      throw Exception('로그인 실패: 잘못된 응답');
+      throw Exception('이메일 또는 비밀번호가 올바르지 않습니다.');
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401 || e.response?.statusCode == 400) {
+        final msg = e.response?.data is Map ? e.response?.data['detail'] : null;
+        throw Exception(msg?.toString() ?? '이메일 또는 비밀번호가 올바르지 않습니다.');
+      }
+      throw Exception('로그인 서비스에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.');
     } catch (e) {
       rethrow;
     }
