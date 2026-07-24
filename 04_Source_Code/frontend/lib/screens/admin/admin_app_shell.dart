@@ -23,7 +23,10 @@ class _AdminAppShellState extends State<AdminAppShell> {
       child: Consumer<AuthProvider>(
         builder: (context, auth, child) {
           final user = auth.currentUser;
-          final isNotAdmin = !auth.isLoggedIn || user == null || (!user.roles.contains('ADMIN') && user.role != 'admin');
+          final isNotAdmin =
+              !auth.isLoggedIn ||
+              user == null ||
+              (!user.roles.contains('ADMIN') && user.role != 'admin');
           if (isNotAdmin) {
             return const AdminAccessDeniedScreen();
           }

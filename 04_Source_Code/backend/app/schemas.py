@@ -180,8 +180,8 @@ class UserOut(UserBase):
     id: str
     role: str
     status: str
-    current_points: int
-    language_code: str
+    current_points: int = 0
+    language_code: str = "ko"
     created_at: datetime
     updated_at: datetime
     last_login_at: Optional[datetime] = None
@@ -424,6 +424,18 @@ class ReviewOut(BaseModel):
     images: List[ReviewImageOut] = []
     store: StoreOut
     is_owner: bool = False
+    can_edit: bool = False
+    can_delete: bool = False
+    can_restore: bool = False
+    can_rewrite: bool = False
+
+    class Config:
+        from_attributes = True
+        orm_mode = True
+
+class MyReviewOut(BaseModel):
+    status: str # 'ACTIVE', 'DELETED', 'NONE'
+    review: Optional[ReviewOut] = None
     can_edit: bool = False
     can_delete: bool = False
     can_restore: bool = False

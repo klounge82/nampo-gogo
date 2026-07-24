@@ -54,15 +54,19 @@ class User {
         [];
 
     return User(
-      id: json['id'] as String,
-      email: json['email'] as String,
-      nickname: json['nickname'] as String,
-      role: json['role'] as String,
-      status: json['status'] as String,
+      id: json['id'] as String? ?? '',
+      email: json['email'] as String? ?? '',
+      nickname: json['nickname'] as String? ?? '게스트',
+      role: json['role'] as String? ?? 'guest',
+      status: json['status'] as String? ?? 'active',
       currentPoints: json['current_points'] as int? ?? 0,
       profileImageUrl: json['profile_image_url'] as String?,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String)
+          : DateTime.now(),
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'] as String)
+          : DateTime.now(),
       lastLoginAt: json['last_login_at'] != null
           ? DateTime.parse(json['last_login_at'] as String)
           : null,

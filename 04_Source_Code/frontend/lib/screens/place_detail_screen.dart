@@ -34,10 +34,12 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
   Place? _place;
   List<model_review.Review> _reviews = [];
   model_review.Review? _myReview;
+  model_review.MyReviewResult? _myReviewResult;
   String? _currentUserId;
   String _currentGuestId = '';
   bool _isLoading = true;
   bool _isReviewsLoading = true;
+  bool _reviewsError = false;
   String? _errorMessage;
 
   @override
@@ -48,15 +50,12 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
   }
 
   Future<void> _loadPlaceDetail() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
+    setState(() => _isLoading = true);
     try {
       final place = await _placeRepository.getPlaceDetail(widget.placeId);
       setState(() {
         _place = place;
+        _errorMessage = null;
       });
     } catch (e) {
       setState(() {
@@ -68,7 +67,10 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
   }
 
   Future<void> _loadReviews() async {
-    setState(() => _isReviewsLoading = true);
+    setState(() {
+      _isReviewsLoading = true;
+      _reviewsError = false;
+    });
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final userId = authProvider.currentUser?.id;
@@ -81,26 +83,31 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
         userId: userId,
         guestId: userId == null ? guestId : null,
       );
-      final myRev = await _reviewRepository.getMyStoreReview(
+      final myResult = await _reviewRepository.getMyStoreReview(
         storeId: widget.placeId,
         userId: userId,
         guestId: userId == null ? guestId : null,
         includeDeleted: true,
       );
 
-      _myReview = myRev;
+      _myReviewResult = myResult;
+      _myReview = myResult.review;
 
-      if (myRev != null && !myRev.isDeleted) {
-        list.removeWhere((r) => r.id == myRev.id);
-        list.insert(0, myRev);
+      if (_myReview != null && !_myReview!.isDeleted) {
+        list.removeWhere((r) => r.id == _myReview!.id);
+        list.insert(0, _myReview!);
       }
 
       setState(() {
         _reviews = list;
         _isReviewsLoading = false;
+        _reviewsError = false;
       });
     } catch (_) {
-      setState(() => _isReviewsLoading = false);
+      setState(() {
+        _isReviewsLoading = false;
+        _reviewsError = true;
+      });
     }
   }
 

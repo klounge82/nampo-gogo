@@ -191,3 +191,36 @@ class Review {
     );
   }
 }
+
+class MyReviewResult {
+  final String status; // 'ACTIVE', 'DELETED', 'NONE'
+  final Review? review;
+  final bool canEdit;
+  final bool canDelete;
+  final bool canRestore;
+  final bool canRewrite;
+
+  MyReviewResult({
+    required this.status,
+    this.review,
+    this.canEdit = false,
+    this.canDelete = false,
+    this.canRestore = false,
+    this.canRewrite = false,
+  });
+
+  factory MyReviewResult.fromJson(Map<String, dynamic> json) {
+    final statusStr = json['status'] as String? ?? 'NONE';
+    final revJson = json['review'] as Map<String, dynamic>?;
+    final rev = revJson != null ? Review.fromJson(revJson) : null;
+
+    return MyReviewResult(
+      status: statusStr,
+      review: rev,
+      canEdit: json['can_edit'] as bool? ?? (rev?.canEdit ?? false),
+      canDelete: json['can_delete'] as bool? ?? (rev?.canDelete ?? false),
+      canRestore: json['can_restore'] as bool? ?? (rev?.canRestore ?? false),
+      canRewrite: json['can_rewrite'] as bool? ?? (rev?.canRewrite ?? false),
+    );
+  }
+}

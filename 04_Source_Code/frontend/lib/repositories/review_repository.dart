@@ -255,7 +255,7 @@ class ReviewRepository {
   }
 
   // Fetch My Review for a specific Store
-  Future<Review?> getMyStoreReview({
+  Future<MyReviewResult> getMyStoreReview({
     required String storeId,
     String? userId,
     String? guestId,
@@ -268,13 +268,15 @@ class ReviewRepository {
         guestId: guestId,
         includeDeleted: includeDeleted,
       );
-      if (json == null) return null;
-      return Review.fromJson(json);
+      if (json == null) {
+        return MyReviewResult(status: 'NONE');
+      }
+      return MyReviewResult.fromJson(json);
     } catch (e) {
       if (kDebugMode) {
         print('ReviewRepository: Failed to fetch my store review: $e');
       }
-      return null;
+      rethrow;
     }
   }
 

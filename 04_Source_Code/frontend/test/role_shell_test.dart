@@ -78,8 +78,6 @@ void main() {
     test(
       'AppModeProvider allows switching to Business mode for Approved Business user',
       () async {
-        // Mock storage or initialize binding
-        final provider = AppModeProvider();
         final bizUser = User(
           id: 'usr_biz_1',
           email: 'owner@example.com',

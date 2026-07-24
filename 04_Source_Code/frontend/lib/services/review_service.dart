@@ -202,8 +202,8 @@ class ReviewService {
         return response.data as Map<String, dynamic>;
       }
       return null;
-    } catch (_) {
-      return null;
+    } catch (e) {
+      rethrow;
     }
   }
 

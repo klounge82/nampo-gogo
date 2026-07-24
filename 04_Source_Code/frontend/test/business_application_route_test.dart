@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import '../lib/services/business_service.dart';
-import '../lib/registries/module_registry.dart';
-import '../lib/registries/dashboard_widget_registry.dart';
+import 'package:frontend/services/business_service.dart';
+import 'package:frontend/registries/module_registry.dart';
+import 'package:frontend/registries/dashboard_widget_registry.dart';
 
 void main() {
   group('Business Application Route & Error Handling Unit Tests', () {
