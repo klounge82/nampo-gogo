@@ -7,7 +7,8 @@ class BusinessApplicationScreen extends StatefulWidget {
   const BusinessApplicationScreen({super.key});
 
   @override
-  State<BusinessApplicationScreen> createState() => _BusinessApplicationScreenState();
+  State<BusinessApplicationScreen> createState() =>
+      _BusinessApplicationScreenState();
 }
 
 class _BusinessApplicationScreenState extends State<BusinessApplicationScreen> {
@@ -43,6 +44,15 @@ class _BusinessApplicationScreenState extends State<BusinessApplicationScreen> {
   }
 
   Future<void> _submitApplication() async {
+    if (_isLoading) return;
+    final currentStatus = _myApplication?['status'];
+    if (currentStatus == 'PENDING') {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('이미 검토 중인 사업자 신청이 있습니다.')));
+      return;
+    }
+
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
@@ -55,27 +65,37 @@ class _BusinessApplicationScreenState extends State<BusinessApplicationScreen> {
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('사업자 회원 신청이 완료되었습니다. 관리자 승인 후 안내해 드립니다.'),
-            backgroundColor: Colors.green,
-          ),
-        );
         setState(() {
           _myApplication = res;
         });
 
-        // Refresh Auth User
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              '사업자 회원 신청이 정상적으로 접수되었습니다.\n\n관리자가 제출 내용을 검토한 후 승인 여부를 알려드리겠습니다.',
+            ),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 4),
+          ),
+        );
+
+        // Refresh Auth User -> Triggers BusinessPendingShell in RootNavigationSelector
         final authProvider = Provider.of<AuthProvider>(context, listen: false);
         await authProvider.autoLogin();
+
+        if (mounted && Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        }
       }
     } catch (e) {
       if (mounted) {
+        var errText = e.toString().replaceAll('Exception: ', '').trim();
+        if (errText.toLowerCase().contains('not found') ||
+            errText.contains('404')) {
+          errText = '신청 경로를 확인하지 못했습니다. 앱을 최신 버전으로 업데이트한 후 다시 시도해 주세요.';
+        }
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString().replaceAll('Exception: ', '')),
-            backgroundColor: Colors.redAccent,
-          ),
+          SnackBar(content: Text(errText), backgroundColor: Colors.redAccent),
         );
       }
     } finally {
@@ -124,7 +144,10 @@ class _BusinessApplicationScreenState extends State<BusinessApplicationScreen> {
                             SizedBox(height: 8),
                             Text(
                               '제출하신 사업자 정보는 총관리자가 검토 중입니다. 승인이 완료되면 사업자 전용 관리가 활성화됩니다.',
-                              style: TextStyle(color: Colors.black54, fontSize: 13),
+                              style: TextStyle(
+                                color: Colors.black54,
+                                fontSize: 13,
+                              ),
                             ),
                           ],
                         ),
@@ -147,7 +170,10 @@ class _BusinessApplicationScreenState extends State<BusinessApplicationScreen> {
                             Expanded(
                               child: Text(
                                 '사업자 승인이 완료되었습니다!\n상단 모드 전환 버튼으로 사업자 모드를 이용할 수 있습니다.',
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
                               ),
                             ),
                           ],
@@ -160,7 +186,10 @@ class _BusinessApplicationScreenState extends State<BusinessApplicationScreen> {
                   if (status == 'NONE' || status == 'REJECTED') ...[
                     const Text(
                       '남포동 파트너 매장 등록',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     const Text(
@@ -180,7 +209,9 @@ class _BusinessApplicationScreenState extends State<BusinessApplicationScreen> {
                               border: OutlineInputBorder(),
                               prefixIcon: Icon(Icons.store),
                             ),
-                            validator: (v) => v == null || v.trim().isEmpty ? '상호를 입력해 주세요.' : null,
+                            validator: (v) => v == null || v.trim().isEmpty
+                                ? '상호를 입력해 주세요.'
+                                : null,
                           ),
                           const SizedBox(height: 16),
                           TextFormField(
@@ -191,7 +222,9 @@ class _BusinessApplicationScreenState extends State<BusinessApplicationScreen> {
                               prefixIcon: Icon(Icons.badge),
                             ),
                             keyboardType: TextInputType.number,
-                            validator: (v) => v == null || v.trim().isEmpty ? '사업자등록번호를 입력해 주세요.' : null,
+                            validator: (v) => v == null || v.trim().isEmpty
+                                ? '사업자등록번호를 입력해 주세요.'
+                                : null,
                           ),
                           const SizedBox(height: 16),
                           TextFormField(
@@ -201,7 +234,9 @@ class _BusinessApplicationScreenState extends State<BusinessApplicationScreen> {
                               border: OutlineInputBorder(),
                               prefixIcon: Icon(Icons.person),
                             ),
-                            validator: (v) => v == null || v.trim().isEmpty ? '대표자 성명을 입력해 주세요.' : null,
+                            validator: (v) => v == null || v.trim().isEmpty
+                                ? '대표자 성명을 입력해 주세요.'
+                                : null,
                           ),
                           const SizedBox(height: 16),
                           TextFormField(
@@ -212,7 +247,9 @@ class _BusinessApplicationScreenState extends State<BusinessApplicationScreen> {
                               prefixIcon: Icon(Icons.phone),
                             ),
                             keyboardType: TextInputType.phone,
-                            validator: (v) => v == null || v.trim().isEmpty ? '연락처를 입력해 주세요.' : null,
+                            validator: (v) => v == null || v.trim().isEmpty
+                                ? '연락처를 입력해 주세요.'
+                                : null,
                           ),
                           const SizedBox(height: 28),
 
@@ -220,13 +257,20 @@ class _BusinessApplicationScreenState extends State<BusinessApplicationScreen> {
                             width: double.infinity,
                             height: 48,
                             child: ElevatedButton(
-                              onPressed: _submitApplication,
+                              onPressed: status == 'PENDING' || _isLoading
+                                  ? null
+                                  : _submitApplication,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Theme.of(context).primaryColor,
                               ),
-                              child: const Text(
-                                '사업자 신청서 제출',
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                              child: Text(
+                                status == 'PENDING'
+                                    ? '승인 검토 진행 중'
+                                    : '사업자 신청서 제출',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),

@@ -27,9 +27,17 @@ class BusinessService {
       );
       return Map<String, dynamic>.from(response.data as Map);
     } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        throw Exception('신청 경로를 확인하지 못했습니다. 앱을 최신 버전으로 업데이트한 후 다시 시도해 주세요.');
+      }
       final msg = e.response?.data is Map ? e.response?.data['detail'] : null;
       if (msg != null && msg.toString().isNotEmpty) {
-        throw Exception(msg.toString());
+        final errStr = msg.toString();
+        if (errStr.toLowerCase().contains('not found') ||
+            errStr.contains('404')) {
+          throw Exception('신청 경로를 확인하지 못했습니다. 앱을 최신 버전으로 업데이트한 후 다시 시도해 주세요.');
+        }
+        throw Exception(errStr);
       }
       throw Exception('신청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.');
     } catch (_) {
@@ -57,9 +65,14 @@ class BusinessService {
     }
   }
 
-  Future<Map<String, dynamic>> updateManagedStore(Map<String, dynamic> data) async {
+  Future<Map<String, dynamic>> updateManagedStore(
+    Map<String, dynamic> data,
+  ) async {
     try {
-      final response = await _apiService.dio.patch('/business/store/me', data: data);
+      final response = await _apiService.dio.patch(
+        '/business/store/me',
+        data: data,
+      );
       return Map<String, dynamic>.from(response.data as Map);
     } on DioException catch (e) {
       final msg = e.response?.data is Map ? e.response?.data['detail'] : null;
@@ -81,7 +94,10 @@ class BusinessService {
     }
   }
 
-  Future<Map<String, dynamic>> createProduct(Map<String, dynamic> data, {String? storeId}) async {
+  Future<Map<String, dynamic>> createProduct(
+    Map<String, dynamic> data, {
+    String? storeId,
+  }) async {
     try {
       final response = await _apiService.dio.post(
         '/business/products',
@@ -95,9 +111,15 @@ class BusinessService {
     }
   }
 
-  Future<Map<String, dynamic>> updateProduct(String productId, Map<String, dynamic> data) async {
+  Future<Map<String, dynamic>> updateProduct(
+    String productId,
+    Map<String, dynamic> data,
+  ) async {
     try {
-      final response = await _apiService.dio.patch('/business/products/$productId', data: data);
+      final response = await _apiService.dio.patch(
+        '/business/products/$productId',
+        data: data,
+      );
       return Map<String, dynamic>.from(response.data as Map);
     } on DioException catch (e) {
       final msg = e.response?.data is Map ? e.response?.data['detail'] : null;

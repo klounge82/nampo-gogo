@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = '008_create_products_table'
-down_revision: Union[str, None] = '007_role_shell_module_foundation'
+down_revision: Union[str, None] = '007_role_shell_module_base'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
