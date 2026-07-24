@@ -2,15 +2,17 @@ import 'package:dio/dio.dart';
 import '../config/api_config.dart';
 
 class PaymentService {
-  Dio get _dio => Dio(BaseOptions(
-        baseUrl: ApiConfig.baseUrl,
-        connectTimeout: ApiConfig.connectTimeout,
-        receiveTimeout: ApiConfig.receiveTimeout,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      ));
+  Dio get _dio => Dio(
+    BaseOptions(
+      baseUrl: ApiConfig.baseUrl,
+      connectTimeout: ApiConfig.connectTimeout,
+      receiveTimeout: ApiConfig.receiveTimeout,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    ),
+  );
 
   // POST /payments/create
   Future<Map<String, dynamic>> createPayment({
@@ -69,10 +71,7 @@ class PaymentService {
     try {
       final res = await _dio.post(
         '/payments/cancel',
-        data: {
-          'payment_id': paymentId,
-          if (reason != null) 'reason': reason,
-        },
+        data: {'payment_id': paymentId, if (reason != null) 'reason': reason},
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       return res.data as Map<String, dynamic>;

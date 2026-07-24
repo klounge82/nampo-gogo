@@ -6,7 +6,7 @@ class PersonalizationProvider extends ChangeNotifier {
   final Dio _dio;
 
   PersonalizationProvider({Dio? dio})
-      : _dio = dio ?? Dio(BaseOptions(baseUrl: ApiConfig.baseUrl));
+    : _dio = dio ?? Dio(BaseOptions(baseUrl: ApiConfig.baseUrl));
 
   bool _usePersonalization = true;
   bool _preferNewPlaces = true;
@@ -21,7 +21,10 @@ class PersonalizationProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
 
   // Toggle flag locally & sync with server if logged in
-  Future<void> togglePersonalization({required bool value, String? token}) async {
+  Future<void> togglePersonalization({
+    required bool value,
+    String? token,
+  }) async {
     _usePersonalization = value;
     notifyListeners();
     if (token != null && token.isNotEmpty) {
@@ -29,7 +32,10 @@ class PersonalizationProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> toggleExcludeVisited({required bool value, String? token}) async {
+  Future<void> toggleExcludeVisited({
+    required bool value,
+    String? token,
+  }) async {
     _preferNewPlaces = value;
     notifyListeners();
     if (token != null && token.isNotEmpty) {
@@ -60,7 +66,9 @@ class PersonalizationProvider extends ChangeNotifier {
       _usePersonalization = data['use_personalization'] ?? true;
       _preferNewPlaces = data['prefer_new_places'] ?? true;
       _preferRewards = data['prefer_rewards'] ?? true;
-      _dislikedCategories = List<String>.from(data['disliked_categories'] ?? []);
+      _dislikedCategories = List<String>.from(
+        data['disliked_categories'] ?? [],
+      );
     } catch (e) {
       debugPrint('PersonalizationProvider: loadPreferences failed -> $e');
     } finally {
@@ -82,10 +90,12 @@ class PersonalizationProvider extends ChangeNotifier {
       final res = await _dio.patch(
         '/recommendations/preferences',
         data: {
-          if (usePersonalization != null) 'use_personalization': usePersonalization,
+          if (usePersonalization != null)
+            'use_personalization': usePersonalization,
           if (preferNewPlaces != null) 'prefer_new_places': preferNewPlaces,
           if (preferRewards != null) 'prefer_rewards': preferRewards,
-          if (dislikedCategories != null) 'disliked_categories': dislikedCategories,
+          if (dislikedCategories != null)
+            'disliked_categories': dislikedCategories,
         },
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
@@ -93,7 +103,9 @@ class PersonalizationProvider extends ChangeNotifier {
       _usePersonalization = data['use_personalization'] ?? _usePersonalization;
       _preferNewPlaces = data['prefer_new_places'] ?? _preferNewPlaces;
       _preferRewards = data['prefer_rewards'] ?? _preferRewards;
-      _dislikedCategories = List<String>.from(data['disliked_categories'] ?? _dislikedCategories);
+      _dislikedCategories = List<String>.from(
+        data['disliked_categories'] ?? _dislikedCategories,
+      );
       notifyListeners();
     } catch (e) {
       debugPrint('PersonalizationProvider: updatePreferences failed -> $e');

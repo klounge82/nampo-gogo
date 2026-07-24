@@ -11,17 +11,19 @@ class AnalyticsDashboardScreen extends StatefulWidget {
   const AnalyticsDashboardScreen({super.key});
 
   @override
-  State<AnalyticsDashboardScreen> createState() => _AnalyticsDashboardScreenState();
+  State<AnalyticsDashboardScreen> createState() =>
+      _AnalyticsDashboardScreenState();
 }
 
-class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> with SingleTickerProviderStateMixin {
+class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    
+
     // Load statistics
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final token = context.read<AuthProvider>().accessToken;
@@ -37,14 +39,20 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
     super.dispose();
   }
 
-  final NumberFormat _currencyFormat = NumberFormat.currency(locale: 'ko_KR', symbol: '₩');
+  final NumberFormat _currencyFormat = NumberFormat.currency(
+    locale: 'ko_KR',
+    symbol: '₩',
+  );
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('비즈니스 통계 대시보드', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          '비즈니스 통계 대시보드',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
         elevation: 0.5,
@@ -52,7 +60,9 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
       body: Consumer<AnalyticsProvider>(
         builder: (context, provider, child) {
           if (provider.isLoading) {
-            return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+            return const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            );
           }
 
           if (provider.errorMessage != null) {
@@ -72,7 +82,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
                       }
                     },
                     child: const Text('다시 시도'),
-                  )
+                  ),
                 ],
               ),
             );
@@ -95,7 +105,11 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
                 // 2. Today Overview Grid Cards
                 const Text(
                   '오늘의 매장 지표',
-                  style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                  style: TextStyle(
+                    fontSize: 15.0,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
                 const SizedBox(height: 12.0),
                 _buildOverviewGrid(dash),
@@ -137,7 +151,8 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
   }
 
   Widget _buildHeroPerformanceCard(Map<String, dynamic> dash) {
-    final int contributedRevenue = dash['app_contributed_total_revenue'] ?? 3250000;
+    final int contributedRevenue =
+        dash['app_contributed_total_revenue'] ?? 3250000;
     final int netProfit = dash['app_contributed_net_profit'] ?? 2870000;
     final double roi = (dash['roi_percentage'] as num? ?? 286.0).toDouble();
 
@@ -156,7 +171,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
             color: Colors.deepPurple.shade900.withAlpha(80),
             blurRadius: 10,
             offset: const Offset(0, 6),
-          )
+          ),
         ],
       ),
       child: Column(
@@ -167,17 +182,28 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
             children: [
               const Text(
                 '🎉 이번 달 앱 성과',
-                style: TextStyle(color: Colors.white70, fontSize: 13.0, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 13.0,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10.0,
+                  vertical: 4.0,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withAlpha(30),
                   borderRadius: BorderRadius.circular(12.0),
                 ),
                 child: Text(
                   'ROI +${roi.toStringAsFixed(0)}%',
-                  style: const TextStyle(color: Colors.amber, fontSize: 11.0, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    color: Colors.amber,
+                    fontSize: 11.0,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -190,7 +216,11 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
           const SizedBox(height: 4.0),
           Text(
             _currencyFormat.format(contributedRevenue),
-            style: const TextStyle(color: Colors.white, fontSize: 26.0, fontWeight: FontWeight.w900),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 26.0,
+              fontWeight: FontWeight.w900,
+            ),
           ),
           const Divider(height: 24.0, color: Colors.white24),
           Row(
@@ -199,24 +229,41 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('앱 기여 순수익', style: TextStyle(color: Colors.white60, fontSize: 10.5)),
+                  const Text(
+                    '앱 기여 순수익',
+                    style: TextStyle(color: Colors.white60, fontSize: 10.5),
+                  ),
                   const SizedBox(height: 4.0),
-                  Text(_currencyFormat.format(netProfit), style: const TextStyle(color: Colors.white, fontSize: 15.0, fontWeight: FontWeight.bold)),
+                  Text(
+                    _currencyFormat.format(netProfit),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 15.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ],
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  const Text('수수료 및 이용료', style: TextStyle(color: Colors.white60, fontSize: 10.5)),
+                  const Text(
+                    '수수료 및 이용료',
+                    style: TextStyle(color: Colors.white60, fontSize: 10.5),
+                  ),
                   const SizedBox(height: 4.0),
                   Text(
                     _currencyFormat.format(contributedRevenue - netProfit),
-                    style: const TextStyle(color: Colors.white70, fontSize: 13.0, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 13.0,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
-              )
+              ),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -231,15 +278,40 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
       mainAxisSpacing: 12.0,
       childAspectRatio: 1.6,
       children: [
-        _buildStatCard('오늘 예상 매출', _currencyFormat.format(dash['today_revenue'] ?? 0), Icons.payments_outlined, Colors.green),
-        _buildStatCard('누적 예약 건수', '${dash['reservation_count'] ?? 0}건', Icons.event_note, Colors.blue),
-        _buildStatCard('AI 추천 노출', '${dash['ai_recommend_exposed'] ?? 0}회', Icons.auto_awesome, Colors.amber.shade800),
-        _buildStatCard('리뷰 및 평점', '⭐ ${dash['average_rating']?.toStringAsFixed(1) ?? '0.0'} (${dash['review_count'] ?? 0})', Icons.star_outline, Colors.orange),
+        _buildStatCard(
+          '오늘 예상 매출',
+          _currencyFormat.format(dash['today_revenue'] ?? 0),
+          Icons.payments_outlined,
+          Colors.green,
+        ),
+        _buildStatCard(
+          '누적 예약 건수',
+          '${dash['reservation_count'] ?? 0}건',
+          Icons.event_note,
+          Colors.blue,
+        ),
+        _buildStatCard(
+          'AI 추천 노출',
+          '${dash['ai_recommend_exposed'] ?? 0}회',
+          Icons.auto_awesome,
+          Colors.amber.shade800,
+        ),
+        _buildStatCard(
+          '리뷰 및 평점',
+          '⭐ ${dash['average_rating']?.toStringAsFixed(1) ?? '0.0'} (${dash['review_count'] ?? 0})',
+          Icons.star_outline,
+          Colors.orange,
+        ),
       ],
     );
   }
 
-  Widget _buildStatCard(String label, String value, IconData icon, Color color) {
+  Widget _buildStatCard(
+    String label,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(12.0),
       decoration: BoxDecoration(
@@ -254,13 +326,23 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(label, style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary)),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 10.5,
+                  color: AppColors.textSecondary,
+                ),
+              ),
               Icon(icon, size: 16.0, color: color),
             ],
           ),
           Text(
             value,
-            style: const TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+            style: const TextStyle(
+              fontSize: 15.0,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
           ),
         ],
       ),
@@ -270,8 +352,10 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
   Widget _buildRevenueChart(Map<String, dynamic>? data) {
     if (data == null) return const Center(child: CircularProgressIndicator());
     final list = data['timeline'] as List<dynamic>? ?? [];
-    
-    final List<double> values = list.map((e) => (e['revenue'] as num).toDouble()).toList();
+
+    final List<double> values = list
+        .map((e) => (e['revenue'] as num).toDouble())
+        .toList();
     final List<String> labels = list.map((e) => e['period'] as String).toList();
 
     return LineChartWidget(values: values, labels: labels);
@@ -279,7 +363,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
 
   Widget _buildReservationChart(Map<String, dynamic>? data) {
     if (data == null) return const Center(child: CircularProgressIndicator());
-    
+
     final List<double> values = [
       (data['pending_count'] as num).toDouble(),
       (data['confirmed_count'] as num).toDouble(),
@@ -293,7 +377,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
 
   Widget _buildAIChart(Map<String, dynamic>? data) {
     if (data == null) return const Center(child: CircularProgressIndicator());
-    
+
     final List<double> values = [
       (data['generated_count'] as num).toDouble(),
       (data['saved_count'] as num).toDouble(),

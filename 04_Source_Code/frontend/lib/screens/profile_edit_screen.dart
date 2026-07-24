@@ -43,15 +43,15 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 
       if (mounted) {
         await context.read<ProfileProvider>().uploadProfileImage(context, file);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('프로필 사진이 변경되었습니다.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('프로필 사진이 변경되었습니다.')));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('사진 업로드 실패: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('사진 업로드 실패: $e')));
       }
     } finally {
       if (mounted) {
@@ -65,15 +65,15 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     try {
       await context.read<ProfileProvider>().removeProfileImage(context);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('기본 이미지로 변경되었습니다.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('기본 이미지로 변경되었습니다.')));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('이미지 제거 실패: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('이미지 제거 실패: $e')));
       }
     } finally {
       if (mounted) {
@@ -88,20 +88,20 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 
     try {
       await context.read<ProfileProvider>().updateNickname(
-            context,
-            _nicknameController.text.trim(),
-          );
+        context,
+        _nicknameController.text.trim(),
+      );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('프로필 수정이 완료되었습니다.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('프로필 수정이 완료되었습니다.')));
         Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('수정 실패: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('수정 실패: $e')));
       }
     } finally {
       if (mounted) {
@@ -143,7 +143,11 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                                     ? NetworkImage(user.profileImageUrl!)
                                     : null,
                                 child: user.profileImageUrl == null
-                                    ? const Icon(Icons.person, size: 64, color: Colors.grey)
+                                    ? const Icon(
+                                        Icons.person,
+                                        size: 64,
+                                        color: Colors.grey,
+                                      )
                                     : null,
                               ),
                               Positioned(
@@ -156,7 +160,11 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                                   child: const CircleAvatar(
                                     radius: 20,
                                     backgroundColor: Colors.blueAccent,
-                                    child: Icon(Icons.camera_alt, color: Colors.white, size: 18),
+                                    child: Icon(
+                                      Icons.camera_alt,
+                                      color: Colors.white,
+                                      size: 18,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -188,9 +196,13 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                           children: [
                             Expanded(
                               child: OutlinedButton(
-                                onPressed: _isSubmitting ? null : () => Navigator.pop(context),
+                                onPressed: _isSubmitting
+                                    ? null
+                                    : () => Navigator.pop(context),
                                 style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
                                 ),
                                 child: Text(l10n.cancel),
                               ),
@@ -200,7 +212,9 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                               child: ElevatedButton(
                                 onPressed: _isSubmitting ? null : _saveProfile,
                                 style: ElevatedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
                                   backgroundColor: Colors.blueAccent,
                                 ),
                                 child: Text(l10n.confirm),
@@ -215,9 +229,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                 if (_isSubmitting)
                   Container(
                     color: Colors.black26,
-                    child: const Center(
-                      child: CircularProgressIndicator(),
-                    ),
+                    child: const Center(child: CircularProgressIndicator()),
                   ),
               ],
             ),
@@ -249,7 +261,10 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.delete, color: Colors.red),
-                title: const Text('기본 이미지로 변경', style: TextStyle(color: Colors.red)),
+                title: const Text(
+                  '기본 이미지로 변경',
+                  style: TextStyle(color: Colors.red),
+                ),
                 onTap: () {
                   Navigator.pop(ctx);
                   _removeImage();

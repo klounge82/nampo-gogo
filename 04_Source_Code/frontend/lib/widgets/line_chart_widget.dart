@@ -60,15 +60,19 @@ class _LineChartPainter extends CustomPainter {
     // Draw horizontal grid lines (3 divisions)
     for (int i = 0; i <= 3; i++) {
       final double y = paddingTop + (chartHeight / 3) * i;
-      canvas.drawLine(Offset(paddingLeft, y), Offset(size.width - paddingRight, y), gridPaint);
+      canvas.drawLine(
+        Offset(paddingLeft, y),
+        Offset(size.width - paddingRight, y),
+        gridPaint,
+      );
 
       // Draw Y label text
       final double valueLabel = maxVal - ((range / 3) * i);
       final String formattedLabel = valueLabel >= 1000000
           ? '${(valueLabel / 1000000).toStringAsFixed(1)}M'
           : valueLabel >= 1000
-              ? '${(valueLabel / 1000).toStringAsFixed(0)}K'
-              : valueLabel.toStringAsFixed(0);
+          ? '${(valueLabel / 1000).toStringAsFixed(0)}K'
+          : valueLabel.toStringAsFixed(0);
 
       final TextPainter tp = TextPainter(
         text: TextSpan(
@@ -81,7 +85,8 @@ class _LineChartPainter extends CustomPainter {
     }
 
     // Points calculation
-    final double xStep = chartWidth / (values.length - 1 == 0 ? 1 : values.length - 1);
+    final double xStep =
+        chartWidth / (values.length - 1 == 0 ? 1 : values.length - 1);
     final List<Offset> points = [];
     for (int i = 0; i < values.length; i++) {
       final double x = paddingLeft + i * xStep;
@@ -99,11 +104,14 @@ class _LineChartPainter extends CustomPainter {
     areaPath.close();
 
     final Paint fillPaint = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [Colors.blue.withAlpha(80), Colors.blue.withAlpha(0)],
-      ).createShader(Rect.fromLTWH(paddingLeft, paddingTop, chartWidth, chartHeight));
+      ..shader =
+          LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.blue.withAlpha(80), Colors.blue.withAlpha(0)],
+          ).createShader(
+            Rect.fromLTWH(paddingLeft, paddingTop, chartWidth, chartHeight),
+          );
 
     canvas.drawPath(areaPath, fillPaint);
 
@@ -136,7 +144,13 @@ class _LineChartPainter extends CustomPainter {
         ),
         textDirection: TextDirection.ltr,
       )..layout();
-      labelTp.paint(canvas, Offset(points[i].dx - (labelTp.width / 2), size.height - paddingBottom + 8.0));
+      labelTp.paint(
+        canvas,
+        Offset(
+          points[i].dx - (labelTp.width / 2),
+          size.height - paddingBottom + 8.0,
+        ),
+      );
     }
   }
 

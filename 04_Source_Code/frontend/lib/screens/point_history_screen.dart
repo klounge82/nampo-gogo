@@ -60,7 +60,10 @@ class _PointHistoryScreenState extends State<PointHistoryScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('포인트 이용 내역', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          '포인트 이용 내역',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
         elevation: 0.5,
@@ -72,59 +75,61 @@ class _PointHistoryScreenState extends State<PointHistoryScreen> {
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            )
           : _errorMessage != null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('에러가 발생했습니다: $_errorMessage'),
-                      const SizedBox(height: 16.0),
-                      ElevatedButton(
-                        onPressed: _loadPointsAndHistory,
-                        child: const Text('다시 시도'),
-                      ),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('에러가 발생했습니다: $_errorMessage'),
+                  const SizedBox(height: 16.0),
+                  ElevatedButton(
+                    onPressed: _loadPointsAndHistory,
+                    child: const Text('다시 시도'),
                   ),
-                )
-              : RefreshIndicator(
-                  onRefresh: _loadPointsAndHistory,
-                  color: AppColors.primary,
-                  child: ListView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.all(16.0),
-                    children: [
-                      // 1. Current Points Card Dashboard
-                      _buildPointsCard(),
-                      const SizedBox(height: 24.0),
-                      
-                      // 2. Timeline Title
-                      const Text(
-                        '상세 이용 내역',
-                        style: TextStyle(
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
+                ],
+              ),
+            )
+          : RefreshIndicator(
+              onRefresh: _loadPointsAndHistory,
+              color: AppColors.primary,
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(16.0),
+                children: [
+                  // 1. Current Points Card Dashboard
+                  _buildPointsCard(),
+                  const SizedBox(height: 24.0),
+
+                  // 2. Timeline Title
+                  const Text(
+                    '상세 이용 내역',
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 12.0),
+
+                  // 3. Point History Timeline List
+                  if (_histories.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 48.0),
+                      child: Center(
+                        child: Text(
+                          '아직 포인트 거래 내역이 없습니다.',
+                          style: TextStyle(color: AppColors.textSecondary),
                         ),
                       ),
-                      const SizedBox(height: 12.0),
-                      
-                      // 3. Point History Timeline List
-                      if (_histories.isEmpty)
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 48.0),
-                          child: Center(
-                            child: Text(
-                              '아직 포인트 거래 내역이 없습니다.',
-                              style: TextStyle(color: AppColors.textSecondary),
-                            ),
-                          ),
-                        )
-                      else
-                        ..._histories.map((item) => _buildHistoryItem(item)),
-                    ],
-                  ),
-                ),
+                    )
+                  else
+                    ..._histories.map((item) => _buildHistoryItem(item)),
+                ],
+              ),
+            ),
     );
   }
 
@@ -152,7 +157,11 @@ class _PointHistoryScreenState extends State<PointHistoryScreen> {
         children: [
           const Text(
             '사용 가능한 포인트',
-            style: TextStyle(color: Colors.white70, fontSize: 13.0, fontWeight: FontWeight.w500),
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 13.0,
+              fontWeight: FontWeight.w500,
+            ),
           ),
           const SizedBox(height: 8.0),
           Row(
@@ -195,11 +204,23 @@ class _PointHistoryScreenState extends State<PointHistoryScreen> {
                 );
               },
               icon: const Icon(Icons.add_circle, color: Colors.white, size: 18),
-              label: const Text('포인트 충전하기', style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+              label: const Text(
+                '포인트 충전하기',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               style: TextButton.styleFrom(
                 backgroundColor: Colors.white.withAlpha(40),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
           ),
@@ -210,10 +231,12 @@ class _PointHistoryScreenState extends State<PointHistoryScreen> {
 
   Widget _buildHistoryItem(PointHistory item) {
     final isEarn = item.points > 0;
-    
+
     // Formatting date
-    final dateStr = '${item.createdAt.year}.${item.createdAt.month.toString().padLeft(2, '0')}.${item.createdAt.day.toString().padLeft(2, '0')}';
-    final timeStr = '${item.createdAt.hour.toString().padLeft(2, '0')}:${item.createdAt.minute.toString().padLeft(2, '0')}';
+    final dateStr =
+        '${item.createdAt.year}.${item.createdAt.month.toString().padLeft(2, '0')}.${item.createdAt.day.toString().padLeft(2, '0')}';
+    final timeStr =
+        '${item.createdAt.hour.toString().padLeft(2, '0')}:${item.createdAt.minute.toString().padLeft(2, '0')}';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12.0),
@@ -241,7 +264,7 @@ class _PointHistoryScreenState extends State<PointHistoryScreen> {
             ),
           ),
           const SizedBox(width: 12.0),
-          
+
           // Mid info section
           Expanded(
             child: Column(
@@ -268,7 +291,7 @@ class _PointHistoryScreenState extends State<PointHistoryScreen> {
               ],
             ),
           ),
-          
+
           // Right points change
           Text(
             isEarn ? '+${item.points} P' : '${item.points} P',

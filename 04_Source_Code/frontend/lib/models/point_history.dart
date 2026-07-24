@@ -19,8 +19,8 @@ class PointHistory {
       userId: json['user_id'] as String? ?? '',
       points: json['points'] as int? ?? 0,
       activity: json['activity'] as String? ?? '',
-      createdAt: json['created_at'] != null 
-          ? DateTime.parse(json['created_at'] as String) 
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String)
           : DateTime.now(),
     );
   }

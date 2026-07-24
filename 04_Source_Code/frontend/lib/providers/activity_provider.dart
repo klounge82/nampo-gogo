@@ -5,7 +5,7 @@ class ActivityProvider extends ChangeNotifier {
   final ActivityRepository _repository;
 
   ActivityProvider({ActivityRepository? repository})
-      : _repository = repository ?? ActivityRepository();
+    : _repository = repository ?? ActivityRepository();
 
   List<dynamic> _activities = [];
   bool _isLoading = false;
@@ -16,7 +16,11 @@ class ActivityProvider extends ChangeNotifier {
   String get errorMessage => _errorMessage;
 
   // Load User Activities (with Mock Fallback on failure)
-  Future<void> loadActivities({required String? token, String? type, int page = 1}) async {
+  Future<void> loadActivities({
+    required String? token,
+    String? type,
+    int page = 1,
+  }) async {
     _isLoading = true;
     _errorMessage = '';
     notifyListeners();

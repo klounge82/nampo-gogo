@@ -28,7 +28,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
     try {
       final parsed = DateTime.parse(dateStr).toLocal();
       final now = DateTime.now();
-      
+
       final today = DateTime(now.year, now.month, now.day);
       final yesterday = today.subtract(const Duration(days: 1));
       final parsedDay = DateTime(parsed.year, parsed.month, parsed.day);
@@ -66,49 +66,56 @@ class _ActivityScreenState extends State<ActivityScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('내 활동 기록', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          '내 활동 기록',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _refreshList,
-          ),
+          IconButton(icon: const Icon(Icons.refresh), onPressed: _refreshList),
         ],
       ),
       body: actProvider.isLoading
           ? const Center(child: CircularProgressIndicator())
           : actProvider.activities.isEmpty
-              ? _buildEmptyState()
-              : RefreshIndicator(
-                  onRefresh: () async => _refreshList(),
-                  child: ListView.builder(
-                    itemCount: groupOrder.length,
-                    itemBuilder: (context, index) {
-                      final groupName = groupOrder[index];
-                      final items = groupedMap[groupName];
-                      if (items == null || items.isEmpty) return const SizedBox.shrink();
+          ? _buildEmptyState()
+          : RefreshIndicator(
+              onRefresh: () async => _refreshList(),
+              child: ListView.builder(
+                itemCount: groupOrder.length,
+                itemBuilder: (context, index) {
+                  final groupName = groupOrder[index];
+                  final items = groupedMap[groupName];
+                  if (items == null || items.isEmpty)
+                    return const SizedBox.shrink();
 
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Group Title Header
-                          Padding(
-                            padding: const EdgeInsets.only(left: 20.0, top: 16.0, bottom: 8.0),
-                            child: Text(
-                              groupName,
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.blueAccent.shade700,
-                              ),
-                            ),
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Group Title Header
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: 20.0,
+                          top: 16.0,
+                          bottom: 8.0,
+                        ),
+                        child: Text(
+                          groupName,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blueAccent.shade700,
                           ),
-                          // Cards in Group
-                          ...items.map((act) => ActivityCard(activity: act)).toList(),
-                        ],
-                      );
-                    },
-                  ),
-                ),
+                        ),
+                      ),
+                      // Cards in Group
+                      ...items
+                          .map((act) => ActivityCard(activity: act))
+                          .toList(),
+                    ],
+                  );
+                },
+              ),
+            ),
     );
   }
 
@@ -121,7 +128,11 @@ class _ActivityScreenState extends State<ActivityScreen> {
           SizedBox(height: 16),
           Text(
             '활동 기록이 없습니다.',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey),
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey,
+            ),
           ),
           SizedBox(height: 8),
           Text(

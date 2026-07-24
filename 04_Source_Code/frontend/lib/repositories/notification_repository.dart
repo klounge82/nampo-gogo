@@ -7,11 +7,15 @@ class NotificationRepository {
   final Dio _dio;
 
   NotificationRepository({Dio? dio})
-      : _dio = dio ?? Dio(BaseOptions(
-          baseUrl: ApiConfig.baseUrl,
-          connectTimeout: const Duration(seconds: 5),
-          receiveTimeout: const Duration(seconds: 3),
-        ));
+    : _dio =
+          dio ??
+          Dio(
+            BaseOptions(
+              baseUrl: ApiConfig.baseUrl,
+              connectTimeout: const Duration(seconds: 5),
+              receiveTimeout: const Duration(seconds: 3),
+            ),
+          );
 
   Future<void> registerToken({
     required String deviceId,
@@ -21,13 +25,16 @@ class NotificationRepository {
     String language = 'ko',
   }) async {
     try {
-      await _dio.post('/notifications/tokens', data: {
-        'user_id': userId,
-        'device_id': deviceId,
-        'device_type': deviceType,
-        'fcm_token': fcmToken,
-        'language': language,
-      });
+      await _dio.post(
+        '/notifications/tokens',
+        data: {
+          'user_id': userId,
+          'device_id': deviceId,
+          'device_type': deviceType,
+          'fcm_token': fcmToken,
+          'language': language,
+        },
+      );
     } catch (e) {
       if (kDebugMode) {
         print('NotificationRepository: Failed registerToken: $e');
@@ -54,21 +61,30 @@ class NotificationRepository {
     }
   }
 
-  Future<List<NotificationModel>> getNotifications({String? userId, int skip = 0, int limit = 20}) async {
+  Future<List<NotificationModel>> getNotifications({
+    String? userId,
+    int skip = 0,
+    int limit = 20,
+  }) async {
     try {
-      final res = await _dio.get('/notifications', queryParameters: {
-        if (userId != null) 'user_id': userId,
-        'skip': skip,
-        'limit': limit,
-      });
-      
+      final res = await _dio.get(
+        '/notifications',
+        queryParameters: {
+          if (userId != null) 'user_id': userId,
+          'skip': skip,
+          'limit': limit,
+        },
+      );
+
       final list = res.data as List;
       return list.map((item) => NotificationModel.fromJson(item)).toList();
     } catch (e) {
       if (kDebugMode) {
-        print('NotificationRepository: Failed fetching notifications. Simulating offline fallback: $e');
+        print(
+          'NotificationRepository: Failed fetching notifications. Simulating offline fallback: $e',
+        );
       }
-      
+
       // Offline fallback dummy mock
       return [
         NotificationModel(
@@ -125,9 +141,10 @@ class NotificationRepository {
 
   Future<void> markAllAsRead({String? userId}) async {
     try {
-      await _dio.patch('/notifications/read-all', queryParameters: {
-        if (userId != null) 'user_id': userId,
-      });
+      await _dio.patch(
+        '/notifications/read-all',
+        queryParameters: {if (userId != null) 'user_id': userId},
+      );
     } catch (e) {
       if (kDebugMode) {
         print('NotificationRepository: Failed markAllAsRead: $e');
@@ -137,13 +154,16 @@ class NotificationRepository {
 
   Future<NotificationPreferenceModel> getPreferences({String? userId}) async {
     try {
-      final res = await _dio.get('/notifications/preferences', queryParameters: {
-        if (userId != null) 'user_id': userId,
-      });
+      final res = await _dio.get(
+        '/notifications/preferences',
+        queryParameters: {if (userId != null) 'user_id': userId},
+      );
       return NotificationPreferenceModel.fromJson(res.data);
     } catch (e) {
       if (kDebugMode) {
-        print('NotificationRepository: Failed getPreferences ($e). Returning defaults.');
+        print(
+          'NotificationRepository: Failed getPreferences ($e). Returning defaults.',
+        );
       }
       return NotificationPreferenceModel(
         userId: userId ?? '',
@@ -166,9 +186,7 @@ class NotificationRepository {
       final res = await _dio.patch(
         '/notifications/preferences',
         data: pref.toJson(),
-        queryParameters: {
-          if (userId != null) 'user_id': userId,
-        },
+        queryParameters: {if (userId != null) 'user_id': userId},
       );
       return NotificationPreferenceModel.fromJson(res.data);
     } catch (e) {

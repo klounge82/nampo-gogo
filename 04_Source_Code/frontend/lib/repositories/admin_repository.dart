@@ -30,11 +30,11 @@ class AdminAuditLogModel {
       action: json['action'] as String? ?? '',
       targetId: json['target_id'] as String?,
       details: json['details'] as String?,
-      createdAt: json['created_at'] != null 
-          ? DateTime.parse(json['created_at'] as String) 
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String)
           : DateTime.now(),
-      admin: json['admin'] != null 
-          ? User.fromJson(json['admin'] as Map<String, dynamic>) 
+      admin: json['admin'] != null
+          ? User.fromJson(json['admin'] as Map<String, dynamic>)
           : null,
     );
   }
@@ -87,7 +87,7 @@ class AdminRepository {
   ];
 
   AdminRepository({AdminService? adminService})
-      : _adminService = adminService ?? AdminService();
+    : _adminService = adminService ?? AdminService();
 
   Future<Map<String, dynamic>> getStats({String? adminId}) async {
     try {
@@ -107,28 +107,54 @@ class AdminRepository {
     }
   }
 
-  Future<List<User>> getUsers({String? search, int skip = 0, int limit = 20, String? adminId}) async {
+  Future<List<User>> getUsers({
+    String? search,
+    int skip = 0,
+    int limit = 20,
+    String? adminId,
+  }) async {
     try {
-      final list = await _adminService.fetchAdminUsers(search: search, skip: skip, limit: limit, adminId: adminId);
-      return list.map((json) => User.fromJson(json as Map<String, dynamic>)).toList();
+      final list = await _adminService.fetchAdminUsers(
+        search: search,
+        skip: skip,
+        limit: limit,
+        adminId: adminId,
+      );
+      return list
+          .map((json) => User.fromJson(json as Map<String, dynamic>))
+          .toList();
     } catch (e) {
       if (kDebugMode) {
         print('AdminRepository: Failed users fetch. Simulating offline: $e');
       }
       if (search != null && search.isNotEmpty) {
-        return _mockUsers.where((u) => u.email.contains(search) || u.nickname.contains(search)).toList();
+        return _mockUsers
+            .where(
+              (u) => u.email.contains(search) || u.nickname.contains(search),
+            )
+            .toList();
       }
       return _mockUsers;
     }
   }
 
-  Future<User> updateUserStatus(String userId, String status, {String? adminId}) async {
+  Future<User> updateUserStatus(
+    String userId,
+    String status, {
+    String? adminId,
+  }) async {
     try {
-      final res = await _adminService.updateUserStatus(userId, status, adminId: adminId);
+      final res = await _adminService.updateUserStatus(
+        userId,
+        status,
+        adminId: adminId,
+      );
       return User.fromJson(res);
     } catch (e) {
       if (kDebugMode) {
-        print('AdminRepository: Failed user status update. Simulating offline: $e');
+        print(
+          'AdminRepository: Failed user status update. Simulating offline: $e',
+        );
       }
       final index = _mockUsers.indexWhere((u) => u.id == userId);
       if (index != -1) {
@@ -144,26 +170,42 @@ class AdminRepository {
           updatedAt: DateTime.now(),
         );
         _mockUsers[index] = updated;
-        
+
         // Append simulated audit log
-        _mockLogs.insert(0, AdminAuditLogModel(
-          id: 'log_mock_${DateTime.now().millisecondsSinceEpoch}',
-          action: 'UPDATE_USER_STATUS',
-          targetId: userId,
-          details: 'Changed status from ${current.status} to $status (Offline)',
-          createdAt: DateTime.now(),
-        ));
-        
+        _mockLogs.insert(
+          0,
+          AdminAuditLogModel(
+            id: 'log_mock_${DateTime.now().millisecondsSinceEpoch}',
+            action: 'UPDATE_USER_STATUS',
+            targetId: userId,
+            details:
+                'Changed status from ${current.status} to $status (Offline)',
+            createdAt: DateTime.now(),
+          ),
+        );
+
         return updated;
       }
       throw Exception('사용자를 찾을 수 없습니다.');
     }
   }
 
-  Future<List<AdminAuditLogModel>> getAuditLogs({String? adminId, int skip = 0, int limit = 30}) async {
+  Future<List<AdminAuditLogModel>> getAuditLogs({
+    String? adminId,
+    int skip = 0,
+    int limit = 30,
+  }) async {
     try {
-      final list = await _adminService.fetchAdminAuditLogs(adminId: adminId, skip: skip, limit: limit);
-      return list.map((json) => AdminAuditLogModel.fromJson(json as Map<String, dynamic>)).toList();
+      final list = await _adminService.fetchAdminAuditLogs(
+        adminId: adminId,
+        skip: skip,
+        limit: limit,
+      );
+      return list
+          .map(
+            (json) => AdminAuditLogModel.fromJson(json as Map<String, dynamic>),
+          )
+          .toList();
     } catch (e) {
       if (kDebugMode) {
         print('AdminRepository: Failed logs fetch. Simulating offline: $e');
@@ -173,34 +215,67 @@ class AdminRepository {
   }
 
   // Expansion helpers (Stubbed out to avoid compile issues)
-  Future<Place> createStore(Map<String, dynamic> data, {String? adminId}) async {
+  Future<Place> createStore(
+    Map<String, dynamic> data, {
+    String? adminId,
+  }) async {
     final res = await _adminService.createStore(data, adminId: adminId);
     return Place.fromJson(res);
   }
 
-  Future<Place> updateStore(String id, Map<String, dynamic> data, {String? adminId}) async {
+  Future<Place> updateStore(
+    String id,
+    Map<String, dynamic> data, {
+    String? adminId,
+  }) async {
     final res = await _adminService.updateStore(id, data, adminId: adminId);
     return Place.fromJson(res);
   }
 
-  Future<Place> updateStoreStatus(String id, String status, {String? adminId}) async {
-    final res = await _adminService.updateStoreStatus(id, status, adminId: adminId);
+  Future<Place> updateStoreStatus(
+    String id,
+    String status, {
+    String? adminId,
+  }) async {
+    final res = await _adminService.updateStoreStatus(
+      id,
+      status,
+      adminId: adminId,
+    );
     return Place.fromJson(res);
   }
 
-  Future<Map<String, dynamic>> createMission(Map<String, dynamic> data, {String? adminId}) async {
+  Future<Map<String, dynamic>> createMission(
+    Map<String, dynamic> data, {
+    String? adminId,
+  }) async {
     return await _adminService.createMission(data, adminId: adminId);
   }
 
-  Future<Map<String, dynamic>> updateMissionStatus(String id, String status, {String? adminId}) async {
-    return await _adminService.updateMissionStatus(id, status, adminId: adminId);
+  Future<Map<String, dynamic>> updateMissionStatus(
+    String id,
+    String status, {
+    String? adminId,
+  }) async {
+    return await _adminService.updateMissionStatus(
+      id,
+      status,
+      adminId: adminId,
+    );
   }
 
-  Future<Map<String, dynamic>> createCoupon(Map<String, dynamic> data, {String? adminId}) async {
+  Future<Map<String, dynamic>> createCoupon(
+    Map<String, dynamic> data, {
+    String? adminId,
+  }) async {
     return await _adminService.createCoupon(data, adminId: adminId);
   }
 
-  Future<Map<String, dynamic>> updateCouponStatus(String id, String status, {String? adminId}) async {
+  Future<Map<String, dynamic>> updateCouponStatus(
+    String id,
+    String status, {
+    String? adminId,
+  }) async {
     return await _adminService.updateCouponStatus(id, status, adminId: adminId);
   }
 
@@ -208,13 +283,23 @@ class AdminRepository {
     return await _adminService.fetchAdminReservations(adminId: adminId);
   }
 
-  Future<Map<String, dynamic>> updateReservationStatus(String id, String status, {String? adminId}) async {
-    return await _adminService.updateReservationStatus(id, status, adminId: adminId);
+  Future<Map<String, dynamic>> updateReservationStatus(
+    String id,
+    String status, {
+    String? adminId,
+  }) async {
+    return await _adminService.updateReservationStatus(
+      id,
+      status,
+      adminId: adminId,
+    );
   }
 
   Future<List<Review>> getReviews({String? adminId}) async {
     final list = await _adminService.fetchAdminReviews(adminId: adminId);
-    return list.map((json) => Review.fromJson(json as Map<String, dynamic>)).toList();
+    return list
+        .map((json) => Review.fromJson(json as Map<String, dynamic>))
+        .toList();
   }
 
   Future<Review> hideReview(String id, bool isHidden, {String? adminId}) async {

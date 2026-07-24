@@ -2,15 +2,17 @@ import 'package:dio/dio.dart';
 import '../config/api_config.dart';
 
 class AdminService {
-  Dio get _dio => Dio(BaseOptions(
-        baseUrl: ApiConfig.baseUrl,
-        connectTimeout: ApiConfig.connectTimeout,
-        receiveTimeout: ApiConfig.receiveTimeout,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      ));
+  Dio get _dio => Dio(
+    BaseOptions(
+      baseUrl: ApiConfig.baseUrl,
+      connectTimeout: ApiConfig.connectTimeout,
+      receiveTimeout: ApiConfig.receiveTimeout,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    ),
+  );
 
   // GET /admin/stats
   Future<Map<String, dynamic>> fetchAdminStats({String? adminId}) async {
@@ -29,7 +31,12 @@ class AdminService {
   }
 
   // GET /admin/users
-  Future<List<dynamic>> fetchAdminUsers({String? search, int skip = 0, int limit = 20, String? adminId}) async {
+  Future<List<dynamic>> fetchAdminUsers({
+    String? search,
+    int skip = 0,
+    int limit = 20,
+    String? adminId,
+  }) async {
     try {
       final response = await _dio.get(
         '/admin/users',
@@ -50,7 +57,11 @@ class AdminService {
   }
 
   // PATCH /admin/users/{user_id}/status
-  Future<Map<String, dynamic>> updateUserStatus(String userId, String status, {String? adminId}) async {
+  Future<Map<String, dynamic>> updateUserStatus(
+    String userId,
+    String status, {
+    String? adminId,
+  }) async {
     try {
       final response = await _dio.patch(
         '/admin/users/$userId/status',
@@ -67,7 +78,10 @@ class AdminService {
   }
 
   // POST /admin/stores
-  Future<Map<String, dynamic>> createStore(Map<String, dynamic> storeData, {String? adminId}) async {
+  Future<Map<String, dynamic>> createStore(
+    Map<String, dynamic> storeData, {
+    String? adminId,
+  }) async {
     try {
       final response = await _dio.post(
         '/admin/stores',
@@ -84,7 +98,11 @@ class AdminService {
   }
 
   // PUT /admin/stores/{store_id}
-  Future<Map<String, dynamic>> updateStore(String storeId, Map<String, dynamic> storeData, {String? adminId}) async {
+  Future<Map<String, dynamic>> updateStore(
+    String storeId,
+    Map<String, dynamic> storeData, {
+    String? adminId,
+  }) async {
     try {
       final response = await _dio.put(
         '/admin/stores/$storeId',
@@ -101,7 +119,11 @@ class AdminService {
   }
 
   // PATCH /admin/stores/{store_id}/status
-  Future<Map<String, dynamic>> updateStoreStatus(String storeId, String status, {String? adminId}) async {
+  Future<Map<String, dynamic>> updateStoreStatus(
+    String storeId,
+    String status, {
+    String? adminId,
+  }) async {
     try {
       final response = await _dio.patch(
         '/admin/stores/$storeId/status',
@@ -118,7 +140,10 @@ class AdminService {
   }
 
   // POST /admin/missions
-  Future<Map<String, dynamic>> createMission(Map<String, dynamic> missionData, {String? adminId}) async {
+  Future<Map<String, dynamic>> createMission(
+    Map<String, dynamic> missionData, {
+    String? adminId,
+  }) async {
     try {
       final response = await _dio.post(
         '/admin/missions',
@@ -135,7 +160,11 @@ class AdminService {
   }
 
   // PATCH /admin/missions/{mission_id}/status
-  Future<Map<String, dynamic>> updateMissionStatus(String missionId, String status, {String? adminId}) async {
+  Future<Map<String, dynamic>> updateMissionStatus(
+    String missionId,
+    String status, {
+    String? adminId,
+  }) async {
     try {
       final response = await _dio.patch(
         '/admin/missions/$missionId/status',
@@ -152,7 +181,10 @@ class AdminService {
   }
 
   // POST /admin/coupons
-  Future<Map<String, dynamic>> createCoupon(Map<String, dynamic> couponData, {String? adminId}) async {
+  Future<Map<String, dynamic>> createCoupon(
+    Map<String, dynamic> couponData, {
+    String? adminId,
+  }) async {
     try {
       final response = await _dio.post(
         '/admin/coupons',
@@ -169,7 +201,11 @@ class AdminService {
   }
 
   // PATCH /admin/coupons/{coupon_id}/status
-  Future<Map<String, dynamic>> updateCouponStatus(String couponId, String status, {String? adminId}) async {
+  Future<Map<String, dynamic>> updateCouponStatus(
+    String couponId,
+    String status, {
+    String? adminId,
+  }) async {
     try {
       final response = await _dio.patch(
         '/admin/coupons/$couponId/status',
@@ -186,7 +222,11 @@ class AdminService {
   }
 
   // GET /admin/reservations
-  Future<List<dynamic>> fetchAdminReservations({String? adminId, int skip = 0, int limit = 20}) async {
+  Future<List<dynamic>> fetchAdminReservations({
+    String? adminId,
+    int skip = 0,
+    int limit = 20,
+  }) async {
     try {
       final response = await _dio.get(
         '/admin/reservations',
@@ -206,7 +246,11 @@ class AdminService {
   }
 
   // PATCH /admin/reservations/{reservation_id}/status
-  Future<Map<String, dynamic>> updateReservationStatus(String reservationId, String status, {String? adminId}) async {
+  Future<Map<String, dynamic>> updateReservationStatus(
+    String reservationId,
+    String status, {
+    String? adminId,
+  }) async {
     try {
       final response = await _dio.patch(
         '/admin/reservations/$reservationId/status',
@@ -223,7 +267,11 @@ class AdminService {
   }
 
   // GET /admin/reviews
-  Future<List<dynamic>> fetchAdminReviews({String? adminId, int skip = 0, int limit = 20}) async {
+  Future<List<dynamic>> fetchAdminReviews({
+    String? adminId,
+    int skip = 0,
+    int limit = 20,
+  }) async {
     try {
       final response = await _dio.get(
         '/admin/reviews',
@@ -243,7 +291,11 @@ class AdminService {
   }
 
   // PATCH /admin/reviews/{review_id}/hide
-  Future<Map<String, dynamic>> hideReview(String reviewId, bool isHidden, {String? adminId}) async {
+  Future<Map<String, dynamic>> hideReview(
+    String reviewId,
+    bool isHidden, {
+    String? adminId,
+  }) async {
     try {
       final response = await _dio.patch(
         '/admin/reviews/$reviewId/hide',
@@ -260,7 +312,11 @@ class AdminService {
   }
 
   // GET /admin/audit-logs
-  Future<List<dynamic>> fetchAdminAuditLogs({String? adminId, int skip = 0, int limit = 30}) async {
+  Future<List<dynamic>> fetchAdminAuditLogs({
+    String? adminId,
+    int skip = 0,
+    int limit = 30,
+  }) async {
     try {
       final response = await _dio.get(
         '/admin/audit-logs',

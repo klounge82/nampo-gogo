@@ -13,7 +13,8 @@ class BusinessDashboardScreen extends StatefulWidget {
   const BusinessDashboardScreen({super.key});
 
   @override
-  State<BusinessDashboardScreen> createState() => _BusinessDashboardScreenState();
+  State<BusinessDashboardScreen> createState() =>
+      _BusinessDashboardScreenState();
 }
 
 class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
@@ -37,21 +38,30 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final storeRes = await _businessService.getManagedStore().catchError((_) => <String, dynamic>{});
+      final storeRes = await _businessService.getManagedStore().catchError(
+        (_) => <String, dynamic>{},
+      );
       final store = (storeRes['store'] as Map<String, dynamic>?) ?? {};
 
-      final products = await _businessService.getProducts().catchError((_) => <Map<String, dynamic>>[]);
+      final products = await _businessService.getProducts().catchError(
+        (_) => <Map<String, dynamic>>[],
+      );
 
-      final reviewsRes = await _businessService.getReviews().catchError((_) => <String, dynamic>{});
+      final reviewsRes = await _businessService.getReviews().catchError(
+        (_) => <String, dynamic>{},
+      );
 
       if (mounted) {
         setState(() {
           _storeName = store['name'] as String? ?? '매장';
           _storeStatus = store['status'] as String? ?? '영업중';
           _totalProducts = products.length;
-          _activeProducts = products.where((p) => p['status'] == 'ACTIVE').length;
+          _activeProducts = products
+              .where((p) => p['status'] == 'ACTIVE')
+              .length;
           _totalReviews = reviewsRes['total_count'] as int? ?? 0;
-          _avgRating = (reviewsRes['average_rating'] as num?)?.toDouble() ?? 0.0;
+          _avgRating =
+              (reviewsRes['average_rating'] as num?)?.toDouble() ?? 0.0;
           _isLoading = false;
         });
       }
@@ -87,9 +97,9 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
     }
 
     if (screen != null) {
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => screen!),
-      ).then((_) => _fetchDashboardData());
+      Navigator.of(context)
+          .push(MaterialPageRoute(builder: (_) => screen!))
+          .then((_) => _fetchDashboardData());
     }
   }
 
@@ -162,7 +172,11 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.store, color: Colors.white, size: 28),
+                          const Icon(
+                            Icons.store,
+                            color: Colors.white,
+                            size: 28,
+                          ),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Column(
@@ -239,17 +253,18 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
                       physics: const NeverScrollableScrollPhysics(),
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
-                        childAspectRatio: 1.3,
-                      ),
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                            childAspectRatio: 1.3,
+                          ),
                       itemCount: DashboardWidgetRegistry.businessWidgets.length,
                       itemBuilder: (context, index) {
                         final widgetDef =
                             DashboardWidgetRegistry.businessWidgets[index];
-                        final displayVal =
-                            _getWidgetDisplayValue(widgetDef.widgetKey);
+                        final displayVal = _getWidgetDisplayValue(
+                          widgetDef.widgetKey,
+                        );
 
                         return Card(
                           elevation: widgetDef.available ? 2 : 0.5,

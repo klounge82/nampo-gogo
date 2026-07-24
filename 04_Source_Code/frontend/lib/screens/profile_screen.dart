@@ -352,12 +352,15 @@ class ProfileScreen extends StatelessWidget {
                             : '사업자 회원 신청',
                         onTap: () {
                           if (user?.isApprovedBusiness == true) {
-                            Provider.of<AppModeProvider>(context, listen: false)
-                                .switchMode(AppMode.business, user);
+                            Provider.of<AppModeProvider>(
+                              context,
+                              listen: false,
+                            ).switchMode(AppMode.business, user);
                           } else {
                             Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (_) => const BusinessApplicationScreen(),
+                                builder: (_) =>
+                                    const BusinessApplicationScreen(),
                               ),
                             );
                           }

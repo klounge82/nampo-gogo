@@ -22,9 +22,9 @@ class ApiService {
           'Accept': 'application/json',
         },
       );
-      
+
       final dio = Dio(baseOptions);
-      
+
       const storage = FlutterSecureStorage();
       dio.interceptors.add(
         InterceptorsWrapper(
@@ -41,14 +41,16 @@ class ApiService {
           },
         ),
       );
-      
+
       // Add simple logging interceptor for debugging
-      dio.interceptors.add(LogInterceptor(
-        requestHeader: false,
-        responseHeader: false,
-        requestBody: true,
-        responseBody: true,
-      ));
+      dio.interceptors.add(
+        LogInterceptor(
+          requestHeader: false,
+          responseHeader: false,
+          requestBody: true,
+          responseBody: true,
+        ),
+      );
 
       _instance = ApiService._(dio);
     }
@@ -59,11 +61,12 @@ class ApiService {
   Future<String> fetchApiStatusMessage() async {
     try {
       final response = await _dio.get('/');
-      
+
       if (response.statusCode == 200 && response.data != null) {
         final data = response.data;
         if (data is Map<String, dynamic>) {
-          return data['message'] ?? 'Nampo GoGo API is running (unknown message)';
+          return data['message'] ??
+              'Nampo GoGo API is running (unknown message)';
         }
       }
       throw DioException(

@@ -57,7 +57,7 @@ class MapRepository {
   ];
 
   MapRepository({PlaceRepository? placeRepository})
-      : _placeRepository = placeRepository ?? PlaceRepository();
+    : _placeRepository = placeRepository ?? PlaceRepository();
 
   /// 지도 상에 노출할 주변 장소들을 조회합니다.
   /// API 실패 시, 로컬 모의 장소 4종(위경도 포함)을 리턴해 오프라인 폴백을 지원합니다.
@@ -65,8 +65,10 @@ class MapRepository {
     try {
       final list = await _placeRepository.getPlaces();
       // Only return places that have coordinates defined
-      final validList = list.where((p) => p.latitude != null && p.longitude != null).toList();
-      
+      final validList = list
+          .where((p) => p.latitude != null && p.longitude != null)
+          .toList();
+
       if (validList.isEmpty) {
         return _mockPlaces;
       }

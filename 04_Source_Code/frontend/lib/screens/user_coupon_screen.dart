@@ -12,10 +12,11 @@ class UserCouponScreen extends StatefulWidget {
   State<UserCouponScreen> createState() => _UserCouponScreenState();
 }
 
-class _UserCouponScreenState extends State<UserCouponScreen> with SingleTickerProviderStateMixin {
+class _UserCouponScreenState extends State<UserCouponScreen>
+    with SingleTickerProviderStateMixin {
   final CouponRepository _couponRepository = CouponRepository();
   late TabController _tabController;
-  
+
   List<UserCoupon> _unusedCoupons = [];
   List<UserCoupon> _usedCoupons = [];
   bool _isLoading = true;
@@ -44,11 +45,16 @@ class _UserCouponScreenState extends State<UserCouponScreen> with SingleTickerPr
     final userId = authProvider.currentUser?.id;
 
     try {
-      final unused = await _couponRepository.getUserCoupons(userId: userId, status: 'unused');
+      final unused = await _couponRepository.getUserCoupons(
+        userId: userId,
+        status: 'unused',
+      );
       final used = await _couponRepository.getUserCoupons(userId: userId);
-      
+
       // Filter out used / expired for secondary tab
-      final usedFiltered = used.where((uc) => uc.status == 'used' || uc.status == 'expired').toList();
+      final usedFiltered = used
+          .where((uc) => uc.status == 'used' || uc.status == 'expired')
+          .toList();
 
       setState(() {
         _unusedCoupons = unused;
@@ -71,11 +77,16 @@ class _UserCouponScreenState extends State<UserCouponScreen> with SingleTickerPr
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
+      builder: (_) => const Center(
+        child: CircularProgressIndicator(color: AppColors.primary),
+      ),
     );
 
     try {
-      final success = await _couponRepository.useUserCoupon(userCoupon.id, userId: userId);
+      final success = await _couponRepository.useUserCoupon(
+        userCoupon.id,
+        userId: userId,
+      );
       Navigator.of(context).pop(); // Dismiss processing indicator
 
       if (success) {
@@ -102,7 +113,13 @@ class _UserCouponScreenState extends State<UserCouponScreen> with SingleTickerPr
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.secondary)),
+        title: Text(
+          title,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: AppColors.secondary,
+          ),
+        ),
         content: Text(message),
         actions: [
           TextButton(
@@ -118,27 +135,38 @@ class _UserCouponScreenState extends State<UserCouponScreen> with SingleTickerPr
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               userCoupon.coupon.title,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0),
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16.0,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8.0),
             Text(
               '유효기간: ~ ${userCoupon.expiresAt.year}.${userCoupon.expiresAt.month.toString().padLeft(2, '0')}.${userCoupon.expiresAt.day.toString().padLeft(2, '0')}',
-              style: const TextStyle(fontSize: 11.0, color: AppColors.textSecondary),
+              style: const TextStyle(
+                fontSize: 11.0,
+                color: AppColors.textSecondary,
+              ),
             ),
             const SizedBox(height: 24.0),
-            
+
             // Fake Barcode Image Placeholder
             Container(
               width: double.infinity,
               height: 90.0,
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 8.0,
+              ),
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.grey.shade300),
                 borderRadius: BorderRadius.circular(8.0),
@@ -160,20 +188,24 @@ class _UserCouponScreenState extends State<UserCouponScreen> with SingleTickerPr
                   const SizedBox(height: 6.0),
                   Text(
                     '${userCoupon.id.replaceAll('-', '').substring(0, 16).toUpperCase()}',
-                    style: const TextStyle(fontSize: 10.0, letterSpacing: 2.0, fontWeight: FontWeight.w500),
+                    style: const TextStyle(
+                      fontSize: 10.0,
+                      letterSpacing: 2.0,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 24.0),
-            
+
             const Text(
               '매장 직원에게 위 바코드를 보여주세요.',
               style: TextStyle(fontSize: 11.0, color: AppColors.textSecondary),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16.0),
-            
+
             // Staff complete button
             SizedBox(
               width: double.infinity,
@@ -188,7 +220,9 @@ class _UserCouponScreenState extends State<UserCouponScreen> with SingleTickerPr
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.secondary,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
                 ),
               ),
             ),
@@ -203,7 +237,10 @@ class _UserCouponScreenState extends State<UserCouponScreen> with SingleTickerPr
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('내 쿠폰함', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          '내 쿠폰함',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
         elevation: 0.5,
@@ -220,25 +257,30 @@ class _UserCouponScreenState extends State<UserCouponScreen> with SingleTickerPr
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            )
           : _errorMessage != null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('쿠폰을 로딩하지 못했습니다: $_errorMessage'),
-                      const SizedBox(height: 16.0),
-                      ElevatedButton(onPressed: _loadUserCoupons, child: const Text('다시 시도')),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('쿠폰을 로딩하지 못했습니다: $_errorMessage'),
+                  const SizedBox(height: 16.0),
+                  ElevatedButton(
+                    onPressed: _loadUserCoupons,
+                    child: const Text('다시 시도'),
                   ),
-                )
-              : TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildCouponTabList(_unusedCoupons, isUnused: true),
-                    _buildCouponTabList(_usedCoupons, isUnused: false),
-                  ],
-                ),
+                ],
+              ),
+            )
+          : TabBarView(
+              controller: _tabController,
+              children: [
+                _buildCouponTabList(_unusedCoupons, isUnused: true),
+                _buildCouponTabList(_usedCoupons, isUnused: false),
+              ],
+            ),
     );
   }
 
@@ -263,7 +305,8 @@ class _UserCouponScreenState extends State<UserCouponScreen> with SingleTickerPr
   }
 
   Widget _buildCouponCard(UserCoupon userCoupon, bool isUnused) {
-    final expStr = '${userCoupon.expiresAt.year}.${userCoupon.expiresAt.month.toString().padLeft(2, '0')}.${userCoupon.expiresAt.day.toString().padLeft(2, '0')}';
+    final expStr =
+        '${userCoupon.expiresAt.year}.${userCoupon.expiresAt.month.toString().padLeft(2, '0')}.${userCoupon.expiresAt.day.toString().padLeft(2, '0')}';
     final isUsed = userCoupon.status == 'used';
 
     return GestureDetector(
@@ -289,36 +332,45 @@ class _UserCouponScreenState extends State<UserCouponScreen> with SingleTickerPr
               width: 80.0,
               height: 80.0,
               decoration: BoxDecoration(
-                color: isUnused ? AppColors.primary.withAlpha(13) : Colors.grey.shade200,
-                borderRadius: const BorderRadius.horizontal(left: Radius.circular(16.0)),
+                color: isUnused
+                    ? AppColors.primary.withAlpha(13)
+                    : Colors.grey.shade200,
+                borderRadius: const BorderRadius.horizontal(
+                  left: Radius.circular(16.0),
+                ),
               ),
               child: Center(
                 child: Text(
-                  userCoupon.coupon.title.contains('호떡') 
-                      ? '🥞' 
-                      : userCoupon.coupon.title.contains('커피') 
-                          ? '☕' 
-                          : '🐟',
+                  userCoupon.coupon.title.contains('호떡')
+                      ? '🥞'
+                      : userCoupon.coupon.title.contains('커피')
+                      ? '☕'
+                      : '🐟',
                   style: const TextStyle(fontSize: 32.0),
                 ),
               ),
             ),
             const SizedBox(width: 16.0),
-            
+
             // Detail info
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 4.0),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12.0,
+                  horizontal: 4.0,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       userCoupon.coupon.title,
                       style: TextStyle(
-                        fontSize: 13.0, 
-                        fontWeight: FontWeight.bold, 
+                        fontSize: 13.0,
+                        fontWeight: FontWeight.bold,
                         color: isUnused ? AppColors.textPrimary : Colors.grey,
-                        decoration: isUnused ? null : TextDecoration.lineThrough,
+                        decoration: isUnused
+                            ? null
+                            : TextDecoration.lineThrough,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -327,42 +379,47 @@ class _UserCouponScreenState extends State<UserCouponScreen> with SingleTickerPr
                     Text(
                       '만료일: ~ $expStr',
                       style: TextStyle(
-                        fontSize: 11.0, 
-                        color: isUnused ? AppColors.textSecondary : Colors.grey.shade400
+                        fontSize: 11.0,
+                        color: isUnused
+                            ? AppColors.textSecondary
+                            : Colors.grey.shade400,
                       ),
                     ),
                   ],
                 ),
               ),
             ),
-            
+
             // Status tag
             Padding(
               padding: const EdgeInsets.only(right: 16.0),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10.0,
+                  vertical: 4.0,
+                ),
                 decoration: BoxDecoration(
-                  color: isUnused 
-                      ? AppColors.secondary.withAlpha(26) 
-                      : isUsed 
-                          ? Colors.grey.withAlpha(26) 
-                          : Colors.red.withAlpha(26),
+                  color: isUnused
+                      ? AppColors.secondary.withAlpha(26)
+                      : isUsed
+                      ? Colors.grey.withAlpha(26)
+                      : Colors.red.withAlpha(26),
                   borderRadius: BorderRadius.circular(20.0),
                 ),
                 child: Text(
-                  isUnused 
-                      ? '사용하기' 
-                      : isUsed 
-                          ? '사용완료' 
-                          : '기간만료',
+                  isUnused
+                      ? '사용하기'
+                      : isUsed
+                      ? '사용완료'
+                      : '기간만료',
                   style: TextStyle(
-                    fontSize: 10.0, 
-                    fontWeight: FontWeight.bold, 
-                    color: isUnused 
-                        ? AppColors.secondary 
-                        : isUsed 
-                            ? Colors.grey 
-                            : Colors.red
+                    fontSize: 10.0,
+                    fontWeight: FontWeight.bold,
+                    color: isUnused
+                        ? AppColors.secondary
+                        : isUsed
+                        ? Colors.grey
+                        : Colors.red,
                   ),
                 ),
               ),

@@ -8,7 +8,8 @@ class NotificationHistoryScreen extends StatefulWidget {
   const NotificationHistoryScreen({super.key});
 
   @override
-  State<NotificationHistoryScreen> createState() => _NotificationHistoryScreenState();
+  State<NotificationHistoryScreen> createState() =>
+      _NotificationHistoryScreenState();
 }
 
 class _NotificationHistoryScreenState extends State<NotificationHistoryScreen> {
@@ -17,7 +18,9 @@ class _NotificationHistoryScreenState extends State<NotificationHistoryScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final auth = context.read<AuthProvider>();
-      context.read<NotificationProvider>().fetchNotifications(userId: auth.currentUser?.id);
+      context.read<NotificationProvider>().fetchNotifications(
+        userId: auth.currentUser?.id,
+      );
     });
   }
 
@@ -43,7 +46,11 @@ class _NotificationHistoryScreenState extends State<NotificationHistoryScreen> {
               onPressed: () {
                 notifProvider.markAllAsRead(userId: auth.currentUser?.id);
               },
-              icon: const Icon(Icons.done_all, size: 18, color: Colors.blueAccent),
+              icon: const Icon(
+                Icons.done_all,
+                size: 18,
+                color: Colors.blueAccent,
+              ),
               label: const Text(
                 '모두 읽음',
                 style: TextStyle(color: Colors.blueAccent, fontSize: 13),
@@ -54,110 +61,132 @@ class _NotificationHistoryScreenState extends State<NotificationHistoryScreen> {
       body: notifProvider.isLoading
           ? const Center(child: CircularProgressIndicator())
           : list.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.notifications_none, size: 64, color: Colors.grey[400]),
-                      const SizedBox(height: 16),
-                      Text(
-                        '새로운 알림이 없습니다.',
-                        style: TextStyle(color: Colors.grey[600], fontSize: 15),
-                      ),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.notifications_none,
+                    size: 64,
+                    color: Colors.grey[400],
                   ),
-                )
-              : ListView.builder(
-                  itemCount: list.length,
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  itemBuilder: (context, index) {
-                    final item = list[index];
-                    return GestureDetector(
-                      onTap: () async {
-                        // Mark read
-                        if (!item.isRead) {
-                          await notifProvider.markAsRead(item.id);
-                        }
-                        
-                        // Route transition
-                        if (mounted) {
-                          NotificationRouter.routeToScreen(context, item.type, item.data);
-                        }
-                      },
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: item.isRead ? Colors.white : const Color(0xFFEBF3FF),
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.02),
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
+                  const SizedBox(height: 16),
+                  Text(
+                    '새로운 알림이 없습니다.',
+                    style: TextStyle(color: Colors.grey[600], fontSize: 15),
+                  ),
+                ],
+              ),
+            )
+          : ListView.builder(
+              itemCount: list.length,
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              itemBuilder: (context, index) {
+                final item = list[index];
+                return GestureDetector(
+                  onTap: () async {
+                    // Mark read
+                    if (!item.isRead) {
+                      await notifProvider.markAsRead(item.id);
+                    }
+
+                    // Route transition
+                    if (mounted) {
+                      NotificationRouter.routeToScreen(
+                        context,
+                        item.type,
+                        item.data,
+                      );
+                    }
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 6,
+                    ),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: item.isRead
+                          ? Colors.white
+                          : const Color(0xFFEBF3FF),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.02),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
                         ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: _getIconBgColor(item.type),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                _getIconData(item.type),
-                                color: _getIconColor(item.type),
-                                size: 20,
-                              ),
-                            ),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                      ],
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: _getIconBgColor(item.type),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            _getIconData(item.type),
+                            color: _getIconColor(item.type),
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        _getTypeLabel(item.type),
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                          color: _getIconColor(item.type),
-                                        ),
-                                      ),
-                                      Text(
-                                        _formatTime(item.createdAt),
-                                        style: TextStyle(fontSize: 11, color: Colors.grey[500]),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 6),
                                   Text(
-                                    item.title,
+                                    _getTypeLabel(item.type),
                                     style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: item.isRead ? FontWeight.w500 : FontWeight.bold,
-                                      color: Colors.black87,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: _getIconColor(item.type),
                                     ),
                                   ),
-                                  const SizedBox(height: 4),
                                   Text(
-                                    item.body,
-                                    style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+                                    _formatTime(item.createdAt),
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.grey[500],
+                                    ),
                                   ),
                                 ],
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 6),
+                              Text(
+                                item.title,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: item.isRead
+                                      ? FontWeight.w500
+                                      : FontWeight.bold,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                item.body,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
     );
   }
 

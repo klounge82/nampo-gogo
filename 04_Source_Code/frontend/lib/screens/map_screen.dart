@@ -24,14 +24,17 @@ class _MapScreenState extends State<MapScreen> {
   Position? _currentPosition;
   List<Place> _places = [];
   Set<Marker> _markers = {};
-  
+
   // Selected place for bottom info card
   Place? _selectedPlace;
   bool _isLoading = true;
 
   // Initial Camera position set to Busan Station (Fallback center)
   static const CameraPosition _initialCamera = CameraPosition(
-    target: LatLng(LocationService.fallbackLatitude, LocationService.fallbackLongitude),
+    target: LatLng(
+      LocationService.fallbackLatitude,
+      LocationService.fallbackLongitude,
+    ),
     zoom: 14.5,
   );
 
@@ -44,7 +47,7 @@ class _MapScreenState extends State<MapScreen> {
   Future<void> _initializeMapData() async {
     // 1. Fetch current GPS location
     final position = await _locationService.getCurrentLocation();
-    
+
     // 2. Fetch place markers
     final list = await _mapRepository.getMapPlaces();
 
@@ -61,7 +64,7 @@ class _MapScreenState extends State<MapScreen> {
 
   void _buildMarkers() {
     final Set<Marker> localMarkers = {};
-    
+
     for (final place in _places) {
       if (place.latitude == null || place.longitude == null) continue;
 
@@ -69,11 +72,13 @@ class _MapScreenState extends State<MapScreen> {
       double markerHue = BitmapDescriptor.hueRed; // Default food
       if (place.category.contains('카페')) {
         markerHue = BitmapDescriptor.hueOrange;
-      } else if (place.category.contains('관광') || place.category.contains('볼거리')) {
+      } else if (place.category.contains('관광') ||
+          place.category.contains('볼거리')) {
         markerHue = BitmapDescriptor.hueAzure;
       } else if (place.category.contains('쇼핑')) {
         markerHue = BitmapDescriptor.hueGreen;
-      } else if (place.category.contains('체험') || place.category.contains('문화')) {
+      } else if (place.category.contains('체험') ||
+          place.category.contains('문화')) {
         markerHue = BitmapDescriptor.hueViolet;
       }
 
@@ -102,12 +107,15 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> _animateToCurrentLocation() async {
     if (_mapController == null || _currentPosition == null) return;
-    
+
     final controller = _mapController!;
     await controller.animateCamera(
       CameraUpdate.newCameraPosition(
         CameraPosition(
-          target: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
+          target: LatLng(
+            _currentPosition!.latitude,
+            _currentPosition!.longitude,
+          ),
           zoom: 15.0,
         ),
       ),
@@ -116,7 +124,9 @@ class _MapScreenState extends State<MapScreen> {
 
   /// Calculates straight-line distance in meters using Geolocator
   int _calculateDistance(Place place) {
-    if (_currentPosition == null || place.latitude == null || place.longitude == null) {
+    if (_currentPosition == null ||
+        place.latitude == null ||
+        place.longitude == null) {
       return 0;
     }
     final double distanceInMeters = Geolocator.distanceBetween(
@@ -146,7 +156,8 @@ class _MapScreenState extends State<MapScreen> {
           GoogleMap(
             initialCameraPosition: _initialCamera,
             markers: _markers,
-            myLocationEnabled: _currentPosition != null && !_currentPosition!.isMocked,
+            myLocationEnabled:
+                _currentPosition != null && !_currentPosition!.isMocked,
             myLocationButtonEnabled: false, // Custom floating button below
             zoomControlsEnabled: false,
             onMapCreated: (GoogleMapController controller) {
@@ -183,7 +194,8 @@ class _MapScreenState extends State<MapScreen> {
                   heroTag: 'my_location_btn',
                   onPressed: () async {
                     setState(() => _isLoading = true);
-                    final position = await _locationService.getCurrentLocation();
+                    final position = await _locationService
+                        .getCurrentLocation();
                     setState(() {
                       _currentPosition = position;
                       _isLoading = false;
@@ -216,8 +228,8 @@ class _MapScreenState extends State<MapScreen> {
   Widget _buildPlaceInfoCard(Place place) {
     final int distance = _calculateDistance(place);
     final int walkingMin = _calculateWalkingMinutes(distance);
-    final String distanceStr = distance >= 1000 
-        ? '${(distance / 1000.0).toStringAsFixed(1)}km' 
+    final String distanceStr = distance >= 1000
+        ? '${(distance / 1000.0).toStringAsFixed(1)}km'
         : '${distance}m';
 
     // Status chip colors
@@ -255,20 +267,31 @@ class _MapScreenState extends State<MapScreen> {
                 Expanded(
                   child: Text(
                     place.name,
-                    style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                    style: const TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8.0,
+                    vertical: 4.0,
+                  ),
                   decoration: BoxDecoration(
                     color: statusColor.withAlpha(20),
                     borderRadius: BorderRadius.circular(6.0),
                   ),
                   child: Text(
                     place.status,
-                    style: TextStyle(fontSize: 10.0, fontWeight: FontWeight.bold, color: statusColor),
+                    style: TextStyle(
+                      fontSize: 10.0,
+                      fontWeight: FontWeight.bold,
+                      color: statusColor,
+                    ),
                   ),
                 ),
               ],
@@ -278,32 +301,50 @@ class _MapScreenState extends State<MapScreen> {
               children: [
                 Text(
                   place.category,
-                  style: const TextStyle(fontSize: 12.0, color: AppColors.textSecondary),
+                  style: const TextStyle(
+                    fontSize: 12.0,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
                 const SizedBox(width: 8.0),
                 const Icon(Icons.star, color: Colors.amber, size: 14.0),
                 const SizedBox(width: 2.0),
                 Text(
                   place.rating.toStringAsFixed(1),
-                  style: const TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                  style: const TextStyle(
+                    fontSize: 12.0,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 12.0),
-            
+
             // Distance / Walking duration details
             Row(
               children: [
-                const Icon(Icons.directions_walk, size: 16.0, color: AppColors.primary),
+                const Icon(
+                  Icons.directions_walk,
+                  size: 16.0,
+                  color: AppColors.primary,
+                ),
                 const SizedBox(width: 4.0),
                 Text(
                   '내 위치에서 $distanceStr',
-                  style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                  style: const TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
                 const SizedBox(width: 8.0),
                 Text(
                   '(도보 약 $walkingMin분 소요)',
-                  style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
+                  style: const TextStyle(
+                    fontSize: 11.5,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -326,11 +367,16 @@ class _MapScreenState extends State<MapScreen> {
                       );
                     },
                     icon: const Icon(Icons.directions_walk, size: 14.0),
-                    label: const Text('도보 길찾기', style: TextStyle(fontSize: 11.5)),
+                    label: const Text(
+                      '도보 길찾기',
+                      style: TextStyle(fontSize: 11.5),
+                    ),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.primary,
                       side: const BorderSide(color: AppColors.primary),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
                     ),
                   ),
                 ),
@@ -347,11 +393,16 @@ class _MapScreenState extends State<MapScreen> {
                       );
                     },
                     icon: const Icon(Icons.directions_car, size: 14.0),
-                    label: const Text('차량 길찾기', style: TextStyle(fontSize: 11.5)),
+                    label: const Text(
+                      '차량 길찾기',
+                      style: TextStyle(fontSize: 11.5),
+                    ),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.textPrimary,
                       side: const BorderSide(color: AppColors.border),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
                     ),
                   ),
                 ),
@@ -370,12 +421,27 @@ class _MapScreenState extends State<MapScreen> {
                         destName: place.name,
                       );
                     },
-                    icon: const Icon(Icons.map, size: 14.0, color: Colors.white),
-                    label: const Text('네이버지도로 길찾기', style: TextStyle(fontSize: 11.5, color: Colors.white, fontWeight: FontWeight.bold)),
+                    icon: const Icon(
+                      Icons.map,
+                      size: 14.0,
+                      color: Colors.white,
+                    ),
+                    label: const Text(
+                      '네이버지도로 길찾기',
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF03C75A), // Naver Green Brand
+                      backgroundColor: const Color(
+                        0xFF03C75A,
+                      ), // Naver Green Brand
                       elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
                     ),
                   ),
                 ),
@@ -400,7 +466,11 @@ class _MapScreenState extends State<MapScreen> {
                     child: const Center(
                       child: Text(
                         '상세보기',
-                        style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 11.5),
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11.5,
+                        ),
                       ),
                     ),
                   ),

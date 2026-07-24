@@ -61,7 +61,7 @@ class NotificationProvider with ChangeNotifier {
 
   Future<void> markAllAsRead({String? userId}) async {
     await _repository.markAllAsRead(userId: userId);
-    
+
     // Update local state
     _notifications = _notifications.map((n) {
       if (n.isRead) return n;
@@ -80,7 +80,7 @@ class NotificationProvider with ChangeNotifier {
         createdAt: n.createdAt,
       );
     }).toList();
-    
+
     notifyListeners();
   }
 
@@ -89,7 +89,10 @@ class NotificationProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> updatePreferences(NotificationPreferenceModel updated, {String? userId}) async {
+  Future<void> updatePreferences(
+    NotificationPreferenceModel updated, {
+    String? userId,
+  }) async {
     _preferences = await _repository.updatePreferences(updated, userId: userId);
     notifyListeners();
   }

@@ -12,7 +12,8 @@ class ReservationDetailScreen extends StatefulWidget {
   const ReservationDetailScreen({super.key, required this.reservationId});
 
   @override
-  State<ReservationDetailScreen> createState() => _ReservationDetailScreenState();
+  State<ReservationDetailScreen> createState() =>
+      _ReservationDetailScreenState();
 }
 
 class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
@@ -34,7 +35,9 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
     });
 
     try {
-      final res = await _reservationRepository.getReservationDetail(widget.reservationId);
+      final res = await _reservationRepository.getReservationDetail(
+        widget.reservationId,
+      );
       setState(() {
         _reservation = res;
       });
@@ -49,7 +52,7 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
 
   Future<void> _performCancel() async {
     if (_reservation == null) return;
-    
+
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final userId = authProvider.currentUser?.id;
 
@@ -57,11 +60,16 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
+      builder: (_) => const Center(
+        child: CircularProgressIndicator(color: AppColors.primary),
+      ),
     );
 
     try {
-      final success = await _reservationRepository.cancelReservation(_reservation!.id, userId: userId);
+      final success = await _reservationRepository.cancelReservation(
+        _reservation!.id,
+        userId: userId,
+      );
       Navigator.of(context).pop(); // Dismiss indicator
 
       if (success) {
@@ -87,7 +95,13 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('예약 취소', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.secondary)),
+        title: const Text(
+          '예약 취소',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: AppColors.secondary,
+          ),
+        ),
         content: const Text('정말로 이 매장 예약을 취소하시겠습니까?'),
         actions: [
           TextButton(
@@ -99,7 +113,13 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
               Navigator.of(ctx).pop();
               _performCancel();
             },
-            child: const Text('취소하기', style: TextStyle(color: AppColors.secondary, fontWeight: FontWeight.bold)),
+            child: const Text(
+              '취소하기',
+              style: TextStyle(
+                color: AppColors.secondary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
@@ -110,7 +130,13 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.secondary)),
+        title: Text(
+          title,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: AppColors.secondary,
+          ),
+        ),
         content: Text(message),
         actions: [
           TextButton(
@@ -125,107 +151,134 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final res = _reservation;
-    final timeStr = res != null 
+    final timeStr = res != null
         ? '${res.reservationTime.year}.${res.reservationTime.month.toString().padLeft(2, '0')}.${res.reservationTime.day.toString().padLeft(2, '0')} ${res.reservationTime.hour.toString().padLeft(2, '0')}:${res.reservationTime.minute.toString().padLeft(2, '0')}'
         : '';
-    final isCancellable = res != null && (res.status == 'pending' || res.status == 'confirmed');
+    final isCancellable =
+        res != null && (res.status == 'pending' || res.status == 'confirmed');
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('예약 상세 정보', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          '예약 상세 정보',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
         elevation: 0.5,
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            )
           : _errorMessage != null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('상세를 불러오지 못했습니다: $_errorMessage'),
-                      const SizedBox(height: 16.0),
-                      ElevatedButton(onPressed: _loadReservationDetail, child: const Text('다시 시도')),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('상세를 불러오지 못했습니다: $_errorMessage'),
+                  const SizedBox(height: 16.0),
+                  ElevatedButton(
+                    onPressed: _loadReservationDetail,
+                    child: const Text('다시 시도'),
                   ),
-                )
-              : res == null
-                  ? const Center(child: Text('예약 정보가 존재하지 않습니다.'))
-                  : SingleChildScrollView(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Status Header Card
-                          _buildStatusHeaderCard(res),
-                          const SizedBox(height: 20.0),
-                          
-                          // Reservation Ticket Info
-                          const Text('예약 명세서', style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-                          const SizedBox(height: 8.0),
-                          _buildTicketCard(res, timeStr),
-                          const SizedBox(height: 24.0),
-                          
-                          // Store Address Card
-                          const Text('오시는 길', style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-                          const SizedBox(height: 8.0),
-                          _buildAddressCard(res),
-                          const SizedBox(height: 32.0),
-                          
-                          // Deposit Payment Button (pending status)
-                          if (res.status == 'pending') ...[
-                            SizedBox(
-                              width: double.infinity,
-                              height: 48.0,
-                              child: ElevatedButton.icon(
-                                onPressed: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (_) => PaymentScreen(
-                                        amount: 15000,
-                                        targetType: 'RESERVATION_DEPOSIT',
-                                        targetId: res.id,
-                                        targetName: '${res.store.name} 예약 보증금 결제',
-                                      ),
-                                    ),
-                                  );
-                                },
-                                icon: const Icon(Icons.payment, size: 18.0),
-                                label: const Text('보증금 ₩15,000 결제하고 예약 확정'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primary,
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-                                  elevation: 0,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 12.0),
-                          ],
+                ],
+              ),
+            )
+          : res == null
+          ? const Center(child: Text('예약 정보가 존재하지 않습니다.'))
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Status Header Card
+                  _buildStatusHeaderCard(res),
+                  const SizedBox(height: 20.0),
 
-                          // Cancel Button
-                          if (isCancellable)
-                            SizedBox(
-                              width: double.infinity,
-                              height: 48.0,
-                              child: ElevatedButton.icon(
-                                onPressed: _confirmCancel,
-                                icon: const Icon(Icons.cancel_outlined, size: 18.0),
-                                label: const Text('예약 신청 취소하기'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white,
-                                  foregroundColor: AppColors.secondary,
-                                  side: const BorderSide(color: AppColors.secondary),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-                                  elevation: 0,
-                                ),
+                  // Reservation Ticket Info
+                  const Text(
+                    '예약 명세서',
+                    style: TextStyle(
+                      fontSize: 15.0,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 8.0),
+                  _buildTicketCard(res, timeStr),
+                  const SizedBox(height: 24.0),
+
+                  // Store Address Card
+                  const Text(
+                    '오시는 길',
+                    style: TextStyle(
+                      fontSize: 15.0,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 8.0),
+                  _buildAddressCard(res),
+                  const SizedBox(height: 32.0),
+
+                  // Deposit Payment Button (pending status)
+                  if (res.status == 'pending') ...[
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48.0,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => PaymentScreen(
+                                amount: 15000,
+                                targetType: 'RESERVATION_DEPOSIT',
+                                targetId: res.id,
+                                targetName: '${res.store.name} 예약 보증금 결제',
                               ),
                             ),
-                        ],
+                          );
+                        },
+                        icon: const Icon(Icons.payment, size: 18.0),
+                        label: const Text('보증금 ₩15,000 결제하고 예약 확정'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          elevation: 0,
+                        ),
                       ),
                     ),
+                    const SizedBox(height: 12.0),
+                  ],
+
+                  // Cancel Button
+                  if (isCancellable)
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48.0,
+                      child: ElevatedButton.icon(
+                        onPressed: _confirmCancel,
+                        icon: const Icon(Icons.cancel_outlined, size: 18.0),
+                        label: const Text('예약 신청 취소하기'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: AppColors.secondary,
+                          side: const BorderSide(color: AppColors.secondary),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          elevation: 0,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
     );
   }
 
@@ -276,7 +329,11 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
           Expanded(
             child: Text(
               label,
-              style: TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold, color: color),
+              style: TextStyle(
+                fontSize: 13.0,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
             ),
           ),
         ],
@@ -301,30 +358,69 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('매장명', style: TextStyle(fontSize: 12.0, color: AppColors.textSecondary)),
-                    Text(res.store.name, style: const TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                    const Text(
+                      '매장명',
+                      style: TextStyle(
+                        fontSize: 12.0,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    Text(
+                      res.store.name,
+                      style: const TextStyle(
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 12.0),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('예약 일시', style: TextStyle(fontSize: 12.0, color: AppColors.textSecondary)),
-                    Text(timeStr, style: const TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                    const Text(
+                      '예약 일시',
+                      style: TextStyle(
+                        fontSize: 12.0,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    Text(
+                      timeStr,
+                      style: const TextStyle(
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 12.0),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('예약 인원', style: TextStyle(fontSize: 12.0, color: AppColors.textSecondary)),
-                    Text('${res.partySize} 명', style: const TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                    const Text(
+                      '예약 인원',
+                      style: TextStyle(
+                        fontSize: 12.0,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    Text(
+                      '${res.partySize} 명',
+                      style: const TextStyle(
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
                   ],
                 ),
               ],
             ),
           ),
-          
+
           // Fake dotted divider line
           Row(
             children: List.generate(30, (index) {
@@ -337,10 +433,13 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
               );
             }),
           ),
-          
+
           // Fake Barcode section
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 20.0),
+            padding: const EdgeInsets.symmetric(
+              vertical: 24.0,
+              horizontal: 20.0,
+            ),
             child: Column(
               children: [
                 Row(
@@ -350,7 +449,9 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
                     return Container(
                       width: isWide ? 4.5 : 1.5,
                       height: 50.0,
-                      color: res.status == 'cancelled' ? Colors.grey.shade400 : Colors.black87,
+                      color: res.status == 'cancelled'
+                          ? Colors.grey.shade400
+                          : Colors.black87,
                     );
                   }),
                 ),
@@ -358,10 +459,12 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
                 Text(
                   'RES-${res.id.replaceAll('-', '').substring(0, 12).toUpperCase()}',
                   style: TextStyle(
-                    fontSize: 10.0, 
-                    letterSpacing: 2.0, 
+                    fontSize: 10.0,
+                    letterSpacing: 2.0,
                     fontWeight: FontWeight.bold,
-                    color: res.status == 'cancelled' ? Colors.grey : AppColors.textPrimary
+                    color: res.status == 'cancelled'
+                        ? Colors.grey
+                        : AppColors.textPrimary,
                   ),
                 ),
               ],
@@ -386,12 +489,20 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
         children: [
           Row(
             children: [
-              const Icon(Icons.location_on_outlined, color: AppColors.primary, size: 20.0),
+              const Icon(
+                Icons.location_on_outlined,
+                color: AppColors.primary,
+                size: 20.0,
+              ),
               const SizedBox(width: 8.0),
               Expanded(
                 child: Text(
                   res.store.address,
-                  style: const TextStyle(fontSize: 13.0, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
+                  style: const TextStyle(
+                    fontSize: 13.0,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
               ),
             ],
@@ -399,7 +510,11 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
           const SizedBox(height: 12.0),
           const Text(
             '지하철 자갈치역 5번 출구에서 도보 약 3분 거리에 위치하고 있습니다. 방문 시 예약을 확인해 주세요.',
-            style: TextStyle(fontSize: 11.0, color: AppColors.textSecondary, height: 1.4),
+            style: TextStyle(
+              fontSize: 11.0,
+              color: AppColors.textSecondary,
+              height: 1.4,
+            ),
           ),
         ],
       ),

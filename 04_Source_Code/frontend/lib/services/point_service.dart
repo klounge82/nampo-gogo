@@ -2,15 +2,17 @@ import 'package:dio/dio.dart';
 import '../config/api_config.dart';
 
 class PointService {
-  Dio get _dio => Dio(BaseOptions(
-        baseUrl: ApiConfig.baseUrl,
-        connectTimeout: ApiConfig.connectTimeout,
-        receiveTimeout: ApiConfig.receiveTimeout,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      ));
+  Dio get _dio => Dio(
+    BaseOptions(
+      baseUrl: ApiConfig.baseUrl,
+      connectTimeout: ApiConfig.connectTimeout,
+      receiveTimeout: ApiConfig.receiveTimeout,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    ),
+  );
 
   // GET /users/points
   Future<Map<String, dynamic>> fetchUserPoints({String? userId}) async {
@@ -45,15 +47,15 @@ class PointService {
   }
 
   // POST /users/points/earn
-  Future<Map<String, dynamic>> earnPoints(int points, String activity, {String? userId}) async {
+  Future<Map<String, dynamic>> earnPoints(
+    int points,
+    String activity, {
+    String? userId,
+  }) async {
     try {
       final response = await _dio.post(
         '/users/points/earn',
-        data: {
-          'points': points,
-          'activity': activity,
-          'user_id': userId,
-        },
+        data: {'points': points, 'activity': activity, 'user_id': userId},
       );
       if (response.statusCode == 200 && response.data != null) {
         return response.data as Map<String, dynamic>;
@@ -65,15 +67,15 @@ class PointService {
   }
 
   // POST /users/points/spend
-  Future<Map<String, dynamic>> spendPoints(int points, String activity, {String? userId}) async {
+  Future<Map<String, dynamic>> spendPoints(
+    int points,
+    String activity, {
+    String? userId,
+  }) async {
     try {
       final response = await _dio.post(
         '/users/points/spend',
-        data: {
-          'points': points,
-          'activity': activity,
-          'user_id': userId,
-        },
+        data: {'points': points, 'activity': activity, 'user_id': userId},
       );
       if (response.statusCode == 200 && response.data != null) {
         return response.data as Map<String, dynamic>;

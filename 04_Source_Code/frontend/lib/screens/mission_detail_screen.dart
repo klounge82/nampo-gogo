@@ -35,7 +35,9 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
     });
 
     try {
-      final mission = await _missionRepository.getMissionDetail(widget.missionId);
+      final mission = await _missionRepository.getMissionDetail(
+        widget.missionId,
+      );
       setState(() {
         _mission = mission;
       });
@@ -73,7 +75,7 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
     try {
       final res = await _missionRepository.verifyMission(mission.id, qrCode);
       if (!mounted) return;
-      
+
       setState(() => _isAuthenticating = false);
       if (res['success'] == true) {
         _showSuccessDialog(context, res['points_awarded'] as int);
@@ -83,7 +85,7 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _isAuthenticating = false);
-      
+
       final cleanMsg = e.toString().replaceAll('Exception:', '').trim();
       _showErrorDialog('인증 실패', cleanMsg);
     }
@@ -125,10 +127,7 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
               duration: const Duration(milliseconds: 1000),
               curve: Curves.elasticOut,
               builder: (context, scale, child) {
-                return Transform.scale(
-                  scale: scale,
-                  child: child,
-                );
+                return Transform.scale(scale: scale, child: child);
               },
               child: Text(
                 '+$points P',
@@ -160,7 +159,10 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
                   borderRadius: BorderRadius.circular(8.0),
                 ),
               ),
-              child: const Text('확인', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: const Text(
+                '확인',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
           ),
         ],
@@ -182,32 +184,43 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
         elevation: 0.5,
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            )
           : _errorMessage != null
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.error_outline, size: 48.0, color: Colors.redAccent),
-                        const SizedBox(height: 12.0),
-                        Text(
-                          _errorMessage!,
-                          style: const TextStyle(color: AppColors.textSecondary),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 16.0),
-                        ElevatedButton(
-                          onPressed: _loadMissionDetail,
-                          style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-                          child: const Text('다시 시도', style: TextStyle(color: Colors.white)),
-                        ),
-                      ],
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      size: 48.0,
+                      color: Colors.redAccent,
                     ),
-                  ),
-                )
-              : _buildContent(context, _mission!),
+                    const SizedBox(height: 12.0),
+                    Text(
+                      _errorMessage!,
+                      style: const TextStyle(color: AppColors.textSecondary),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16.0),
+                    ElevatedButton(
+                      onPressed: _loadMissionDetail,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                      ),
+                      child: const Text(
+                        '다시 시도',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : _buildContent(context, _mission!),
     );
   }
 
@@ -247,9 +260,17 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _buildBadge(AppColors.secondary.withAlpha(26), AppColors.secondary, '${mission.points} P 지급'),
+                    _buildBadge(
+                      AppColors.secondary.withAlpha(26),
+                      AppColors.secondary,
+                      '${mission.points} P 지급',
+                    ),
                     const SizedBox(width: 8.0),
-                    _buildBadge(AppColors.primary.withAlpha(26), AppColors.primary, _getAuthTypeText(mission.authType)),
+                    _buildBadge(
+                      AppColors.primary.withAlpha(26),
+                      AppColors.primary,
+                      _getAuthTypeText(mission.authType),
+                    ),
                   ],
                 ),
               ],
@@ -286,7 +307,7 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
                   ),
                 ),
                 const SizedBox(height: 18.0),
-                
+
                 const Text(
                   '참고 사항',
                   style: TextStyle(
@@ -311,7 +332,9 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
 
           // Related Store Navigation Card
           Card(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12.0),
+            ),
             elevation: 0,
             color: AppColors.surface,
             child: Container(
@@ -320,20 +343,35 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
                 border: Border.all(color: AppColors.border),
               ),
               child: ListTile(
-                leading: const Icon(Icons.store, color: AppColors.primary, size: 28.0),
+                leading: const Icon(
+                  Icons.store,
+                  color: AppColors.primary,
+                  size: 28.0,
+                ),
                 title: const Text(
                   '관련 매장 정보 보기',
-                  style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                  style: TextStyle(
+                    fontSize: 14.0,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
                 subtitle: const Text(
                   '미션을 수행할 매장의 상세 위치 및 주소를 확인합니다.',
-                  style: TextStyle(fontSize: 11.0, color: AppColors.textSecondary),
+                  style: TextStyle(
+                    fontSize: 11.0,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
-                trailing: const Icon(Icons.chevron_right, color: AppColors.textHint),
+                trailing: const Icon(
+                  Icons.chevron_right,
+                  color: AppColors.textHint,
+                ),
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) => PlaceDetailScreen(placeId: mission.storeId),
+                      builder: (_) =>
+                          PlaceDetailScreen(placeId: mission.storeId),
                     ),
                   );
                 },

@@ -13,7 +13,8 @@ class MyReservationsScreen extends StatefulWidget {
   State<MyReservationsScreen> createState() => _MyReservationsScreenState();
 }
 
-class _MyReservationsScreenState extends State<MyReservationsScreen> with SingleTickerProviderStateMixin {
+class _MyReservationsScreenState extends State<MyReservationsScreen>
+    with SingleTickerProviderStateMixin {
   final ReservationRepository _reservationRepository = ReservationRepository();
   late TabController _tabController;
 
@@ -45,11 +46,17 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> with Single
     final userId = authProvider.currentUser?.id;
 
     try {
-      final list = await _reservationRepository.getUserReservations(userId: userId);
-      
+      final list = await _reservationRepository.getUserReservations(
+        userId: userId,
+      );
+
       // Separate active vs past
-      final active = list.where((r) => r.status == 'pending' || r.status == 'confirmed').toList();
-      final past = list.where((r) => r.status == 'cancelled' || r.status == 'completed').toList();
+      final active = list
+          .where((r) => r.status == 'pending' || r.status == 'confirmed')
+          .toList();
+      final past = list
+          .where((r) => r.status == 'cancelled' || r.status == 'completed')
+          .toList();
 
       setState(() {
         _activeReservations = active;
@@ -69,7 +76,10 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> with Single
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('내 예약 내역', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          '내 예약 내역',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
         elevation: 0.5,
@@ -86,29 +96,37 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> with Single
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            )
           : _errorMessage != null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('예약 정보를 불러오지 못했습니다: $_errorMessage'),
-                      const SizedBox(height: 16.0),
-                      ElevatedButton(onPressed: _loadReservations, child: const Text('다시 시도')),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('예약 정보를 불러오지 못했습니다: $_errorMessage'),
+                  const SizedBox(height: 16.0),
+                  ElevatedButton(
+                    onPressed: _loadReservations,
+                    child: const Text('다시 시도'),
                   ),
-                )
-              : TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildReservationTabList(_activeReservations, isActive: true),
-                    _buildReservationTabList(_pastReservations, isActive: false),
-                  ],
-                ),
+                ],
+              ),
+            )
+          : TabBarView(
+              controller: _tabController,
+              children: [
+                _buildReservationTabList(_activeReservations, isActive: true),
+                _buildReservationTabList(_pastReservations, isActive: false),
+              ],
+            ),
     );
   }
 
-  Widget _buildReservationTabList(List<Reservation> list, {required bool isActive}) {
+  Widget _buildReservationTabList(
+    List<Reservation> list, {
+    required bool isActive,
+  }) {
     if (list.isEmpty) {
       return Center(
         child: Text(
@@ -133,7 +151,8 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> with Single
   }
 
   Widget _buildReservationCard(Reservation res) {
-    final timeStr = '${res.reservationTime.year}.${res.reservationTime.month.toString().padLeft(2, '0')}.${res.reservationTime.day.toString().padLeft(2, '0')} ${res.reservationTime.hour.toString().padLeft(2, '0')}:${res.reservationTime.minute.toString().padLeft(2, '0')}';
+    final timeStr =
+        '${res.reservationTime.year}.${res.reservationTime.month.toString().padLeft(2, '0')}.${res.reservationTime.day.toString().padLeft(2, '0')} ${res.reservationTime.hour.toString().padLeft(2, '0')}:${res.reservationTime.minute.toString().padLeft(2, '0')}';
 
     return GestureDetector(
       onTap: () async {
@@ -178,7 +197,7 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> with Single
                 ),
               ),
               const SizedBox(width: 16.0),
-              
+
               // Info
               Expanded(
                 child: Column(
@@ -186,22 +205,32 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> with Single
                   children: [
                     Text(
                       res.store.name,
-                      style: const TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                      style: const TextStyle(
+                        fontSize: 15.0,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
                     const SizedBox(height: 6.0),
                     Text(
                       '예약 시간: $timeStr',
-                      style: const TextStyle(fontSize: 12.0, color: AppColors.textSecondary),
+                      style: const TextStyle(
+                        fontSize: 12.0,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                     const SizedBox(height: 2.0),
                     Text(
                       '인원수: ${res.partySize} 명',
-                      style: const TextStyle(fontSize: 12.0, color: AppColors.textSecondary),
+                      style: const TextStyle(
+                        fontSize: 12.0,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ],
                 ),
               ),
-              
+
               // Status Badge
               _buildStatusBadge(res.status),
             ],
@@ -251,7 +280,11 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> with Single
       ),
       child: Text(
         label,
-        style: TextStyle(fontSize: 10.0, fontWeight: FontWeight.bold, color: textColor),
+        style: TextStyle(
+          fontSize: 10.0,
+          fontWeight: FontWeight.bold,
+          color: textColor,
+        ),
       ),
     );
   }

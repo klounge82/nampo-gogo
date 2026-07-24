@@ -9,7 +9,7 @@ class ProfileProvider extends ChangeNotifier {
   final ProfileRepository _profileRepository;
 
   ProfileProvider({ProfileRepository? profileRepository})
-      : _profileRepository = profileRepository ?? ProfileRepository();
+    : _profileRepository = profileRepository ?? ProfileRepository();
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -40,7 +40,9 @@ class ProfileProvider extends ChangeNotifier {
       final url = await _profileRepository.uploadProfileImage(file);
       final authProvider = context.read<AuthProvider>();
       if (authProvider.currentUser != null) {
-        final updatedUser = authProvider.currentUser!.copyWith(profileImageUrl: url);
+        final updatedUser = authProvider.currentUser!.copyWith(
+          profileImageUrl: url,
+        );
         authProvider.updateUser(updatedUser);
       }
       return url;
@@ -63,7 +65,10 @@ class ProfileProvider extends ChangeNotifier {
   }
 
   // Change Password
-  Future<void> changePassword(String currentPassword, String newPassword) async {
+  Future<void> changePassword(
+    String currentPassword,
+    String newPassword,
+  ) async {
     _setLoading(true);
     try {
       await _profileRepository.changePassword(currentPassword, newPassword);

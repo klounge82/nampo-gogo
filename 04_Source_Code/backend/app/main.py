@@ -2,7 +2,7 @@ from datetime import datetime, time, timedelta
 import math
 import hashlib
 from typing import Optional, List
-from fastapi import FastAPI, Depends, HTTPException, status, Header
+from fastapi import FastAPI, Depends, HTTPException, status, Header, Query
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -762,96 +762,6 @@ def get_my_business_application(
         models.BusinessApplication.user_id == current_user.id
     ).order_by(models.BusinessApplication.created_at.desc()).first()
 
-@app.get("/admin/business/applications", response_model=List[schemas.BusinessApplicationOut], tags=["Admin Business Approval"])
-def list_business_applications(
-    status_filter: Optional[str] = None,
-    current_user: models.User = Depends(require_capability("business.approve")),
-    db: Session = Depends(get_db)
-):
-    query = db.query(models.BusinessApplication)
-    if status_filter:
-        query = query.filter(models.BusinessApplication.status == status_filter.upper())
-    return query.order_by(models.BusinessApplication.created_at.desc()).all()
-
-@app.post("/admin/business/applications/{application_id}/approve", response_model=schemas.BusinessApplicationOut, tags=["Admin Business Approval"])
-def approve_business_application(
-    application_id: str,
-    req: Optional[schemas.BusinessApplicationApproveRequest] = None,
-    current_user: models.User = Depends(require_capability("business.approve")),
-    db: Session = Depends(get_db)
-):
-    app_record = db.query(models.BusinessApplication).filter(
-        models.BusinessApplication.id == application_id
-    ).first()
-
-    if not app_record:
-        raise HTTPException(status_code=404, detail="해당 사업자 신청건을 찾을 수 없습니다.")
-
-    target_store_id = (req.store_id if req and req.store_id else None) or app_record.requested_store_id
-
-    # Atomic single transaction
-    app_record.status = "APPROVED"
-    app_record.reviewed_by = current_user.id
-    app_record.reviewed_at = datetime.utcnow()
-    db.add(app_record)
-
-    # 1. Add BUSINESS role
-    existing_role = db.query(models.UserRole).filter(
-        models.UserRole.user_id == app_record.user_id,
-        models.UserRole.role == "BUSINESS"
-    ).first()
-
-    if not existing_role:
-        new_role = models.UserRole(user_id=app_record.user_id, role="BUSINESS")
-        db.add(new_role)
-
-    # 2. Add OWNER membership if store_id exists
-    if target_store_id:
-        existing_mem = db.query(models.BusinessMembership).filter(
-            models.BusinessMembership.user_id == app_record.user_id,
-            models.BusinessMembership.store_id == target_store_id
-        ).first()
-
-        if not existing_mem:
-            new_mem = models.BusinessMembership(
-                user_id=app_record.user_id,
-                store_id=target_store_id,
-                membership_role="OWNER",
-                status="ACTIVE"
-            )
-            db.add(new_mem)
-        else:
-            existing_mem.status = "ACTIVE"
-            db.add(existing_mem)
-
-    db.commit()
-    db.refresh(app_record)
-    return app_record
-
-@app.post("/admin/business/applications/{application_id}/reject", response_model=schemas.BusinessApplicationOut, tags=["Admin Business Approval"])
-def reject_business_application(
-    application_id: str,
-    req: schemas.BusinessApplicationRejectRequest,
-    current_user: models.User = Depends(require_capability("business.approve")),
-    db: Session = Depends(get_db)
-):
-    app_record = db.query(models.BusinessApplication).filter(
-        models.BusinessApplication.id == application_id
-    ).first()
-
-    if not app_record:
-        raise HTTPException(status_code=404, detail="해당 사업자 신청건을 찾을 수 없습니다.")
-
-    app_record.status = "REJECTED"
-    app_record.rejection_reason = req.rejection_reason
-    app_record.reviewed_by = current_user.id
-    app_record.reviewed_at = datetime.utcnow()
-
-    db.add(app_record)
-    db.commit()
-    db.refresh(app_record)
-    return app_record
-
 # ---------------------------------------------------------
 # Approved Business Management Endpoints (Store, Products, Reviews)
 # ---------------------------------------------------------
@@ -1129,19 +1039,20 @@ def get_business_reviews(
 
 @app.get("/stores", response_model=List[schemas.StoreOut], tags=["Stores"])
 def get_stores(category: Optional[str] = None, db: Session = Depends(get_db)):
-    query = db.query(models.Store)
+    query = db.query(models.Store).filter(models.Store.status != "DRAFT")
     if category:
         query = query.filter(models.Store.category == category)
     return query.all()
 
 @app.get("/stores/categories", response_model=List[str], tags=["Stores"])
 def get_categories(db: Session = Depends(get_db)):
-    categories = db.query(models.Store.category).distinct().all()
+    categories = db.query(models.Store.category).filter(models.Store.status != "DRAFT").distinct().all()
     return [cat[0] for cat in categories]
 
 @app.get("/stores/search", response_model=List[schemas.StoreOut], tags=["Stores"])
 def search_stores(q: str, db: Session = Depends(get_db)):
     return db.query(models.Store).filter(
+        models.Store.status != "DRAFT",
         (models.Store.name.contains(q)) | (models.Store.description.contains(q))
     ).all()
 
@@ -2469,41 +2380,17 @@ def get_owner_or_admin_user(current_user: models.User = Depends(get_current_user
     return current_user
 
 def get_admin_user(
-    admin_id: Optional[str] = None, 
     current_user: models.User = Depends(get_current_user), 
     db: Session = Depends(get_db)
 ) -> models.User:
-    if APP_ENV == "production":
-        if current_user.role != "admin":
-            raise HTTPException(status_code=403, detail="관리자 권한이 없습니다.")
-        if current_user.status == "blocked":
-            raise HTTPException(status_code=403, detail="정지된 관리자 계정입니다.")
+    if current_user.status == "blocked":
+        raise HTTPException(status_code=403, detail="정지된 관리자 계정입니다.")
+
+    roles = get_user_roles(db, current_user.id)
+    if "ADMIN" in roles or current_user.role in ["admin", "ADMIN"]:
         return current_user
 
-    # Development auto-promotion helper
-    if admin_id:
-        admin = db.query(models.User).filter(models.User.id == admin_id).first()
-        if not admin or admin.role != "admin":
-            raise HTTPException(status_code=403, detail="관리자 권한이 없습니다.")
-        if admin.status == "blocked":
-            raise HTTPException(status_code=403, detail="정지된 관리자 계정입니다.")
-        return admin
-
-    if current_user.role == "admin":
-        if current_user.status == "blocked":
-            raise HTTPException(status_code=403, detail="정지된 관리자 계정입니다.")
-        return current_user
-
-    admin = db.query(models.User).filter(models.User.role == "admin").first()
-    if not admin:
-        # dev helper auto-promotion
-        first_user = db.query(models.User).first()
-        if first_user:
-            first_user.role = "admin"
-            db.commit()
-            return first_user
-        raise HTTPException(status_code=403, detail="관리자 권한이 필요합니다.")
-    return admin
+    raise HTTPException(status_code=403, detail="관리자 권한이 없습니다.")
 
 def log_admin_action(db: Session, admin_id: str, action: str, target_id: Optional[str], details: str):
     log = models.AdminAuditLog(
@@ -2514,6 +2401,242 @@ def log_admin_action(db: Session, admin_id: str, action: str, target_id: Optiona
     )
     db.add(log)
     db.commit()
+
+# --- MASKING HELPERS ---
+def mask_phone_str(phone: str) -> str:
+    if not phone:
+        return "****"
+    parts = phone.split("-")
+    if len(parts) == 3:
+        return f"{parts[0]}-****-{parts[2]}"
+    if len(phone) >= 8:
+        return phone[:3] + "****" + phone[-4:]
+    return phone[:2] + "****"
+
+def mask_registration_number_str(num: str) -> str:
+    if not num:
+        return "***-**-*****"
+    parts = num.split("-")
+    if len(parts) == 3:
+        return f"{parts[0]}-**-***{parts[2][-2:]}"
+    if len(num) >= 10:
+        return num[:3] + "-**-***" + num[-2:]
+    return num[:3] + "-**-***"
+
+def mask_email_str(email: str) -> str:
+    if not email or "@" not in email:
+        return "***"
+    name, domain = email.split("@", 1)
+    if len(name) <= 2:
+        masked_name = name[0] + "*"
+    else:
+        masked_name = name[:2] + "*" * (len(name) - 2)
+    return f"{masked_name}@{domain}"
+
+# --- ADMIN BUSINESS APPLICATION APPROVAL ENDPOINTS ---
+
+@app.get("/admin/business/application-summary", response_model=schemas.AdminApplicationSummaryOut, tags=["Admin Business Applications"])
+def get_admin_business_application_summary(
+    admin: models.User = Depends(get_admin_user),
+    db: Session = Depends(get_db)
+):
+    pending_count = db.query(models.BusinessApplication).filter(models.BusinessApplication.status == "PENDING").count()
+    approved_count = db.query(models.BusinessApplication).filter(models.BusinessApplication.status == "APPROVED").count()
+    rejected_count = db.query(models.BusinessApplication).filter(models.BusinessApplication.status == "REJECTED").count()
+    
+    today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    today_count = db.query(models.BusinessApplication).filter(models.BusinessApplication.created_at >= today_start).count()
+
+    return {
+        "pending_count": pending_count,
+        "today_count": today_count,
+        "approved_count": approved_count,
+        "rejected_count": rejected_count
+    }
+
+@app.get("/admin/business/applications", response_model=List[schemas.AdminApplicationListItem], tags=["Admin Business Applications"])
+def get_admin_business_applications(
+    status: Optional[str] = Query(None),
+    q: Optional[str] = Query(None),
+    skip: int = 0,
+    limit: int = 50,
+    admin: models.User = Depends(get_admin_user),
+    db: Session = Depends(get_db)
+):
+    query = db.query(models.BusinessApplication)
+    if status and status.upper() != "ALL":
+        query = query.filter(models.BusinessApplication.status == status.upper())
+    if q and q.strip():
+        search_term = f"%{q.strip()}%"
+        query = query.filter(
+            (models.BusinessApplication.business_name.ilike(search_term)) |
+            (models.BusinessApplication.representative_name.ilike(search_term))
+        )
+
+    apps = query.order_by(models.BusinessApplication.created_at.desc()).offset(skip).limit(limit).all()
+
+    items = []
+    for a in apps:
+        app_type = "EXISTING_STORE" if a.requested_store_id else "NEW_STORE"
+        items.append(schemas.AdminApplicationListItem(
+            id=a.id,
+            user_id=a.user_id,
+            business_name=a.business_name,
+            business_registration_number_masked=mask_registration_number_str(a.business_registration_number),
+            representative_name=a.representative_name,
+            phone_masked=mask_phone_str(a.phone),
+            requested_store_id=a.requested_store_id,
+            application_type=app_type,
+            status=a.status,
+            created_at=a.created_at
+        ))
+    return items
+
+@app.get("/admin/business/applications/{application_id}", response_model=schemas.AdminApplicationDetailOut, tags=["Admin Business Applications"])
+def get_admin_business_application_detail(
+    application_id: str,
+    admin: models.User = Depends(get_admin_user),
+    db: Session = Depends(get_db)
+):
+    app_obj = db.query(models.BusinessApplication).filter(models.BusinessApplication.id == application_id).first()
+    if not app_obj:
+        raise HTTPException(status_code=404, detail="신청건을 찾을 수 없습니다.")
+
+    applicant = db.query(models.User).filter(models.User.id == app_obj.user_id).first()
+    store_name = None
+    if app_obj.requested_store_id:
+        st = db.query(models.Store).filter(models.Store.id == app_obj.requested_store_id).first()
+        if st:
+            store_name = st.name
+
+    app_type = "EXISTING_STORE" if app_obj.requested_store_id else "NEW_STORE"
+
+    return schemas.AdminApplicationDetailOut(
+        id=app_obj.id,
+        user_id=app_obj.user_id,
+        user_nickname=applicant.nickname if applicant else "알 수 없음",
+        user_email_masked=mask_email_str(applicant.email) if applicant else "***",
+        user_created_at=applicant.created_at if applicant else None,
+        business_name=app_obj.business_name,
+        business_registration_number=app_obj.business_registration_number,
+        representative_name=app_obj.representative_name,
+        phone=app_obj.phone,
+        requested_store_id=app_obj.requested_store_id,
+        requested_store_name=store_name,
+        application_type=app_type,
+        status=app_obj.status,
+        rejection_reason=app_obj.rejection_reason,
+        reviewed_by=app_obj.reviewed_by,
+        reviewed_at=app_obj.reviewed_at,
+        created_at=app_obj.created_at,
+        updated_at=app_obj.updated_at
+    )
+
+@app.post("/admin/business/applications/{application_id}/approve", response_model=schemas.BusinessApplicationOut, tags=["Admin Business Applications"])
+def approve_business_application(
+    application_id: str,
+    admin: models.User = Depends(get_admin_user),
+    db: Session = Depends(get_db)
+):
+    query = db.query(models.BusinessApplication).filter(models.BusinessApplication.id == application_id)
+    if db.bind and db.bind.dialect.name != "sqlite":
+        query = query.with_for_update()
+    app_obj = query.first()
+
+    if not app_obj:
+        raise HTTPException(status_code=404, detail="신청건을 찾을 수 없습니다.")
+
+    if app_obj.status != "PENDING":
+        raise HTTPException(status_code=400, detail="이미 승인 또는 거절 처리된 사업자 신청건입니다.")
+
+    try:
+        user_id = app_obj.user_id
+        store_id = app_obj.requested_store_id
+
+        # If requested_store_id is null -> New Store Application -> Create draft Store
+        if not store_id:
+            new_store = models.Store(
+                name=app_obj.business_name,
+                category="기타",
+                address="부산 중구 남포동 (신규 사업장)",
+                description=f"{app_obj.business_name} 사업자 신규 매장 (비공개 검토 상태)",
+                status="DRAFT",
+                operating_hours="09:00 - 22:00",
+                phone_number=app_obj.phone
+            )
+            db.add(new_store)
+            db.flush()
+            store_id = new_store.id
+
+        # Grant BUSINESS role in UserRole table if not present
+        existing_role = db.query(models.UserRole).filter(
+            models.UserRole.user_id == user_id,
+            models.UserRole.role == "BUSINESS"
+        ).first()
+        if not existing_role:
+            db.add(models.UserRole(user_id=user_id, role="BUSINESS"))
+
+        # Create BusinessMembership (OWNER) if not present
+        existing_mem = db.query(models.BusinessMembership).filter(
+            models.BusinessMembership.user_id == user_id,
+            models.BusinessMembership.store_id == store_id
+        ).first()
+        if not existing_mem:
+            db.add(models.BusinessMembership(
+                user_id=user_id,
+                store_id=store_id,
+                membership_role="OWNER",
+                status="ACTIVE"
+            ))
+
+        app_obj.status = "APPROVED"
+        app_obj.reviewed_by = admin.id
+        app_obj.reviewed_at = datetime.utcnow()
+
+        db.commit()
+        db.refresh(app_obj)
+
+        log_admin_action(db, admin.id, "APPROVE_BUSINESS_APPLICATION", app_obj.id, f"Approved application {app_obj.id} for user {user_id}, store {store_id}")
+        return app_obj
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"승인 처리 중 오류가 발생했습니다: {str(e)}")
+
+@app.post("/admin/business/applications/{application_id}/reject", response_model=schemas.BusinessApplicationOut, tags=["Admin Business Applications"])
+def reject_business_application(
+    application_id: str,
+    req: schemas.AdminApplicationRejectRequest,
+    admin: models.User = Depends(get_admin_user),
+    db: Session = Depends(get_db)
+):
+    if not req.rejection_reason or not req.rejection_reason.strip():
+        raise HTTPException(status_code=400, detail="거절 사유를 입력해 주세요.")
+
+    query = db.query(models.BusinessApplication).filter(models.BusinessApplication.id == application_id)
+    if db.bind and db.bind.dialect.name != "sqlite":
+        query = query.with_for_update()
+    app_obj = query.first()
+
+    if not app_obj:
+        raise HTTPException(status_code=404, detail="신청건을 찾을 수 없습니다.")
+
+    if app_obj.status != "PENDING":
+        raise HTTPException(status_code=400, detail="이미 승인 또는 거절 처리된 사업자 신청건입니다.")
+
+    try:
+        app_obj.status = "REJECTED"
+        app_obj.rejection_reason = req.rejection_reason.strip()
+        app_obj.reviewed_by = admin.id
+        app_obj.reviewed_at = datetime.utcnow()
+
+        db.commit()
+        db.refresh(app_obj)
+
+        log_admin_action(db, admin.id, "REJECT_BUSINESS_APPLICATION", app_obj.id, f"Rejected application {app_obj.id}: {req.rejection_reason.strip()}")
+        return app_obj
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"거절 처리 중 오류가 발생했습니다: {str(e)}")
 
 @app.get("/admin/stats", response_model=schemas.AdminStatsOut, tags=["Admin"])
 def get_admin_stats(admin: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):

@@ -2,15 +2,17 @@ import 'package:dio/dio.dart';
 import '../config/api_config.dart';
 
 class ReservationService {
-  Dio get _dio => Dio(BaseOptions(
-        baseUrl: ApiConfig.baseUrl,
-        connectTimeout: ApiConfig.connectTimeout,
-        receiveTimeout: ApiConfig.receiveTimeout,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      ));
+  Dio get _dio => Dio(
+    BaseOptions(
+      baseUrl: ApiConfig.baseUrl,
+      connectTimeout: ApiConfig.connectTimeout,
+      receiveTimeout: ApiConfig.receiveTimeout,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    ),
+  );
 
   // POST /reservations
   Future<Map<String, dynamic>> createReservation({
@@ -39,7 +41,10 @@ class ReservationService {
   }
 
   // POST /reservations/{reservation_id}/cancel
-  Future<Map<String, dynamic>> cancelReservation(String reservationId, {String? userId}) async {
+  Future<Map<String, dynamic>> cancelReservation(
+    String reservationId, {
+    String? userId,
+  }) async {
     try {
       final response = await _dio.post(
         '/reservations/$reservationId/cancel',
@@ -59,9 +64,7 @@ class ReservationService {
     try {
       final response = await _dio.get(
         '/users/reservations',
-        queryParameters: {
-          if (userId != null) 'user_id': userId,
-        },
+        queryParameters: {if (userId != null) 'user_id': userId},
       );
       if (response.statusCode == 200 && response.data != null) {
         return response.data as List<dynamic>;
@@ -73,7 +76,9 @@ class ReservationService {
   }
 
   // GET /reservations/{reservation_id}
-  Future<Map<String, dynamic>> fetchReservationDetail(String reservationId) async {
+  Future<Map<String, dynamic>> fetchReservationDetail(
+    String reservationId,
+  ) async {
     try {
       final response = await _dio.get('/reservations/$reservationId');
       if (response.statusCode == 200 && response.data != null) {

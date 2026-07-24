@@ -40,10 +40,7 @@ class _SearchScreenState extends State<SearchScreen> {
     setState(() => _hasSearched = true);
 
     final lang = context.read<LocaleProvider>().locale.languageCode;
-    context.read<SearchProvider>().triggerSearch(
-          query: query,
-          lang: lang,
-        );
+    context.read<SearchProvider>().triggerSearch(query: query, lang: lang);
   }
 
   void _clearSearch() {
@@ -83,7 +80,8 @@ class _SearchScreenState extends State<SearchScreen> {
                   child: TextField(
                     controller: _searchController,
                     focusNode: _focusNode,
-                    onChanged: (text) => searchProvider.onSearchTextChanged(text, lang: lang),
+                    onChanged: (text) =>
+                        searchProvider.onSearchTextChanged(text, lang: lang),
                     onSubmitted: _executeSearch,
                     decoration: const InputDecoration(
                       hintText: '장소, 미션, 쿠폰 검색...',
@@ -113,7 +111,11 @@ class _SearchScreenState extends State<SearchScreen> {
                 itemBuilder: (context, index) {
                   final suggestion = searchProvider.suggestions[index];
                   return ListTile(
-                    leading: const Icon(Icons.search, color: Colors.grey, size: 18),
+                    leading: const Icon(
+                      Icons.search,
+                      color: Colors.grey,
+                      size: 18,
+                    ),
                     title: Text(suggestion),
                     onTap: () => _executeSearch(suggestion),
                   );
@@ -128,14 +130,21 @@ class _SearchScreenState extends State<SearchScreen> {
                   // Filter Tab headers (All, Place, Mission, Coupon, Recommendation)
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12.0,
+                      vertical: 8.0,
+                    ),
                     child: Row(
                       children: [
                         _buildTabChip('all', '전체', searchProvider),
                         _buildTabChip('place', '장소', searchProvider),
                         _buildTabChip('mission', '미션', searchProvider),
                         _buildTabChip('coupon', '쿠폰', searchProvider),
-                        _buildTabChip('recommendation', 'AI 코스', searchProvider),
+                        _buildTabChip(
+                          'recommendation',
+                          'AI 코스',
+                          searchProvider,
+                        ),
                       ],
                     ),
                   ),
@@ -145,14 +154,14 @@ class _SearchScreenState extends State<SearchScreen> {
                     child: searchProvider.isLoading
                         ? const Center(child: CircularProgressIndicator())
                         : searchProvider.searchResults.isEmpty
-                            ? _buildEmptyState()
-                            : ListView.builder(
-                                itemCount: searchProvider.searchResults.length,
-                                itemBuilder: (context, index) {
-                                  final item = searchProvider.searchResults[index];
-                                  return _buildResultCard(item);
-                                },
-                              ),
+                        ? _buildEmptyState()
+                        : ListView.builder(
+                            itemCount: searchProvider.searchResults.length,
+                            itemBuilder: (context, index) {
+                              final item = searchProvider.searchResults[index];
+                              return _buildResultCard(item);
+                            },
+                          ),
                   ),
                 ],
               ),
@@ -172,11 +181,20 @@ class _SearchScreenState extends State<SearchScreen> {
                         children: [
                           const Text(
                             '최근 검색어',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
                           ),
                           TextButton(
                             onPressed: () => searchProvider.clearAllHistory(),
-                            child: const Text('전체 삭제', style: TextStyle(color: Colors.grey, fontSize: 13)),
+                            child: const Text(
+                              '전체 삭제',
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 13,
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -187,7 +205,8 @@ class _SearchScreenState extends State<SearchScreen> {
                           return InputChip(
                             label: Text(query),
                             onPressed: () => _executeSearch(query),
-                            onDeleted: () => searchProvider.deleteHistoryItem(query),
+                            onDeleted: () =>
+                                searchProvider.deleteHistoryItem(query),
                           );
                         }).toList(),
                       ),
@@ -198,7 +217,10 @@ class _SearchScreenState extends State<SearchScreen> {
                     if (searchProvider.popularSearches.isNotEmpty) ...[
                       const Text(
                         '인기 검색어',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       Wrap(
@@ -208,8 +230,12 @@ class _SearchScreenState extends State<SearchScreen> {
                           return ActionChip(
                             label: Text(pop),
                             onPressed: () => _executeSearch(pop),
-                            backgroundColor: Colors.blueAccent.withOpacity(0.06),
-                            side: BorderSide(color: Colors.blueAccent.withOpacity(0.2)),
+                            backgroundColor: Colors.blueAccent.withOpacity(
+                              0.06,
+                            ),
+                            side: BorderSide(
+                              color: Colors.blueAccent.withOpacity(0.2),
+                            ),
                           );
                         }).toList(),
                       ),
@@ -251,7 +277,11 @@ class _SearchScreenState extends State<SearchScreen> {
           SizedBox(height: 16),
           Text(
             '검색 결과가 없습니다.',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey),
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey,
+            ),
           ),
           SizedBox(height: 8),
           Text(
@@ -319,28 +349,47 @@ class _SearchScreenState extends State<SearchScreen> {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: typeColor.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
                     type,
-                    style: TextStyle(fontSize: 9, color: typeColor, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 9,
+                      color: typeColor,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 if (cat != null && cat.isNotEmpty) ...[
                   const SizedBox(width: 8),
-                  Text(cat, style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                  Text(
+                    cat,
+                    style: const TextStyle(fontSize: 11, color: Colors.grey),
+                  ),
                 ],
                 if (rating > 0.0) ...[
                   const SizedBox(width: 8),
                   const Icon(Icons.star, color: Colors.amber, size: 12),
-                  Text(' $rating', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                  Text(
+                    ' $rating',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ],
                 if (dist != null) ...[
                   const SizedBox(width: 8),
-                  Text('${dist}m', style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                  Text(
+                    '${dist}m',
+                    style: const TextStyle(fontSize: 11, color: Colors.grey),
+                  ),
                 ],
               ],
             ),
@@ -355,12 +404,14 @@ class _SearchScreenState extends State<SearchScreen> {
             );
           } else if (type == 'MISSION') {
             Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => MissionDetailScreen(missionId: id)),
+              MaterialPageRoute(
+                builder: (_) => MissionDetailScreen(missionId: id),
+              ),
             );
           } else if (type == 'COUPON') {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const UserCouponScreen()),
-            );
+            Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const UserCouponScreen()));
           }
         },
       ),

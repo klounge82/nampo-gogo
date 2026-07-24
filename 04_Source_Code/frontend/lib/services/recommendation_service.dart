@@ -2,15 +2,17 @@ import 'package:dio/dio.dart';
 import '../config/api_config.dart';
 
 class RecommendationService {
-  Dio get _dio => Dio(BaseOptions(
-        baseUrl: ApiConfig.baseUrl,
-        connectTimeout: ApiConfig.connectTimeout,
-        receiveTimeout: ApiConfig.receiveTimeout,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      ));
+  Dio get _dio => Dio(
+    BaseOptions(
+      baseUrl: ApiConfig.baseUrl,
+      connectTimeout: ApiConfig.connectTimeout,
+      receiveTimeout: ApiConfig.receiveTimeout,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    ),
+  );
 
   // POST /recommendations/courses
   Future<Map<String, dynamic>> generateCourse({
@@ -68,7 +70,10 @@ class RecommendationService {
   }
 
   // PATCH /recommendations/{id}/save
-  Future<Map<String, dynamic>> toggleSaveStatus(String id, {required bool isSaved}) async {
+  Future<Map<String, dynamic>> toggleSaveStatus(
+    String id, {
+    required bool isSaved,
+  }) async {
     try {
       final response = await _dio.patch(
         '/recommendations/$id/save',

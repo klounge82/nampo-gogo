@@ -5,7 +5,7 @@ class FavoriteProvider extends ChangeNotifier {
   final FavoriteRepository _repository;
 
   FavoriteProvider({FavoriteRepository? repository})
-      : _repository = repository ?? FavoriteRepository();
+    : _repository = repository ?? FavoriteRepository();
 
   // Active Favorites Status IDs for fast lookup
   final Set<String> _favoriteIds = {};
@@ -51,7 +51,7 @@ class FavoriteProvider extends ChangeNotifier {
             'subtitle': '로그인 시 정보가 완전히 연동됩니다.',
             'category': '',
             'rating': 0.0,
-            'is_active': true
+            'is_active': true,
           });
         }
       }
@@ -87,7 +87,7 @@ class FavoriteProvider extends ChangeNotifier {
         'subtitle': '',
         'category': '',
         'rating': 0.0,
-        'is_active': true
+        'is_active': true,
       });
     }
     notifyListeners();
@@ -143,7 +143,10 @@ class FavoriteProvider extends ChangeNotifier {
   }
 
   // Merge Local Cache to Account after login completes
-  Future<void> mergeLocalCacheToAccount(String token, {String lang = 'ko'}) async {
+  Future<void> mergeLocalCacheToAccount(
+    String token, {
+    String lang = 'ko',
+  }) async {
     try {
       final locals = await _repository.getLocalFavorites();
       if (locals.isEmpty) return;

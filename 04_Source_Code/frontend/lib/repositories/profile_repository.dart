@@ -11,15 +11,13 @@ class ProfileRepository {
   final AuthService _authService;
 
   ProfileRepository({Dio? dio, AuthService? authService})
-      : _dio = dio ?? Dio(BaseOptions(baseUrl: ApiConfig.baseUrl)),
-        _authService = authService ?? AuthService();
+    : _dio = dio ?? Dio(BaseOptions(baseUrl: ApiConfig.baseUrl)),
+      _authService = authService ?? AuthService();
 
   Future<Options> _getHeaders() async {
     final token = await _authService.getAccessToken();
     return Options(
-      headers: {
-        if (token != null) 'Authorization': 'Bearer $token',
-      },
+      headers: {if (token != null) 'Authorization': 'Bearer $token'},
     );
   }
 
@@ -65,10 +63,7 @@ class ProfileRepository {
 
       final res = await _dio.post(
         '/users/me/profile-image',
-        data: {
-          'filename': fileName,
-          'base64_data': base64Data,
-        },
+        data: {'filename': fileName, 'base64_data': base64Data},
         options: opts,
       );
       return res.data['profile_image_url'] as String;
@@ -95,7 +90,10 @@ class ProfileRepository {
   }
 
   // POST /auth/change-password
-  Future<void> changePassword(String currentPassword, String newPassword) async {
+  Future<void> changePassword(
+    String currentPassword,
+    String newPassword,
+  ) async {
     try {
       final opts = await _getHeaders();
       await _dio.post(

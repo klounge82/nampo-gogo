@@ -9,7 +9,10 @@ class AdminReviewManageScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('리뷰 노출 차단', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          '리뷰 노출 차단',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
         elevation: 0.5,
@@ -20,23 +23,39 @@ class AdminReviewManageScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.construction_outlined, size: 64.0, color: AppColors.textHint),
+              const Icon(
+                Icons.construction_outlined,
+                size: 64.0,
+                color: AppColors.textHint,
+              ),
               const SizedBox(height: 16.0),
               const Text(
                 '악성 후기 격리/숨김',
-                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                style: TextStyle(
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
               ),
               const SizedBox(height: 8.0),
               const Text(
                 '매장별 비방 후기 숨김 처리 토글 제어 인터페이스(Expansion) 범위입니다.',
-                style: TextStyle(fontSize: 12.0, color: AppColors.textSecondary),
+                style: TextStyle(
+                  fontSize: 12.0,
+                  color: AppColors.textSecondary,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24.0),
               ElevatedButton(
                 onPressed: () => Navigator.of(context).pop(),
-                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-                child: const Text('돌아가기', style: TextStyle(color: Colors.white)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                ),
+                child: const Text(
+                  '돌아가기',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ],
           ),

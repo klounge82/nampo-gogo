@@ -15,7 +15,7 @@ class ReviewEditScreen extends StatefulWidget {
 class _ReviewEditScreenState extends State<ReviewEditScreen> {
   final ReviewRepository _reviewRepository = ReviewRepository();
   late TextEditingController _contentController;
-  
+
   late int _rating;
   bool _isSubmitting = false;
   String _inputText = '';
@@ -26,7 +26,7 @@ class _ReviewEditScreenState extends State<ReviewEditScreen> {
     _rating = widget.review.rating;
     _contentController = TextEditingController(text: widget.review.content);
     _inputText = widget.review.content;
-    
+
     _contentController.addListener(() {
       setState(() {
         _inputText = _contentController.text;
@@ -55,7 +55,7 @@ class _ReviewEditScreenState extends State<ReviewEditScreen> {
         rating: _rating,
         content: cleanContent,
       );
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -64,7 +64,9 @@ class _ReviewEditScreenState extends State<ReviewEditScreen> {
             behavior: SnackBarBehavior.floating,
           ),
         );
-        Navigator.of(context).pop(true); // Return true to trigger refresh on lists
+        Navigator.of(
+          context,
+        ).pop(true); // Return true to trigger refresh on lists
       }
     } catch (e) {
       setState(() => _isSubmitting = false);
@@ -77,7 +79,13 @@ class _ReviewEditScreenState extends State<ReviewEditScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.secondary)),
+        title: Text(
+          title,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: AppColors.secondary,
+          ),
+        ),
         content: Text(message),
         actions: [
           TextButton(
@@ -96,7 +104,10 @@ class _ReviewEditScreenState extends State<ReviewEditScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('리뷰 수정', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          '리뷰 수정',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
         elevation: 0.5,
@@ -108,7 +119,11 @@ class _ReviewEditScreenState extends State<ReviewEditScreen> {
           children: [
             Text(
               widget.review.store?.name ?? '매장 후기 수정',
-              style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+              style: const TextStyle(
+                fontSize: 18.0,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
             ),
             const SizedBox(height: 4.0),
             const Text(
@@ -116,9 +131,16 @@ class _ReviewEditScreenState extends State<ReviewEditScreen> {
               style: TextStyle(fontSize: 12.0, color: AppColors.textSecondary),
             ),
             const SizedBox(height: 24.0),
-            
+
             // Star Input Widget
-            const Text('별점 평가', style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+            const Text(
+              '별점 평가',
+              style: TextStyle(
+                fontSize: 14.0,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
             const SizedBox(height: 8.0),
             Center(
               child: Row(
@@ -127,7 +149,9 @@ class _ReviewEditScreenState extends State<ReviewEditScreen> {
                   final starVal = index + 1;
                   final isFilled = starVal <= _rating;
                   return IconButton(
-                    onPressed: _isSubmitting ? null : () => setState(() => _rating = starVal),
+                    onPressed: _isSubmitting
+                        ? null
+                        : () => setState(() => _rating = starVal),
                     icon: Icon(
                       isFilled ? Icons.star : Icons.star_border,
                       color: isFilled ? Colors.amber : Colors.grey.shade400,
@@ -140,7 +164,14 @@ class _ReviewEditScreenState extends State<ReviewEditScreen> {
             const SizedBox(height: 24.0),
 
             // Content Area
-            const Text('리뷰 본문', style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+            const Text(
+              '리뷰 본문',
+              style: TextStyle(
+                fontSize: 14.0,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
             const SizedBox(height: 8.0),
             TextField(
               controller: _contentController,
@@ -157,12 +188,15 @@ class _ReviewEditScreenState extends State<ReviewEditScreen> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.0),
-                  borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                  borderSide: const BorderSide(
+                    color: AppColors.primary,
+                    width: 1.5,
+                  ),
                 ),
                 contentPadding: const EdgeInsets.all(16.0),
               ),
             ),
-            
+
             // Text count info
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -170,8 +204,10 @@ class _ReviewEditScreenState extends State<ReviewEditScreen> {
                 Text(
                   '${_inputText.trim().length} / 최소 10자',
                   style: TextStyle(
-                    fontSize: 11.0, 
-                    color: _inputText.trim().length >= 10 ? Colors.green : AppColors.textHint
+                    fontSize: 11.0,
+                    color: _inputText.trim().length >= 10
+                        ? Colors.green
+                        : AppColors.textHint,
                   ),
                 ),
               ],
@@ -187,18 +223,27 @@ class _ReviewEditScreenState extends State<ReviewEditScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   disabledBackgroundColor: Colors.grey.shade300,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
                   elevation: 0,
                 ),
                 child: _isSubmitting
                     ? const SizedBox(
                         width: 20.0,
                         height: 20.0,
-                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.0),
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2.0,
+                        ),
                       )
                     : const Text(
                         '수정 완료',
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14.0),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14.0,
+                        ),
                       ),
               ),
             ),

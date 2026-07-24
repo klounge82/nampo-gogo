@@ -6,7 +6,7 @@ class ActivityRepository {
   final Dio _dio;
 
   ActivityRepository({Dio? dio})
-      : _dio = dio ?? Dio(BaseOptions(baseUrl: ApiConfig.baseUrl));
+    : _dio = dio ?? Dio(BaseOptions(baseUrl: ApiConfig.baseUrl));
 
   // GET /activity
   Future<List<dynamic>> getActivities({

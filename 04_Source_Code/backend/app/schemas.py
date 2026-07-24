@@ -42,6 +42,65 @@ class BusinessApplicationCreate(BaseModel):
     phone: str
     requested_store_id: Optional[str] = None
 
+class BusinessApplicationOut(BaseModel):
+    id: str
+    user_id: str
+    business_name: str
+    business_registration_number: str
+    representative_name: str
+    phone: str
+    requested_store_id: Optional[str] = None
+    status: str
+    rejection_reason: Optional[str] = None
+    reviewed_by: Optional[str] = None
+    reviewed_at: Optional[datetime] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class AdminApplicationSummaryOut(BaseModel):
+    pending_count: int
+    today_count: int
+    approved_count: int
+    rejected_count: int
+
+class AdminApplicationListItem(BaseModel):
+    id: str
+    user_id: str
+    business_name: str
+    business_registration_number_masked: str
+    representative_name: str
+    phone_masked: str
+    requested_store_id: Optional[str] = None
+    application_type: str # 'EXISTING_STORE', 'NEW_STORE'
+    status: str
+    created_at: datetime
+
+class AdminApplicationDetailOut(BaseModel):
+    id: str
+    user_id: str
+    user_nickname: str
+    user_email_masked: str
+    user_created_at: Optional[datetime] = None
+    business_name: str
+    business_registration_number: str
+    representative_name: str
+    phone: str
+    requested_store_id: Optional[str] = None
+    requested_store_name: Optional[str] = None
+    application_type: str # 'EXISTING_STORE', 'NEW_STORE'
+    status: str
+    rejection_reason: Optional[str] = None
+    reviewed_by: Optional[str] = None
+    reviewed_at: Optional[datetime] = None
+    created_at: datetime
+    updated_at: datetime
+
+class AdminApplicationRejectRequest(BaseModel):
+    rejection_reason: str
+
 class BusinessSignupCreate(BaseModel):
     email: EmailStr
     password: str

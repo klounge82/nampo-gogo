@@ -4,11 +4,7 @@ class BarChartWidget extends StatelessWidget {
   final List<double> values;
   final List<String> labels;
 
-  const BarChartWidget({
-    super.key,
-    required this.values,
-    required this.labels,
-  });
+  const BarChartWidget({super.key, required this.values, required this.labels});
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +55,11 @@ class _BarChartPainter extends CustomPainter {
     // Draw grid guide lines
     for (int i = 0; i <= 3; i++) {
       final double y = paddingTop + (chartHeight / 3) * i;
-      canvas.drawLine(Offset(paddingLeft, y), Offset(size.width - paddingRight, y), gridPaint);
+      canvas.drawLine(
+        Offset(paddingLeft, y),
+        Offset(size.width - paddingRight, y),
+        gridPaint,
+      );
 
       // Y value label
       final double valueLabel = maxVal - ((range / 3) * i);
@@ -102,11 +102,18 @@ class _BarChartPainter extends CustomPainter {
       final TextPainter valTp = TextPainter(
         text: TextSpan(
           text: values[i].toStringAsFixed(0),
-          style: TextStyle(color: Colors.orange.shade900, fontSize: 8.5, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Colors.orange.shade900,
+            fontSize: 8.5,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         textDirection: TextDirection.ltr,
       )..layout();
-      valTp.paint(canvas, Offset(x + (barWidth / 2) - (valTp.width / 2), y - 14.0));
+      valTp.paint(
+        canvas,
+        Offset(x + (barWidth / 2) - (valTp.width / 2), y - 14.0),
+      );
 
       // X label
       final TextPainter xTp = TextPainter(
@@ -116,7 +123,13 @@ class _BarChartPainter extends CustomPainter {
         ),
         textDirection: TextDirection.ltr,
       )..layout();
-      xTp.paint(canvas, Offset(x + (barWidth / 2) - (xTp.width / 2), size.height - paddingBottom + 8.0));
+      xTp.paint(
+        canvas,
+        Offset(
+          x + (barWidth / 2) - (xTp.width / 2),
+          size.height - paddingBottom + 8.0,
+        ),
+      );
     }
   }
 

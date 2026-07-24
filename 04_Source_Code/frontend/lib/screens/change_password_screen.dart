@@ -30,9 +30,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
     try {
       await context.read<ProfileProvider>().changePassword(
-            _currentPasswordController.text,
-            _newPasswordController.text,
-          );
+        _currentPasswordController.text,
+        _newPasswordController.text,
+      );
 
       if (mounted) {
         showDialog(
@@ -40,13 +40,15 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           barrierDismissible: false,
           builder: (ctx) => AlertDialog(
             title: const Text('비밀번호 변경 완료'),
-            content: const Text('비밀번호가 안전하게 변경되었습니다. 보안 세션을 위해 로그아웃되며 새 비밀번호로 다시 로그인해 주세요.'),
+            content: const Text(
+              '비밀번호가 안전하게 변경되었습니다. 보안 세션을 위해 로그아웃되며 새 비밀번호로 다시 로그인해 주세요.',
+            ),
             actions: [
               TextButton(
                 onPressed: () {
                   Navigator.pop(ctx); // Close Dialog
                   // Perform logout and redirect to login/auth flow
-                  context.read<ProfileProvider>().withdrawAccount(context); 
+                  context.read<ProfileProvider>().withdrawAccount(context);
                 },
                 child: const Text('확인'),
               ),
@@ -56,9 +58,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('비밀번호 변경 실패: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('비밀번호 변경 실패: $e')));
       }
     } finally {
       if (mounted) {
@@ -123,7 +125,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       if (value.length < 8) {
                         return '비밀번호는 최소 8자 이상이어야 합니다.';
                       }
-                      if (!RegExp(r'[a-zA-Z]').hasMatch(value) || !RegExp(r'[0-9]').hasMatch(value)) {
+                      if (!RegExp(r'[a-zA-Z]').hasMatch(value) ||
+                          !RegExp(r'[0-9]').hasMatch(value)) {
                         return '영문자와 숫자를 모두 포함해야 합니다.';
                       }
                       return null;
@@ -165,9 +168,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           if (_isSubmitting)
             Container(
               color: Colors.black26,
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
+              child: const Center(child: CircularProgressIndicator()),
             ),
         ],
       ),

@@ -93,7 +93,8 @@ class AuthService {
         ),
       );
 
-      if ((response.statusCode == 200 || response.statusCode == 201) && response.data != null) {
+      if ((response.statusCode == 200 || response.statusCode == 201) &&
+          response.data != null) {
         return response.data as Map<String, dynamic>;
       }
       throw Exception('사업자 회원가입 실패: 서버 응답 오류');

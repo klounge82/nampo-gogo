@@ -51,7 +51,7 @@ class ReservationRepository {
   ];
 
   ReservationRepository({ReservationService? reservationService})
-      : _reservationService = reservationService ?? ReservationService();
+    : _reservationService = reservationService ?? ReservationService();
 
   // Create Reservation
   Future<Reservation> createReservation({
@@ -70,12 +70,14 @@ class ReservationRepository {
       return Reservation.fromJson(res);
     } catch (e) {
       if (kDebugMode) {
-        print('ReservationRepository: Failed to create reservation online. Simulating offline. Error: $e');
+        print(
+          'ReservationRepository: Failed to create reservation online. Simulating offline. Error: $e',
+        );
       }
-      
+
       // Fallback offline simulator
       final newId = 'res_mock_${DateTime.now().millisecondsSinceEpoch}';
-      
+
       // Attempt to load place info or default
       final newRes = Reservation(
         id: newId,
@@ -97,7 +99,7 @@ class ReservationRepository {
           createdAt: DateTime.now(),
         ),
       );
-      
+
       _mockReservations.insert(0, newRes);
       return newRes;
     }
@@ -106,20 +108,25 @@ class ReservationRepository {
   // Cancel Reservation
   Future<bool> cancelReservation(String reservationId, {String? userId}) async {
     try {
-      final res = await _reservationService.cancelReservation(reservationId, userId: userId);
+      final res = await _reservationService.cancelReservation(
+        reservationId,
+        userId: userId,
+      );
       return res['success'] as bool? ?? false;
     } catch (e) {
       if (kDebugMode) {
-        print('ReservationRepository: Failed to cancel reservation online. Simulating offline. Error: $e');
+        print(
+          'ReservationRepository: Failed to cancel reservation online. Simulating offline. Error: $e',
+        );
       }
-      
+
       final index = _mockReservations.indexWhere((r) => r.id == reservationId);
       if (index != -1) {
         final current = _mockReservations[index];
         if (current.status == 'cancelled' || current.status == 'completed') {
           throw Exception('이미 취소 또는 완료된 예약입니다. (오프라인 모드)');
         }
-        
+
         _mockReservations[index] = Reservation(
           id: current.id,
           userId: current.userId,
@@ -140,11 +147,17 @@ class ReservationRepository {
   // Get user reservations list
   Future<List<Reservation>> getUserReservations({String? userId}) async {
     try {
-      final list = await _reservationService.fetchUserReservations(userId: userId);
-      return list.map((json) => Reservation.fromJson(json as Map<String, dynamic>)).toList();
+      final list = await _reservationService.fetchUserReservations(
+        userId: userId,
+      );
+      return list
+          .map((json) => Reservation.fromJson(json as Map<String, dynamic>))
+          .toList();
     } catch (e) {
       if (kDebugMode) {
-        print('ReservationRepository: Failed to fetch reservations. Simulating offline. Error: $e');
+        print(
+          'ReservationRepository: Failed to fetch reservations. Simulating offline. Error: $e',
+        );
       }
       return List.from(_mockReservations);
     }
@@ -153,11 +166,15 @@ class ReservationRepository {
   // Get reservation detail
   Future<Reservation> getReservationDetail(String reservationId) async {
     try {
-      final res = await _reservationService.fetchReservationDetail(reservationId);
+      final res = await _reservationService.fetchReservationDetail(
+        reservationId,
+      );
       return Reservation.fromJson(res);
     } catch (e) {
       if (kDebugMode) {
-        print('ReservationRepository: Failed to get reservation detail. Simulating offline. Error: $e');
+        print(
+          'ReservationRepository: Failed to get reservation detail. Simulating offline. Error: $e',
+        );
       }
       return _mockReservations.firstWhere(
         (r) => r.id == reservationId,

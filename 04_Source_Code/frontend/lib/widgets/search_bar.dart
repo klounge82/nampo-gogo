@@ -6,11 +6,7 @@ class NampoSearchBar extends StatelessWidget {
   final ValueChanged<String>? onChanged;
   final VoidCallback? onTap;
 
-  const NampoSearchBar({
-    super.key,
-    this.onChanged,
-    this.onTap,
-  });
+  const NampoSearchBar({super.key, this.onChanged, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -31,14 +27,8 @@ class NampoSearchBar extends StatelessWidget {
         onTap: onTap,
         decoration: InputDecoration(
           hintText: AppStrings.homeSearchHint,
-          hintStyle: const TextStyle(
-            color: AppColors.textHint,
-            fontSize: 14.0,
-          ),
-          prefixIcon: const Icon(
-            Icons.search,
-            color: AppColors.primary,
-          ),
+          hintStyle: const TextStyle(color: AppColors.textHint, fontSize: 14.0),
+          prefixIcon: const Icon(Icons.search, color: AppColors.primary),
           suffixIcon: IconButton(
             icon: const Icon(Icons.mic_none, color: AppColors.textSecondary),
             onPressed: () {},

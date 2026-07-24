@@ -4,12 +4,11 @@ import '../services/place_service.dart';
 import '../data/mock_data.dart';
 import '../config/production_config.dart';
 
-
 class PlaceRepository {
   final PlaceService _placeService;
 
   PlaceRepository({PlaceService? placeService})
-      : _placeService = placeService ?? PlaceService();
+    : _placeService = placeService ?? PlaceService();
 
   // Helper to map Mock Recommendation to Place model
   Place _mapMockToPlace(dynamic rec) {
@@ -28,16 +27,22 @@ class PlaceRepository {
   Future<List<Place>> getPlaces({String? category}) async {
     try {
       final data = await _placeService.fetchPlaces(category: category);
-      return data.map((json) => Place.fromJson(json as Map<String, dynamic>)).toList();
+      return data
+          .map((json) => Place.fromJson(json as Map<String, dynamic>))
+          .toList();
     } catch (e) {
       if (!ProductionConfig.enableMockData) {
         rethrow;
       }
       if (kDebugMode) {
-        print('PlaceRepository: Failed to load places from API. Falling back to Mock. Error: $e');
+        print(
+          'PlaceRepository: Failed to load places from API. Falling back to Mock. Error: $e',
+        );
       }
       // Fallback local Mock mapping
-      var list = MockData.recommendations.map((rec) => _mapMockToPlace(rec)).toList();
+      var list = MockData.recommendations
+          .map((rec) => _mapMockToPlace(rec))
+          .toList();
       if (category != null) {
         list = list.where((place) => place.category == category).toList();
       }
@@ -55,7 +60,9 @@ class PlaceRepository {
         rethrow;
       }
       if (kDebugMode) {
-        print('PlaceRepository: Failed to load categories. Falling back. Error: $e');
+        print(
+          'PlaceRepository: Failed to load categories. Falling back. Error: $e',
+        );
       }
       // Fallback local unique categories
       return ['먹거리', '볼거리', '맛집'];
@@ -66,7 +73,9 @@ class PlaceRepository {
   Future<List<Place>> searchPlaces(String query) async {
     try {
       final data = await _placeService.searchPlaces(query);
-      return data.map((json) => Place.fromJson(json as Map<String, dynamic>)).toList();
+      return data
+          .map((json) => Place.fromJson(json as Map<String, dynamic>))
+          .toList();
     } catch (e) {
       if (!ProductionConfig.enableMockData) {
         rethrow;
@@ -78,9 +87,11 @@ class PlaceRepository {
       final cleanQuery = query.toLowerCase();
       return MockData.recommendations
           .map((rec) => _mapMockToPlace(rec))
-          .where((place) =>
-              place.name.toLowerCase().contains(cleanQuery) ||
-              place.description.toLowerCase().contains(cleanQuery))
+          .where(
+            (place) =>
+                place.name.toLowerCase().contains(cleanQuery) ||
+                place.description.toLowerCase().contains(cleanQuery),
+          )
           .toList();
     }
   }
@@ -99,7 +110,9 @@ class PlaceRepository {
       }
       // Fallback mock detail matching
       try {
-        final mockRec = MockData.recommendations.firstWhere((rec) => rec.id == id);
+        final mockRec = MockData.recommendations.firstWhere(
+          (rec) => rec.id == id,
+        );
         return _mapMockToPlace(mockRec);
       } catch (_) {
         throw Exception('해당 장소의 정보를 찾을 수 없습니다.');

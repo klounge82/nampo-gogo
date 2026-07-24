@@ -26,7 +26,10 @@ class LanguageSettingsScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           l10n.languageSetting,
-          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
         ),
         backgroundColor: Colors.white,
         elevation: 0.5,
@@ -37,7 +40,9 @@ class LanguageSettingsScreen extends StatelessWidget {
         itemCount: languages.length,
         itemBuilder: (context, index) {
           final lang = languages[index];
-          final isSelected = (lang['code'] == currentLang) || (lang['code'] == 'zh' && currentLang.startsWith('zh'));
+          final isSelected =
+              (lang['code'] == currentLang) ||
+              (lang['code'] == 'zh' && currentLang.startsWith('zh'));
 
           return Container(
             margin: const EdgeInsets.symmetric(vertical: 6),
@@ -64,7 +69,10 @@ class LanguageSettingsScreen extends StatelessWidget {
                   ? const Icon(Icons.check_circle, color: Colors.blueAccent)
                   : const Icon(Icons.circle_outlined, color: Colors.grey),
               onTap: () {
-                localeProvider.setLocale(Locale(lang['code']!), userId: auth.currentUser?.id);
+                localeProvider.setLocale(
+                  Locale(lang['code']!),
+                  userId: auth.currentUser?.id,
+                );
               },
             ),
           );

@@ -6,7 +6,7 @@ class SearchProvider extends ChangeNotifier {
   final SearchRepository _searchRepository;
 
   SearchProvider({SearchRepository? searchRepository})
-      : _searchRepository = searchRepository ?? SearchRepository();
+    : _searchRepository = searchRepository ?? SearchRepository();
 
   // Search Results States
   List<dynamic> _searchResults = [];
@@ -20,7 +20,8 @@ class SearchProvider extends ChangeNotifier {
   List<String> _suggestions = [];
 
   // Filter States
-  String _selectedType = 'all'; // 'all', 'place', 'mission', 'coupon', 'recommendation'
+  String _selectedType =
+      'all'; // 'all', 'place', 'mission', 'coupon', 'recommendation'
   String _selectedSort = 'relevance'; // 'relevance', 'distance', 'rating'
 
   // Getters

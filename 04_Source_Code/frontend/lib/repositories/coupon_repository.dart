@@ -30,7 +30,8 @@ class CouponRepository {
     Coupon(
       id: 'coupon_mock_3',
       title: '자갈치시장 신선횟집 10% 식사 할인권',
-      description: '자갈치시장 지정 협약 식당에서 식사류 및 활어회 메뉴 주문 시 결제 금액 of 10%를 즉시 할인받을 수 있습니다.',
+      description:
+          '자갈치시장 지정 협약 식당에서 식사류 및 활어회 메뉴 주문 시 결제 금액 of 10%를 즉시 할인받을 수 있습니다.',
       costPoints: 1000,
       image_url: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb',
       expiryDays: 30,
@@ -61,23 +62,30 @@ class CouponRepository {
   ];
 
   CouponRepository({CouponService? couponService})
-      : _couponService = couponService ?? CouponService();
+    : _couponService = couponService ?? CouponService();
 
   // Get exchangeable shop coupons
   Future<List<Coupon>> getCoupons() async {
     try {
       final list = await _couponService.fetchCoupons();
-      return list.map((json) => Coupon.fromJson(json as Map<String, dynamic>)).toList();
+      return list
+          .map((json) => Coupon.fromJson(json as Map<String, dynamic>))
+          .toList();
     } catch (e) {
       if (kDebugMode) {
-        print('CouponRepository: Failed to load shop coupons. Falling back to local mock list. Error: $e');
+        print(
+          'CouponRepository: Failed to load shop coupons. Falling back to local mock list. Error: $e',
+        );
       }
       return List.from(_mockCoupons);
     }
   }
 
   // Exchange coupon
-  Future<Map<String, dynamic>> exchangeCoupon(String couponId, {String? userId}) async {
+  Future<Map<String, dynamic>> exchangeCoupon(
+    String couponId, {
+    String? userId,
+  }) async {
     try {
       final res = await _couponService.exchangeCoupon(couponId, userId: userId);
       return {
@@ -87,25 +95,32 @@ class CouponRepository {
       };
     } catch (e) {
       if (kDebugMode) {
-        print('CouponRepository: Failed to exchange coupon. Falling back locally. Error: $e');
+        print(
+          'CouponRepository: Failed to exchange coupon. Falling back locally. Error: $e',
+        );
       }
       // Offline local transaction fallback
-      final targetCoupon = _mockCoupons.firstWhere((c) => c.id == couponId, 
-          orElse: () => throw Exception('해당 쿠폰 상품이 존재하지 않습니다.'));
-      
-      final currentPoints = await _pointRepository.getUserPoints(userId: userId);
+      final targetCoupon = _mockCoupons.firstWhere(
+        (c) => c.id == couponId,
+        orElse: () => throw Exception('해당 쿠폰 상품이 존재하지 않습니다.'),
+      );
+
+      final currentPoints = await _pointRepository.getUserPoints(
+        userId: userId,
+      );
       if (currentPoints < targetCoupon.costPoints) {
         throw Exception('보유 포인트가 부족합니다. (오프라인 모드)');
       }
 
       // Deduct points locally
       final updatedPoints = await _pointRepository.spendPoints(
-        targetCoupon.costPoints, 
+        targetCoupon.costPoints,
         '${targetCoupon.title} 쿠폰 교환',
-        userId: userId
+        userId: userId,
       );
 
-      final newUcId = 'user_coupon_mock_${DateTime.now().millisecondsSinceEpoch}';
+      final newUcId =
+          'user_coupon_mock_${DateTime.now().millisecondsSinceEpoch}';
       final newUc = UserCoupon(
         id: newUcId,
         userId: userId ?? 'usr_mock_999',
@@ -126,13 +141,23 @@ class CouponRepository {
   }
 
   // Get user owned coupons
-  Future<List<UserCoupon>> getUserCoupons({String? userId, String? status}) async {
+  Future<List<UserCoupon>> getUserCoupons({
+    String? userId,
+    String? status,
+  }) async {
     try {
-      final list = await _couponService.fetchUserCoupons(userId: userId, status: status);
-      return list.map((json) => UserCoupon.fromJson(json as Map<String, dynamic>)).toList();
+      final list = await _couponService.fetchUserCoupons(
+        userId: userId,
+        status: status,
+      );
+      return list
+          .map((json) => UserCoupon.fromJson(json as Map<String, dynamic>))
+          .toList();
     } catch (e) {
       if (kDebugMode) {
-        print('CouponRepository: Failed to load user coupons. Falling back locally. Error: $e');
+        print(
+          'CouponRepository: Failed to load user coupons. Falling back locally. Error: $e',
+        );
       }
       var resList = List<UserCoupon>.from(_mockUserCoupons);
       if (status != null) {
@@ -145,13 +170,20 @@ class CouponRepository {
   // Use coupon
   Future<bool> useUserCoupon(String userCouponId, {String? userId}) async {
     try {
-      final res = await _couponService.useUserCoupon(userCouponId, userId: userId);
+      final res = await _couponService.useUserCoupon(
+        userCouponId,
+        userId: userId,
+      );
       return res['success'] as bool? ?? false;
     } catch (e) {
       if (kDebugMode) {
-        print('CouponRepository: Failed to use coupon. Falling back locally. Error: $e');
+        print(
+          'CouponRepository: Failed to use coupon. Falling back locally. Error: $e',
+        );
       }
-      final ucIndex = _mockUserCoupons.indexWhere((uc) => uc.id == userCouponId);
+      final ucIndex = _mockUserCoupons.indexWhere(
+        (uc) => uc.id == userCouponId,
+      );
       if (ucIndex != -1) {
         final currentUc = _mockUserCoupons[ucIndex];
         if (currentUc.status != 'unused') {

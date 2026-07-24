@@ -5,7 +5,11 @@ import 'saved_courses_screen.dart';
 import 'user_coupon_screen.dart';
 
 class NotificationRouter {
-  static void routeToScreen(BuildContext context, String type, Map<String, dynamic> data) {
+  static void routeToScreen(
+    BuildContext context,
+    String type,
+    Map<String, dynamic> data,
+  ) {
     if (!context.mounted) return;
 
     switch (type) {
@@ -24,18 +28,14 @@ class NotificationRouter {
       case 'COUPON':
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) => const UserCouponScreen(),
-          ),
+          MaterialPageRoute(builder: (_) => const UserCouponScreen()),
         );
         break;
 
       case 'AI':
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) => const SavedCoursesScreen(),
-          ),
+          MaterialPageRoute(builder: (_) => const SavedCoursesScreen()),
         );
         break;
 

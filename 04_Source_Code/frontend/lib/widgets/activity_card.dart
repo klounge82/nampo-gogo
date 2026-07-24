@@ -64,12 +64,14 @@ class ActivityCard extends StatelessWidget {
       );
     } else if (targetType == 'MISSION') {
       Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => MissionDetailScreen(missionId: targetId)),
+        MaterialPageRoute(
+          builder: (_) => MissionDetailScreen(missionId: targetId),
+        ),
       );
     } else if (targetType == 'COUPON') {
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const UserCouponScreen()),
-      );
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const UserCouponScreen()));
     }
   }
 
@@ -87,7 +89,8 @@ class ActivityCard extends StatelessWidget {
     final iconData = _getIcon(iconStr);
     final themeColor = _getColor(colorStr);
 
-    final hasLink = activity['target_type'] != null && activity['target_id'] != null;
+    final hasLink =
+        activity['target_type'] != null && activity['target_id'] != null;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
@@ -116,11 +119,17 @@ class ActivityCard extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
                       ),
                       Text(
                         timeFormatted,
-                        style: const TextStyle(color: Colors.grey, fontSize: 11),
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 11,
+                        ),
                       ),
                     ],
                   ),
@@ -135,7 +144,11 @@ class ActivityCard extends StatelessWidget {
             if (hasLink) ...[
               const SizedBox(width: 8),
               IconButton(
-                icon: const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
+                icon: const Icon(
+                  Icons.arrow_forward_ios,
+                  size: 14,
+                  color: Colors.grey,
+                ),
                 onPressed: () => _handleDeepLink(context),
               ),
             ],

@@ -11,7 +11,10 @@ class PaymentResultScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final NumberFormat currencyFormat = NumberFormat.currency(locale: 'ko_KR', symbol: '₩');
+    final NumberFormat currencyFormat = NumberFormat.currency(
+      locale: 'ko_KR',
+      symbol: '₩',
+    );
     final DateFormat dateFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
 
     return Scaffold(
@@ -36,7 +39,11 @@ class PaymentResultScreen extends StatelessWidget {
               const SizedBox(height: 20.0),
               const Text(
                 '결제가 완료되었습니다',
-                style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                style: TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
               ),
               const SizedBox(height: 8.0),
               const Text(
@@ -56,15 +63,35 @@ class PaymentResultScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('결제 영수증 명세', style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold)),
+                    const Text(
+                      '결제 영수증 명세',
+                      style: TextStyle(
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const Divider(height: 24.0),
-                    _buildReceiptRow('결제 금액', currencyFormat.format(payment.amount), isPrimary: true),
+                    _buildReceiptRow(
+                      '결제 금액',
+                      currencyFormat.format(payment.amount),
+                      isPrimary: true,
+                    ),
                     _buildReceiptRow('결제 수단', payment.paymentMethod),
                     _buildReceiptRow('결제 종류', payment.targetType),
-                    _buildReceiptRow('결제 상태', payment.status.toUpperCase(), valueColor: Colors.green),
-                    _buildReceiptRow('결제 시간', dateFormat.format(payment.createdAt)),
+                    _buildReceiptRow(
+                      '결제 상태',
+                      payment.status.toUpperCase(),
+                      valueColor: Colors.green,
+                    ),
+                    _buildReceiptRow(
+                      '결제 시간',
+                      dateFormat.format(payment.createdAt),
+                    ),
                     _buildReceiptRow('거래 고유번호', payment.id.substring(0, 18)),
-                    _buildReceiptRow('중복방지 키', payment.idempotencyKey.substring(0, 18)),
+                    _buildReceiptRow(
+                      '중복방지 키',
+                      payment.idempotencyKey.substring(0, 18),
+                    ),
                   ],
                 ),
               ),
@@ -79,7 +106,9 @@ class PaymentResultScreen extends StatelessWidget {
                   onPressed: () {
                     // Navigate back to Main Screen
                     Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+                      MaterialPageRoute(
+                        builder: (_) => const MainNavigationScreen(),
+                      ),
                       (route) => false,
                     );
                   },
@@ -87,9 +116,17 @@ class PaymentResultScreen extends StatelessWidget {
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
                   ),
-                  child: const Text('확인 (홈으로 이동)', style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    '확인 (홈으로 이동)',
+                    style: TextStyle(
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -99,19 +136,32 @@ class PaymentResultScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildReceiptRow(String label, String value, {bool isPrimary = false, Color? valueColor}) {
+  Widget _buildReceiptRow(
+    String label,
+    String value, {
+    bool isPrimary = false,
+    Color? valueColor,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(fontSize: 12.0, color: AppColors.textSecondary)),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12.0,
+              color: AppColors.textSecondary,
+            ),
+          ),
           Text(
             value,
             style: TextStyle(
               fontSize: isPrimary ? 15.0 : 12.0,
               fontWeight: isPrimary ? FontWeight.bold : FontWeight.w500,
-              color: valueColor ?? (isPrimary ? AppColors.primary : AppColors.textPrimary),
+              color:
+                  valueColor ??
+                  (isPrimary ? AppColors.primary : AppColors.textPrimary),
             ),
           ),
         ],

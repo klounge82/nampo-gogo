@@ -12,8 +12,10 @@ class MapService {
   }) async {
     // google.navigation:q=lat,lng&mode=d(드라이브), w(도보), b(대중교통)
     final String modeParam = mode == 'w' ? 'w' : (mode == 'r' ? 'b' : 'd');
-    final String googleAppUrl = 'google.navigation:q=$destLat,$destLng&mode=$modeParam';
-    final String googleWebUrl = 'https://www.google.com/maps/dir/?api=1&destination=$destLat,$destLng&travelmode=${mode == 'w' ? 'walking' : (mode == 'r' ? 'transit' : 'driving')}';
+    final String googleAppUrl =
+        'google.navigation:q=$destLat,$destLng&mode=$modeParam';
+    final String googleWebUrl =
+        'https://www.google.com/maps/dir/?api=1&destination=$destLat,$destLng&travelmode=${mode == 'w' ? 'walking' : (mode == 'r' ? 'transit' : 'driving')}';
 
     try {
       final Uri appUri = Uri.parse(googleAppUrl);
@@ -23,7 +25,9 @@ class MapService {
       }
     } catch (e) {
       if (kDebugMode) {
-        print('MapService: Google Maps app launch failed: $e. Using web fallback.');
+        print(
+          'MapService: Google Maps app launch failed: $e. Using web fallback.',
+        );
       }
     }
 
@@ -45,8 +49,10 @@ class MapService {
     String mode = 'walk',
   }) async {
     // nmap://route/walk?dlat=..&dlng=..&dname=..
-    final String naverAppUrl = 'nmap://route/$mode?dlat=$destLat&dlng=$destLng&dname=${Uri.encodeComponent(destName)}&appname=com.nampogogo.app';
-    final String naverWebUrl = 'https://map.naver.com/v5/directions/-/-/${destLat},${destLng},${Uri.encodeComponent(destName)},-/-/walk';
+    final String naverAppUrl =
+        'nmap://route/$mode?dlat=$destLat&dlng=$destLng&dname=${Uri.encodeComponent(destName)}&appname=com.nampogogo.app';
+    final String naverWebUrl =
+        'https://map.naver.com/v5/directions/-/-/${destLat},${destLng},${Uri.encodeComponent(destName)},-/-/walk';
 
     try {
       final Uri appUri = Uri.parse(naverAppUrl);
@@ -56,7 +62,9 @@ class MapService {
       }
     } catch (e) {
       if (kDebugMode) {
-        print('MapService: Naver Map app launch failed: $e. Using web fallback.');
+        print(
+          'MapService: Naver Map app launch failed: $e. Using web fallback.',
+        );
       }
     }
 

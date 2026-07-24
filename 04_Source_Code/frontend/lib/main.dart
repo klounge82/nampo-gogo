@@ -15,6 +15,7 @@ import 'providers/personalization_provider.dart';
 import 'providers/analytics_provider.dart';
 import 'services/notification_service.dart';
 import 'providers/app_mode_provider.dart';
+import 'screens/admin/admin_app_shell.dart';
 import 'screens/main_navigation_screen.dart';
 import 'screens/business_app_shell.dart';
 import 'screens/business_pending_shell.dart';
@@ -85,6 +86,7 @@ class MyApp extends StatelessWidget {
       ],
       theme: activeTheme,
       home: const RootNavigationSelector(),
+      routes: {'/admin': (context) => const AdminAppShell()},
     );
   }
 }

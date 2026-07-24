@@ -25,7 +25,10 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     });
   }
 
-  final NumberFormat _currencyFormat = NumberFormat.currency(locale: 'ko_KR', symbol: '₩');
+  final NumberFormat _currencyFormat = NumberFormat.currency(
+    locale: 'ko_KR',
+    symbol: '₩',
+  );
   final DateFormat _dateFormat = DateFormat('yyyy-MM-dd HH:mm');
 
   Future<void> _refundTransaction(String paymentId, int amount) async {
@@ -37,7 +40,9 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
         context: context,
         builder: (ctx) => AlertDialog(
           title: const Text('운영 환불 기능 제한'),
-          content: const Text('현재 운영(Live) 결제 환경입니다. 가상 PG 환불 처리는 불가능하며, 고객 센터를 통해 환불 요청을 진행하십시오.'),
+          content: const Text(
+            '현재 운영(Live) 결제 환경입니다. 가상 PG 환불 처리는 불가능하며, 고객 센터를 통해 환불 요청을 진행하십시오.',
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
@@ -70,8 +75,14 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('취소')),
-          TextButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('확인')),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('취소'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('확인'),
+          ),
         ],
       ),
     );
@@ -79,18 +90,18 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     if (confirm == true) {
       final reason = reasonController.text.trim();
       if (reason.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('환불 사유를 입력하셔야 합니다.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('환불 사유를 입력하셔야 합니다.')));
         return;
       }
 
       final success = await context.read<PaymentProvider>().requestRefund(
-            token: token,
-            paymentId: paymentId,
-            refundAmount: amount,
-            reason: reason,
-          );
+        token: token,
+        paymentId: paymentId,
+        refundAmount: amount,
+        reason: reason,
+      );
 
       if (mounted) {
         if (success) {
@@ -112,7 +123,10 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('결제 및 이용 이력', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          '결제 및 이용 이력',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
         elevation: 0.5,
@@ -120,7 +134,9 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
       body: Consumer<PaymentProvider>(
         builder: (context, provider, child) {
           if (provider.isLoading) {
-            return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+            return const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            );
           }
 
           if (provider.errorMessage != null) {
@@ -154,17 +170,25 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          pay.targetType == 'POINT_CHARGE' ? '💎 포인트 충전' : '📅 예약 보증금 결제',
-                          style: const TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold),
+                          pay.targetType == 'POINT_CHARGE'
+                              ? '💎 포인트 충전'
+                              : '📅 예약 보증금 결제',
+                          style: const TextStyle(
+                            fontSize: 13.0,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8.0,
+                            vertical: 4.0,
+                          ),
                           decoration: BoxDecoration(
                             color: pay.status == 'paid'
                                 ? Colors.green.withAlpha(20)
                                 : pay.status == 'refunded'
-                                    ? Colors.orange.withAlpha(20)
-                                    : Colors.grey.withAlpha(20),
+                                ? Colors.orange.withAlpha(20)
+                                : Colors.grey.withAlpha(20),
                             borderRadius: BorderRadius.circular(6.0),
                           ),
                           child: Text(
@@ -175,8 +199,8 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                               color: pay.status == 'paid'
                                   ? Colors.green
                                   : pay.status == 'refunded'
-                                      ? Colors.orange
-                                      : Colors.grey,
+                                  ? Colors.orange
+                                  : Colors.grey,
                             ),
                           ),
                         ),
@@ -185,18 +209,29 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                     const SizedBox(height: 8.0),
                     Text(
                       _currencyFormat.format(pay.amount),
-                      style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color: AppColors.primary),
+                      style: const TextStyle(
+                        fontSize: 18.0,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                      ),
                     ),
                     const SizedBox(height: 4.0),
                     Text(
                       '결제일자: ${_dateFormat.format(pay.createdAt)}',
-                      style: const TextStyle(fontSize: 11.0, color: Colors.grey),
+                      style: const TextStyle(
+                        fontSize: 11.0,
+                        color: Colors.grey,
+                      ),
                     ),
                     if (pay.refunds.isNotEmpty) ...[
                       const Divider(height: 20.0),
                       Text(
                         '환불 사유: ${pay.refunds.first.reason ?? '사유 없음'}',
-                        style: const TextStyle(fontSize: 11.5, color: Colors.deepOrange, fontWeight: FontWeight.w500),
+                        style: const TextStyle(
+                          fontSize: 11.5,
+                          color: Colors.deepOrange,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ],
                     if (canRefund) ...[
@@ -204,13 +239,20 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                       Align(
                         alignment: Alignment.centerRight,
                         child: OutlinedButton(
-                          onPressed: () => _refundTransaction(pay.id, pay.amount),
+                          onPressed: () =>
+                              _refundTransaction(pay.id, pay.amount),
                           style: OutlinedButton.styleFrom(
                             side: const BorderSide(color: Colors.redAccent),
                             foregroundColor: Colors.redAccent,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 4,
+                            ),
                           ),
-                          child: const Text('환불 신청', style: TextStyle(fontSize: 11.5)),
+                          child: const Text(
+                            '환불 신청',
+                            style: TextStyle(fontSize: 11.5),
+                          ),
                         ),
                       ),
                     ],

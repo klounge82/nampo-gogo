@@ -10,17 +10,18 @@ class FavoriteRepository {
   static const String _localFavKey = 'nampo_gogo_local_favorites_json';
 
   FavoriteRepository({Dio? dio})
-      : _dio = dio ?? Dio(BaseOptions(baseUrl: ApiConfig.baseUrl));
+    : _dio = dio ?? Dio(BaseOptions(baseUrl: ApiConfig.baseUrl));
 
   // POST /favorites (Add)
-  Future<Map<String, dynamic>> addFavorite(String targetType, String targetId, {String? token}) async {
+  Future<Map<String, dynamic>> addFavorite(
+    String targetType,
+    String targetId, {
+    String? token,
+  }) async {
     try {
       final res = await _dio.post(
         '/favorites',
-        data: {
-          'target_type': targetType,
-          'target_id': targetId,
-        },
+        data: {'target_type': targetType, 'target_id': targetId},
         options: token != null
             ? Options(headers: {'Authorization': 'Bearer $token'})
             : null,
@@ -35,7 +36,11 @@ class FavoriteRepository {
   }
 
   // DELETE /favorites/{target_type}/{target_id} (Remove)
-  Future<Map<String, dynamic>> removeFavorite(String targetType, String targetId, {String? token}) async {
+  Future<Map<String, dynamic>> removeFavorite(
+    String targetType,
+    String targetId, {
+    String? token,
+  }) async {
     try {
       final res = await _dio.delete(
         '/favorites/$targetType/$targetId',
@@ -72,7 +77,10 @@ class FavoriteRepository {
   }
 
   // POST /favorites/merge (Merge)
-  Future<Map<String, dynamic>> mergeFavorites(List<Map<String, String>> localItems, String token) async {
+  Future<Map<String, dynamic>> mergeFavorites(
+    List<Map<String, String>> localItems,
+    String token,
+  ) async {
     try {
       final res = await _dio.post(
         '/favorites/merge',
@@ -114,12 +122,12 @@ class FavoriteRepository {
     try {
       final list = await getLocalFavorites();
       // Duplication check
-      final exists = list.any((item) => item['target_id'] == targetId && item['target_type'] == targetType);
+      final exists = list.any(
+        (item) =>
+            item['target_id'] == targetId && item['target_type'] == targetType,
+      );
       if (!exists) {
-        list.add({
-          'target_type': targetType,
-          'target_id': targetId,
-        });
+        list.add({'target_type': targetType, 'target_id': targetId});
         await _storage.write(key: _localFavKey, value: jsonEncode(list));
       }
     } catch (e) {
@@ -132,7 +140,10 @@ class FavoriteRepository {
   Future<void> removeLocalFavorite(String targetType, String targetId) async {
     try {
       final list = await getLocalFavorites();
-      list.removeWhere((item) => item['target_id'] == targetId && item['target_type'] == targetType);
+      list.removeWhere(
+        (item) =>
+            item['target_id'] == targetId && item['target_type'] == targetType,
+      );
       await _storage.write(key: _localFavKey, value: jsonEncode(list));
     } catch (e) {
       if (kDebugMode) {

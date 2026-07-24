@@ -58,8 +58,9 @@ class PaymentModel {
 
   factory PaymentModel.fromJson(Map<String, dynamic> json) {
     var refundsList = json['refunds'] as List<dynamic>? ?? [];
-    List<PaymentRefundModel> parsedRefunds =
-        refundsList.map((e) => PaymentRefundModel.fromJson(e as Map<String, dynamic>)).toList();
+    List<PaymentRefundModel> parsedRefunds = refundsList
+        .map((e) => PaymentRefundModel.fromJson(e as Map<String, dynamic>))
+        .toList();
 
     return PaymentModel(
       id: json['id'] as String? ?? '',

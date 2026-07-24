@@ -8,7 +8,9 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   if (kDebugMode) {
-    print('NotificationService: Handling a background message: ${message.messageId}');
+    print(
+      'NotificationService: Handling a background message: ${message.messageId}',
+    );
   }
 }
 
@@ -17,7 +19,8 @@ class NotificationService {
   factory NotificationService() => _instance;
   NotificationService._internal();
 
-  final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _localNotifications =
+      FlutterLocalNotificationsPlugin();
   bool _isFirebaseInitialized = false;
 
   Future<void> initialize() async {
@@ -25,11 +28,12 @@ class NotificationService {
       // 1. Local notifications configuration
       const AndroidInitializationSettings androidSettings =
           AndroidInitializationSettings('@mipmap/ic_launcher');
-      const DarwinInitializationSettings iosSettings = DarwinInitializationSettings(
-        requestAlertPermission: false,
-        requestBadgePermission: false,
-        requestSoundPermission: false,
-      );
+      const DarwinInitializationSettings iosSettings =
+          DarwinInitializationSettings(
+            requestAlertPermission: false,
+            requestBadgePermission: false,
+            requestSoundPermission: false,
+          );
 
       const InitializationSettings initSettings = InitializationSettings(
         android: androidSettings,
@@ -41,7 +45,9 @@ class NotificationService {
         onDidReceiveNotificationResponse: (NotificationResponse response) {
           // Trigger when foreground local notification clicked
           if (kDebugMode) {
-            print('NotificationService: Foreground local notification clicked with payload: ${response.payload}');
+            print(
+              'NotificationService: Foreground local notification clicked with payload: ${response.payload}',
+            );
           }
         },
       );
@@ -56,7 +62,9 @@ class NotificationService {
         );
 
         await _localNotifications
-            .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >()
             ?.createNotificationChannel(channel);
       }
 
@@ -65,7 +73,9 @@ class NotificationService {
       _isFirebaseInitialized = true;
 
       // Bind background message handler
-      FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+      FirebaseMessaging.onBackgroundMessage(
+        _firebaseMessagingBackgroundHandler,
+      );
 
       // Bind foreground message handler
       FirebaseMessaging.onMessage.listen((RemoteMessage message) {
@@ -77,7 +87,9 @@ class NotificationService {
       }
     } catch (e) {
       if (kDebugMode) {
-        print('NotificationService: Failed to initialize Firebase/FCM ($e). Running in Mock fallback mode.');
+        print(
+          'NotificationService: Failed to initialize Firebase/FCM ($e). Running in Mock fallback mode.',
+        );
       }
     }
   }
@@ -95,9 +107,9 @@ class NotificationService {
         provisional: false,
         sound: true,
       );
-      
+
       return settings.authorizationStatus == AuthorizationStatus.authorized ||
-             settings.authorizationStatus == AuthorizationStatus.provisional;
+          settings.authorizationStatus == AuthorizationStatus.provisional;
     } catch (e) {
       if (kDebugMode) {
         print('NotificationService: Error requesting permission ($e)');
@@ -107,12 +119,15 @@ class NotificationService {
   }
 
   Future<String?> getFCMToken() async {
-    if (!_isFirebaseInitialized) return 'mock_fcm_token_${DateTime.now().millisecondsSinceEpoch}';
+    if (!_isFirebaseInitialized)
+      return 'mock_fcm_token_${DateTime.now().millisecondsSinceEpoch}';
     try {
       return await FirebaseMessaging.instance.getToken();
     } catch (e) {
       if (kDebugMode) {
-        print('NotificationService: Error fetching FCM token ($e). Returning mock token.');
+        print(
+          'NotificationService: Error fetching FCM token ($e). Returning mock token.',
+        );
       }
       return 'mock_fcm_token_error_${DateTime.now().millisecondsSinceEpoch}';
     }
@@ -137,7 +152,10 @@ class NotificationService {
       presentSound: true,
     );
 
-    final details = NotificationDetails(android: androidDetails, iOS: iosDetails);
+    final details = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
 
     await _localNotifications.show(
       notification.hashCode,

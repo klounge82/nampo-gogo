@@ -6,12 +6,14 @@ import '../lib/registries/dashboard_widget_registry.dart';
 void main() {
   group('Business Application Route & Error Handling Unit Tests', () {
     test('Official Business Application Route metadata is consistent', () {
-      final module = ModuleRegistry.businessModules
-          .firstWhere((m) => m.featureKey == 'business_store_manage');
+      final module = ModuleRegistry.businessModules.firstWhere(
+        (m) => m.featureKey == 'business_store_manage',
+      );
       expect(module.route, '/business/store');
 
-      final widget = DashboardWidgetRegistry.businessWidgets
-          .firstWhere((w) => w.widgetKey == 'store_status');
+      final widget = DashboardWidgetRegistry.businessWidgets.firstWhere(
+        (w) => w.widgetKey == 'store_status',
+      );
       expect(widget.targetRoute, '/business/store');
     });
 

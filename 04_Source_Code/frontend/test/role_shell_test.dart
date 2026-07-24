@@ -20,7 +20,11 @@ void main() {
         'updated_at': '2026-07-23T18:00:00.000000',
         'roles': ['CUSTOMER', 'BUSINESS'],
         'business_application_status': 'APPROVED',
-        'capabilities': ['place.read', 'business.dashboard.read', 'store.own.update'],
+        'capabilities': [
+          'place.read',
+          'business.dashboard.read',
+          'store.own.update',
+        ],
         'available_app_modes': ['CUSTOMER', 'BUSINESS'],
         'business_memberships': [
           {
@@ -28,9 +32,9 @@ void main() {
             'store_id': 'store_31b96920',
             'membership_role': 'OWNER',
             'status': 'ACTIVE',
-            'created_at': '2026-07-23T18:00:00.000000'
-          }
-        ]
+            'created_at': '2026-07-23T18:00:00.000000',
+          },
+        ],
       };
 
       final user = User.fromJson(json);
@@ -49,58 +53,68 @@ void main() {
       expect(provider.isBusinessMode, isFalse);
     });
 
-    test('AppModeProvider blocks switching to Business mode for normal Customer user', () async {
-      final provider = AppModeProvider();
-      final normalUser = User(
-        id: 'usr_cust_1',
-        email: 'cust@example.com',
-        nickname: '일반고객',
-        role: 'member',
-        status: 'active',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-        roles: ['CUSTOMER'],
-        availableAppModes: ['CUSTOMER'],
-      );
+    test(
+      'AppModeProvider blocks switching to Business mode for normal Customer user',
+      () async {
+        final provider = AppModeProvider();
+        final normalUser = User(
+          id: 'usr_cust_1',
+          email: 'cust@example.com',
+          nickname: '일반고객',
+          role: 'member',
+          status: 'active',
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+          roles: ['CUSTOMER'],
+          availableAppModes: ['CUSTOMER'],
+        );
 
-      final success = await provider.switchMode(AppMode.business, normalUser);
-      expect(success, isFalse);
-      expect(provider.activeMode, equals(AppMode.customer));
-    });
+        final success = await provider.switchMode(AppMode.business, normalUser);
+        expect(success, isFalse);
+        expect(provider.activeMode, equals(AppMode.customer));
+      },
+    );
 
-    test('AppModeProvider allows switching to Business mode for Approved Business user', () async {
-      // Mock storage or initialize binding
-      final provider = AppModeProvider();
-      final bizUser = User(
-        id: 'usr_biz_1',
-        email: 'owner@example.com',
-        nickname: '매장주인',
-        role: 'member',
-        status: 'active',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-        roles: ['CUSTOMER', 'BUSINESS'],
-        businessApplicationStatus: 'APPROVED',
-        availableAppModes: ['CUSTOMER', 'BUSINESS'],
-        businessMemberships: [
-          {'store_id': 'store_1'}
-        ],
-      );
+    test(
+      'AppModeProvider allows switching to Business mode for Approved Business user',
+      () async {
+        // Mock storage or initialize binding
+        final provider = AppModeProvider();
+        final bizUser = User(
+          id: 'usr_biz_1',
+          email: 'owner@example.com',
+          nickname: '매장주인',
+          role: 'member',
+          status: 'active',
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+          roles: ['CUSTOMER', 'BUSINESS'],
+          businessApplicationStatus: 'APPROVED',
+          availableAppModes: ['CUSTOMER', 'BUSINESS'],
+          businessMemberships: [
+            {'store_id': 'store_1'},
+          ],
+        );
 
-      // Avoid secure storage native channel call in unit test by setting mock values or handling binding
-      expect(bizUser.isApprovedBusiness, isTrue);
-    });
+        // Avoid secure storage native channel call in unit test by setting mock values or handling binding
+        expect(bizUser.isApprovedBusiness, isTrue);
+      },
+    );
 
     test('ModuleRegistry definitions contain correct metadata', () {
       expect(ModuleRegistry.customerModules.isNotEmpty, isTrue);
       expect(ModuleRegistry.businessModules.isNotEmpty, isTrue);
       expect(ModuleRegistry.adminModules.isNotEmpty, isTrue);
 
-      final exploreModule = ModuleRegistry.customerModules.firstWhere((m) => m.featureKey == 'customer_explore');
+      final exploreModule = ModuleRegistry.customerModules.firstWhere(
+        (m) => m.featureKey == 'customer_explore',
+      );
       expect(exploreModule.title, equals('탐색'));
       expect(exploreModule.allowedModes, contains('CUSTOMER'));
 
-      final bizDash = ModuleRegistry.businessModules.firstWhere((m) => m.featureKey == 'business_dashboard');
+      final bizDash = ModuleRegistry.businessModules.firstWhere(
+        (m) => m.featureKey == 'business_dashboard',
+      );
       expect(bizDash.title, equals('대시보드'));
       expect(bizDash.allowedModes, contains('BUSINESS'));
     });
@@ -109,7 +123,9 @@ void main() {
       expect(DashboardWidgetRegistry.businessWidgets.isNotEmpty, isTrue);
       expect(DashboardWidgetRegistry.customerWidgets.isNotEmpty, isTrue);
 
-      final todayRes = DashboardWidgetRegistry.businessWidgets.firstWhere((w) => w.widgetKey == 'today_reservations');
+      final todayRes = DashboardWidgetRegistry.businessWidgets.firstWhere(
+        (w) => w.widgetKey == 'today_reservations',
+      );
       expect(todayRes.title, equals('오늘 예약'));
     });
   });

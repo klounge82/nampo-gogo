@@ -48,7 +48,9 @@ class NotificationModel {
       sentStatus: json['sent_status'] ?? 'pending',
       sentAt: json['sent_at'] != null ? DateTime.parse(json['sent_at']) : null,
       readAt: json['read_at'] != null ? DateTime.parse(json['read_at']) : null,
-      createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toIso8601String()),
+      createdAt: DateTime.parse(
+        json['created_at'] ?? DateTime.now().toIso8601String(),
+      ),
     );
   }
 }

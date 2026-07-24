@@ -8,16 +8,20 @@ class NotificationSettingsScreen extends StatefulWidget {
   const NotificationSettingsScreen({super.key});
 
   @override
-  State<NotificationSettingsScreen> createState() => _NotificationSettingsScreenState();
+  State<NotificationSettingsScreen> createState() =>
+      _NotificationSettingsScreenState();
 }
 
-class _NotificationSettingsScreenState extends State<NotificationSettingsScreen> {
+class _NotificationSettingsScreenState
+    extends State<NotificationSettingsScreen> {
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final auth = context.read<AuthProvider>();
-      context.read<NotificationProvider>().fetchPreferences(userId: auth.currentUser?.id);
+      context.read<NotificationProvider>().fetchPreferences(
+        userId: auth.currentUser?.id,
+      );
     });
   }
 
@@ -143,10 +147,16 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
     );
   }
 
-  void _updatePref(NotificationPreferenceModel current, String type, bool value) {
+  void _updatePref(
+    NotificationPreferenceModel current,
+    String type,
+    bool value,
+  ) {
     final updated = NotificationPreferenceModel(
       userId: current.userId,
-      reservationEnabled: type == 'reservation' ? value : current.reservationEnabled,
+      reservationEnabled: type == 'reservation'
+          ? value
+          : current.reservationEnabled,
       missionEnabled: type == 'mission' ? value : current.missionEnabled,
       pointEnabled: type == 'point' ? value : current.pointEnabled,
       couponEnabled: type == 'coupon' ? value : current.couponEnabled,
@@ -156,7 +166,10 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
     );
 
     final auth = context.read<AuthProvider>();
-    context.read<NotificationProvider>().updatePreferences(updated, userId: auth.currentUser?.id);
+    context.read<NotificationProvider>().updatePreferences(
+      updated,
+      userId: auth.currentUser?.id,
+    );
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(

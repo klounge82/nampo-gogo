@@ -15,7 +15,9 @@ class LocationService {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         if (kDebugMode) {
-          print('LocationService: Location services are disabled. Using fallback (Busan Station).');
+          print(
+            'LocationService: Location services are disabled. Using fallback (Busan Station).',
+          );
         }
         return _getFallbackPosition('위치 서비스가 비활성화되어 있습니다.');
       }
@@ -28,7 +30,9 @@ class LocationService {
 
       if (status.isPermanentlyDenied || status.isDenied) {
         if (kDebugMode) {
-          print('LocationService: Location permission is denied. Using fallback (Busan Station).');
+          print(
+            'LocationService: Location permission is denied. Using fallback (Busan Station).',
+          );
         }
         return _getFallbackPosition('위치 정보 접근 권한이 거절되었습니다.');
       }
@@ -42,7 +46,9 @@ class LocationService {
       return position;
     } catch (e) {
       if (kDebugMode) {
-        print('LocationService: Exception caught: $e. Returning fallback (Busan Station).');
+        print(
+          'LocationService: Exception caught: $e. Returning fallback (Busan Station).',
+        );
       }
       return _getFallbackPosition(e.toString());
     }

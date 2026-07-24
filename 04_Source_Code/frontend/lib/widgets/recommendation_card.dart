@@ -76,7 +76,9 @@ class RecommendationCard extends StatelessWidget {
                               vertical: 2.0,
                             ),
                             decoration: BoxDecoration(
-                              color: AppColors.primary.withAlpha(26), // 0.1 opacity
+                              color: AppColors.primary.withAlpha(
+                                26,
+                              ), // 0.1 opacity
                               borderRadius: BorderRadius.circular(4.0),
                             ),
                             child: Text(

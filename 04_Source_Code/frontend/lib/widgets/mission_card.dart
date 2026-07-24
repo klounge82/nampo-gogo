@@ -44,7 +44,9 @@ class MissionCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(10.0),
                   decoration: BoxDecoration(
-                    color: _getCategoryColor(mission.category).withAlpha(26), // 0.1 opacity
+                    color: _getCategoryColor(
+                      mission.category,
+                    ).withAlpha(26), // 0.1 opacity
                     shape: BoxShape.circle,
                   ),
                   child: Icon(

@@ -7,7 +7,7 @@ class MissionRepository {
   final MissionService _missionService;
 
   MissionRepository({MissionService? missionService})
-      : _missionService = missionService ?? MissionService();
+    : _missionService = missionService ?? MissionService();
 
   // Helper to map Mock Mission metadata to Mission model
   Mission _mapMockToMission(dynamic mock) {
@@ -26,13 +26,19 @@ class MissionRepository {
   Future<List<Mission>> getMissions({String? storeId}) async {
     try {
       final data = await _missionService.fetchMissions(storeId: storeId);
-      return data.map((json) => Mission.fromJson(json as Map<String, dynamic>)).toList();
+      return data
+          .map((json) => Mission.fromJson(json as Map<String, dynamic>))
+          .toList();
     } catch (e) {
       if (kDebugMode) {
-        print('MissionRepository: Failed to load missions from API. Falling back to Mock. Error: $e');
+        print(
+          'MissionRepository: Failed to load missions from API. Falling back to Mock. Error: $e',
+        );
       }
       // Fallback local Mock mapping
-      var list = MockData.missions.map((mock) => _mapMockToMission(mock)).toList();
+      var list = MockData.missions
+          .map((mock) => _mapMockToMission(mock))
+          .toList();
       if (storeId != null) {
         list = list.where((m) => m.storeId == storeId).toList();
       }
@@ -47,7 +53,9 @@ class MissionRepository {
       return Mission.fromJson(json);
     } catch (e) {
       if (kDebugMode) {
-        print('MissionRepository: Detail fetch failed. Falling back. Error: $e');
+        print(
+          'MissionRepository: Detail fetch failed. Falling back. Error: $e',
+        );
       }
       // Fallback local Mock detail
       try {
@@ -63,10 +71,14 @@ class MissionRepository {
   Future<List<Mission>> getStoreMissions(String storeId) async {
     try {
       final data = await _missionService.fetchStoreMissions(storeId);
-      return data.map((json) => Mission.fromJson(json as Map<String, dynamic>)).toList();
+      return data
+          .map((json) => Mission.fromJson(json as Map<String, dynamic>))
+          .toList();
     } catch (e) {
       if (kDebugMode) {
-        print('MissionRepository: Store missions fetch failed. Falling back. Error: $e');
+        print(
+          'MissionRepository: Store missions fetch failed. Falling back. Error: $e',
+        );
       }
       // Fallback local Mock filtering
       return MockData.missions
@@ -77,9 +89,17 @@ class MissionRepository {
   }
 
   // Verify mission (QR / Auth verify API call)
-  Future<Map<String, dynamic>> verifyMission(String id, String qrCode, {String? userId}) async {
+  Future<Map<String, dynamic>> verifyMission(
+    String id,
+    String qrCode, {
+    String? userId,
+  }) async {
     try {
-      final res = await _missionService.verifyMission(id, qrCode, userId: userId);
+      final res = await _missionService.verifyMission(
+        id,
+        qrCode,
+        userId: userId,
+      );
       return {
         'success': res['success'] as bool,
         'message': res['message'] as String,
@@ -87,7 +107,9 @@ class MissionRepository {
       };
     } catch (e) {
       if (kDebugMode) {
-        print('MissionRepository: Verification API failed. Performing local Mock Fallback. Error: $e');
+        print(
+          'MissionRepository: Verification API failed. Performing local Mock Fallback. Error: $e',
+        );
       }
       if (qrCode == 'QR_SUCCESS_TOKEN' || qrCode.startsWith('QR_')) {
         return {

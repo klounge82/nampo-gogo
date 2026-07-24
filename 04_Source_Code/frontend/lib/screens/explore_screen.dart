@@ -20,7 +20,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
   List<Place> _places = [];
   List<String> _categories = ['전체'];
-  
+
   String _selectedCategory = '전체';
   bool _isLoading = false;
 
@@ -41,7 +41,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
     try {
       final categories = await _placeRepository.getCategories();
       final places = await _placeRepository.getPlaces();
-      
+
       setState(() {
         _categories = ['전체', ...categories];
         _places = places;
@@ -55,7 +55,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
   Future<void> _onCategorySelected(String category) async {
     if (_selectedCategory == category) return;
-    
+
     setState(() {
       _selectedCategory = category;
       _isLoading = true;
@@ -116,7 +116,12 @@ class _ExploreScreenState extends State<ExploreScreen> {
           // Search Box & Category Filters Area
           Container(
             color: AppColors.surface,
-            padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0, bottom: 12.0),
+            padding: const EdgeInsets.only(
+              left: 16.0,
+              right: 16.0,
+              top: 16.0,
+              bottom: 12.0,
+            ),
             child: Column(
               children: [
                 // Custom Search Text Field
@@ -134,7 +139,10 @@ class _ExploreScreenState extends State<ExploreScreen> {
                     },
                     decoration: const InputDecoration(
                       hintText: '장소 이름이나 설명 검색...',
-                      hintStyle: TextStyle(color: AppColors.textHint, fontSize: 13.0),
+                      hintStyle: TextStyle(
+                        color: AppColors.textHint,
+                        fontSize: 13.0,
+                      ),
                       prefixIcon: Icon(Icons.search, color: AppColors.primary),
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.symmetric(vertical: 12.0),
@@ -142,7 +150,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   ),
                 ),
                 const SizedBox(height: 12.0),
-                
+
                 // Horizontal category chips scroll
                 SizedBox(
                   height: 38.0,
@@ -152,7 +160,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                     itemBuilder: (context, index) {
                       final category = _categories[index];
                       final isSelected = _selectedCategory == category;
-                      
+
                       return Padding(
                         padding: const EdgeInsets.only(right: 8.0),
                         child: ChoiceChip(
@@ -162,14 +170,20 @@ class _ExploreScreenState extends State<ExploreScreen> {
                           selectedColor: AppColors.primary,
                           backgroundColor: AppColors.background,
                           labelStyle: TextStyle(
-                            color: isSelected ? Colors.white : AppColors.textPrimary,
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                            color: isSelected
+                                ? Colors.white
+                                : AppColors.textPrimary,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
                             fontSize: 12.0,
                           ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20.0),
                             side: BorderSide(
-                              color: isSelected ? Colors.transparent : AppColors.border,
+                              color: isSelected
+                                  ? Colors.transparent
+                                  : AppColors.border,
                             ),
                           ),
                           showCheckmark: false,
@@ -181,7 +195,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
               ],
             ),
           ),
-          
+
           // Place List Container
           Expanded(
             child: _isLoading
@@ -189,28 +203,32 @@ class _ExploreScreenState extends State<ExploreScreen> {
                     child: CircularProgressIndicator(color: AppColors.primary),
                   )
                 : _places.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: const [
-                            Icon(Icons.search_off, size: 48.0, color: AppColors.textHint),
-                            SizedBox(height: 12.0),
-                            Text(
-                              '검색 결과에 맞는 장소가 없습니다.',
-                              style: TextStyle(color: AppColors.textSecondary),
-                            ),
-                          ],
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Icon(
+                          Icons.search_off,
+                          size: 48.0,
+                          color: AppColors.textHint,
                         ),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(16.0),
-                        physics: const BouncingScrollPhysics(),
-                        itemCount: _places.length,
-                        itemBuilder: (context, index) {
-                          final place = _places[index];
-                          return _buildPlaceCard(context, place);
-                        },
-                      ),
+                        SizedBox(height: 12.0),
+                        Text(
+                          '검색 결과에 맞는 장소가 없습니다.',
+                          style: TextStyle(color: AppColors.textSecondary),
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.all(16.0),
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: _places.length,
+                    itemBuilder: (context, index) {
+                      final place = _places[index];
+                      return _buildPlaceCard(context, place);
+                    },
+                  ),
           ),
         ],
       ),
@@ -221,7 +239,10 @@ class _ExploreScreenState extends State<ExploreScreen> {
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.map),
-        label: const Text('주변 지도 보기', style: TextStyle(fontWeight: FontWeight.bold)),
+        label: const Text(
+          '주변 지도 보기',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
@@ -240,7 +261,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
         child: InkWell(
           onTap: () {
             Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => PlaceDetailScreen(placeId: place.id)),
+              MaterialPageRoute(
+                builder: (_) => PlaceDetailScreen(placeId: place.id),
+              ),
             );
           },
           borderRadius: BorderRadius.circular(12.0),
@@ -272,7 +295,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   ),
                 ),
                 const SizedBox(width: 14.0),
-                
+
                 // Right Details
                 Expanded(
                   child: Column(
@@ -282,7 +305,10 @@ class _ExploreScreenState extends State<ExploreScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6.0,
+                              vertical: 2.0,
+                            ),
                             decoration: BoxDecoration(
                               color: AppColors.primary.withAlpha(26),
                               borderRadius: BorderRadius.circular(4.0),
@@ -298,7 +324,11 @@ class _ExploreScreenState extends State<ExploreScreen> {
                           ),
                           Row(
                             children: [
-                              const Icon(Icons.star, color: AppColors.secondary, size: 13.0),
+                              const Icon(
+                                Icons.star,
+                                color: AppColors.secondary,
+                                size: 13.0,
+                              ),
                               const SizedBox(width: 2.0),
                               Text(
                                 place.rating.toString(),

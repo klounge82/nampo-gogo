@@ -39,7 +39,7 @@ class PointRepository {
   ];
 
   PointRepository({PointService? pointService})
-      : _pointService = pointService ?? PointService();
+    : _pointService = pointService ?? PointService();
 
   // Get user points
   Future<int> getUserPoints({String? userId}) async {
@@ -50,7 +50,9 @@ class PointRepository {
       return currentPoints;
     } catch (e) {
       if (kDebugMode) {
-        print('PointRepository: Failed to fetch points. Falling back to local cache: $_mockBalance. Error: $e');
+        print(
+          'PointRepository: Failed to fetch points. Falling back to local cache: $_mockBalance. Error: $e',
+        );
       }
       return _mockBalance;
     }
@@ -60,14 +62,18 @@ class PointRepository {
   Future<List<PointHistory>> getPointHistory({String? userId}) async {
     try {
       final list = await _pointService.fetchPointHistory(userId: userId);
-      final result = list.map((json) => PointHistory.fromJson(json as Map<String, dynamic>)).toList();
+      final result = list
+          .map((json) => PointHistory.fromJson(json as Map<String, dynamic>))
+          .toList();
       // Sync local cache histories
       _mockHistories.clear();
       _mockHistories.addAll(result);
       return result;
     } catch (e) {
       if (kDebugMode) {
-        print('PointRepository: Failed to fetch history. Falling back to local mock list. Error: $e');
+        print(
+          'PointRepository: Failed to fetch history. Falling back to local mock list. Error: $e',
+        );
       }
       return List.from(_mockHistories);
     }
@@ -76,13 +82,19 @@ class PointRepository {
   // Earn points
   Future<int> earnPoints(int points, String activity, {String? userId}) async {
     try {
-      final res = await _pointService.earnPoints(points, activity, userId: userId);
+      final res = await _pointService.earnPoints(
+        points,
+        activity,
+        userId: userId,
+      );
       final currentPoints = res['current_points'] as int? ?? 0;
       _mockBalance = currentPoints;
       return currentPoints;
     } catch (e) {
       if (kDebugMode) {
-        print('PointRepository: Failed to earn points API. Falling back locally. Error: $e');
+        print(
+          'PointRepository: Failed to earn points API. Falling back locally. Error: $e',
+        );
       }
       _mockBalance += points;
       _mockHistories.insert(
@@ -102,13 +114,19 @@ class PointRepository {
   // Spend points
   Future<int> spendPoints(int points, String activity, {String? userId}) async {
     try {
-      final res = await _pointService.spendPoints(points, activity, userId: userId);
+      final res = await _pointService.spendPoints(
+        points,
+        activity,
+        userId: userId,
+      );
       final currentPoints = res['current_points'] as int? ?? 0;
       _mockBalance = currentPoints;
       return currentPoints;
     } catch (e) {
       if (kDebugMode) {
-        print('PointRepository: Failed to spend points API. Falling back locally. Error: $e');
+        print(
+          'PointRepository: Failed to spend points API. Falling back locally. Error: $e',
+        );
       }
       if (_mockBalance < points) {
         throw Exception('보유 포인트가 부족합니다. (오프라인 모드)');

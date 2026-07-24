@@ -37,7 +37,9 @@ class Mission {
       authType: json['auth_type'] as String,
       reward: json['reward'] as String? ?? '',
       category: json['category'] as String? ?? '일반',
-      createdAt: json['created_at'] != null ? DateTime.parse(json['created_at'] as String) : null,
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String)
+          : null,
     );
   }
 

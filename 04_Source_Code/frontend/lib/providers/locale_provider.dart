@@ -6,10 +6,12 @@ import '../config/api_config.dart';
 
 class LocaleProvider with ChangeNotifier {
   final LocaleStorageService _storage = LocaleStorageService();
-  final Dio _dio = Dio(BaseOptions(
-    baseUrl: ApiConfig.baseUrl,
-    connectTimeout: const Duration(seconds: 5),
-  ));
+  final Dio _dio = Dio(
+    BaseOptions(
+      baseUrl: ApiConfig.baseUrl,
+      connectTimeout: const Duration(seconds: 5),
+    ),
+  );
 
   Locale _locale = const Locale('ko');
 
@@ -39,7 +41,8 @@ class LocaleProvider with ChangeNotifier {
   }
 
   Future<void> setLocale(Locale newLocale, {String? userId}) async {
-    if (!['ko', 'en', 'ja', 'zh', 'zh-Hans'].contains(newLocale.languageCode)) return;
+    if (!['ko', 'en', 'ja', 'zh', 'zh-Hans'].contains(newLocale.languageCode))
+      return;
 
     _locale = newLocale;
     notifyListeners();
@@ -49,11 +52,11 @@ class LocaleProvider with ChangeNotifier {
 
     // Sync to backend DB if logged in
     try {
-      await _dio.patch('/users/language', data: {
-        'language_code': newLocale.languageCode,
-      }, queryParameters: {
-        if (userId != null) 'user_id': userId,
-      });
+      await _dio.patch(
+        '/users/language',
+        data: {'language_code': newLocale.languageCode},
+        queryParameters: {if (userId != null) 'user_id': userId},
+      );
     } catch (_) {
       // Offline fallback silent failure
     }

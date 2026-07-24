@@ -4,12 +4,7 @@ import '../constants/colors.dart';
 import '../providers/auth_provider.dart';
 import 'business_pending_shell.dart';
 
-enum AuthViewMode {
-  login,
-  signupSelection,
-  customerSignup,
-  businessSignup,
-}
+enum AuthViewMode { login, signupSelection, customerSignup, businessSignup }
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -20,7 +15,7 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   final _formKey = GlobalKey<FormState>();
-  
+
   // Account controllers
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -57,10 +52,7 @@ class _AuthScreenState extends State<AuthScreen> {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
 
-    final success = await authProvider.login(
-      email: email,
-      password: password,
-    );
+    final success = await authProvider.login(email: email, password: password);
     if (mounted) {
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -104,7 +96,10 @@ class _AuthScreenState extends State<AuthScreen> {
       }
     } catch (e) {
       final msg = e.toString().replaceAll('Exception: ', '');
-      _showErrorDialog('회원가입 실패', msg.isNotEmpty ? msg : '이미 가입된 이메일이거나 입력 정보에 오류가 있습니다.');
+      _showErrorDialog(
+        '회원가입 실패',
+        msg.isNotEmpty ? msg : '이미 가입된 이메일이거나 입력 정보에 오류가 있습니다.',
+      );
     }
   }
 
@@ -132,7 +127,10 @@ class _AuthScreenState extends State<AuthScreen> {
           context: context,
           barrierDismissible: false,
           builder: (ctx) => AlertDialog(
-            title: const Text('사업자 신청 접수 완료', style: TextStyle(fontWeight: FontWeight.bold)),
+            title: const Text(
+              '사업자 신청 접수 완료',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             content: const Text(
               '사업자회원 가입과 승인 신청이 정상적으로 접수되었습니다.\n관리자가 제출 내용을 검토한 후 승인 여부를 알려드리겠습니다.',
             ),
@@ -144,7 +142,10 @@ class _AuthScreenState extends State<AuthScreen> {
                     _viewMode = AuthViewMode.login;
                   });
                 },
-                child: const Text('확인', style: TextStyle(fontWeight: FontWeight.bold)),
+                child: const Text(
+                  '확인',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
             ],
           ),
@@ -154,9 +155,7 @@ class _AuthScreenState extends State<AuthScreen> {
       final msg = e.toString().replaceAll('Exception: ', '');
       _showErrorDialog(
         '사업자 가입 실패',
-        msg.contains('이미 가입')
-            ? '이미 가입된 계정입니다.\n로그인 후 사업자회원 신청을 진행해 주세요.'
-            : msg,
+        msg.contains('이미 가입') ? '이미 가입된 계정입니다.\n로그인 후 사업자회원 신청을 진행해 주세요.' : msg,
       );
     }
   }
@@ -400,7 +399,9 @@ class _AuthScreenState extends State<AuthScreen> {
         // Card A: Customer
         Card(
           elevation: 2,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.0),
+          ),
           child: InkWell(
             borderRadius: BorderRadius.circular(16.0),
             onTap: () {
@@ -459,7 +460,9 @@ class _AuthScreenState extends State<AuthScreen> {
         // Card B: Business
         Card(
           elevation: 2,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.0),
+          ),
           child: InkWell(
             borderRadius: BorderRadius.circular(16.0),
             onTap: () {
@@ -536,7 +539,10 @@ class _AuthScreenState extends State<AuthScreen> {
       if (isBusiness) ...[
         const Text(
           '[계정 정보]',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF00897B)),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF00897B),
+          ),
         ),
         const SizedBox(height: 12.0),
       ],
@@ -597,7 +603,9 @@ class _AuthScreenState extends State<AuthScreen> {
             prefixIcon: const Icon(Icons.lock_reset_outlined),
             suffixIcon: IconButton(
               icon: Icon(
-                _isConfirmPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                _isConfirmPasswordVisible
+                    ? Icons.visibility
+                    : Icons.visibility_off,
               ),
               onPressed: () {
                 setState(() {
@@ -642,7 +650,10 @@ class _AuthScreenState extends State<AuthScreen> {
         const Divider(height: 32.0),
         const Text(
           '[사업자 정보]',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF00897B)),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF00897B),
+          ),
         ),
         const SizedBox(height: 12.0),
 

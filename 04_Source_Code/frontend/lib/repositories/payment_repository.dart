@@ -66,6 +66,8 @@ class PaymentRepository {
 
   Future<List<PaymentModel>> getPayments({required String token}) async {
     final list = await _service.fetchPayments(token: token);
-    return list.map((e) => PaymentModel.fromJson(e as Map<String, dynamic>)).toList();
+    return list
+        .map((e) => PaymentModel.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 }

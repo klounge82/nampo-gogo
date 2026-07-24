@@ -23,12 +23,12 @@ class ApiConfig {
     if (kIsWeb) {
       return 'http://localhost:18080';
     }
-    
+
     // Android Emulator uses 10.0.2.2 to access host loopback
     if (defaultTargetPlatform == TargetPlatform.android) {
       return 'http://10.0.2.2:18080';
     }
-    
+
     // iOS Simulator, desktop apps, etc. use localhost
     return 'http://localhost:18080';
   }

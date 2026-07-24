@@ -3,15 +3,17 @@ import '../config/api_config.dart';
 
 class MissionService {
   // Helper to build Dio client
-  Dio get _dio => Dio(BaseOptions(
-        baseUrl: ApiConfig.baseUrl,
-        connectTimeout: ApiConfig.connectTimeout,
-        receiveTimeout: ApiConfig.receiveTimeout,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      ));
+  Dio get _dio => Dio(
+    BaseOptions(
+      baseUrl: ApiConfig.baseUrl,
+      connectTimeout: ApiConfig.connectTimeout,
+      receiveTimeout: ApiConfig.receiveTimeout,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    ),
+  );
 
   // GET /missions
   Future<List<dynamic>> fetchMissions({String? storeId}) async {
@@ -56,14 +58,15 @@ class MissionService {
   }
 
   // POST /missions/{mission_id}/verify
-  Future<Map<String, dynamic>> verifyMission(String id, String qrCode, {String? userId}) async {
+  Future<Map<String, dynamic>> verifyMission(
+    String id,
+    String qrCode, {
+    String? userId,
+  }) async {
     try {
       final response = await _dio.post(
         '/missions/$id/verify',
-        data: {
-          'qr_code': qrCode,
-          'user_id': userId,
-        },
+        data: {'qr_code': qrCode, 'user_id': userId},
       );
       if (response.statusCode == 200 && response.data != null) {
         return response.data as Map<String, dynamic>;

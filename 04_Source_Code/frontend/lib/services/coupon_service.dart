@@ -2,15 +2,17 @@ import 'package:dio/dio.dart';
 import '../config/api_config.dart';
 
 class CouponService {
-  Dio get _dio => Dio(BaseOptions(
-        baseUrl: ApiConfig.baseUrl,
-        connectTimeout: ApiConfig.connectTimeout,
-        receiveTimeout: ApiConfig.receiveTimeout,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      ));
+  Dio get _dio => Dio(
+    BaseOptions(
+      baseUrl: ApiConfig.baseUrl,
+      connectTimeout: ApiConfig.connectTimeout,
+      receiveTimeout: ApiConfig.receiveTimeout,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    ),
+  );
 
   // GET /coupons
   Future<List<dynamic>> fetchCoupons() async {
@@ -26,7 +28,10 @@ class CouponService {
   }
 
   // POST /coupons/{coupon_id}/exchange
-  Future<Map<String, dynamic>> exchangeCoupon(String couponId, {String? userId}) async {
+  Future<Map<String, dynamic>> exchangeCoupon(
+    String couponId, {
+    String? userId,
+  }) async {
     try {
       final response = await _dio.post(
         '/coupons/$couponId/exchange',
@@ -42,7 +47,10 @@ class CouponService {
   }
 
   // GET /users/coupons
-  Future<List<dynamic>> fetchUserCoupons({String? userId, String? status}) async {
+  Future<List<dynamic>> fetchUserCoupons({
+    String? userId,
+    String? status,
+  }) async {
     try {
       final response = await _dio.get(
         '/users/coupons',
@@ -61,7 +69,10 @@ class CouponService {
   }
 
   // POST /users/coupons/{user_coupon_id}/use
-  Future<Map<String, dynamic>> useUserCoupon(String userCouponId, {String? userId}) async {
+  Future<Map<String, dynamic>> useUserCoupon(
+    String userCouponId, {
+    String? userId,
+  }) async {
     try {
       final response = await _dio.post(
         '/users/coupons/$userCouponId/use',

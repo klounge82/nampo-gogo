@@ -8,10 +8,8 @@ _test_mode = os.getenv("TEST_MODE", "false").lower() == "true"
 
 if _db_url_env:
     db_url = _db_url_env
-elif _test_mode:
-    db_url = "sqlite:///./nampo_gogo_test.db"
 else:
-    db_url = "postgresql+psycopg://nampo_admin:Hwang123!!@db:5432/nampo_gogo"
+    db_url = "sqlite:///./nampo_gogo_test.db"
 
 if "CHANGE_ME" in db_url:
     password = os.getenv("POSTGRES_PASSWORD", "Hwang123!!")

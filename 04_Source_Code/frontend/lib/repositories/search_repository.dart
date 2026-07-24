@@ -10,7 +10,7 @@ class SearchRepository {
   static const String _recentSearchKey = 'nampo_gogo_recent_searches_json';
 
   SearchRepository({Dio? dio})
-      : _dio = dio ?? Dio(BaseOptions(baseUrl: ApiConfig.baseUrl));
+    : _dio = dio ?? Dio(BaseOptions(baseUrl: ApiConfig.baseUrl));
 
   // GET /search
   Future<Map<String, dynamic>> search({

@@ -1,7 +1,8 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class LocaleStorageService {
-  static final LocaleStorageService _instance = LocaleStorageService._internal();
+  static final LocaleStorageService _instance =
+      LocaleStorageService._internal();
   factory LocaleStorageService() => _instance;
   LocaleStorageService._internal();
 

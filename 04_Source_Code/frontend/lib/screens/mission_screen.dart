@@ -116,10 +116,7 @@ class _MissionScreenState extends State<MissionScreen> {
                         ],
                       ),
                       const SizedBox(height: 12.0),
-                      Container(
-                        height: 1.0,
-                        color: Colors.white24,
-                      ),
+                      Container(height: 1.0, color: Colors.white24),
                       const SizedBox(height: 12.0),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -145,7 +142,7 @@ class _MissionScreenState extends State<MissionScreen> {
                   ),
                 ),
                 const SizedBox(height: 28.0),
-                
+
                 // Section Header
                 const Text(
                   '전체 미션 목록',
@@ -156,34 +153,36 @@ class _MissionScreenState extends State<MissionScreen> {
                   ),
                 ),
                 const SizedBox(height: 16.0),
-                
+
                 // Mission List
                 _isLoading
                     ? const Center(
                         child: Padding(
                           padding: EdgeInsets.symmetric(vertical: 40.0),
-                          child: CircularProgressIndicator(color: AppColors.primary),
+                          child: CircularProgressIndicator(
+                            color: AppColors.primary,
+                          ),
                         ),
                       )
                     : _missions.isEmpty
-                        ? const Center(
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(vertical: 40.0),
-                              child: Text(
-                                '진행 가능한 미션이 없습니다.',
-                                style: TextStyle(color: AppColors.textSecondary),
-                              ),
-                            ),
-                          )
-                        : ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: _missions.length,
-                            itemBuilder: (context, index) {
-                              final mission = _missions[index];
-                              return _buildMissionItemCard(context, mission);
-                            },
+                    ? const Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 40.0),
+                          child: Text(
+                            '진행 가능한 미션이 없습니다.',
+                            style: TextStyle(color: AppColors.textSecondary),
                           ),
+                        ),
+                      )
+                    : ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: _missions.length,
+                        itemBuilder: (context, index) {
+                          final mission = _missions[index];
+                          return _buildMissionItemCard(context, mission);
+                        },
+                      ),
               ],
             ),
           ),
@@ -206,7 +205,9 @@ class _MissionScreenState extends State<MissionScreen> {
         child: InkWell(
           onTap: () {
             Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => MissionDetailScreen(missionId: mission.id)),
+              MaterialPageRoute(
+                builder: (_) => MissionDetailScreen(missionId: mission.id),
+              ),
             );
           },
           borderRadius: BorderRadius.circular(12.0),
@@ -232,7 +233,7 @@ class _MissionScreenState extends State<MissionScreen> {
                   ),
                 ),
                 const SizedBox(width: 16.0),
-                
+
                 // Details
                 Expanded(
                   child: Column(
@@ -242,7 +243,10 @@ class _MissionScreenState extends State<MissionScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6.0,
+                              vertical: 2.0,
+                            ),
                             decoration: BoxDecoration(
                               color: AppColors.secondary.withAlpha(26),
                               borderRadius: BorderRadius.circular(4.0),

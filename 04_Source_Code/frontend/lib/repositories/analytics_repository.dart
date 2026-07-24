@@ -5,12 +5,15 @@ class AnalyticsRepository {
   final Dio _dio;
 
   AnalyticsRepository({Dio? dio})
-      : _dio = dio ??
-            Dio(BaseOptions(
+    : _dio =
+          dio ??
+          Dio(
+            BaseOptions(
               baseUrl: ApiConfig.baseUrl,
               connectTimeout: ApiConfig.connectTimeout,
               receiveTimeout: ApiConfig.receiveTimeout,
-            ));
+            ),
+          );
 
   // GET /analytics/dashboard
   Future<Map<String, dynamic>> fetchDashboardSummary({

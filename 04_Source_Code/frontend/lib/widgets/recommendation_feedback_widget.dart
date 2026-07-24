@@ -9,27 +9,29 @@ class RecommendationFeedbackWidget extends StatefulWidget {
   const RecommendationFeedbackWidget({super.key, required this.storeId});
 
   @override
-  State<RecommendationFeedbackWidget> createState() => _RecommendationFeedbackWidgetState();
+  State<RecommendationFeedbackWidget> createState() =>
+      _RecommendationFeedbackWidgetState();
 }
 
-class _RecommendationFeedbackWidgetState extends State<RecommendationFeedbackWidget> {
+class _RecommendationFeedbackWidgetState
+    extends State<RecommendationFeedbackWidget> {
   String? _currentFeedback; // 'LIKE' or 'DISMISS'
 
   Future<void> _submitFeedback(String type) async {
     final token = context.read<AuthProvider>().accessToken;
     if (token == null || token.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('로그인 후 피드백을 제출할 수 있습니다.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('로그인 후 피드백을 제출할 수 있습니다.')));
       return;
     }
 
     final success = await context.read<PersonalizationProvider>().sendFeedback(
-          token: token,
-          targetType: 'PLACE',
-          targetId: widget.storeId,
-          feedbackType: type,
-        );
+      token: token,
+      targetType: 'PLACE',
+      targetId: widget.storeId,
+      feedbackType: type,
+    );
 
     if (success) {
       setState(() {

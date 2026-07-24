@@ -15,7 +15,6 @@ import 'notification_history_screen.dart';
 import 'auth_screen.dart';
 import '../config/production_config.dart';
 
-
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -32,7 +31,7 @@ class HomeScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 24.0),
-                
+
                 // Welcome Section
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -62,7 +61,7 @@ class HomeScreen extends StatelessWidget {
                       builder: (context, auth, notif, _) {
                         final isLoggedIn = auth.isLoggedIn;
                         final count = notif.unreadCount;
-                        
+
                         return Stack(
                           clipBehavior: Clip.none,
                           children: [
@@ -71,12 +70,17 @@ class HomeScreen extends StatelessWidget {
                                 if (isLoggedIn) {
                                   Navigator.push(
                                     context,
-                                    MaterialPageRoute(builder: (_) => const NotificationHistoryScreen()),
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          const NotificationHistoryScreen(),
+                                    ),
                                   );
                                 } else {
                                   Navigator.push(
                                     context,
-                                    MaterialPageRoute(builder: (_) => const AuthScreen()),
+                                    MaterialPageRoute(
+                                      builder: (_) => const AuthScreen(),
+                                    ),
                                   );
                                 }
                               },
@@ -117,7 +121,7 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 12.0),
 
                 // Server Status Badge
@@ -125,18 +129,22 @@ class HomeScreen extends StatelessWidget {
                   future: SystemRepository().getSystemStatus(),
                   builder: (context, snapshot) {
                     final statusText = snapshot.data ?? '서버 상태 확인 중...';
-                    final isOnline = snapshot.hasData && !statusText.contains('오프라인');
-                    
+                    final isOnline =
+                        snapshot.hasData && !statusText.contains('오프라인');
+
                     return Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14.0,
+                        vertical: 10.0,
+                      ),
                       decoration: BoxDecoration(
-                        color: isOnline 
+                        color: isOnline
                             ? AppColors.success.withAlpha(20)
                             : AppColors.error.withAlpha(20),
                         borderRadius: BorderRadius.circular(12.0),
                         border: Border.all(
-                          color: isOnline 
+                          color: isOnline
                               ? AppColors.success.withAlpha(40)
                               : AppColors.error.withAlpha(40),
                         ),
@@ -147,15 +155,17 @@ class HomeScreen extends StatelessWidget {
                           Row(
                             children: [
                               Text(
-                                isOnline 
-                                    ? '🟢 API 연결됨' 
-                                    : (ProductionConfig.isProduction 
-                                        ? '🔴 서버 연결 실패 (네트워크를 확인해 주세요)' 
-                                        : '🔴 오프라인 모드 (Mock 데이터 사용)'),
+                                isOnline
+                                    ? '🟢 API 연결됨'
+                                    : (ProductionConfig.isProduction
+                                          ? '🔴 서버 연결 실패 (네트워크를 확인해 주세요)'
+                                          : '🔴 오프라인 모드 (Mock 데이터 사용)'),
                                 style: TextStyle(
                                   fontSize: 13.0,
                                   fontWeight: FontWeight.bold,
-                                  color: isOnline ? AppColors.success : AppColors.error,
+                                  color: isOnline
+                                      ? AppColors.success
+                                      : AppColors.error,
                                 ),
                               ),
                             ],
@@ -176,26 +186,24 @@ class HomeScreen extends StatelessWidget {
                     );
                   },
                 ),
-                
+
                 const SizedBox(height: 16.0),
-                
+
                 // Search Bar
-                NampoSearchBar(
-                  onTap: () {},
-                  onChanged: (value) {},
-                ),
-                
+                NampoSearchBar(onTap: () {}, onChanged: (value) {}),
+
                 const SizedBox(height: 28.0),
-                
+
                 // AI Recommendation Header
                 _buildSectionHeader(
                   context,
                   title: AppStrings.homeRecommendTitle,
-                  onMorePressed: () => _showComingSoon(context, AppStrings.homeRecommendTitle),
+                  onMorePressed: () =>
+                      _showComingSoon(context, AppStrings.homeRecommendTitle),
                 ),
-                
+
                 const SizedBox(height: 12.0),
-                
+
                 // AI Recommendation List (Horizontal)
                 SizedBox(
                   height: 290.0,
@@ -210,7 +218,8 @@ class HomeScreen extends StatelessWidget {
                         onTap: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (_) => PlaceDetailScreen(placeId: recommendation.id),
+                              builder: (_) =>
+                                  PlaceDetailScreen(placeId: recommendation.id),
                             ),
                           );
                         },
@@ -218,18 +227,19 @@ class HomeScreen extends StatelessWidget {
                     },
                   ),
                 ),
-                
+
                 const SizedBox(height: 28.0),
-                
+
                 // Today's Mission Header
                 _buildSectionHeader(
                   context,
                   title: AppStrings.homeMissionTitle,
-                  onMorePressed: () => _showComingSoon(context, AppStrings.homeMissionTitle),
+                  onMorePressed: () =>
+                      _showComingSoon(context, AppStrings.homeMissionTitle),
                 ),
-                
+
                 const SizedBox(height: 12.0),
-                
+
                 // Today's Mission List (Vertical)
                 ListView.builder(
                   shrinkWrap: true,
@@ -237,26 +247,28 @@ class HomeScreen extends StatelessWidget {
                   itemCount: MockData.missions.length,
                   itemBuilder: (context, index) {
                     final mission = MockData.missions[index];
-                     return MissionCard(
-                       mission: mission,
-                       onTap: () {
-                         Navigator.of(context).push(
-                           MaterialPageRoute(
-                             builder: (_) => MissionDetailScreen(missionId: mission.id),
-                           ),
-                         );
-                       },
-                       onActionButtonTap: () {
-                         Navigator.of(context).push(
-                           MaterialPageRoute(
-                             builder: (_) => MissionDetailScreen(missionId: mission.id),
-                           ),
-                         );
-                       },
-                     );
+                    return MissionCard(
+                      mission: mission,
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                MissionDetailScreen(missionId: mission.id),
+                          ),
+                        );
+                      },
+                      onActionButtonTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                MissionDetailScreen(missionId: mission.id),
+                          ),
+                        );
+                      },
+                    );
                   },
                 ),
-                
+
                 const SizedBox(height: 24.0),
               ],
             ),
@@ -308,9 +320,7 @@ class HomeScreen extends StatelessWidget {
       SnackBar(
         content: Text('[$featureName] 기능은 MVP 정식 버전에서 연결될 예정입니다!'),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8.0),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
         backgroundColor: AppColors.textPrimary,
         duration: const Duration(seconds: 2),
       ),
