@@ -153,6 +153,8 @@ class _SearchScreenState extends State<SearchScreen> {
                   Expanded(
                     child: searchProvider.isLoading
                         ? const Center(child: CircularProgressIndicator())
+                        : searchProvider.errorMessage.isNotEmpty
+                        ? _buildErrorState()
                         : searchProvider.searchResults.isEmpty
                         ? _buildEmptyState()
                         : ListView.builder(
@@ -287,6 +289,28 @@ class _SearchScreenState extends State<SearchScreen> {
           Text(
             '검색어를 확인하거나 필터를 변경해 보세요.',
             style: TextStyle(fontSize: 13, color: Colors.grey),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error_outline, size: 64, color: Colors.redAccent),
+          SizedBox(height: 16),
+          Text(
+            '검색 결과를 불러오지 못했습니다.\n잠시 후 다시 시도해 주세요.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: Colors.redAccent,
+              height: 1.4,
+            ),
           ),
         ],
       ),

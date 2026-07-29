@@ -1,18 +1,8 @@
 import 'package:dio/dio.dart';
-import '../config/api_config.dart';
+import 'api_service.dart';
 
 class ReviewService {
-  Dio get _dio => Dio(
-    BaseOptions(
-      baseUrl: ApiConfig.baseUrl,
-      connectTimeout: ApiConfig.connectTimeout,
-      receiveTimeout: ApiConfig.receiveTimeout,
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-    ),
-  );
+  Dio get _dio => ApiService().dio;
 
   // POST /stores/{store_id}/reviews
   Future<Map<String, dynamic>> createReview({

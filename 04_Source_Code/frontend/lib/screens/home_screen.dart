@@ -13,6 +13,7 @@ import '../providers/notification_provider.dart';
 import '../providers/auth_provider.dart';
 import 'notification_history_screen.dart';
 import 'auth_screen.dart';
+import 'search_screen.dart';
 import '../config/production_config.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -190,7 +191,22 @@ class HomeScreen extends StatelessWidget {
                 const SizedBox(height: 16.0),
 
                 // Search Bar
-                NampoSearchBar(onTap: () {}, onChanged: (value) {}),
+                NampoSearchBar(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => SearchScreen()),
+                    );
+                  },
+                  onChanged: (value) {
+                    if (value.trim().isNotEmpty) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => SearchScreen()),
+                      );
+                    }
+                  },
+                ),
 
                 const SizedBox(height: 28.0),
 

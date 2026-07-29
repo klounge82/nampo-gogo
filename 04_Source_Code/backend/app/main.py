@@ -2137,10 +2137,19 @@ def get_store_reviews(
     user_id: Optional[str] = None,
     guest_id: Optional[str] = None,
     x_guest_id: Optional[str] = Header(None, alias="x-guest-id"),
+    token: Optional[str] = Depends(oauth2_scheme),
     skip: int = 0,
     limit: int = 10,
     db: Session = Depends(get_db)
 ):
+    eff_user_id = user_id
+    if not eff_user_id and token:
+        try:
+            payload = auth.decode_token(token)
+            eff_user_id = payload.get("sub")
+        except Exception:
+            pass
+
     reviews = db.query(models.Review).filter(
         models.Review.store_id == store_id,
         models.Review.is_deleted == False,
@@ -2149,7 +2158,7 @@ def get_store_reviews(
     ).order_by(models.Review.created_at.desc()).offset(skip).limit(limit).all()
 
     return [
-        attach_ownership_flags(r, user_id=user_id, guest_id=guest_id, x_guest_id=x_guest_id)
+        attach_ownership_flags(r, user_id=eff_user_id, guest_id=guest_id, x_guest_id=x_guest_id)
         for r in reviews
     ]
 
@@ -2158,15 +2167,24 @@ def get_my_reviews(
     user_id: Optional[str] = None,
     guest_id: Optional[str] = None,
     x_guest_id: Optional[str] = Header(None, alias="x-guest-id"),
+    token: Optional[str] = Depends(oauth2_scheme),
     include_deleted: bool = False,
     skip: int = 0,
     limit: int = 20,
     db: Session = Depends(get_db)
 ):
+    eff_user_id = user_id
+    if not eff_user_id and token:
+        try:
+            payload = auth.decode_token(token)
+            eff_user_id = payload.get("sub")
+        except Exception:
+            pass
+
     eff_guest_id = guest_id or x_guest_id
     query = db.query(models.Review)
-    if user_id:
-        query = query.filter(models.Review.user_id == user_id)
+    if eff_user_id:
+        query = query.filter(models.Review.user_id == eff_user_id)
     elif eff_guest_id:
         query = query.filter(models.Review.guest_id == eff_guest_id)
     else:
@@ -2186,7 +2204,7 @@ def get_my_reviews(
 
     revs = query.order_by(models.Review.created_at.desc()).offset(skip).limit(limit).all()
     return [
-        attach_ownership_flags(r, user_id=user_id, guest_id=eff_guest_id)
+        attach_ownership_flags(r, user_id=eff_user_id, guest_id=eff_guest_id)
         for r in revs
     ]
 
@@ -2196,11 +2214,20 @@ def get_my_store_review(
     user_id: Optional[str] = None,
     guest_id: Optional[str] = None,
     x_guest_id: Optional[str] = Header(None, alias="x-guest-id"),
+    token: Optional[str] = Depends(oauth2_scheme),
     include_deleted: bool = True,
     db: Session = Depends(get_db)
 ):
+    eff_user_id = user_id
+    if not eff_user_id and token:
+        try:
+            payload = auth.decode_token(token)
+            eff_user_id = payload.get("sub")
+        except Exception:
+            pass
+
     eff_guest_id = guest_id or x_guest_id
-    if not user_id and not eff_guest_id:
+    if not eff_user_id and not eff_guest_id:
         return schemas.MyReviewOut(
             status="NONE",
             review=None,
@@ -2217,14 +2244,14 @@ def get_my_store_review(
         models.Review.deleted_at == None,
         models.Review.is_hidden == False
     )
-    if user_id:
-        active_q = active_q.filter(models.Review.user_id == user_id)
+    if eff_user_id:
+        active_q = active_q.filter(models.Review.user_id == eff_user_id)
     else:
         active_q = active_q.filter(models.Review.guest_id == eff_guest_id, models.Review.user_id.is_(None))
 
     active_rev = active_q.order_by(models.Review.created_at.desc()).first()
     if active_rev:
-        rev_out = attach_ownership_flags(active_rev, user_id=user_id, guest_id=eff_guest_id)
+        rev_out = attach_ownership_flags(active_rev, user_id=eff_user_id, guest_id=eff_guest_id)
         return schemas.MyReviewOut(
             status="ACTIVE",
             review=rev_out,
@@ -2287,14 +2314,23 @@ def update_review(
     review_id: str,
     req: schemas.ReviewUpdate,
     x_guest_id: Optional[str] = Header(None, alias="x-guest-id"),
+    token: Optional[str] = Depends(oauth2_scheme),
     db: Session = Depends(get_db)
 ):
     review = db.query(models.Review).filter(models.Review.id == review_id).first()
     if not review:
         raise HTTPException(status_code=404, detail="해당 리뷰를 찾을 수 없습니다.")
 
+    eff_user_id = req.user_id
+    if not eff_user_id and token:
+        try:
+            payload = auth.decode_token(token)
+            eff_user_id = payload.get("sub")
+        except Exception:
+            pass
+
     eff_guest_id = req.guest_id or x_guest_id
-    verify_review_ownership(review, user_id=req.user_id, guest_id=eff_guest_id, action_name="수정")
+    verify_review_ownership(review, user_id=eff_user_id, guest_id=eff_guest_id, action_name="수정")
 
     if review.is_deleted or review.deleted_at is not None:
         raise HTTPException(status_code=400, detail="삭제된 리뷰는 다시 작성 또는 복구를 이용해 주세요.")
@@ -2329,7 +2365,7 @@ def update_review(
         db.rollback()
         raise HTTPException(status_code=500, detail=f"리뷰 수정 중 오류 발생: {str(e)}")
 
-    return attach_ownership_flags(review, user_id=req.user_id, guest_id=eff_guest_id)
+    return attach_ownership_flags(review, user_id=eff_user_id, guest_id=eff_guest_id)
 
 @app.delete("/reviews/{review_id}", tags=["Reviews"])
 def delete_review(
@@ -2337,14 +2373,23 @@ def delete_review(
     user_id: Optional[str] = None,
     guest_id: Optional[str] = None,
     x_guest_id: Optional[str] = Header(None, alias="x-guest-id"),
+    token: Optional[str] = Depends(oauth2_scheme),
     db: Session = Depends(get_db)
 ):
     review = db.query(models.Review).filter(models.Review.id == review_id).first()
     if not review:
         raise HTTPException(status_code=404, detail="해당 리뷰를 찾을 수 없습니다.")
 
+    eff_user_id = user_id
+    if not eff_user_id and token:
+        try:
+            payload = auth.decode_token(token)
+            eff_user_id = payload.get("sub")
+        except Exception:
+            pass
+
     eff_guest_id = guest_id or x_guest_id
-    verify_review_ownership(review, user_id=user_id, guest_id=eff_guest_id, action_name="삭제")
+    verify_review_ownership(review, user_id=eff_user_id, guest_id=eff_guest_id, action_name="삭제")
 
     try:
         now = datetime.utcnow()
@@ -2368,14 +2413,23 @@ def restore_review(
     user_id: Optional[str] = None,
     guest_id: Optional[str] = None,
     x_guest_id: Optional[str] = Header(None, alias="x-guest-id"),
+    token: Optional[str] = Depends(oauth2_scheme),
     db: Session = Depends(get_db)
 ):
     review = db.query(models.Review).filter(models.Review.id == review_id).first()
     if not review:
         raise HTTPException(status_code=404, detail="해당 리뷰를 찾을 수 없습니다.")
 
+    eff_user_id = user_id
+    if not eff_user_id and token:
+        try:
+            payload = auth.decode_token(token)
+            eff_user_id = payload.get("sub")
+        except Exception:
+            pass
+
     eff_guest_id = guest_id or x_guest_id
-    verify_review_ownership(review, user_id=user_id, guest_id=eff_guest_id, action_name="복구")
+    verify_review_ownership(review, user_id=eff_user_id, guest_id=eff_guest_id, action_name="복구")
 
     try:
         now = datetime.utcnow()
@@ -2392,21 +2446,30 @@ def restore_review(
         db.rollback()
         raise HTTPException(status_code=500, detail=f"리뷰 복구 중 오류 발생: {str(e)}")
 
-    return attach_ownership_flags(review, user_id=user_id, guest_id=eff_guest_id)
+    return attach_ownership_flags(review, user_id=eff_user_id, guest_id=eff_guest_id)
 
 @app.patch("/reviews/{review_id}/rewrite", response_model=schemas.ReviewOut, tags=["Reviews"])
 def rewrite_review(
     review_id: str,
     req: schemas.ReviewUpdate,
     x_guest_id: Optional[str] = Header(None, alias="x-guest-id"),
+    token: Optional[str] = Depends(oauth2_scheme),
     db: Session = Depends(get_db)
 ):
     review = db.query(models.Review).filter(models.Review.id == review_id).first()
     if not review:
         raise HTTPException(status_code=404, detail="해당 리뷰를 찾을 수 없습니다.")
 
+    eff_user_id = req.user_id
+    if not eff_user_id and token:
+        try:
+            payload = auth.decode_token(token)
+            eff_user_id = payload.get("sub")
+        except Exception:
+            pass
+
     eff_guest_id = req.guest_id or x_guest_id
-    verify_review_ownership(review, user_id=req.user_id, guest_id=eff_guest_id, action_name="다시 작성")
+    verify_review_ownership(review, user_id=eff_user_id, guest_id=eff_guest_id, action_name="다시 작성")
 
     if req.rating is not None:
         if req.rating < 1 or req.rating > 5:

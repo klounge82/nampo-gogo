@@ -759,11 +759,13 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                         children: _reviews.map((rev) {
                           final isMyReview =
                               rev.isOwner ||
+                              (_myReview != null && rev.id == _myReview!.id) ||
                               (_currentUserId != null &&
                                   rev.userId == _currentUserId) ||
                               (_currentUserId == null &&
                                   _currentGuestId.isNotEmpty &&
-                                  rev.guestId == _currentGuestId);
+                                  rev.guestId == _currentGuestId &&
+                                  rev.userId == null);
 
                           return Container(
                             margin: const EdgeInsets.only(bottom: 12.0),
