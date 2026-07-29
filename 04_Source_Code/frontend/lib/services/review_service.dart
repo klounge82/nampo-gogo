@@ -65,6 +65,7 @@ class ReviewService {
     required String storeId,
     required double latitude,
     required double longitude,
+    double? accuracy,
     String? userId,
     String? guestId,
   }) async {
@@ -74,6 +75,7 @@ class ReviewService {
         data: {
           'latitude': latitude,
           'longitude': longitude,
+          if (accuracy != null) 'accuracy': accuracy,
           if (userId != null) 'user_id': userId,
           if (guestId != null) 'guest_id': guestId,
         },
@@ -82,6 +84,21 @@ class ReviewService {
         return response.data as Map<String, dynamic>;
       }
       throw Exception('위치 방문 확인 실패');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // GET /stores/{store_id}/verification-options
+  Future<Map<String, dynamic>> getStoreVerificationOptions(
+    String storeId,
+  ) async {
+    try {
+      final response = await _dio.get('/stores/$storeId/verification-options');
+      if (response.statusCode == 200 && response.data != null) {
+        return response.data as Map<String, dynamic>;
+      }
+      throw Exception('인증 옵션 조회 실패');
     } catch (e) {
       rethrow;
     }

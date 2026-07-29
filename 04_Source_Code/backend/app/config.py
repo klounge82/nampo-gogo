@@ -1,0 +1,8 @@
+import os
+
+# Central Configuration for Review Verification and Location Policies
+
+DEFAULT_VERIFICATION_RADIUS_METERS: int = int(os.getenv("DEFAULT_VERIFICATION_RADIUS_METERS", "300"))
+DEFAULT_MAX_VISIT_DATE_DAYS_AGO: int = int(os.getenv("DEFAULT_MAX_VISIT_DATE_DAYS_AGO", "90"))
+MAX_ALLOWED_LOCATION_ACCURACY_METERS: float = float(os.getenv("MAX_ALLOWED_LOCATION_ACCURACY_METERS", "500.0"))
+VERIFICATION_WINDOW_HOURS: int = int(os.getenv("VERIFICATION_WINDOW_HOURS", "72"))

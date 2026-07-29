@@ -350,6 +350,7 @@ class QRVerifyRequest(BaseModel):
 class LocationVerifyRequest(BaseModel):
     latitude: float
     longitude: float
+    accuracy: Optional[float] = None
     guest_id: Optional[str] = None
     user_id: Optional[str] = None
 
@@ -366,6 +367,7 @@ class VisitVerificationOut(BaseModel):
     user_id: Optional[str] = None
     guest_id: Optional[str] = None
     verification_method: str
+    verification_badge: Optional[str] = None
     verified_at: datetime
     expires_at: datetime
     review_used_at: Optional[datetime] = None
@@ -373,10 +375,24 @@ class VisitVerificationOut(BaseModel):
     measured_distance_m: Optional[float] = None
     status: str
     created_at: datetime
+    can_write_review: bool = True
 
     class Config:
         from_attributes = True
         orm_mode = True
+
+class VerificationOptionsOut(BaseModel):
+    store_id: str
+    review_verification_type: str # 'BUSINESS_QR', 'ATTRACTION_LOCATION', 'OPEN_REVIEW'
+    has_coordinates: bool
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    verification_radius_m: int
+    manual_visit_allowed: bool
+    can_use_gps: bool
+    can_use_visit_date: bool
+    can_use_qr: bool
+
 
 # --- REVIEW SCHEMAS ---
 

@@ -10,7 +10,7 @@ from pydantic import BaseModel
 import json
 
 from .database import engine, Base, SessionLocal, get_db
-from . import models, schemas, auth
+from . import models, schemas, auth, config
 
 import os
 
@@ -1589,11 +1589,42 @@ def haversine_distance_m(lat1: float, lon1: float, lat2: float, lon2: float) -> 
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
     return R * c
 
+@app.get("/stores/{store_id}/verification-options", response_model=schemas.VerificationOptionsOut, tags=["VisitVerifications"])
+def get_store_verification_options(store_id: str, db: Session = Depends(get_db)):
+    store = db.query(models.Store).filter(models.Store.id == store_id).first()
+    if not store:
+        raise HTTPException(status_code=404, detail="해당 장소를 찾을 수 없습니다.")
+
+    vtype = store.review_verification_type or "BUSINESS_QR"
+    has_coords = store.latitude is not None and store.longitude is not None and (store.latitude != 0.0 or store.longitude != 0.0)
+    radius = store.review_location_radius_m or config.DEFAULT_VERIFICATION_RADIUS_METERS
+    manual_allowed = bool(store.manual_visit_allowed if store.manual_visit_allowed is not None else True)
+
+    can_qr = (vtype == "BUSINESS_QR")
+    can_gps = (vtype in ["ATTRACTION_LOCATION", "OPEN_REVIEW"]) and has_coords
+    can_date = (vtype in ["ATTRACTION_LOCATION", "OPEN_REVIEW"]) and manual_allowed
+
+    return schemas.VerificationOptionsOut(
+        store_id=store.id,
+        review_verification_type=vtype,
+        has_coordinates=has_coords,
+        latitude=store.latitude,
+        longitude=store.longitude,
+        verification_radius_m=radius,
+        manual_visit_allowed=manual_allowed,
+        can_use_gps=can_gps,
+        can_use_visit_date=can_date,
+        can_use_qr=can_qr
+    )
+
 @app.post("/stores/{store_id}/verify-qr", response_model=schemas.VisitVerificationOut, status_code=status.HTTP_201_CREATED, tags=["VisitVerifications"])
 def verify_store_qr(store_id: str, req: schemas.QRVerifyRequest, db: Session = Depends(get_db)):
     store = db.query(models.Store).filter(models.Store.id == store_id).first()
     if not store:
         raise HTTPException(status_code=404, detail="해당 매장을 찾을 수 없습니다.")
+
+    if store.review_verification_type == "ATTRACTION_LOCATION":
+        raise HTTPException(status_code=400, detail="관광지/공공장소는 QR 인증 대상이 아닙니다.")
 
     token = req.qr_token.strip()
     if not token:
@@ -1708,22 +1739,53 @@ def verify_attraction_location(store_id: str, req: schemas.LocationVerifyRequest
     if not store:
         raise HTTPException(status_code=404, detail="해당 장소를 찾을 수 없습니다.")
 
+    if store.review_verification_type == "BUSINESS_QR":
+        raise HTTPException(status_code=400, detail="사업장 매장은 사업장 QR 인증만 사용할 수 있습니다.")
+
+    if store.status == "DRAFT":
+        raise HTTPException(status_code=400, detail="DRAFT 상태의 매장은 방문 인증을 진행할 수 없습니다.")
+
     if store.latitude is None or store.longitude is None:
-        raise HTTPException(status_code=400, detail="해당 장소의 위치 좌표 정보가 등록되어 있지 않습니다. 방문 날짜 직접 입력을 이용해 주세요.")
+        raise HTTPException(status_code=400, detail="현재 위치를 확인하지 못했습니다. 위치 권한과 GPS 설정을 확인해 주세요.")
+
+    if req.accuracy is not None and req.accuracy > config.MAX_ALLOWED_LOCATION_ACCURACY_METERS:
+        raise HTTPException(status_code=400, detail="위치 정확도가 너무 낮아 방문을 확인할 수 없습니다. 잠시 후 다시 시도해 주세요.")
 
     dist_m = haversine_distance_m(req.latitude, req.longitude, store.latitude, store.longitude)
-    allowed_radius = store.review_location_radius_m or 300
+    allowed_radius = store.review_location_radius_m or config.DEFAULT_VERIFICATION_RADIUS_METERS
 
     if dist_m > allowed_radius:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"현재 위치(약 {int(dist_m)}m)가 관광지 방문 인증 반경({allowed_radius}m)을 벗어났습니다. 방문 날짜 직접 입력을 이용해 주세요."
+            detail="현재 위치에서는 이 관광지 방문을 확인할 수 없습니다."
         )
 
     target_user_id = req.user_id
     target_guest_id = req.guest_id
 
+    if not target_user_id and not target_guest_id:
+        raise HTTPException(status_code=400, detail="인증 주체(사용자 또는 게스트 ID)가 필요합니다.")
+
     now = datetime.utcnow()
+    window_start = now - timedelta(hours=72)
+
+    # Duplicate review check within 72h for same principal & same store
+    existing_review_query = db.query(models.Review).filter(
+        models.Review.store_id == store_id,
+        models.Review.is_deleted == False,
+        models.Review.created_at >= window_start
+    )
+    if target_user_id:
+        existing_review_query = existing_review_query.filter(models.Review.user_id == target_user_id)
+    else:
+        existing_review_query = existing_review_query.filter(models.Review.guest_id == target_guest_id)
+
+    if existing_review_query.first():
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="이미 이 장소의 방문 인증 리뷰를 작성했습니다. 새로운 방문 리뷰는 인증 후 72시간이 지난 뒤 작성할 수 있습니다."
+        )
+
     expires_at = now + timedelta(hours=72)
     verification = models.VisitVerification(
         store_id=store_id,
@@ -1746,27 +1808,53 @@ def verify_attraction_manual_visit(store_id: str, req: schemas.ManualVisitVerify
     if not store:
         raise HTTPException(status_code=404, detail="해당 장소를 찾을 수 없습니다.")
 
+    if store.review_verification_type == "BUSINESS_QR":
+        raise HTTPException(status_code=400, detail="사업장 매장은 방문 날짜 직접 입력을 사용할 수 없습니다.")
+
     if store.manual_visit_allowed is False:
         raise HTTPException(status_code=400, detail="이 장소는 방문 날짜 직접 입력이 허용되지 않습니다.")
 
     now = datetime.utcnow()
     visit_dt = req.visit_date
-    if visit_dt > now + timedelta(days=1):
+    if visit_dt > now:
         raise HTTPException(status_code=400, detail="미래 방문 날짜는 선택할 수 없습니다.")
 
-    ninety_days_ago = now - timedelta(days=90)
-    if visit_dt < ninety_days_ago:
-        raise HTTPException(status_code=400, detail="방문 날짜는 최근 90일 이내의 과거 날짜여야 합니다.")
+    max_days_ago = config.DEFAULT_MAX_VISIT_DATE_DAYS_AGO
+    oldest_allowed = now - timedelta(days=max_days_ago)
+    if visit_dt < oldest_allowed:
+        raise HTTPException(status_code=400, detail=f"방문 날짜는 최근 {max_days_ago}일 이내의 과거 날짜여야 합니다.")
 
     target_user_id = req.user_id
     target_guest_id = req.guest_id
+
+    if not target_user_id and not target_guest_id:
+        raise HTTPException(status_code=400, detail="인증 주체(사용자 또는 게스트 ID)가 필요합니다.")
+
+    window_start = now - timedelta(hours=72)
+
+    # Duplicate review check within 72h for same principal & same store
+    existing_review_query = db.query(models.Review).filter(
+        models.Review.store_id == store_id,
+        models.Review.is_deleted == False,
+        models.Review.created_at >= window_start
+    )
+    if target_user_id:
+        existing_review_query = existing_review_query.filter(models.Review.user_id == target_user_id)
+    else:
+        existing_review_query = existing_review_query.filter(models.Review.guest_id == target_guest_id)
+
+    if existing_review_query.first():
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="이미 이 장소의 방문 인증 리뷰를 작성했습니다. 새로운 방문 리뷰는 인증 후 72시간이 지난 뒤 작성할 수 있습니다."
+        )
 
     expires_at = now + timedelta(hours=72)
     verification = models.VisitVerification(
         store_id=store_id,
         user_id=target_user_id,
         guest_id=target_guest_id,
-        verification_method="ATTRACTION_MANUAL",
+        verification_method="ATTRACTION_DATE",
         verified_at=now,
         expires_at=expires_at,
         visit_date=visit_dt,
@@ -1776,6 +1864,7 @@ def verify_attraction_manual_visit(store_id: str, req: schemas.ManualVisitVerify
     db.commit()
     db.refresh(verification)
     return verification
+
 
 @app.get("/stores/{store_id}/active-verification", response_model=Optional[schemas.VisitVerificationOut], tags=["VisitVerifications"])
 def get_active_verification(store_id: str, user_id: Optional[str] = None, guest_id: Optional[str] = None, db: Session = Depends(get_db)):
@@ -1939,7 +2028,8 @@ def create_review(store_id: str, req: schemas.ReviewCreate, db: Session = Depend
             now = datetime.utcnow()
             query = db.query(models.VisitVerification).filter(
                 models.VisitVerification.store_id == store_id,
-                models.VisitVerification.verification_method.in_(["ATTRACTION_GPS", "ATTRACTION_MANUAL"]),
+                models.VisitVerification.verification_method.in_(["ATTRACTION_GPS", "ATTRACTION_DATE", "ATTRACTION_MANUAL"]),
+
                 models.VisitVerification.status == "ACTIVE",
                 models.VisitVerification.expires_at > now,
                 models.VisitVerification.review_used_at == None
@@ -2001,11 +2091,12 @@ def create_review(store_id: str, req: schemas.ReviewCreate, db: Session = Depend
     if v_method == "BUSINESS_QR":
         badge_text = "QR 방문 인증"
     elif v_method == "ATTRACTION_GPS":
-        badge_text = "위치 확인 방문"
-    elif v_method == "ATTRACTION_MANUAL":
-        badge_text = "일반 방문 후기"
+        badge_text = "GPS 방문 인증"
+    elif v_method in ["ATTRACTION_DATE", "ATTRACTION_MANUAL"]:
+        badge_text = "방문일자 인증"
     elif v_type == "OPEN_REVIEW":
         badge_text = "일반 후기"
+
 
     try:
         new_review = models.Review(

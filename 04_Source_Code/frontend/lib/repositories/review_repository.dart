@@ -169,6 +169,7 @@ class ReviewRepository {
     required String storeId,
     required double latitude,
     required double longitude,
+    double? accuracy,
     String? userId,
     String? guestId,
   }) async {
@@ -177,12 +178,27 @@ class ReviewRepository {
         storeId: storeId,
         latitude: latitude,
         longitude: longitude,
+        accuracy: accuracy,
         userId: userId,
         guestId: guestId,
       );
     } catch (e) {
       if (kDebugMode) {
         print('ReviewRepository: verifyAttractionLocation error: $e');
+      }
+      rethrow;
+    }
+  }
+
+  // Verification Options Lookup
+  Future<Map<String, dynamic>> getStoreVerificationOptions(
+    String storeId,
+  ) async {
+    try {
+      return await _reviewService.getStoreVerificationOptions(storeId);
+    } catch (e) {
+      if (kDebugMode) {
+        print('ReviewRepository: getStoreVerificationOptions error: $e');
       }
       rethrow;
     }

@@ -79,12 +79,15 @@ void main() {
       ];
     });
 
-    test('1. Public K-Lounge search result conveys correct public store_id', () {
-      final searchResults = [publicKLounge];
-      expect(searchResults.first.id, equals(publicStoreId));
-      expect(searchResults.first.name, equals('K-Lounge'));
-      expect(searchResults.first.rating, equals(5.0));
-    });
+    test(
+      '1. Public K-Lounge search result conveys correct public store_id',
+      () {
+        final searchResults = [publicKLounge];
+        expect(searchResults.first.id, equals(publicStoreId));
+        expect(searchResults.first.name, equals('K-Lounge'));
+        expect(searchResults.first.rating, equals(5.0));
+      },
+    );
 
     test('2. Detail, Rating, and Review APIs use identical store_id', () {
       final detailStoreId = publicKLounge.id;

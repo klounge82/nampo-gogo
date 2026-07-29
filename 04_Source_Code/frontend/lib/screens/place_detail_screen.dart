@@ -1772,15 +1772,38 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
     String? userId,
     String guestId,
   ) {
+    final hasCoords =
+        place.latitude != null &&
+        place.longitude != null &&
+        (place.latitude != 0.0 || place.longitude != 0.0);
+    final manualAllowed = place.manualVisitAllowed ?? true;
+
+    if (!hasCoords) {
+      if (manualAllowed) {
+        _pickManualVisitDate(place, userId, guestId);
+      } else {
+        _showWarningDialog(
+          '위치 정보 준비 중',
+          '위치 정보 준비 중입니다. 위치 또는 방문일자 인증이 활성화되면 리뷰를 작성할 수 있습니다.',
+        );
+      }
+      return;
+    }
+
+    if (!manualAllowed) {
+      _verifyLocationGPS(place, userId, guestId);
+      return;
+    }
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text(
-          '방문 확인 방법',
+          '방문을 어떻게 인증하시겠습니까?',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0),
         ),
         content: const Text(
-          '관광지는 QR 코드 없이 현재 위치 또는 방문 날짜를 확인한 후 후기를 작성할 수 있습니다.',
+          '관광지 방문을 현재 위치(GPS) 또는 방문 날짜 직접 입력으로 인증할 수 있습니다.',
           style: TextStyle(fontSize: 13.0, height: 1.4),
         ),
         actions: [
@@ -1797,7 +1820,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
               _verifyLocationGPS(place, userId, guestId);
             },
             child: const Text(
-              '현재 위치로 확인',
+              '현재 위치로 인증',
               style: TextStyle(
                 color: AppColors.primary,
                 fontWeight: FontWeight.bold,
@@ -1813,7 +1836,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
             ),
-            child: const Text('방문 날짜 입력'),
+            child: const Text('방문일자로 인증'),
           ),
         ],
       ),
@@ -1834,16 +1857,13 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
       if (permission == LocationPermission.deniedForever ||
           permission == LocationPermission.denied) {
         if (mounted) {
-          _showWarningDialog(
-            '위치 확인 불가',
-            '현재 위치 권한이 제공되지 않았습니다. 방문 날짜 직접 입력을 이용해 후기를 작성할 수 있습니다.',
-          );
+          _showWarningDialog('현재 위치를 확인하지 못했습니다.', '위치 권한과 GPS 설정을 확인해 주세요.');
         }
         return;
       }
 
       final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.medium,
+        desiredAccuracy: LocationAccuracy.high,
         timeLimit: const Duration(seconds: 10),
       );
 
@@ -1851,6 +1871,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
         storeId: place.id,
         latitude: position.latitude,
         longitude: position.longitude,
+        accuracy: position.accuracy,
         userId: userId,
         guestId: userId == null ? guestId : null,
       );
@@ -1858,7 +1879,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('현재 위치로 방문이 확인되었습니다. 이제 후기를 작성할 수 있습니다.'),
+            content: Text('GPS 위치 방문 확인이 완료되었습니다. 이제 후기를 작성할 수 있습니다.'),
             backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
           ),
@@ -1888,9 +1909,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
             .trim();
         _showWarningDialog(
           '위치 확인 실패',
-          cleanMsg.isEmpty
-              ? '현재 위치에서 방문을 확인하기 어렵습니다. 방문 날짜를 직접 입력하여 후기를 작성할 수 있습니다.'
-              : cleanMsg,
+          cleanMsg.isEmpty ? '현재 위치에서는 이 관광지 방문을 확인할 수 없습니다.' : cleanMsg,
         );
       }
     }

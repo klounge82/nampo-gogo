@@ -180,4 +180,9 @@ class ProductionConfig {
   }
 
   static bool get isMockPayment => paymentMode == 'mock';
+
+  // Verification Central Policy Defaults
+  static const int defaultVerificationRadiusMeters = 300;
+  static const int defaultMaxVisitDateDaysAgo = 90;
+  static const double maxAllowedLocationAccuracyMeters = 500.0;
 }
