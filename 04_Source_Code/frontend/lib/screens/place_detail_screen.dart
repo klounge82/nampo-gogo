@@ -703,6 +703,38 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                           ),
                         ),
                       )
+                    : _reviewsError
+                    ? Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16.0),
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          borderRadius: BorderRadius.circular(12.0),
+                          border: Border.all(color: Colors.red.shade200),
+                        ),
+                        child: Column(
+                          children: [
+                            const Text(
+                              '방문자 후기를 불러오지 못했습니다.\n잠시 후 다시 시도해 주세요.',
+                              style: TextStyle(
+                                fontSize: 13.0,
+                                color: Colors.red,
+                                height: 1.4,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 10.0),
+                            OutlinedButton.icon(
+                              onPressed: _loadReviews,
+                              icon: const Icon(Icons.refresh, size: 16.0),
+                              label: const Text('새로고침'),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: AppColors.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
                     : _reviews.isEmpty
                     ? Container(
                         width: double.infinity,

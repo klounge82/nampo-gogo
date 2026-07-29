@@ -645,13 +645,13 @@ class TestReviewVerification(unittest.TestCase):
         self.assertEqual(res_e2.status_code, 200)
 
         # 4. Third Edit
-                "content": "세 번째 연속 수정 완료된 리뷰 내용 10자 이상.",
-                "guest_id": "guest_multi_01"
-            },
+        res_e3 = self.client.patch(
+            f"/reviews/{rev_id}",
+            json={"rating": 5, "content": "세 번째 연속 수정 완료된 리뷰 내용 10자 이상."},
             headers={"x-guest-id": "guest_multi_01"}
         )
-        self.assertEqual(res_edit3.status_code, 200)
-        data3 = res_edit3.json()
+        self.assertEqual(res_e3.status_code, 200)
+        data3 = res_e3.json()
         self.assertEqual(data3["guest_id"], "guest_multi_01")
         self.assertTrue(data3["is_owner"])
         self.assertTrue(data3["can_edit"])

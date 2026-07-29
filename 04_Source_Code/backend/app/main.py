@@ -4118,7 +4118,7 @@ def get_integrated_search(
 
     # 1. Search Stores (PLACE)
     if type in ["all", "place"]:
-        stores = db.query(models.Store).all()
+        stores = db.query(models.Store).filter(models.Store.status != "DRAFT").all()
         for s in stores:
             title, title_score = get_multilingual_value(s, "name", lang)
             subtitle, desc_score = get_multilingual_value(s, "description", lang)
