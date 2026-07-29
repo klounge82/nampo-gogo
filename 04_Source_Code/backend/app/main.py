@@ -2157,8 +2157,9 @@ def get_store_reviews(
         models.Review.is_hidden == False
     ).order_by(models.Review.created_at.desc()).offset(skip).limit(limit).all()
 
+    eff_guest_id = guest_id or x_guest_id
     return [
-        attach_ownership_flags(r, user_id=eff_user_id, guest_id=guest_id, x_guest_id=x_guest_id)
+        attach_ownership_flags(r, user_id=eff_user_id, guest_id=eff_guest_id)
         for r in reviews
     ]
 
@@ -4159,23 +4160,49 @@ def get_integrated_search(
 
     results = []
 
+    expanded_queries = {query_str}
+    aliases = {
+        "케이": "k",
+        "케이라운지": "k-lounge",
+        "케이 라운지": "k-lounge",
+        "라운지": "lounge",
+        "klounge": "k-lounge",
+    }
+    for k, v in aliases.items():
+        if k in query_str:
+            expanded_queries.add(v)
+            expanded_queries.add(query_str.replace(k, v))
+        if v in query_str:
+            expanded_queries.add(k)
+            expanded_queries.add(query_str.replace(v, k))
+
     # Helper function to compute multilingual fallback match
     def get_multilingual_value(obj, field_prefix: str, current_lang: str) -> tuple[str, float]:
         # returns (value_to_display, match_score)
         val_lang = getattr(obj, f"{field_prefix}_{current_lang}", None)
         val_en = getattr(obj, f"{field_prefix}_en", None)
-        val_ko = getattr(obj, field_prefix, None) # default field like 'name' or 'description'
+        val_ko = getattr(obj, f"{field_prefix}_ko", None) if hasattr(obj, f"{field_prefix}_ko") else getattr(obj, field_prefix, None)
         
-        target_val = val_lang or val_en or val_ko or ""
+        target_val = val_lang or val_ko or val_en or ""
         target_val_lower = target_val.lower()
 
+        candidates = [target_val_lower]
+        if hasattr(obj, "name_ko") and obj.name_ko:
+            candidates.append(obj.name_ko.lower())
+        if hasattr(obj, "name_en") and obj.name_en:
+            candidates.append(obj.name_en.lower())
+        if hasattr(obj, "name") and obj.name:
+            candidates.append(obj.name.lower())
+
         score = 0.0
-        if query_str == target_val_lower:
-            score = 50.0
-        elif target_val_lower.startswith(query_str):
-            score = 35.0
-        elif query_str in target_val_lower:
-            score = 25.0
+        for eq in expanded_queries:
+            for cand in candidates:
+                if eq == cand:
+                    score = max(score, 50.0)
+                elif cand.startswith(eq):
+                    score = max(score, 35.0)
+                elif eq in cand:
+                    score = max(score, 25.0)
             
         return target_val, score
 
