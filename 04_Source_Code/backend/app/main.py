@@ -4163,10 +4163,11 @@ def get_integrated_search(
     expanded_queries = {query_str}
     aliases = {
         "케이": "k",
-        "케이라운지": "k-lounge",
-        "케이 라운지": "k-lounge",
+        "케이라운지": "klounge",
+        "케이 라운지": "klounge",
         "라운지": "lounge",
         "klounge": "k-lounge",
+        "k-lounge": "klounge",
     }
     for k, v in aliases.items():
         if k in query_str:
@@ -4187,8 +4188,6 @@ def get_integrated_search(
         target_val_lower = target_val.lower()
 
         candidates = [target_val_lower]
-        if hasattr(obj, "name_ko") and obj.name_ko:
-            candidates.append(obj.name_ko.lower())
         if hasattr(obj, "name_en") and obj.name_en:
             candidates.append(obj.name_en.lower())
         if hasattr(obj, "name") and obj.name:
@@ -4196,12 +4195,14 @@ def get_integrated_search(
 
         score = 0.0
         for eq in expanded_queries:
+            eq_norm = eq.replace("-", "").replace(" ", "")
             for cand in candidates:
-                if eq == cand:
+                cand_norm = cand.replace("-", "").replace(" ", "")
+                if eq == cand or eq_norm == cand_norm:
                     score = max(score, 50.0)
-                elif cand.startswith(eq):
+                elif cand.startswith(eq) or cand_norm.startswith(eq_norm):
                     score = max(score, 35.0)
-                elif eq in cand:
+                elif eq in cand or (len(eq_norm) >= 2 and eq_norm in cand_norm):
                     score = max(score, 25.0)
             
         return target_val, score
