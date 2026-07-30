@@ -112,14 +112,17 @@ class ReviewService {
     String? guestId,
   }) async {
     try {
+      final dateStr =
+          "${visitDate.year}-${visitDate.month.toString().padLeft(2, '0')}-${visitDate.day.toString().padLeft(2, '0')}";
       final response = await _dio.post(
         '/stores/$storeId/verify-manual-visit',
         data: {
-          'visit_date': visitDate.toIso8601String(),
+          'visit_date': dateStr,
           if (userId != null) 'user_id': userId,
           if (guestId != null) 'guest_id': guestId,
         },
       );
+
       if (response.statusCode == 201 && response.data != null) {
         return response.data as Map<String, dynamic>;
       }

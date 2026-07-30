@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:dio/dio.dart';
+
 import '../constants/colors.dart';
 import '../models/place.dart';
 import '../repositories/place_repository.dart';
@@ -1902,14 +1904,9 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
       }
     } catch (e) {
       if (mounted) {
-        final cleanMsg = e
-            .toString()
-            .replaceAll('Exception:', '')
-            .replaceAll('DioException', '')
-            .trim();
         _showWarningDialog(
           '위치 확인 실패',
-          cleanMsg.isEmpty ? '현재 위치에서는 이 관광지 방문을 확인할 수 없습니다.' : cleanMsg,
+          _getCleanUserErrorMessage(e),
         );
       }
     }
@@ -1958,19 +1955,67 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
         }
       } catch (e) {
         if (mounted) {
-          final cleanMsg = e
-              .toString()
-              .replaceAll('Exception:', '')
-              .replaceAll('DioException', '')
-              .trim();
           _showWarningDialog(
             '방문 확인 실패',
-            cleanMsg.isEmpty ? '방문 날짜를 확인하지 못했습니다.' : cleanMsg,
+            _getCleanUserErrorMessage(e),
           );
         }
       }
     }
   }
+
+  String _getCleanUserErrorMessage(dynamic error) {
+    if (error is DioException) {
+      final status = error.response?.statusCode;
+      final dynamic detail = error.response?.data is Map
+          ? error.response?.data['detail']
+          : null;
+
+      if (status == 400) {
+        if (detail != null && detail is String) {
+          if (detail.contains('미래') || detail.contains('90일') || detail.contains('날짜')) {
+            return '방문일자를 확인해 주세요.\n오늘부터 최근 90일 이내의 날짜만 선택할 수 있습니다.';
+          }
+          if (detail.contains('사업장') || detail.contains('허용되지')) {
+            return '이 관광지에서는 해당 인증 방식을 이용할 수 없습니다.';
+          }
+        }
+        return '방문일자를 확인해 주세요.\n오늘부터 최근 90일 이내의 날짜만 선택할 수 있습니다.';
+      }
+
+      if (status == 409) {
+        return '이미 이 관광지의 방문 인증 또는 후기가 있습니다.';
+      }
+
+      if (status == 401) {
+        return '로그인 상태를 확인한 후 다시 시도해 주세요.';
+      }
+
+      if (status == 403) {
+        return '이 관광지에서는 해당 인증 방식을 이용할 수 없습니다.';
+      }
+
+      if (status == 404) {
+        return '관광지 정보를 찾지 못했습니다. 앱을 새로고침해 주세요.';
+      }
+
+      return '방문 확인을 처리하지 못했습니다.\n잠시 후 다시 시도해 주세요.';
+    }
+
+    final errStr = error.toString();
+    if (errStr.contains('409') || errStr.contains('이미')) {
+      return '이미 이 관광지의 방문 인증 또는 후기가 있습니다.';
+    }
+    if (errStr.contains('미래') || errStr.contains('90일') || errStr.contains('날짜')) {
+      return '방문일자를 확인해 주세요.\n오늘부터 최근 90일 이내의 날짜만 선택할 수 있습니다.';
+    }
+    if (errStr.contains('401') || errStr.contains('로그인')) {
+      return '로그인 상태를 확인한 후 다시 시도해 주세요.';
+    }
+
+    return '방문 확인을 처리하지 못했습니다.\n잠시 후 다시 시도해 주세요.';
+  }
+
 
   void _showWarningDialog(String title, String message) {
     showDialog(

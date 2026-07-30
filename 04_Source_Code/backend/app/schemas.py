@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr
-from datetime import datetime
-from typing import Optional, List
+from datetime import datetime, date
+from typing import Optional, List, Union
+
 
 class UserBase(BaseModel):
     email: EmailStr
@@ -355,11 +356,12 @@ class LocationVerifyRequest(BaseModel):
     user_id: Optional[str] = None
 
 class ManualVisitVerifyRequest(BaseModel):
-    visit_date: datetime
+    visit_date: Union[datetime, date, str]
     visit_time_slot: Optional[str] = None
     companion_type: Optional[str] = None
     guest_id: Optional[str] = None
     user_id: Optional[str] = None
+
 
 class VisitVerificationOut(BaseModel):
     id: str

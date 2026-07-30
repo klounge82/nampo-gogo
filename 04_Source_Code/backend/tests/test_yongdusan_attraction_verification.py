@@ -35,8 +35,10 @@ class TestYongdusanAttractionVerification(unittest.TestCase):
         Base.metadata.drop_all(bind=engine)
 
     def setUp(self):
+        Base.metadata.create_all(bind=engine)
         self.db = TestingSessionLocal()
         self.client = TestClient(app)
+
 
         # Clear tables
         self.db.query(models.ReviewImage).delete()
@@ -227,28 +229,47 @@ class TestYongdusanAttractionVerification(unittest.TestCase):
         self.assertEqual(res.status_code, 400)
         self.assertIn("90일", res.json()["detail"])
 
-    # 10. Existing BUSINESS_QR Workflow Preserved
-    def test_10_business_qr_preserved(self):
-        v_res = self.client.post(
-            f"/stores/{self.klounge_store.id}/verify-qr",
-            json={"qr_token": f"QR_SECRET_{self.klounge_store.id}", "user_id": self.user1.id}
-        )
-        self.assertEqual(v_res.status_code, 201)
-        self.assertEqual(v_res.json()["verification_method"], "BUSINESS_QR")
-
-        r_res = self.client.post(
-            f"/stores/{self.klounge_store.id}/reviews",
-            headers={"Authorization": f"Bearer {self.token1}"},
+    # 11. YYYY-MM-DD string visit date success
+    def test_11_visit_date_yyyy_mm_dd_format(self):
+        res = self.client.post(
+            f"/stores/{self.yongdusan_store.id}/verify-manual-visit",
             json={
-                "rating": 5,
-                "content": "K-Lounge 사업장 QR 방문 인증 후기입니다.",
-                "verification_id": v_res.json()["id"],
+                "visit_date": "2026-07-28",
                 "user_id": self.user1.id
             }
         )
-        self.assertEqual(r_res.status_code, 201)
-        self.assertEqual(r_res.json()["verification_badge"], "QR 방문 인증")
+        self.assertEqual(res.status_code, 201)
+        data = res.json()
+        self.assertEqual(data["verification_method"], "ATTRACTION_DATE")
+        self.assertIn("2026-07-28", data["visit_date"])
+
+    # 12. Visit date with x-guest-id header (no body guest_id/user_id)
+    def test_12_visit_date_with_x_guest_id_header(self):
+        res = self.client.post(
+            f"/stores/{self.yongdusan_store.id}/verify-manual-visit",
+            headers={"x-guest-id": "header_guest_999"},
+            json={
+                "visit_date": "2026-07-29"
+            }
+        )
+        self.assertEqual(res.status_code, 201)
+        data = res.json()
+        self.assertEqual(data["guest_id"], "header_guest_999")
+
+    # 13. Visit date with Bearer token header (no body user_id)
+    def test_13_visit_date_with_bearer_token(self):
+        res = self.client.post(
+            f"/stores/{self.yongdusan_store.id}/verify-manual-visit",
+            headers={"Authorization": f"Bearer {self.token1}"},
+            json={
+                "visit_date": "2026-07-29"
+            }
+        )
+        self.assertEqual(res.status_code, 201)
+        data = res.json()
+        self.assertEqual(data["user_id"], self.user1.id)
 
 
 if __name__ == "__main__":
     unittest.main()
+

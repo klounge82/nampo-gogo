@@ -1803,7 +1803,13 @@ def verify_attraction_location(store_id: str, req: schemas.LocationVerifyRequest
     return verification
 
 @app.post("/stores/{store_id}/verify-manual-visit", response_model=schemas.VisitVerificationOut, status_code=status.HTTP_201_CREATED, tags=["VisitVerifications"])
-def verify_attraction_manual_visit(store_id: str, req: schemas.ManualVisitVerifyRequest, db: Session = Depends(get_db)):
+def verify_attraction_manual_visit(
+    store_id: str,
+    req: schemas.ManualVisitVerifyRequest,
+    x_guest_id: Optional[str] = Header(None, alias="x-guest-id"),
+    token: Optional[str] = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
     store = db.query(models.Store).filter(models.Store.id == store_id).first()
     if not store:
         raise HTTPException(status_code=404, detail="해당 장소를 찾을 수 없습니다.")
@@ -1814,21 +1820,53 @@ def verify_attraction_manual_visit(store_id: str, req: schemas.ManualVisitVerify
     if store.manual_visit_allowed is False:
         raise HTTPException(status_code=400, detail="이 장소는 방문 날짜 직접 입력이 허용되지 않습니다.")
 
+    # Parse visit_date (YYYY-MM-DD string, date, or datetime)
+    raw_visit_date = req.visit_date
+    if isinstance(raw_visit_date, str):
+        try:
+            visit_date_obj = datetime.strptime(raw_visit_date[:10], "%Y-%m-%d").date()
+            parsed_visit_datetime = datetime.strptime(raw_visit_date[:10], "%Y-%m-%d")
+        except Exception:
+            raise HTTPException(status_code=400, detail="방문 날짜 형식이 올바르지 않습니다. YYYY-MM-DD 형식이어야 합니다.")
+    elif isinstance(raw_visit_date, datetime):
+        visit_date_obj = raw_visit_date.date()
+        parsed_visit_datetime = raw_visit_date
+    elif isinstance(raw_visit_date, date):
+        visit_date_obj = raw_visit_date
+        parsed_visit_datetime = datetime.combine(raw_visit_date, datetime.min.time())
+    else:
+        raise HTTPException(status_code=400, detail="방문 날짜 형식이 올바르지 않습니다.")
+
     now = datetime.utcnow()
-    visit_dt = req.visit_date
-    if visit_dt > now:
+    now_utc = now
+
+    today_utc = now_utc.date()
+    today_kst = (now_utc + timedelta(hours=9)).date()
+    max_today = max(today_utc, today_kst)
+
+    if visit_date_obj > max_today:
         raise HTTPException(status_code=400, detail="미래 방문 날짜는 선택할 수 없습니다.")
 
     max_days_ago = config.DEFAULT_MAX_VISIT_DATE_DAYS_AGO
-    oldest_allowed = now - timedelta(days=max_days_ago)
-    if visit_dt < oldest_allowed:
+    oldest_allowed = max_today - timedelta(days=max_days_ago)
+    if visit_date_obj < oldest_allowed:
         raise HTTPException(status_code=400, detail=f"방문 날짜는 최근 {max_days_ago}일 이내의 과거 날짜여야 합니다.")
 
-    target_user_id = req.user_id
-    target_guest_id = req.guest_id
+    # Principal extraction (body > token > header)
+    eff_user_id = req.user_id
+    if not eff_user_id and token:
+        try:
+            payload = auth.decode_token(token)
+            eff_user_id = payload.get("sub")
+        except Exception:
+            pass
+
+    target_user_id = eff_user_id
+    target_guest_id = req.guest_id or x_guest_id
 
     if not target_user_id and not target_guest_id:
         raise HTTPException(status_code=400, detail="인증 주체(사용자 또는 게스트 ID)가 필요합니다.")
+
 
     window_start = now - timedelta(hours=72)
 
@@ -1857,7 +1895,8 @@ def verify_attraction_manual_visit(store_id: str, req: schemas.ManualVisitVerify
         verification_method="ATTRACTION_DATE",
         verified_at=now,
         expires_at=expires_at,
-        visit_date=visit_dt,
+        visit_date=parsed_visit_datetime,
+
         status="ACTIVE"
     )
     db.add(verification)
