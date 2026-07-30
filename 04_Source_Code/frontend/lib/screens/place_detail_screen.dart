@@ -18,6 +18,8 @@ import 'my_reviews_screen.dart';
 import 'qr_scanner_screen.dart';
 import '../services/map_service.dart';
 import '../services/auth_service.dart';
+import '../services/reservation_service.dart';
+
 
 class PlaceDetailScreen extends StatefulWidget {
   final String placeId;
@@ -43,6 +45,8 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
   bool _isReviewsLoading = true;
   bool _reviewsError = false;
   String? _errorMessage;
+  bool _reservationsEnabled = false;
+
 
   @override
   void initState() {
@@ -55,14 +59,22 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
     setState(() => _isLoading = true);
     try {
       final place = await _placeRepository.getPlaceDetail(widget.placeId);
+      bool resEnabled = false;
+      try {
+        final options = await ReservationService().getPublicReservationOptions(widget.placeId);
+        resEnabled = options['reservations_enabled'] as bool? ?? false;
+      } catch (_) {}
+
       setState(() {
         _place = place;
+        _reservationsEnabled = resEnabled;
         _errorMessage = null;
       });
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
       });
+
     } finally {
       setState(() => _isLoading = false);
     }
@@ -1318,22 +1330,25 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                 ),
               ),
             ),
-            const SizedBox(width: 8.0),
-            Expanded(
-              child: ElevatedButton.icon(
-                onPressed: () => _showReservationBottomSheet(context),
-                icon: const Icon(Icons.calendar_today, size: 18.0),
-                label: const Text('예약하기', style: TextStyle(fontSize: 12.0)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.secondary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 12.0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
+            if (_reservationsEnabled) ...[
+              const SizedBox(width: 8.0),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () => _showReservationBottomSheet(context),
+                  icon: const Icon(Icons.calendar_today, size: 18.0),
+                  label: const Text('예약하기', style: TextStyle(fontSize: 12.0)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.secondary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
                   ),
                 ),
               ),
-            ),
+            ],
+
             const SizedBox(width: 8.0),
             Expanded(
               child: ElevatedButton.icon(

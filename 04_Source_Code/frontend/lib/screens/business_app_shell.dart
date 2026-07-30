@@ -7,6 +7,7 @@ import 'business_dashboard_screen.dart';
 import 'business_store_screen.dart';
 import 'business_products_screen.dart';
 import 'business_reviews_screen.dart';
+import 'business_reservations_screen.dart';
 
 class BusinessAppShell extends StatefulWidget {
   const BusinessAppShell({super.key});
@@ -23,6 +24,7 @@ class _BusinessAppShellState extends State<BusinessAppShell> {
     BusinessStoreScreen(),
     BusinessProductsScreen(),
     BusinessReviewsScreen(),
+    BusinessReservationsScreen(),
   ];
 
   @override
@@ -67,6 +69,11 @@ class _BusinessAppShellState extends State<BusinessAppShell> {
               icon: Icon(Icons.rate_review_outlined),
               activeIcon: Icon(Icons.rate_review),
               label: '손님 리뷰',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.calendar_today_outlined),
+              activeIcon: Icon(Icons.calendar_today),
+              label: '예약 관리',
             ),
           ],
         ),

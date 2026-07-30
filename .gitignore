@@ -65,6 +65,9 @@ ios/Pods/
 .DS_Store
 Thumbs.db
 
-# Release temporary folders
+# Release temporary folders & APK deliverables
 05_Release/Netlify_Policy_Update/
 05_Release/Nampo_GoGo_Netlify_Final/
+*.apk
+scratch/
+

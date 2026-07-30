@@ -123,10 +123,11 @@ class ModuleRegistry {
       route: '/business/reservations',
       allowedModes: ['BUSINESS'],
       requiredCapabilities: ['business.dashboard.read'],
-      enabled: false,
-      comingSoon: true,
+      enabled: true,
+      comingSoon: false,
       navigationPosition: 5,
     ),
+
     FeatureModule(
       featureKey: 'business_recommendations',
       title: '추천 관리',

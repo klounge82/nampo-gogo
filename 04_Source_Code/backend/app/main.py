@@ -1462,122 +1462,525 @@ def use_user_coupon(user_coupon_id: str, req: ExchangeRequest, db: Session = Dep
         "message": "쿠폰 사용이 완료되었습니다."
     }
 
-# --- RESERVATION MVP APIs ---
+# --- RESERVATION I1 APIs ---
 
-class CancelRequest(BaseModel):
-    user_id: Optional[str] = None
+def check_business_store_access(db: Session, user_id: str, store_id: str):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if user and user.role == "ADMIN":
+        return True
+    mem = db.query(models.BusinessMembership).filter(
+        models.BusinessMembership.user_id == user_id,
+        models.BusinessMembership.store_id == store_id,
+        models.BusinessMembership.status == "ACTIVE"
+    ).first()
+    if not mem or mem.membership_role not in ["OWNER", "MANAGER"]:
+        raise HTTPException(status_code=403, detail="해당 매장에 대한 관리 권한이 없습니다.")
+    return True
 
+def get_or_create_reservation_settings(db: Session, store_id: str) -> models.ReservationSettings:
+    settings = db.query(models.ReservationSettings).filter(models.ReservationSettings.store_id == store_id).first()
+    if not settings:
+        settings = models.ReservationSettings(
+            store_id=store_id,
+            reservations_enabled=False,
+            approval_mode="MANUAL",
+            available_weekdays="1,2,3,4,5,6,7",
+            operating_start_time="09:00",
+            operating_end_time="22:00",
+            slot_interval_minutes=30,
+            minimum_advance_minutes=120,
+            maximum_advance_days=30,
+            same_day_booking_allowed=True,
+            minimum_party_size=1,
+            maximum_party_size=6,
+            max_reservations_per_slot=1,
+            temporary_pause_enabled=False,
+            timezone="Asia/Seoul"
+        )
+        db.add(settings)
+        db.commit()
+        db.refresh(settings)
+    return settings
+
+# 1. Business Reservation Settings
+@app.get("/business/stores/{store_id}/reservation-settings", response_model=schemas.ReservationSettingsOut, tags=["BusinessReservations"])
+def get_business_reservation_settings(
+    store_id: str,
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+    payload = auth.decode_token(token)
+    user_id = payload.get("sub")
+    check_business_store_access(db, user_id, store_id)
+    return get_or_create_reservation_settings(db, store_id)
+
+@app.put("/business/stores/{store_id}/reservation-settings", response_model=schemas.ReservationSettingsOut, tags=["BusinessReservations"])
+def update_business_reservation_settings(
+    store_id: str,
+    req: schemas.ReservationSettingsUpdate,
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+    payload = auth.decode_token(token)
+    user_id = payload.get("sub")
+    check_business_store_access(db, user_id, store_id)
+    settings = get_or_create_reservation_settings(db, store_id)
+
+    for field, value in req.dict(exclude_unset=True).items():
+        setattr(settings, field, value)
+
+    db.commit()
+    db.refresh(settings)
+    return settings
+
+@app.get("/business/stores/{store_id}/reservation-blackouts", response_model=List[schemas.ReservationBlackoutOut], tags=["BusinessReservations"])
+def get_business_reservation_blackouts(
+    store_id: str,
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+    payload = auth.decode_token(token)
+    user_id = payload.get("sub")
+    check_business_store_access(db, user_id, store_id)
+    return db.query(models.ReservationBlackout).filter(
+        models.ReservationBlackout.store_id == store_id,
+        models.ReservationBlackout.is_active == True
+    ).all()
+
+@app.post("/business/stores/{store_id}/reservation-blackouts", response_model=schemas.ReservationBlackoutOut, status_code=status.HTTP_201_CREATED, tags=["BusinessReservations"])
+def create_business_reservation_blackout(
+    store_id: str,
+    req: schemas.ReservationBlackoutCreate,
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+    payload = auth.decode_token(token)
+    user_id = payload.get("sub")
+    check_business_store_access(db, user_id, store_id)
+
+    # Check overlaps
+    existing = db.query(models.ReservationBlackout).filter(
+        models.ReservationBlackout.store_id == store_id,
+        models.ReservationBlackout.is_active == True,
+        models.ReservationBlackout.weekday == req.weekday,
+        models.ReservationBlackout.start_time < req.end_time,
+        models.ReservationBlackout.end_time > req.start_time
+    ).first()
+
+    if existing:
+        raise HTTPException(status_code=400, detail="이미 등록된 예약 차단 시간과 중복됩니다.")
+
+    blackout = models.ReservationBlackout(
+        store_id=store_id,
+        weekday=req.weekday,
+        start_time=req.start_time,
+        end_time=req.end_time,
+        reason=req.reason,
+        is_active=True
+    )
+    db.add(blackout)
+    db.commit()
+    db.refresh(blackout)
+    return blackout
+
+@app.delete("/business/stores/{store_id}/reservation-blackouts/{blackout_id}", tags=["BusinessReservations"])
+def delete_business_reservation_blackout(
+    store_id: str,
+    blackout_id: str,
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+    payload = auth.decode_token(token)
+    user_id = payload.get("sub")
+    check_business_store_access(db, user_id, store_id)
+
+    blackout = db.query(models.ReservationBlackout).filter(
+        models.ReservationBlackout.id == blackout_id,
+        models.ReservationBlackout.store_id == store_id
+    ).first()
+    if not blackout:
+        raise HTTPException(status_code=404, detail="해당 예약 차단 설정을 찾을 수 없습니다.")
+
+    blackout.is_active = False
+    db.commit()
+    return {"success": True, "message": "예약 차단 설정이 삭제되었습니다."}
+
+# 2. Public Reservation Options & Available Slots
+@app.get("/stores/{store_id}/reservation-options", response_model=schemas.ReservationSettingsOut, tags=["PublicReservations"])
+def get_public_reservation_options(store_id: str, db: Session = Depends(get_db)):
+    return get_or_create_reservation_settings(db, store_id)
+
+@app.get("/stores/{store_id}/available-slots", tags=["PublicReservations"])
+def get_available_reservation_slots(store_id: str, date: str, db: Session = Depends(get_db)):
+    settings = get_or_create_reservation_settings(db, store_id)
+    if not settings.reservations_enabled:
+        return {"reservations_enabled": False, "slots": []}
+
+    try:
+        target_date = datetime.strptime(date[:10], "%Y-%m-%d").date()
+    except Exception:
+        raise HTTPException(status_code=400, detail="날짜 형식이 올바르지 않습니다. (YYYY-MM-DD)")
+
+    # Current time in Asia/Seoul (UTC+9)
+    now_kst = datetime.utcnow() + timedelta(hours=9)
+    today_kst = now_kst.date()
+
+    if target_date < today_kst:
+        return {"reservations_enabled": True, "slots": [], "message": "과거 날짜는 예약할 수 없습니다."}
+
+    if (target_date - today_kst).days > settings.maximum_advance_days:
+        return {"reservations_enabled": True, "slots": [], "message": f"최대 {settings.maximum_advance_days}일 이내만 예약 가능합니다."}
+
+    # ISO weekday 1..7 (Mon=1, Sun=7)
+    iso_weekday = str(target_date.isoweekday())
+    allowed_weekdays = [w.strip() for w in settings.available_weekdays.split(",")]
+    if iso_weekday not in allowed_weekdays:
+        return {"reservations_enabled": True, "slots": [], "message": "해당 요일은 휴무일 또는 예약 불가일입니다."}
+
+    # Generate slots
+    try:
+        start_h, start_m = map(int, settings.operating_start_time.split(":"))
+        end_h, end_m = map(int, settings.operating_end_time.split(":"))
+    except Exception:
+        start_h, start_m = 9, 0
+        end_h, end_m = 22, 0
+
+    interval = max(15, settings.slot_interval_minutes)
+    curr_time = datetime.combine(target_date, datetime.min.time()).replace(hour=start_h, minute=start_m)
+    end_time_dt = datetime.combine(target_date, datetime.min.time()).replace(hour=end_h, minute=end_m)
+
+    blackouts = db.query(models.ReservationBlackout).filter(
+        models.ReservationBlackout.store_id == store_id,
+        models.ReservationBlackout.is_active == True
+    ).all()
+
+    slots = []
+    min_advance_dt = now_kst + timedelta(minutes=settings.minimum_advance_minutes)
+
+    while curr_time <= end_time_dt:
+        time_str = curr_time.strftime("%H:%M")
+        is_available = True
+        reason = None
+
+        # Advance time check
+        if curr_time < min_advance_dt:
+            is_available = False
+            reason = f"최소 {settings.minimum_advance_minutes // 60}시간 전 사전 예약 필요"
+
+        # Same day cutoff check
+        if target_date == today_kst and settings.same_day_cutoff_time:
+            try:
+                cut_h, cut_m = map(int, settings.same_day_cutoff_time.split(":"))
+                cutoff_dt = datetime.combine(target_date, datetime.min.time()).replace(hour=cut_h, minute=cut_m)
+                if now_kst > cutoff_dt:
+                    is_available = False
+                    reason = f"오늘 당일 예약 마감 시각({settings.same_day_cutoff_time}) 경과"
+            except Exception:
+                pass
+
+        # Blackout check
+        if is_available:
+            for bo in blackouts:
+                if bo.weekday is None or bo.weekday == int(iso_weekday):
+                    if bo.start_time <= time_str < bo.end_time:
+                        is_available = False
+                        reason = bo.reason or "해당 시간은 매장 사정으로 예약을 받지 않습니다."
+                        break
+
+        # Max reservations per slot check
+        if is_available:
+            active_count = db.query(models.StoreReservation).filter(
+                models.StoreReservation.store_id == store_id,
+                models.StoreReservation.reservation_date == date[:10],
+                models.StoreReservation.start_time == time_str,
+                models.StoreReservation.status.in_(["PENDING", "APPROVED", "pending", "confirmed"])
+            ).count()
+
+            if active_count >= settings.max_reservations_per_slot:
+                is_available = False
+                reason = "해당 시간대 예약 정원 마감"
+
+        slots.append({
+            "time": time_str,
+            "available": is_available,
+            "reason": reason
+        })
+
+        curr_time += timedelta(minutes=interval)
+
+    return {
+        "reservations_enabled": True,
+        "date": date[:10],
+        "slots": slots
+    }
+
+# 3. Customer Reservation Flow
 @app.post("/reservations", response_model=schemas.ReservationOut, status_code=status.HTTP_201_CREATED, tags=["Reservations"])
-def create_reservation(req: schemas.ReservationCreate, db: Session = Depends(get_db)):
+def create_reservation(
+    req: schemas.ReservationCreateRequest,
+    x_guest_id: Optional[str] = Header(None, alias="x-guest-id"),
+    token: Optional[str] = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+    # User authentication
+    target_user_id = None
+    if token:
+        try:
+            payload = auth.decode_token(token)
+            target_user_id = payload.get("sub")
+        except Exception:
+            pass
+
+    if not target_user_id:
+        raise HTTPException(status_code=401, detail="예약을 신청하려면 로그인이 필요합니다.")
+
+    user = db.query(models.User).filter(models.User.id == target_user_id).first()
+    if not user:
+        raise HTTPException(status_code=401, detail="사용자 정보를 찾을 수 없습니다. 다시 로그인해 주세요.")
+
     store = db.query(models.Store).filter(models.Store.id == req.store_id).first()
     if not store:
         raise HTTPException(status_code=404, detail="해당 매장을 찾을 수 없습니다.")
 
-    target_user_id = req.user_id
-    if not target_user_id:
-        user = db.query(models.User).first()
-        if not user:
-            raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다.")
-        target_user_id = user.id
-    else:
-        user = db.query(models.User).filter(models.User.id == target_user_id).first()
-        if not user:
-            raise HTTPException(status_code=404, detail="해당 사용자를 찾을 수 없습니다.")
+    settings = get_or_create_reservation_settings(db, req.store_id)
+    if not settings.reservations_enabled:
+        raise HTTPException(status_code=400, detail="이 매장은 현재 예약 기능을 지원하지 않습니다.")
 
-    if req.reservation_time.replace(tzinfo=None) < datetime.utcnow().replace(tzinfo=None):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="과거의 시간에는 예약할 수 없습니다."
-        )
+    if settings.temporary_pause_enabled:
+        pause_reason = settings.temporary_pause_reason or "현재 매장 사정으로 예약 접수를 잠시 중단했습니다."
+        raise HTTPException(status_code=400, detail=pause_reason)
 
+    if req.party_size < settings.minimum_party_size or req.party_size > settings.maximum_party_size:
+        raise HTTPException(status_code=400, detail=f"예약 인원은 최소 {settings.minimum_party_size}명에서 최대 {settings.maximum_party_size}명까지 지정할 수 있습니다.")
+
+    # Parse reservation_date & start_time
     try:
-        new_res = models.StoreReservation(
-            user_id=target_user_id,
-            store_id=req.store_id,
-            reservation_time=req.reservation_time,
-            party_size=req.party_size,
-            status="pending"
-        )
-        db.add(new_res)
-        db.commit()
-        db.refresh(new_res)
+        res_date_obj = datetime.strptime(req.reservation_date[:10], "%Y-%m-%d").date()
+        time_h, time_m = map(int, req.start_time.split(":"))
+        res_datetime = datetime.combine(res_date_obj, datetime.min.time()).replace(hour=time_h, minute=time_m)
+    except Exception:
+        raise HTTPException(status_code=400, detail="예약 날짜 또는 시간 형식이 올바르지 않습니다.")
 
-        # Insert activity log
-        create_activity_log(
-            db=db,
-            user_id=target_user_id,
-            activity_type="RESERVATION_CREATE",
-            title="예약 생성",
-            description=f"'{store.name}' 매장에 {req.reservation_time.strftime('%m월 %d일 %H:%M')} 예약을 접수했습니다.",
-            target_type="RESERVATION",
-            target_id=new_res.id,
-            icon="calendar_today",
-            color="blue"
-        )
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=f"예약 생성 중 오류 발생: {str(e)}")
+    now_kst = datetime.utcnow() + timedelta(hours=9)
+
+    # Minimum advance check
+    min_advance_dt = now_kst + timedelta(minutes=settings.minimum_advance_minutes)
+    if res_datetime < min_advance_dt:
+        min_hours = settings.minimum_advance_minutes // 60
+        raise HTTPException(status_code=400, detail=f"이 매장은 예약 시간 기준 최소 {min_hours}시간 전에 예약해야 합니다.")
+
+    # Blackouts check
+    iso_weekday = res_date_obj.isoweekday()
+    blackout = db.query(models.ReservationBlackout).filter(
+        models.ReservationBlackout.store_id == req.store_id,
+        models.ReservationBlackout.is_active == True,
+        models.ReservationBlackout.start_time <= req.start_time,
+        models.ReservationBlackout.end_time > req.start_time
+    ).first()
+    if blackout and (blackout.weekday is None or blackout.weekday == iso_weekday):
+        raise HTTPException(status_code=400, detail="해당 시간은 매장 운영이 바빠 예약을 받지 않습니다. 다른 시간을 선택해 주세요.")
+
+    # Concurrency & Capacity check in single atomic lock
+    active_count = db.query(models.StoreReservation).filter(
+        models.StoreReservation.store_id == req.store_id,
+        models.StoreReservation.reservation_date == req.reservation_date[:10],
+        models.StoreReservation.start_time == req.start_time,
+        models.StoreReservation.status.in_(["PENDING", "APPROVED", "pending", "confirmed"])
+    ).count()
+
+    if active_count >= settings.max_reservations_per_slot:
+        raise HTTPException(status_code=400, detail="선택하신 시간대의 예약 정원이 이미 마감되었습니다.")
+
+    # Duplicate active reservation by same user
+    dup = db.query(models.StoreReservation).filter(
+        models.StoreReservation.user_id == target_user_id,
+        models.StoreReservation.store_id == req.store_id,
+        models.StoreReservation.reservation_date == req.reservation_date[:10],
+        models.StoreReservation.start_time == req.start_time,
+        models.StoreReservation.status.in_(["PENDING", "APPROVED", "pending", "confirmed"])
+    ).first()
+    if dup:
+        raise HTTPException(status_code=409, detail="이미 동일한 날짜 및 시간에 신청된 예약이 있습니다.")
+
+    new_res = models.StoreReservation(
+        user_id=target_user_id,
+        store_id=req.store_id,
+        product_id=req.product_id,
+        reservation_time=res_datetime,
+        reservation_date=req.reservation_date[:10],
+        start_time=req.start_time,
+        party_size=req.party_size,
+        customer_note=req.customer_note,
+        status="PENDING"
+    )
+    db.add(new_res)
+    db.commit()
+    db.refresh(new_res)
+
+    create_activity_log(
+        db=db,
+        user_id=target_user_id,
+        activity_type="RESERVATION_CREATE",
+        title="예약 신청",
+        description=f"'{store.name}' 매장에 {req.reservation_date} {req.start_time} 예약을 신청했습니다.",
+        target_type="RESERVATION",
+        target_id=new_res.id,
+        icon="calendar_today",
+        color="blue"
+    )
+
+    new_res.store_name = store.name
+    if req.product_id:
+        prod = db.query(models.Product).filter(models.Product.id == req.product_id).first()
+        new_res.product_name = prod.name if prod else None
 
     return new_res
 
-@app.post("/reservations/{reservation_id}/cancel", tags=["Reservations"])
-def cancel_reservation(reservation_id: str, req: CancelRequest, db: Session = Depends(get_db)):
-    res_obj = db.query(models.StoreReservation).filter(models.StoreReservation.id == reservation_id).first()
-    if not res_obj:
-        raise HTTPException(status_code=404, detail="해당 예약을 찾을 수 없습니다.")
-
-    if res_obj.status in ["cancelled", "completed"]:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"이미 취소 또는 완료된 예약입니다. (현재 상태: {res_obj.status})"
-        )
-
-    try:
-        res_obj.status = "cancelled"
-        db.commit()
-
-        # Insert activity log
-        store_name = res_obj.store.name if res_obj.store else "매장"
-        create_activity_log(
-            db=db,
-            user_id=res_obj.user_id,
-            activity_type="RESERVATION_CANCEL",
-            title="예약 취소",
-            description=f"'{store_name}' 예약을 취소했습니다.",
-            target_type="RESERVATION",
-            target_id=res_obj.id,
-            icon="calendar_today",
-            color="blue"
-        )
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=f"예약 취소 중 오류 발생: {str(e)}")
-
-    return {
-        "success": True,
-        "message": "예약이 성공적으로 취소되었습니다."
-    }
-
-@app.get("/users/reservations", response_model=List[schemas.ReservationOut], tags=["Reservations"])
-def get_user_reservations(user_id: Optional[str] = None, db: Session = Depends(get_db)):
-    if not user_id:
-        user = db.query(models.User).first()
-        if not user:
-            return []
-        target_user_id = user.id
-    else:
-        target_user_id = user_id
-
-    return db.query(models.StoreReservation).filter(
-        models.StoreReservation.user_id == target_user_id
+@app.get("/reservations/me", response_model=List[schemas.ReservationOut], tags=["Reservations"])
+def get_my_reservations(
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+    payload = auth.decode_token(token)
+    user_id = payload.get("sub")
+    
+    reservations = db.query(models.StoreReservation).filter(
+        models.StoreReservation.user_id == user_id
     ).order_by(models.StoreReservation.reservation_time.desc()).all()
 
-@app.get("/reservations/{reservation_id}", response_model=schemas.ReservationOut, tags=["Reservations"])
-def get_reservation_detail(reservation_id: str, db: Session = Depends(get_db)):
+    for r in reservations:
+        r.store_name = r.store.name if r.store else "매장"
+        if r.product_id:
+            prod = db.query(models.Product).filter(models.Product.id == r.product_id).first()
+            r.product_name = prod.name if prod else None
+
+    return reservations
+
+@app.post("/reservations/{reservation_id}/cancel", tags=["Reservations"])
+def cancel_reservation(
+    reservation_id: str,
+    req: Optional[schemas.ReservationActionReasonRequest] = None,
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+    payload = auth.decode_token(token)
+    user_id = payload.get("sub")
+
+    res_obj = db.query(models.StoreReservation).filter(
+        models.StoreReservation.id == reservation_id,
+        models.StoreReservation.user_id == user_id
+    ).first()
+    if not res_obj:
+        raise HTTPException(status_code=404, detail="해당 예약을 찾을 수 없습니다.")
+
+    if res_obj.status in ["CANCELLED_BY_CUSTOMER", "CANCELLED_BY_BUSINESS", "COMPLETED", "NO_SHOW"]:
+        raise HTTPException(status_code=400, detail=f"이미 취소 또는 완료 처리된 예약입니다. (현재 상태: {res_obj.status})")
+
+    res_obj.status = "CANCELLED_BY_CUSTOMER"
+    if req and req.reason:
+        res_obj.cancellation_reason = req.reason
+    db.commit()
+
+    return {"success": True, "message": "예약이 취소되었습니다."}
+
+# 4. Business Reservation Management
+@app.get("/business/stores/{store_id}/reservations", response_model=List[schemas.ReservationOut], tags=["BusinessReservations"])
+def get_business_store_reservations(
+    store_id: str,
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+    payload = auth.decode_token(token)
+    user_id = payload.get("sub")
+    check_business_store_access(db, user_id, store_id)
+
+    reservations = db.query(models.StoreReservation).filter(
+        models.StoreReservation.store_id == store_id
+    ).order_by(models.StoreReservation.reservation_time.desc()).all()
+
+    for r in reservations:
+        r.store_name = r.store.name if r.store else "매장"
+        if r.product_id:
+            prod = db.query(models.Product).filter(models.Product.id == r.product_id).first()
+            r.product_name = prod.name if prod else None
+
+    return reservations
+
+@app.post("/business/reservations/{reservation_id}/approve", response_model=schemas.ReservationOut, tags=["BusinessReservations"])
+def approve_business_reservation(
+    reservation_id: str,
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+    payload = auth.decode_token(token)
+    user_id = payload.get("sub")
     res_obj = db.query(models.StoreReservation).filter(models.StoreReservation.id == reservation_id).first()
     if not res_obj:
         raise HTTPException(status_code=404, detail="해당 예약을 찾을 수 없습니다.")
+
+    check_business_store_access(db, user_id, res_obj.store_id)
+    res_obj.status = "APPROVED"
+    db.commit()
+    db.refresh(res_obj)
     return res_obj
+
+@app.post("/business/reservations/{reservation_id}/reject", response_model=schemas.ReservationOut, tags=["BusinessReservations"])
+def reject_business_reservation(
+    reservation_id: str,
+    req: Optional[schemas.ReservationActionReasonRequest] = None,
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+    payload = auth.decode_token(token)
+    user_id = payload.get("sub")
+    res_obj = db.query(models.StoreReservation).filter(models.StoreReservation.id == reservation_id).first()
+    if not res_obj:
+        raise HTTPException(status_code=404, detail="해당 예약을 찾을 수 없습니다.")
+
+    check_business_store_access(db, user_id, res_obj.store_id)
+    res_obj.status = "REJECTED"
+    if req and req.reason:
+        res_obj.rejection_reason = req.reason
+    db.commit()
+    db.refresh(res_obj)
+    return res_obj
+
+@app.post("/business/reservations/{reservation_id}/complete", response_model=schemas.ReservationOut, tags=["BusinessReservations"])
+def complete_business_reservation(
+    reservation_id: str,
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+    payload = auth.decode_token(token)
+    user_id = payload.get("sub")
+    res_obj = db.query(models.StoreReservation).filter(models.StoreReservation.id == reservation_id).first()
+    if not res_obj:
+        raise HTTPException(status_code=404, detail="해당 예약을 찾을 수 없습니다.")
+
+    check_business_store_access(db, user_id, res_obj.store_id)
+    res_obj.status = "COMPLETED"
+    db.commit()
+    db.refresh(res_obj)
+    return res_obj
+
+@app.post("/business/reservations/{reservation_id}/no-show", response_model=schemas.ReservationOut, tags=["BusinessReservations"])
+def noshow_business_reservation(
+    reservation_id: str,
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+    payload = auth.decode_token(token)
+    user_id = payload.get("sub")
+    res_obj = db.query(models.StoreReservation).filter(models.StoreReservation.id == reservation_id).first()
+    if not res_obj:
+        raise HTTPException(status_code=404, detail="해당 예약을 찾을 수 없습니다.")
+
+    check_business_store_access(db, user_id, res_obj.store_id)
+    res_obj.status = "NO_SHOW"
+    db.commit()
+    db.refresh(res_obj)
+    return res_obj
+
 
 # --- VISIT VERIFICATION & REVIEW GATE APIs ---
 

@@ -890,3 +890,102 @@ class StoreQrCredentialOut(BaseModel):
     class Config:
         from_attributes = True
         orm_mode = True
+
+class ReservationSettingsOut(BaseModel):
+    id: str
+    store_id: str
+    reservations_enabled: bool
+    approval_mode: str
+    available_weekdays: str
+    operating_start_time: str
+    operating_end_time: str
+    slot_interval_minutes: int
+    minimum_advance_minutes: int
+    maximum_advance_days: int
+    same_day_booking_allowed: bool
+    same_day_cutoff_time: Optional[str] = None
+    minimum_party_size: int
+    maximum_party_size: int
+    max_reservations_per_slot: int
+    temporary_pause_enabled: bool
+    temporary_pause_until: Optional[datetime] = None
+    temporary_pause_reason: Optional[str] = None
+    timezone: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+        orm_mode = True
+
+class ReservationSettingsUpdate(BaseModel):
+    reservations_enabled: Optional[bool] = None
+    approval_mode: Optional[str] = None
+    available_weekdays: Optional[str] = None
+    operating_start_time: Optional[str] = None
+    operating_end_time: Optional[str] = None
+    slot_interval_minutes: Optional[int] = None
+    minimum_advance_minutes: Optional[int] = None
+    maximum_advance_days: Optional[int] = None
+    same_day_booking_allowed: Optional[bool] = None
+    same_day_cutoff_time: Optional[str] = None
+    minimum_party_size: Optional[int] = None
+    maximum_party_size: Optional[int] = None
+    max_reservations_per_slot: Optional[int] = None
+    temporary_pause_enabled: Optional[bool] = None
+    temporary_pause_until: Optional[datetime] = None
+    temporary_pause_reason: Optional[str] = None
+
+class ReservationBlackoutCreate(BaseModel):
+    weekday: Optional[int] = None
+    start_time: str
+    end_time: str
+    reason: Optional[str] = None
+
+class ReservationBlackoutOut(BaseModel):
+    id: str
+    store_id: str
+    weekday: Optional[int] = None
+    start_time: str
+    end_time: str
+    reason: Optional[str] = None
+    is_active: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+        orm_mode = True
+
+class ReservationCreateRequest(BaseModel):
+    store_id: str
+    product_id: Optional[str] = None
+    reservation_date: str
+    start_time: str
+    party_size: int = 2
+    customer_note: Optional[str] = None
+
+class ReservationActionReasonRequest(BaseModel):
+    reason: Optional[str] = None
+
+class ReservationOut(BaseModel):
+    id: str
+    user_id: str
+    store_id: str
+    product_id: Optional[str] = None
+    reservation_time: datetime
+    reservation_date: Optional[str] = None
+    start_time: Optional[str] = None
+    party_size: int
+    customer_note: Optional[str] = None
+    status: str
+    rejection_reason: Optional[str] = None
+    cancellation_reason: Optional[str] = None
+    store_name: Optional[str] = None
+    product_name: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+        orm_mode = True
+

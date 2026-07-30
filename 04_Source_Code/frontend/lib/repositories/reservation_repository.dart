@@ -63,7 +63,8 @@ class ReservationRepository {
     try {
       final res = await _reservationService.createReservation(
         storeId: storeId,
-        reservationTime: reservationTime,
+        reservationDate: reservationTime.toIso8601String().substring(0, 10),
+        startTime: "${reservationTime.hour.toString().padLeft(2, '0')}:${reservationTime.minute.toString().padLeft(2, '0')}",
         partySize: partySize,
         userId: userId,
       );
@@ -110,9 +111,9 @@ class ReservationRepository {
     try {
       final res = await _reservationService.cancelReservation(
         reservationId,
-        userId: userId,
       );
       return res['success'] as bool? ?? false;
+
     } catch (e) {
       if (kDebugMode) {
         print(

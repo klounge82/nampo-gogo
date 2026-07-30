@@ -301,15 +301,68 @@ class StoreReservation(Base):
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     store_id = Column(String(36), ForeignKey("stores.id", ondelete="CASCADE"), nullable=False)
+    product_id = Column(String(36), ForeignKey("products.id", ondelete="SET NULL"), nullable=True)
     reservation_time = Column(DateTime, nullable=False)
+    reservation_date = Column(String(10), nullable=True)
+    start_time = Column(String(10), nullable=True)
     party_size = Column(Integer, nullable=False, default=2)
-    status = Column(String(50), nullable=False, default="pending") # 'pending', 'confirmed', 'cancelled', 'completed'
+    customer_note = Column(Text, nullable=True)
+    status = Column(String(50), nullable=False, default="PENDING")
+    rejection_reason = Column(Text, nullable=True)
+    cancellation_reason = Column(Text, nullable=True)
     created_at = Column(DateTime, nullable=False, server_default=func.now())
     updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
 
     # Relationships
     user = relationship("User", back_populates="reservations")
     store = relationship("Store", back_populates="reservations")
+    product = relationship("Product")
+
+class ReservationSettings(Base):
+    __tablename__ = "reservation_settings"
+    __table_args__ = (
+        UniqueConstraint("store_id", name="uq_reservation_settings_store"),
+    )
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    store_id = Column(String(36), ForeignKey("stores.id", ondelete="CASCADE"), nullable=False, index=True)
+    reservations_enabled = Column(Boolean, nullable=False, default=False)
+    approval_mode = Column(String(50), nullable=False, default="MANUAL")
+    available_weekdays = Column(String(100), nullable=False, default="1,2,3,4,5,6,7")
+    operating_start_time = Column(String(10), nullable=False, default="09:00")
+    operating_end_time = Column(String(10), nullable=False, default="22:00")
+    slot_interval_minutes = Column(Integer, nullable=False, default=30)
+    minimum_advance_minutes = Column(Integer, nullable=False, default=120)
+    maximum_advance_days = Column(Integer, nullable=False, default=30)
+    same_day_booking_allowed = Column(Boolean, nullable=False, default=True)
+    same_day_cutoff_time = Column(String(10), nullable=True)
+    minimum_party_size = Column(Integer, nullable=False, default=1)
+    maximum_party_size = Column(Integer, nullable=False, default=6)
+    max_reservations_per_slot = Column(Integer, nullable=False, default=1)
+    temporary_pause_enabled = Column(Boolean, nullable=False, default=False)
+    temporary_pause_until = Column(DateTime, nullable=True)
+    temporary_pause_reason = Column(Text, nullable=True)
+    timezone = Column(String(50), nullable=False, default="Asia/Seoul")
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+    updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
+
+    store = relationship("Store")
+
+class ReservationBlackout(Base):
+    __tablename__ = "reservation_blackouts"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    store_id = Column(String(36), ForeignKey("stores.id", ondelete="CASCADE"), nullable=False, index=True)
+    weekday = Column(Integer, nullable=True)
+    start_time = Column(String(10), nullable=False)
+    end_time = Column(String(10), nullable=False)
+    reason = Column(String(255), nullable=True)
+    is_active = Column(Boolean, nullable=False, default=True)
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+    updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
+
+    store = relationship("Store")
+
 
 class Review(Base):
     __tablename__ = "reviews"
