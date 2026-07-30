@@ -186,7 +186,7 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
           const Divider(),
           const SizedBox(height: 12),
           Text(
-            '앱 빌드: HOTFIX-008',
+            '앱 빌드: HOTFIX-009',
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.bold,
@@ -195,14 +195,15 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            'Commit: 4f5fe9b (HOTFIX-008)',
+            'Commit: d598ba5 (HOTFIX-009)',
             style: TextStyle(fontSize: 11, color: Colors.grey[600]),
           ),
           const SizedBox(height: 2),
           Text(
-            'Build time: 2026-07-30 14:45 KST',
+            'Build time: 2026-07-30 18:05 KST',
             style: TextStyle(fontSize: 11, color: Colors.grey[600]),
           ),
+
 
           const SizedBox(height: 12),
         ],
