@@ -268,6 +268,24 @@ class ReservationService {
     }
   }
 
+  Future<Map<String, dynamic>> cancelBusinessReservation(
+    String reservationId, {
+    String? reason,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '/business/reservations/$reservationId/cancel',
+        data: {if (reason != null) 'reason': reason},
+      );
+      if (response.statusCode == 200 && response.data != null) {
+        return response.data as Map<String, dynamic>;
+      }
+      throw Exception('매장 취소 처리 실패');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<Map<String, dynamic>> completeBusinessReservation(
     String reservationId,
   ) async {

@@ -1968,6 +1968,9 @@ def approve_business_reservation(
         raise HTTPException(status_code=404, detail="해당 예약을 찾을 수 없습니다.")
 
     check_business_store_access(db, user_id, res_obj.store_id)
+    if res_obj.status in ["REJECTED", "CANCELLED_BY_CUSTOMER", "CANCELLED_BY_BUSINESS", "COMPLETED", "NO_SHOW"]:
+        raise HTTPException(status_code=400, detail=f"거절·취소 또는 완료된 예약은 승인할 수 없습니다. (현재 상태: {res_obj.status})")
+
     res_obj.status = "APPROVED"
     db.commit()
     db.refresh(res_obj)
@@ -1987,9 +1990,37 @@ def reject_business_reservation(
         raise HTTPException(status_code=404, detail="해당 예약을 찾을 수 없습니다.")
 
     check_business_store_access(db, user_id, res_obj.store_id)
+    if res_obj.status in ["APPROVED", "COMPLETED", "NO_SHOW", "CANCELLED_BY_CUSTOMER", "CANCELLED_BY_BUSINESS", "REJECTED"]:
+        raise HTTPException(status_code=400, detail=f"이미 승인·완료 또는 처리된 예약은 거절할 수 없습니다. (현재 상태: {res_obj.status})")
+
     res_obj.status = "REJECTED"
     if req and req.reason:
         res_obj.rejection_reason = req.reason
+    db.commit()
+    db.refresh(res_obj)
+    return res_obj
+
+@app.post("/business/reservations/{reservation_id}/cancel", response_model=schemas.ReservationOut, tags=["BusinessReservations"])
+def cancel_business_reservation(
+    reservation_id: str,
+    req: Optional[schemas.ReservationActionReasonRequest] = None,
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+    payload = auth.decode_token(token)
+    user_id = payload.get("sub")
+    res_obj = db.query(models.StoreReservation).filter(models.StoreReservation.id == reservation_id).first()
+    if not res_obj:
+        raise HTTPException(status_code=404, detail="해당 예약을 찾을 수 없습니다.")
+
+    check_business_store_access(db, user_id, res_obj.store_id)
+    if res_obj.status in ["PENDING", "COMPLETED", "NO_SHOW", "REJECTED", "CANCELLED_BY_CUSTOMER", "CANCELLED_BY_BUSINESS"]:
+        raise HTTPException(status_code=400, detail=f"승인된 예약만 매장 취소할 수 있습니다. (현재 상태: {res_obj.status})")
+
+    res_obj.status = "CANCELLED_BY_BUSINESS"
+
+    if req and req.reason:
+        res_obj.cancellation_reason = req.reason
     db.commit()
     db.refresh(res_obj)
     return res_obj
@@ -2007,6 +2038,9 @@ def complete_business_reservation(
         raise HTTPException(status_code=404, detail="해당 예약을 찾을 수 없습니다.")
 
     check_business_store_access(db, user_id, res_obj.store_id)
+    if res_obj.status in ["PENDING", "REJECTED", "CANCELLED_BY_CUSTOMER", "CANCELLED_BY_BUSINESS", "NO_SHOW"]:
+        raise HTTPException(status_code=400, detail=f"승인된 예약만 완료 처리할 수 있습니다. (현재 상태: {res_obj.status})")
+
     res_obj.status = "COMPLETED"
     db.commit()
     db.refresh(res_obj)
@@ -2025,10 +2059,14 @@ def noshow_business_reservation(
         raise HTTPException(status_code=404, detail="해당 예약을 찾을 수 없습니다.")
 
     check_business_store_access(db, user_id, res_obj.store_id)
+    if res_obj.status in ["PENDING", "REJECTED", "CANCELLED_BY_CUSTOMER", "CANCELLED_BY_BUSINESS", "COMPLETED", "NO_SHOW"]:
+        raise HTTPException(status_code=400, detail=f"승인된 예약만 노쇼 처리할 수 있습니다. (현재 상태: {res_obj.status})")
+
     res_obj.status = "NO_SHOW"
     db.commit()
     db.refresh(res_obj)
     return res_obj
+
 
 
 # --- VISIT VERIFICATION & REVIEW GATE APIs ---

@@ -10,6 +10,8 @@ class Reservation {
   final DateTime createdAt;
   final DateTime updatedAt;
   final Place store;
+  final String? rejectionReason;
+  final String? cancellationReason;
 
   Reservation({
     required this.id,
@@ -21,6 +23,8 @@ class Reservation {
     required this.createdAt,
     required this.updatedAt,
     required this.store,
+    this.rejectionReason,
+    this.cancellationReason,
   });
 
   factory Reservation.fromJson(Map<String, dynamic> json) {
@@ -67,6 +71,8 @@ class Reservation {
           ? DateTime.tryParse(json['updated_at'].toString()) ?? DateTime.now()
           : DateTime.now(),
       store: parsedStore,
+      rejectionReason: json['rejection_reason']?.toString(),
+      cancellationReason: json['cancellation_reason']?.toString(),
     );
   }
 

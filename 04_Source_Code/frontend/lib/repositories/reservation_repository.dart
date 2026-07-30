@@ -140,4 +140,42 @@ class ReservationRepository {
       );
     }
   }
+
+  // Business Reservation Actions
+  Future<Reservation> approveBusinessReservation(String resId) async {
+    final data = await _reservationService.approveBusinessReservation(resId);
+    return Reservation.fromJson(data);
+  }
+
+  Future<Reservation> rejectBusinessReservation(
+    String resId, {
+    String? reason,
+  }) async {
+    final data = await _reservationService.rejectBusinessReservation(
+      resId,
+      reason: reason,
+    );
+    return Reservation.fromJson(data);
+  }
+
+  Future<Reservation> cancelBusinessReservation(
+    String resId, {
+    String? reason,
+  }) async {
+    final data = await _reservationService.cancelBusinessReservation(
+      resId,
+      reason: reason,
+    );
+    return Reservation.fromJson(data);
+  }
+
+  Future<Reservation> completeBusinessReservation(String resId) async {
+    final data = await _reservationService.completeBusinessReservation(resId);
+    return Reservation.fromJson(data);
+  }
+
+  Future<Reservation> noShowBusinessReservation(String resId) async {
+    final data = await _reservationService.noShowBusinessReservation(resId);
+    return Reservation.fromJson(data);
+  }
 }

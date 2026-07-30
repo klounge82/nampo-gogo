@@ -4,6 +4,7 @@ import '../constants/colors.dart';
 import '../models/reservation.dart';
 import '../repositories/reservation_repository.dart';
 import '../providers/auth_provider.dart';
+import '../utils/reservation_status_helper.dart';
 import 'payment_screen.dart';
 
 class ReservationDetailScreen extends StatefulWidget {
@@ -73,21 +74,22 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
       Navigator.of(context).pop(); // Dismiss indicator
 
       if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('🛑 예약 취소가 정상 처리되었습니다.'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-        Navigator.of(context).pop(true); // Return to list with refresh signal
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('예약이 취소되었습니다.'),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          Navigator.of(context).pop(true); // Return to list with refresh signal
+        }
       } else {
-        _showErrorDialog('취소 실패', '예약 취소 중 서버 에러가 발생했습니다.');
+        _showErrorDialog('취소 실패', '예약 상태를 변경하지 못했습니다.\n잠시 후 다시 시도해 주세요.');
       }
     } catch (e) {
       Navigator.of(context).pop(); // Dismiss indicator
-      final cleanMsg = e.toString().replaceAll('Exception:', '').trim();
-      _showErrorDialog('취소 실패', cleanMsg);
+      _showErrorDialog('취소 실패', '예약 상태를 변경하지 못했습니다.\n잠시 후 다시 시도해 주세요.');
     }
   }
 
@@ -102,23 +104,24 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
             color: AppColors.secondary,
           ),
         ),
-        content: const Text('정말로 이 매장 예약을 취소하시겠습니까?'),
+        content: const Text('예약을 취소하시겠습니까?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('유지하기', style: TextStyle(color: Colors.grey)),
+            child: const Text('돌아가기', style: TextStyle(color: Colors.grey)),
           ),
-          TextButton(
+          ElevatedButton(
             onPressed: () {
               Navigator.of(ctx).pop();
               _performCancel();
             },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.secondary,
+              foregroundColor: Colors.white,
+            ),
             child: const Text(
-              '취소하기',
-              style: TextStyle(
-                color: AppColors.secondary,
-                fontWeight: FontWeight.bold,
-              ),
+              '확인',
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -154,8 +157,10 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
     final timeStr = res != null
         ? '${res.reservationTime.year}.${res.reservationTime.month.toString().padLeft(2, '0')}.${res.reservationTime.day.toString().padLeft(2, '0')} ${res.reservationTime.hour.toString().padLeft(2, '0')}:${res.reservationTime.minute.toString().padLeft(2, '0')}'
         : '';
+    final st = res?.status.toUpperCase() ?? '';
     final isCancellable =
-        res != null && (res.status == 'pending' || res.status == 'confirmed');
+        res != null &&
+        (st == 'PENDING' || st == 'APPROVED' || st == 'CONFIRMED');
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -177,7 +182,10 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('상세를 불러오지 못했습니다: $_errorMessage'),
+                  const Text(
+                    '예약 정보를 불러오지 못했습니다.\n잠시 후 다시 시도해 주세요.',
+                    textAlign: TextAlign.center,
+                  ),
                   const SizedBox(height: 16.0),
                   ElevatedButton(
                     onPressed: _loadReservationDetail,
@@ -224,7 +232,7 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
                   const SizedBox(height: 32.0),
 
                   // Deposit Payment Button (pending status)
-                  if (res.status == 'pending') ...[
+                  if (st == 'PENDING') ...[
                     SizedBox(
                       width: double.infinity,
                       height: 48.0,
@@ -283,59 +291,62 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
   }
 
   Widget _buildStatusHeaderCard(Reservation res) {
-    String label;
-    IconData icon;
-    Color color;
+    final color = ReservationStatusHelper.getStatusColor(res.status);
+    final label = ReservationStatusHelper.getKoreanLabel(res.status);
+    final reason = res.rejectionReason ?? res.cancellationReason;
 
-    switch (res.status) {
-      case 'pending':
-        label = '대기 중 (매장에서 확인하고 있습니다)';
-        icon = Icons.hourglass_empty;
-        color = Colors.orange;
-        break;
-      case 'confirmed':
-        label = '예약 확정 (방문 시 예약을 확인해 주세요)';
-        icon = Icons.check_circle_outline;
-        color = Colors.green;
-        break;
-      case 'cancelled':
-        label = '취소된 예약 내역입니다';
-        icon = Icons.cancel_outlined;
-        color = Colors.red;
-        break;
-      case 'completed':
-        label = '이용 완료된 매장입니다';
-        icon = Icons.done_all;
-        color = Colors.blue;
-        break;
-      default:
-        label = '대기 중';
-        icon = Icons.hourglass_empty;
-        color = Colors.orange;
+    IconData icon;
+    final st = res.status.toUpperCase();
+    if (st == 'PENDING') {
+      icon = Icons.hourglass_empty;
+    } else if (st == 'APPROVED' || st == 'CONFIRMED') {
+      icon = Icons.check_circle_outline;
+    } else if (st == 'COMPLETED') {
+      icon = Icons.done_all;
+    } else if (st == 'NO_SHOW') {
+      icon = Icons.person_off_outlined;
+    } else {
+      icon = Icons.cancel_outlined;
     }
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: color.withAlpha(20),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12.0),
-        border: Border.all(color: color.withAlpha(80)),
+        border: Border.all(color: color.withValues(alpha: 0.5)),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: color, size: 24.0),
-          const SizedBox(width: 12.0),
-          Expanded(
-            child: Text(
-              label,
+          Row(
+            children: [
+              Icon(icon, color: color, size: 24.0),
+              const SizedBox(width: 12.0),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 15.0,
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (reason != null && reason.isNotEmpty) ...[
+            const SizedBox(height: 8.0),
+            Text(
+              '사유: $reason',
               style: TextStyle(
                 fontSize: 13.0,
-                fontWeight: FontWeight.bold,
-                color: color,
+                color: color.withValues(alpha: 0.9),
+                fontWeight: FontWeight.w500,
               ),
             ),
-          ),
+          ],
         ],
       ),
     );

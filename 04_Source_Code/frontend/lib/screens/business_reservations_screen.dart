@@ -175,25 +175,78 @@ class _BusinessReservationsScreenState extends State<BusinessReservationsScreen>
     }
   }
 
+  final Set<String> _processingResIds = {};
+
   Future<void> _actionReservation(
     String resId,
     String action, {
     String? reason,
   }) async {
+    if (_processingResIds.contains(resId)) return;
+
+    String? actionReason = reason;
+
+    if (action == 'reject') {
+      actionReason = await _showReasonDialog(
+        title: '예약 거절',
+        hint: '거절 사유를 입력해 주세요 (예: 재료 소진, 예약 인원 초과)',
+        confirmText: '거절하기',
+      );
+      if (actionReason == null) return; // User cancelled dialog
+    } else if (action == 'cancel') {
+      actionReason = await _showReasonDialog(
+        title: '매장 예약 취소',
+        hint: '매장 취소 사유를 입력해 주세요 (예: 매장 임시 휴무)',
+        confirmText: '취소하기',
+      );
+      if (actionReason == null) return; // User cancelled dialog
+    } else if (action == 'no-show') {
+      final confirm = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text(
+            '노쇼 처리 확인',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: const Text(
+            '고객이 예약 시간에 방문하지 않았습니까?\n노쇼 처리 후에는 일반 상태로 되돌릴 수 없습니다.',
+            style: TextStyle(fontSize: 14.0, height: 1.4),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('취소', style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.purple,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('노쇼 확정'),
+            ),
+          ],
+        ),
+      );
+      if (confirm != true) return;
+    }
+
+    setState(() => _processingResIds.add(resId));
+
     try {
       if (action == 'approve') {
         await _reservationService.approveBusinessReservation(resId);
       } else if (action == 'reject') {
         await _reservationService.rejectBusinessReservation(
           resId,
-          reason: reason,
+          reason: actionReason,
         );
       } else if (action == 'complete') {
         await _reservationService.completeBusinessReservation(resId);
       } else if (action == 'cancel') {
-        await _reservationService.rejectBusinessReservation(
+        await _reservationService.cancelBusinessReservation(
           resId,
-          reason: reason ?? "사업자 사정으로 취소",
+          reason: actionReason,
         );
       } else if (action == 'no-show') {
         await _reservationService.noShowBusinessReservation(resId);
@@ -207,16 +260,57 @@ class _BusinessReservationsScreenState extends State<BusinessReservationsScreen>
           ),
         );
       }
-    } catch (_) {
+    } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('처리에 실패했습니다. 잠시 후 다시 시도해 주세요.'),
+            content: Text('예약 상태를 변경하지 못했습니다.\n잠시 후 다시 시도해 주세요.'),
             backgroundColor: Colors.red,
           ),
         );
       }
+    } finally {
+      if (mounted) {
+        setState(() => _processingResIds.remove(resId));
+      }
     }
+  }
+
+  Future<String?> _showReasonDialog({
+    required String title,
+    required String hint,
+    required String confirmText,
+  }) async {
+    final controller = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        content: TextField(
+          controller: controller,
+          maxLines: 2,
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: const TextStyle(fontSize: 13.0, color: Colors.grey),
+            border: const OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(null),
+            child: const Text('취소', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: Text(confirmText),
+          ),
+        ],
+      ),
+    );
   }
 
   String _maskUserId(String userId) {
