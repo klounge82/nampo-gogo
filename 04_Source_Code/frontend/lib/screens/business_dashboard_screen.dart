@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../config/build_info.dart';
 import '../models/user.dart';
 import '../providers/auth_provider.dart';
 
@@ -192,7 +193,7 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
           const Divider(),
           const SizedBox(height: 12),
           Text(
-            '앱 빌드: HOTFIX-010',
+            '앱 빌드: ${BuildInfo.appBuildName}',
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.bold,
@@ -201,15 +202,15 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            'Commit: aa08b85 (HOTFIX-010)',
+            'Commit: ${BuildInfo.commitHash} (${BuildInfo.appBuildName})',
+            style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            'Build time: ${BuildInfo.buildTime}',
             style: TextStyle(fontSize: 11, color: Colors.grey[600]),
           ),
 
-          const SizedBox(height: 2),
-          Text(
-            'Build time: 2026-07-30 18:30 KST',
-            style: TextStyle(fontSize: 11, color: Colors.grey[600]),
-          ),
           const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.all(8.0),
