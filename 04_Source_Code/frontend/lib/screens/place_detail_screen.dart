@@ -1038,6 +1038,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
     int partySize = 2;
     DateTime selectedDate = DateTime.now().add(const Duration(days: 1));
     TimeOfDay selectedTime = const TimeOfDay(hour: 18, minute: 0);
+    bool isSubmitting = false;
 
     showModalBottomSheet(
       context: context,
@@ -1047,160 +1048,190 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
       isScrollControlled: true,
       builder: (bctx) {
         return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Padding(
-              padding: EdgeInsets.only(
-                left: 24.0,
-                right: 24.0,
-                top: 24.0,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 24.0,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    '매장 예약 신청',
-                    style: TextStyle(
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16.0),
+          builder: (modalContext, setModalState) {
+            final bottomPadding =
+                MediaQuery.of(modalContext).viewInsets.bottom +
+                MediaQuery.of(modalContext).padding.bottom +
+                20.0;
 
-                  // Party Size Selection
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            return SafeArea(
+              bottom: true,
+              child: Padding(
+                padding: EdgeInsets.only(
+                  left: 24.0,
+                  right: 24.0,
+                  top: 24.0,
+                  bottom: bottomPadding,
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        '예약 인원',
+                        '매장 예약 신청',
                         style: TextStyle(
-                          fontSize: 14.0,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      Row(
-                        children: [
-                          IconButton(
-                            onPressed: partySize > 1
-                                ? () => setModalState(() => partySize--)
-                                : null,
-                            icon: const Icon(Icons.remove_circle_outline),
-                          ),
-                          Text(
-                            '$partySize 명',
-                            style: const TextStyle(
-                              fontSize: 16.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          IconButton(
-                            onPressed: partySize < 8
-                                ? () => setModalState(() => partySize++)
-                                : null,
-                            icon: const Icon(Icons.add_circle_outline),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const Divider(),
-
-                  // Date Picker
-                  ListTile(
-                    leading: const Icon(
-                      Icons.calendar_today,
-                      color: AppColors.primary,
-                    ),
-                    title: const Text(
-                      '예약 날짜',
-                      style: TextStyle(fontSize: 13.0),
-                    ),
-                    subtitle: Text(
-                      '${selectedDate.year}.${selectedDate.month.toString().padLeft(2, '0')}.${selectedDate.day.toString().padLeft(2, '0')}',
-                      style: const TextStyle(
-                        fontSize: 15.0,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () async {
-                      final picked = await showDatePicker(
-                        context: context,
-                        initialDate: selectedDate,
-                        firstDate: DateTime.now(),
-                        lastDate: DateTime.now().add(
-                          Duration(days: _maxAdvanceDays),
-                        ),
-                      );
-
-                      if (picked != null) {
-                        setModalState(() => selectedDate = picked);
-                      }
-                    },
-                  ),
-                  const Divider(),
-
-                  // Time Picker
-                  ListTile(
-                    leading: const Icon(
-                      Icons.access_time,
-                      color: AppColors.primary,
-                    ),
-                    title: const Text(
-                      '예약 시간',
-                      style: TextStyle(fontSize: 13.0),
-                    ),
-                    subtitle: Text(
-                      '${selectedTime.hour.toString().padLeft(2, '0')}:${selectedTime.minute.toString().padLeft(2, '0')}',
-                      style: const TextStyle(
-                        fontSize: 15.0,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () async {
-                      final picked = await showTimePicker(
-                        context: context,
-                        initialTime: selectedTime,
-                      );
-                      if (picked != null) {
-                        setModalState(() => selectedTime = picked);
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 24.0),
-
-                  // Submit
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48.0,
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        Navigator.of(bctx).pop();
-                        _submitReservation(
-                          context,
-                          partySize,
-                          selectedDate,
-                          selectedTime,
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
-                      ),
-                      child: const Text(
-                        '예약 확정하기',
-                        style: TextStyle(
-                          color: Colors.white,
+                          fontSize: 18.0,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ),
+                      const SizedBox(height: 16.0),
+
+                      // Party Size Selection
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            '예약 인원',
+                            style: TextStyle(
+                              fontSize: 14.0,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              IconButton(
+                                onPressed: (!isSubmitting && partySize > 1)
+                                    ? () => setModalState(() => partySize--)
+                                    : null,
+                                icon: const Icon(Icons.remove_circle_outline),
+                              ),
+                              Text(
+                                '$partySize 명',
+                                style: const TextStyle(
+                                  fontSize: 16.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: (!isSubmitting && partySize < 8)
+                                    ? () => setModalState(() => partySize++)
+                                    : null,
+                                icon: const Icon(Icons.add_circle_outline),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const Divider(),
+
+                      // Date Picker
+                      ListTile(
+                        enabled: !isSubmitting,
+                        leading: const Icon(
+                          Icons.calendar_today,
+                          color: AppColors.primary,
+                        ),
+                        title: const Text(
+                          '예약 날짜',
+                          style: TextStyle(fontSize: 13.0),
+                        ),
+                        subtitle: Text(
+                          '${selectedDate.year}.${selectedDate.month.toString().padLeft(2, '0')}.${selectedDate.day.toString().padLeft(2, '0')}',
+                          style: const TextStyle(
+                            fontSize: 15.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: isSubmitting
+                            ? null
+                            : () async {
+                                final picked = await showDatePicker(
+                                  context: modalContext,
+                                  initialDate: selectedDate,
+                                  firstDate: DateTime.now(),
+                                  lastDate: DateTime.now().add(
+                                    Duration(days: _maxAdvanceDays),
+                                  ),
+                                );
+
+                                if (picked != null) {
+                                  setModalState(() => selectedDate = picked);
+                                }
+                              },
+                      ),
+                      const Divider(),
+
+                      // Time Picker
+                      ListTile(
+                        enabled: !isSubmitting,
+                        leading: const Icon(
+                          Icons.access_time,
+                          color: AppColors.primary,
+                        ),
+                        title: const Text(
+                          '예약 시간',
+                          style: TextStyle(fontSize: 13.0),
+                        ),
+                        subtitle: Text(
+                          '${selectedTime.hour.toString().padLeft(2, '0')}:${selectedTime.minute.toString().padLeft(2, '0')}',
+                          style: const TextStyle(
+                            fontSize: 15.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: isSubmitting
+                            ? null
+                            : () async {
+                                final picked = await showTimePicker(
+                                  context: modalContext,
+                                  initialTime: selectedTime,
+                                );
+                                if (picked != null) {
+                                  setModalState(() => selectedTime = picked);
+                                }
+                              },
+                      ),
+                      const SizedBox(height: 24.0),
+
+                      // Submit Button
+                      SizedBox(
+                        width: double.infinity,
+                        height: 48.0,
+                        child: ElevatedButton(
+                          onPressed: isSubmitting
+                              ? null
+                              : () async {
+                                  setModalState(() => isSubmitting = true);
+                                  await _handleReservationSubmit(
+                                    context: context,
+                                    modalContext: modalContext,
+                                    partySize: partySize,
+                                    date: selectedDate,
+                                    time: selectedTime,
+                                    setModalState: setModalState,
+                                  );
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                          ),
+                          child: isSubmitting
+                              ? const SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2.5,
+                                  ),
+                                )
+                              : const Text(
+                                  '예약 신청하기',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16.0,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             );
           },
@@ -1209,12 +1240,14 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
     );
   }
 
-  Future<void> _submitReservation(
-    BuildContext context,
-    int partySize,
-    DateTime date,
-    TimeOfDay time,
-  ) async {
+  Future<void> _handleReservationSubmit({
+    required BuildContext context,
+    required BuildContext modalContext,
+    required int partySize,
+    required DateTime date,
+    required TimeOfDay time,
+    required StateSetter setModalState,
+  }) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final userId = authProvider.currentUser?.id;
     final finalTime = DateTime(
@@ -1225,15 +1258,6 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
       time.minute,
     );
 
-    // Show indicator
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
-      ),
-    );
-
     try {
       final repo = ReservationRepository();
       await repo.createReservation(
@@ -1242,59 +1266,94 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
         partySize: partySize,
         userId: userId,
       );
-      Navigator.of(context).pop();
 
-      showDialog(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: const Text(
-            '🎉 예약 신청 완료',
-            style: TextStyle(fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
-          content: Text(
-            '${_place!.name} 매장에 예약이 정상적으로 신청되었습니다.\n내 예약 내역에서 승인 상태를 확인해 주세요.',
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 12.0),
-          ),
-          actions: [
-            Center(
-              child: ElevatedButton(
-                onPressed: () => Navigator.of(ctx).pop(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
+      // Pop bottom sheet safely
+      if (Navigator.canPop(modalContext)) {
+        Navigator.of(modalContext).pop();
+      }
+
+      // Show Korean success dialog
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text(
+              '🎉 예약 신청 접수 완료',
+              style: TextStyle(fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            content: Text(
+              '${_place!.name} 매장에 예약 신청이 접수되었습니다.\n사업자가 확인한 후 승인 여부를 알려드립니다.',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 14.0),
+            ),
+            actions: [
+              Center(
+                child: ElevatedButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                  ),
+                  child: const Text(
+                    '확인',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
-                child: const Text('확인', style: TextStyle(color: Colors.white)),
               ),
-            ),
-          ],
-        ),
-      );
-    } catch (e) {
-      Navigator.of(context).pop();
-      showDialog(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: const Text(
-            '예약 실패',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: AppColors.secondary,
-            ),
+            ],
           ),
-          content: Text(e.toString().replaceAll('Exception:', '').trim()),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text(
-                '확인',
-                style: TextStyle(color: AppColors.primary),
+        );
+      }
+    } catch (e) {
+      setModalState(() {});
+      String cleanError = _formatReservationErrorMessage(e);
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text(
+              '예약 신청 안내',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: AppColors.secondary,
               ),
             ),
-          ],
-        ),
-      );
+            content: Text(cleanError),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text(
+                  '확인',
+                  style: TextStyle(color: AppColors.primary),
+                ),
+              ),
+            ],
+          ),
+        );
+      }
     }
+  }
+
+  String _formatReservationErrorMessage(dynamic error) {
+    final raw = error.toString();
+    if (raw.contains('최소')) return '최소 사전 예약 시간을 확인해 주세요.';
+    if (raw.contains('피크타임') || raw.contains('바빠'))
+      return '선택하신 시간은 매장 사정으로 예약을 받지 않습니다.';
+    if (raw.contains('마감')) return '선택하신 시간대의 예약이 마감되었습니다.';
+    if (raw.contains('중복')) return '이미 신청된 예약이 있습니다.';
+    if (raw.contains('기능이 꺼져')) return '현재 해당 매장의 예약 기능이 준비 중입니다.';
+
+    String cleaned = raw
+        .replaceAll('Exception:', '')
+        .replaceAll('DioException', '')
+        .replaceAll('[bad response]:', '')
+        .trim();
+    if (cleaned.contains('http') ||
+        cleaned.contains('Status code') ||
+        cleaned.isEmpty) {
+      return '예약 신청 정보를 불러오지 못했습니다.\n잠시 후 다시 시도해 주세요.';
+    }
+    return cleaned;
   }
 
   IconData _getCategoryIcon(String category) {

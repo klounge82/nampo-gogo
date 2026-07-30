@@ -29,12 +29,16 @@ class TestH4KLoungeLinkAndI1Reservations(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         app.dependency_overrides.clear()
-        Base.metadata.drop_all(bind=engine)
+        try:
+            Base.metadata.drop_all(bind=engine)
+        except Exception:
+            pass
+
 
     def setUp(self):
-        Base.metadata.create_all(bind=engine)
         self.db = TestingSessionLocal()
         self.client = TestClient(app)
+
 
         # Clear tables
         self.db.query(models.ReservationBlackout).delete()
@@ -116,20 +120,25 @@ class TestH4KLoungeLinkAndI1Reservations(unittest.TestCase):
         self.db.add(self.mem_hwang)
         self.db.commit()
 
+        self.public_klounge_id = self.public_klounge.id
+        self.draft_klounge_id = self.draft_klounge.id
+
     def tearDown(self):
         self.db.close()
+
+
 
     # H4-1. Public K-Lounge OWNER Manage Access
     def test_h4_01_public_klounge_owner_manage_access(self):
         res = self.client.get(
-            f"/business/stores/{self.public_klounge.id}/reservation-settings",
+            f"/business/stores/{self.public_klounge_id}/reservation-settings",
             headers={"Authorization": f"Bearer {self.token_hwang}"}
         )
         self.assertEqual(res.status_code, 200)
 
         # Other business user is forbidden (403)
         res_other = self.client.get(
-            f"/business/stores/{self.public_klounge.id}/reservation-settings",
+            f"/business/stores/{self.public_klounge_id}/reservation-settings",
             headers={"Authorization": f"Bearer {self.token_other}"}
         )
         self.assertEqual(res_other.status_code, 403)
@@ -139,7 +148,8 @@ class TestH4KLoungeLinkAndI1Reservations(unittest.TestCase):
         res = self.client.get("/stores")
         self.assertEqual(res.status_code, 200)
         store_ids = [s["id"] for s in res.json()]
-        self.assertNotIn(self.draft_klounge.id, store_ids)
+        self.assertNotIn(self.draft_klounge_id, store_ids)
+
 
     # I1-1. Reservation OFF Blocks Booking
     def test_i1_01_reservation_off_blocks_booking(self):
@@ -149,7 +159,7 @@ class TestH4KLoungeLinkAndI1Reservations(unittest.TestCase):
             "/reservations",
             headers={"Authorization": f"Bearer {self.token_cust1}"},
             json={
-                "store_id": self.public_klounge.id,
+                "store_id": self.public_klounge_id,
                 "reservation_date": future_date,
                 "start_time": "14:00",
                 "party_size": 2
@@ -162,17 +172,23 @@ class TestH4KLoungeLinkAndI1Reservations(unittest.TestCase):
     def test_i1_02_reservation_on_enables_booking(self):
         # Turn ON reservations
         self.client.put(
-            f"/business/stores/{self.public_klounge.id}/reservation-settings",
+            f"/business/stores/{self.public_klounge_id}/reservation-settings",
             headers={"Authorization": f"Bearer {self.token_hwang}"},
-            json={"reservations_enabled": True}
+            json={
+                "reservations_enabled": True,
+                "available_weekdays": "1,2,3,4,5,6,7",
+                "minimum_advance_minutes": 0,
+                "maximum_advance_days": 30
+            }
         )
+
 
         future_date = (datetime.utcnow() + timedelta(days=2)).strftime("%Y-%m-%d")
         res = self.client.post(
             "/reservations",
             headers={"Authorization": f"Bearer {self.token_cust1}"},
             json={
-                "store_id": self.public_klounge.id,
+                "store_id": self.public_klounge_id,
                 "reservation_date": future_date,
                 "start_time": "14:00",
                 "party_size": 2,
@@ -187,13 +203,13 @@ class TestH4KLoungeLinkAndI1Reservations(unittest.TestCase):
     # I1-3. Blackout / Peak-Time Blocked
     def test_i1_03_blackout_peaktime_blocked(self):
         self.client.put(
-            f"/business/stores/{self.public_klounge.id}/reservation-settings",
+            f"/business/stores/{self.public_klounge_id}/reservation-settings",
             headers={"Authorization": f"Bearer {self.token_hwang}"},
             json={"reservations_enabled": True}
         )
         # Add Lunch Blackout 11:30~14:00
         bo_res = self.client.post(
-            f"/business/stores/{self.public_klounge.id}/reservation-blackouts",
+            f"/business/stores/{self.public_klounge_id}/reservation-blackouts",
             headers={"Authorization": f"Bearer {self.token_hwang}"},
             json={"start_time": "11:30", "end_time": "14:00", "reason": "점심 피크타임"}
         )
@@ -204,7 +220,7 @@ class TestH4KLoungeLinkAndI1Reservations(unittest.TestCase):
             "/reservations",
             headers={"Authorization": f"Bearer {self.token_cust1}"},
             json={
-                "store_id": self.public_klounge.id,
+                "store_id": self.public_klounge_id,
                 "reservation_date": future_date,
                 "start_time": "12:00",
                 "party_size": 2
@@ -216,7 +232,7 @@ class TestH4KLoungeLinkAndI1Reservations(unittest.TestCase):
     # I1-4. Minimum Advance Time Validation
     def test_i1_04_minimum_advance_time_validation(self):
         self.client.put(
-            f"/business/stores/{self.public_klounge.id}/reservation-settings",
+            f"/business/stores/{self.public_klounge_id}/reservation-settings",
             headers={"Authorization": f"Bearer {self.token_hwang}"},
             json={"reservations_enabled": True, "minimum_advance_minutes": 120}
         )
@@ -230,7 +246,7 @@ class TestH4KLoungeLinkAndI1Reservations(unittest.TestCase):
             "/reservations",
             headers={"Authorization": f"Bearer {self.token_cust1}"},
             json={
-                "store_id": self.public_klounge.id,
+                "store_id": self.public_klounge_id,
                 "reservation_date": today_date,
                 "start_time": near_time_str,
                 "party_size": 2
@@ -242,7 +258,7 @@ class TestH4KLoungeLinkAndI1Reservations(unittest.TestCase):
     # I1-5. Business Approve, Complete, and Customer Cancel
     def test_i1_05_business_approve_complete_and_customer_cancel(self):
         self.client.put(
-            f"/business/stores/{self.public_klounge.id}/reservation-settings",
+            f"/business/stores/{self.public_klounge_id}/reservation-settings",
             headers={"Authorization": f"Bearer {self.token_hwang}"},
             json={"reservations_enabled": True}
         )
@@ -253,7 +269,7 @@ class TestH4KLoungeLinkAndI1Reservations(unittest.TestCase):
             "/reservations",
             headers={"Authorization": f"Bearer {self.token_cust1}"},
             json={
-                "store_id": self.public_klounge.id,
+                "store_id": self.public_klounge_id,
                 "reservation_date": future_date,
                 "start_time": "15:00",
                 "party_size": 2

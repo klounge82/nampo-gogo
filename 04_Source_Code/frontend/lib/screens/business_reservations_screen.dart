@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/reservation_service.dart';
 import '../services/business_service.dart';
 import '../theme/business_theme.dart';
+import '../utils/reservation_status_helper.dart';
 
 class BusinessReservationsScreen extends StatefulWidget {
   final int initialTabIndex;
@@ -392,9 +393,15 @@ class _BusinessReservationsScreenState extends State<BusinessReservationsScreen>
                       final res =
                           (filtered[idx] as Map<String, dynamic>?) ?? {};
                       final resId = res['id']?.toString() ?? '';
-                      final status = res['status']?.toString() ?? 'PENDING';
-                      final dateStr = res['reservation_date']?.toString() ?? '';
-                      final timeStr = res['start_time']?.toString() ?? '시간 미정';
+                      final status = res['status']?.toString();
+
+                      final dateStr = res['reservation_date']?.toString();
+                      final timeStr = res['start_time']?.toString();
+                      final formattedDateTime =
+                          ReservationStatusHelper.formatDateTimeSafe(
+                            dateStr,
+                            timeStr,
+                          );
                       final partySize =
                           (res['party_size'] as num?)?.toInt() ?? 1;
                       final userId = res['user_id']?.toString() ?? '손님';
@@ -402,27 +409,10 @@ class _BusinessReservationsScreenState extends State<BusinessReservationsScreen>
                       final productName =
                           res['product_name']?.toString() ?? '일반 예약';
 
-                      Color statusColor = Colors.grey;
-                      String statusText = status;
-                      if (status == 'PENDING') {
-                        statusColor = Colors.orange;
-                        statusText = '승인 대기';
-                      } else if (status == 'APPROVED') {
-                        statusColor = Colors.green;
-                        statusText = '승인 완료';
-                      } else if (status == 'REJECTED') {
-                        statusColor = Colors.red;
-                        statusText = '거절됨';
-                      } else if (status == 'COMPLETED') {
-                        statusColor = Colors.blue;
-                        statusText = '이용 완료';
-                      } else if (status == 'NO_SHOW') {
-                        statusColor = Colors.purple;
-                        statusText = '노쇼';
-                      } else if (status.contains('CANCEL')) {
-                        statusColor = Colors.grey;
-                        statusText = '취소됨';
-                      }
+                      final Color statusColor =
+                          ReservationStatusHelper.getStatusColor(status);
+                      final String statusText =
+                          ReservationStatusHelper.getKoreanLabel(status);
 
                       return Card(
                         margin: const EdgeInsets.only(bottom: 12.0),
@@ -437,12 +427,13 @@ class _BusinessReservationsScreenState extends State<BusinessReservationsScreen>
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    '$dateStr $timeStr',
+                                    formattedDateTime,
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16.0,
                                     ),
                                   ),
+
                                   Container(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 10,

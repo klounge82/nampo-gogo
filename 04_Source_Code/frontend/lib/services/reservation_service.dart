@@ -56,10 +56,12 @@ class ReservationService {
           if (userId != null) 'user_id': userId,
         },
       );
-      if (response.statusCode == 201 && response.data != null) {
+      if ((response.statusCode == 201 || response.statusCode == 200) &&
+          response.data != null) {
         return response.data as Map<String, dynamic>;
       }
-      throw Exception('예약 신청 실패');
+      throw Exception('예약 신청에 실패했습니다.');
+
     } catch (e) {
       rethrow;
     }
