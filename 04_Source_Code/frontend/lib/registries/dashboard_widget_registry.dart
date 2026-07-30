@@ -64,16 +64,19 @@ class DashboardWidgetRegistry {
       widgetKey: 'today_reservations',
       title: '오늘 예약',
       icon: Icons.today,
-      available: false,
-      statusText: '준비 중',
+      available: true,
+      statusText: '예약 관리',
+      targetRoute: '/business/reservations',
     ),
     DashboardWidgetDefinition(
       widgetKey: 'pending_reservations',
       title: '처리 대기 예약',
       icon: Icons.pending_actions,
-      available: false,
-      statusText: '기능 비활성화',
+      available: true,
+      statusText: '대기 건수',
+      targetRoute: '/business/reservations',
     ),
+
     DashboardWidgetDefinition(
       widgetKey: 'recommendation_count',
       title: '추천받은 횟수',

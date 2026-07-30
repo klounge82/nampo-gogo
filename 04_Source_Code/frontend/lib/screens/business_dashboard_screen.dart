@@ -4,10 +4,12 @@ import '../providers/auth_provider.dart';
 import '../providers/app_mode_provider.dart';
 import '../registries/dashboard_widget_registry.dart';
 import '../services/business_service.dart';
+import '../services/reservation_service.dart';
 import '../theme/business_theme.dart';
 import 'business_store_screen.dart';
 import 'business_products_screen.dart';
 import 'business_reviews_screen.dart';
+import 'business_reservations_screen.dart';
 
 class BusinessDashboardScreen extends StatefulWidget {
   const BusinessDashboardScreen({super.key});
@@ -27,6 +29,8 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
   int _activeProducts = 0;
   int _totalReviews = 0;
   double _avgRating = 0.0;
+  int _todayReservations = 0;
+  int _pendingReservations = 0;
 
   @override
   void initState() {
@@ -46,10 +50,26 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
       final products = await _businessService.getProducts().catchError(
         (_) => <Map<String, dynamic>>[],
       );
-
       final reviewsRes = await _businessService.getReviews().catchError(
         (_) => <String, dynamic>{},
       );
+
+      int todayCount = 0;
+      int pendingCount = 0;
+      final storeId = store['id'] as String?;
+      if (storeId != null && storeId.isNotEmpty) {
+        try {
+          final resList = await ReservationService()
+              .getBusinessStoreReservations(storeId);
+          final todayStr = DateTime.now().toIso8601String().substring(0, 10);
+          todayCount = resList
+              .where((r) => (r as Map)['reservation_date'] == todayStr)
+              .length;
+          pendingCount = resList
+              .where((r) => (r as Map)['status'] == 'PENDING')
+              .length;
+        } catch (_) {}
+      }
 
       if (mounted) {
         setState(() {
@@ -62,6 +82,8 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
           _totalReviews = reviewsRes['total_count'] as int? ?? 0;
           _avgRating =
               (reviewsRes['average_rating'] as num?)?.toDouble() ?? 0.0;
+          _todayReservations = todayCount;
+          _pendingReservations = pendingCount;
           _isLoading = false;
         });
       }
@@ -94,6 +116,12 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
       case 'average_rating':
         screen = const BusinessReviewsScreen();
         break;
+      case 'today_reservations':
+        screen = const BusinessReservationsScreen(initialFilter: 'TODAY');
+        break;
+      case 'pending_reservations':
+        screen = const BusinessReservationsScreen(initialFilter: 'PENDING');
+        break;
     }
 
     if (screen != null) {
@@ -115,6 +143,10 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
         return '$_totalReviews 개';
       case 'average_rating':
         return _avgRating > 0 ? '★ ${_avgRating.toStringAsFixed(1)}' : '0.0';
+      case 'today_reservations':
+        return '$_todayReservations 건';
+      case 'pending_reservations':
+        return '$_pendingReservations 건';
       default:
         return '준비 중';
     }
