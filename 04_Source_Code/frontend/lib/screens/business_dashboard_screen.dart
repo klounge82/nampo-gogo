@@ -29,8 +29,11 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
   int _activeProducts = 0;
   int _totalReviews = 0;
   double _avgRating = 0.0;
+
   int _todayReservations = 0;
   int _pendingReservations = 0;
+  int _completedReservations = 0;
+  bool _reservationsEnabled = false;
 
   @override
   void initState() {
@@ -56,18 +59,28 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
 
       int todayCount = 0;
       int pendingCount = 0;
+      int completedCount = 0;
+      bool resEnabled = false;
+
       final storeId = store['id'] as String?;
       if (storeId != null && storeId.isNotEmpty) {
         try {
           final resList = await ReservationService()
               .getBusinessStoreReservations(storeId);
+          final options = await ReservationService()
+              .getBusinessReservationSettings(storeId);
+          resEnabled = options['reservations_enabled'] as bool? ?? false;
+
           final todayStr = DateTime.now().toIso8601String().substring(0, 10);
-          todayCount = resList
-              .where((r) => (r as Map)['reservation_date'] == todayStr)
-              .length;
-          pendingCount = resList
-              .where((r) => (r as Map)['status'] == 'PENDING')
-              .length;
+          for (var r in resList) {
+            final map = r as Map<String, dynamic>;
+            final date = map['reservation_date'] as String? ?? '';
+            final status = map['status'] as String? ?? '';
+
+            if (date == todayStr) todayCount++;
+            if (status == 'PENDING') pendingCount++;
+            if (status == 'APPROVED' || status == 'COMPLETED') completedCount++;
+          }
         } catch (_) {}
       }
 
@@ -84,6 +97,8 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
               (reviewsRes['average_rating'] as num?)?.toDouble() ?? 0.0;
           _todayReservations = todayCount;
           _pendingReservations = pendingCount;
+          _completedReservations = completedCount;
+          _reservationsEnabled = resEnabled;
           _isLoading = false;
         });
       }
@@ -122,6 +137,12 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
       case 'pending_reservations':
         screen = const BusinessReservationsScreen(initialFilter: 'PENDING');
         break;
+      case 'completed_reservations':
+        screen = const BusinessReservationsScreen(initialFilter: 'APPROVED');
+        break;
+      case 'reservation_settings':
+        screen = const BusinessReservationsScreen(initialTabIndex: 1);
+        break;
     }
 
     if (screen != null) {
@@ -147,9 +168,45 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
         return '$_todayReservations 건';
       case 'pending_reservations':
         return '$_pendingReservations 건';
+      case 'completed_reservations':
+        return '$_completedReservations 건';
+      case 'reservation_settings':
+        return _reservationsEnabled ? '사용 중' : '꺼짐';
       default:
         return '준비 중';
     }
+  }
+
+  Widget _buildBuildInfoFooter() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 16.0),
+      child: Column(
+        children: [
+          const Divider(),
+          const SizedBox(height: 12),
+          Text(
+            '앱 빌드: HOTFIX-007',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[700],
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Commit: 3828a3c (HOTFIX-007)',
+            style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            'Build time: 2026-07-30 14:30 KST',
+            style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+          ),
+          const SizedBox(height: 12),
+        ],
+      ),
+    );
   }
 
   @override
@@ -160,104 +217,62 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
 
     final memberships = user?.businessMemberships ?? [];
     final activeStoreId = memberships.isNotEmpty
-        ? memberships.first['store_id']
-        : '미연결 매장';
+        ? (memberships.first as Map)['store_id']
+        : null;
+
+
+    final availableWidgets = DashboardWidgetRegistry.businessWidgets;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('사업자 관리 대시보드'),
+        title: const Text('사업자 대시보드'),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _fetchDashboardData,
           ),
-          TextButton.icon(
-            onPressed: () {
-              modeProvider.switchMode(AppMode.customer, user);
-            },
-            icon: const Icon(Icons.swap_horiz, color: Colors.white),
-            label: const Text(
-              '이용자 모드',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: _fetchDashboardData,
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: _fetchDashboardData,
+          child: ListView(
+            padding: const EdgeInsets.all(16.0),
             children: [
-              // Business Header Card
               Card(
-                color: BusinessTheme.primaryTeal,
+                elevation: 2,
+                color: BusinessTheme.primaryTeal.withValues(alpha: 0.1),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
                     children: [
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.store,
-                            color: Colors.white,
-                            size: 28,
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  _storeName,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  '${user?.nickname ?? '대표'}님 (승인 사업자)',
-                                  style: const TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white24,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              _storeStatus,
+                      CircleAvatar(
+                        backgroundColor: BusinessTheme.primaryTeal,
+                        radius: 24,
+                        child: const Icon(Icons.store, color: Colors.white),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _storeName,
                               style: const TextStyle(
-                                color: Colors.white,
+                                fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 12,
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        '관리 매장 ID: $activeStoreId',
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 12,
+                            const SizedBox(height: 4),
+                            Text(
+                              '매장 ID: ${activeStoreId ?? '미연결'}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[700],
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -265,18 +280,15 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-
               const Text(
-                '운영 정보 현황',
+                '매장 현황 및 관리',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
-
-              // Dashboard Widgets Grid
               _isLoading
                   ? const Center(
                       child: Padding(
-                        padding: EdgeInsets.all(40),
+                        padding: EdgeInsets.all(40.0),
                         child: CircularProgressIndicator(),
                       ),
                     )
@@ -290,24 +302,33 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
                             mainAxisSpacing: 12,
                             childAspectRatio: 1.3,
                           ),
-                      itemCount: DashboardWidgetRegistry.businessWidgets.length,
+                      itemCount: availableWidgets.length,
                       itemBuilder: (context, index) {
-                        final widgetDef =
-                            DashboardWidgetRegistry.businessWidgets[index];
+                        final widgetDef = availableWidgets[index];
                         final displayVal = _getWidgetDisplayValue(
                           widgetDef.widgetKey,
                         );
 
-                        return Card(
-                          elevation: widgetDef.available ? 2 : 0.5,
-                          color: widgetDef.available
-                              ? Colors.white
-                              : Colors.grey[100],
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(12),
-                            onTap: () => _onWidgetTap(widgetDef),
+                        return InkWell(
+                          onTap: () => _onWidgetTap(widgetDef),
+                          borderRadius: BorderRadius.circular(12),
+                          child: Card(
+                            elevation: widgetDef.available ? 2 : 1,
+                            color: widgetDef.available
+                                ? Colors.white
+                                : Colors.grey[100],
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side: BorderSide(
+                                color: widgetDef.available
+                                    ? BusinessTheme.primaryTeal.withValues(
+                                        alpha: 0.3,
+                                      )
+                                    : Colors.grey[300]!,
+                              ),
+                            ),
                             child: Padding(
-                              padding: const EdgeInsets.all(14.0),
+                              padding: const EdgeInsets.all(12.0),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment:
@@ -341,7 +362,7 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
                                   Text(
                                     widgetDef.available ? displayVal : '준비 중',
                                     style: TextStyle(
-                                      fontSize: 18,
+                                      fontSize: 17,
                                       fontWeight: FontWeight.bold,
                                       color: widgetDef.available
                                           ? BusinessTheme.darkSlate
@@ -379,6 +400,7 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
                         );
                       },
                     ),
+              _buildBuildInfoFooter(),
             ],
           ),
         ),

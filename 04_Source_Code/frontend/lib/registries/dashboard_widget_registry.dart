@@ -65,7 +65,7 @@ class DashboardWidgetRegistry {
       title: '오늘 예약',
       icon: Icons.today,
       available: true,
-      statusText: '예약 관리',
+      statusText: '오늘 예약',
       targetRoute: '/business/reservations',
     ),
     DashboardWidgetDefinition(
@@ -76,7 +76,22 @@ class DashboardWidgetRegistry {
       statusText: '대기 건수',
       targetRoute: '/business/reservations',
     ),
-
+    DashboardWidgetDefinition(
+      widgetKey: 'completed_reservations',
+      title: '예약 완료',
+      icon: Icons.check_circle_outline,
+      available: true,
+      statusText: '완료 건수',
+      targetRoute: '/business/reservations',
+    ),
+    DashboardWidgetDefinition(
+      widgetKey: 'reservation_settings',
+      title: '예약 설정',
+      icon: Icons.settings,
+      available: true,
+      statusText: '옵션 설정',
+      targetRoute: '/business/reservations',
+    ),
     DashboardWidgetDefinition(
       widgetKey: 'recommendation_count',
       title: '추천받은 횟수',
@@ -111,33 +126,6 @@ class DashboardWidgetRegistry {
       widgetKey: 'saved_places',
       title: '즐겨찾기 장소',
       icon: Icons.bookmark,
-      available: true,
-    ),
-    DashboardWidgetDefinition(
-      widgetKey: 'saved_courses',
-      title: '저장 코스',
-      icon: Icons.map,
-      available: true,
-    ),
-  ];
-
-  static const List<DashboardWidgetDefinition> adminWidgets = [
-    DashboardWidgetDefinition(
-      widgetKey: 'pending_applications',
-      title: '승인 대기 사업자',
-      icon: Icons.badge,
-      available: true,
-    ),
-    DashboardWidgetDefinition(
-      widgetKey: 'total_members',
-      title: '전체 회원 수',
-      icon: Icons.group,
-      available: true,
-    ),
-    DashboardWidgetDefinition(
-      widgetKey: 'total_stores',
-      title: '전체 매장 수',
-      icon: Icons.store,
       available: true,
     ),
   ];

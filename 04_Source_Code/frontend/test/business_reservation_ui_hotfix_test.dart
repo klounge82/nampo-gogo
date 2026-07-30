@@ -18,14 +18,17 @@ void main() {
       expect(pendingWidget.targetRoute, equals('/business/reservations'));
     });
 
-    test('2. BusinessReservationsScreen instantiated with initialTabIndex & initialFilter', () {
-      const screen = BusinessReservationsScreen(
-        initialTabIndex: 1,
-        initialFilter: 'PENDING',
-      );
+    test(
+      '2. BusinessReservationsScreen instantiated with initialTabIndex & initialFilter',
+      () {
+        const screen = BusinessReservationsScreen(
+          initialTabIndex: 1,
+          initialFilter: 'PENDING',
+        );
 
-      expect(screen.initialTabIndex, equals(1));
-      expect(screen.initialFilter, equals('PENDING'));
-    });
+        expect(screen.initialTabIndex, equals(1));
+        expect(screen.initialFilter, equals('PENDING'));
+      },
+    );
   });
 }
