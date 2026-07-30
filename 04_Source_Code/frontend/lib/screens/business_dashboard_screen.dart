@@ -201,9 +201,10 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            'Commit: 371fc6d (HOTFIX-010)',
+            'Commit: aa08b85 (HOTFIX-010)',
             style: TextStyle(fontSize: 11, color: Colors.grey[600]),
           ),
+
           const SizedBox(height: 2),
           Text(
             'Build time: 2026-07-30 18:30 KST',
