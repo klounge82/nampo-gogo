@@ -227,12 +227,31 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
       appBar: AppBar(
         title: const Text('사업자 대시보드'),
         actions: [
+          TextButton.icon(
+            onPressed: () {
+              final modeProvider = Provider.of<AppModeProvider>(
+                context,
+                listen: false,
+              );
+              final authProvider = Provider.of<AuthProvider>(
+                context,
+                listen: false,
+              );
+              modeProvider.switchMode(
+                AppMode.customer,
+                authProvider.currentUser,
+              );
+            },
+            icon: const Icon(Icons.swap_horiz, size: 18),
+            label: const Text('이용자 모드'),
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _fetchDashboardData,
           ),
         ],
       ),
+
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: _fetchDashboardData,

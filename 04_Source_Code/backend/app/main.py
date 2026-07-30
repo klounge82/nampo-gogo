@@ -1523,8 +1523,14 @@ def update_business_reservation_settings(
 ):
     payload = auth.decode_token(token)
     user_id = payload.get("sub")
-    check_business_store_access(db, user_id, store_id)
     settings = get_or_create_reservation_settings(db, store_id)
+    if req.maximum_advance_days is not None:
+        if req.maximum_advance_days < 1 or req.maximum_advance_days > 365:
+            raise HTTPException(
+                status_code=400,
+                detail="최대 예약 가능 기간은 1일 이상 365일 이하이어야 합니다."
+            )
+
 
     for field, value in req.dict(exclude_unset=True).items():
         setattr(settings, field, value)
@@ -1532,6 +1538,7 @@ def update_business_reservation_settings(
     db.commit()
     db.refresh(settings)
     return settings
+
 
 @app.get("/business/stores/{store_id}/reservation-blackouts", response_model=List[schemas.ReservationBlackoutOut], tags=["BusinessReservations"])
 def get_business_reservation_blackouts(
@@ -1768,6 +1775,16 @@ def create_reservation(
     if res_datetime < min_advance_dt:
         min_hours = settings.minimum_advance_minutes // 60
         raise HTTPException(status_code=400, detail=f"이 매장은 예약 시간 기준 최소 {min_hours}시간 전에 예약해야 합니다.")
+
+    # Maximum advance check
+    today_date = now_kst.date()
+    max_advance_date = today_date + timedelta(days=settings.maximum_advance_days)
+    if res_date_obj > max_advance_date:
+        raise HTTPException(
+            status_code=400,
+            detail=f"이 매장은 오늘부터 최대 {settings.maximum_advance_days}일 이내의 예약만 받습니다."
+        )
+
 
     # Blackouts check
     iso_weekday = res_date_obj.isoweekday()

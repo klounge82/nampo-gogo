@@ -39,7 +39,9 @@ class _BusinessReservationsScreenState extends State<BusinessReservationsScreen>
   String _startHours = "09:00";
   String _endHours = "22:00";
   int _minAdvanceMins = 120;
+  int _maxAdvanceDays = 30;
   int _minParty = 1;
+
   int _maxParty = 6;
   int _maxPerSlot = 1;
   bool _tempPauseEnabled = false;
@@ -102,6 +104,8 @@ class _BusinessReservationsScreenState extends State<BusinessReservationsScreen>
           _endHours = settings['operating_end_time']?.toString() ?? "22:00";
           _minAdvanceMins =
               (settings['minimum_advance_minutes'] as num?)?.toInt() ?? 120;
+          _maxAdvanceDays =
+              (settings['maximum_advance_days'] as num?)?.toInt() ?? 30;
           _minParty = (settings['minimum_party_size'] as num?)?.toInt() ?? 1;
           _maxParty = (settings['maximum_party_size'] as num?)?.toInt() ?? 6;
           _maxPerSlot =
@@ -134,6 +138,7 @@ class _BusinessReservationsScreenState extends State<BusinessReservationsScreen>
         'operating_start_time': _startHours,
         'operating_end_time': _endHours,
         'minimum_advance_minutes': _minAdvanceMins,
+        'maximum_advance_days': _maxAdvanceDays,
         'minimum_party_size': _minParty,
         'maximum_party_size': _maxParty,
         'max_reservations_per_slot': _maxPerSlot,
@@ -646,6 +651,25 @@ class _BusinessReservationsScreenState extends State<BusinessReservationsScreen>
             ],
             onChanged: (val) {
               if (val != null) setState(() => _minAdvanceMins = val);
+            },
+          ),
+        ),
+        ListTile(
+          title: const Text('최대 예약 가능 기간'),
+          subtitle: Text('오늘부터 $_maxAdvanceDays일 뒤까지 예약 가능'),
+          trailing: DropdownButton<int>(
+            value: [7, 14, 30, 60, 90].contains(_maxAdvanceDays)
+                ? _maxAdvanceDays
+                : 30,
+            items: const [
+              DropdownMenuItem(value: 7, child: Text('7일')),
+              DropdownMenuItem(value: 14, child: Text('14일')),
+              DropdownMenuItem(value: 30, child: Text('30일')),
+              DropdownMenuItem(value: 60, child: Text('60일')),
+              DropdownMenuItem(value: 90, child: Text('90일')),
+            ],
+            onChanged: (val) {
+              if (val != null) setState(() => _maxAdvanceDays = val);
             },
           ),
         ),

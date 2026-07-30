@@ -20,7 +20,6 @@ import '../services/map_service.dart';
 import '../services/auth_service.dart';
 import '../services/reservation_service.dart';
 
-
 class PlaceDetailScreen extends StatefulWidget {
   final String placeId;
 
@@ -46,7 +45,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
   bool _reviewsError = false;
   String? _errorMessage;
   bool _reservationsEnabled = false;
-
+  int _maxAdvanceDays = 30;
 
   @override
   void initState() {
@@ -60,21 +59,25 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
     try {
       final place = await _placeRepository.getPlaceDetail(widget.placeId);
       bool resEnabled = false;
+      int maxAdvDays = 30;
       try {
-        final options = await ReservationService().getPublicReservationOptions(widget.placeId);
+        final options = await ReservationService().getPublicReservationOptions(
+          widget.placeId,
+        );
         resEnabled = options['reservations_enabled'] as bool? ?? false;
+        maxAdvDays = (options['maximum_advance_days'] as num?)?.toInt() ?? 30;
       } catch (_) {}
 
       setState(() {
         _place = place;
         _reservationsEnabled = resEnabled;
+        _maxAdvanceDays = maxAdvDays;
         _errorMessage = null;
       });
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
       });
-
     } finally {
       setState(() => _isLoading = false);
     }
@@ -1126,8 +1129,11 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                         context: context,
                         initialDate: selectedDate,
                         firstDate: DateTime.now(),
-                        lastDate: DateTime.now().add(const Duration(days: 30)),
+                        lastDate: DateTime.now().add(
+                          Duration(days: _maxAdvanceDays),
+                        ),
                       );
+
                       if (picked != null) {
                         setModalState(() => selectedDate = picked);
                       }
@@ -1919,10 +1925,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
       }
     } catch (e) {
       if (mounted) {
-        _showWarningDialog(
-          '위치 확인 실패',
-          _getCleanUserErrorMessage(e),
-        );
+        _showWarningDialog('위치 확인 실패', _getCleanUserErrorMessage(e));
       }
     }
   }
@@ -1970,10 +1973,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
         }
       } catch (e) {
         if (mounted) {
-          _showWarningDialog(
-            '방문 확인 실패',
-            _getCleanUserErrorMessage(e),
-          );
+          _showWarningDialog('방문 확인 실패', _getCleanUserErrorMessage(e));
         }
       }
     }
@@ -1988,7 +1988,9 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
 
       if (status == 400) {
         if (detail != null && detail is String) {
-          if (detail.contains('미래') || detail.contains('90일') || detail.contains('날짜')) {
+          if (detail.contains('미래') ||
+              detail.contains('90일') ||
+              detail.contains('날짜')) {
             return '방문일자를 확인해 주세요.\n오늘부터 최근 90일 이내의 날짜만 선택할 수 있습니다.';
           }
           if (detail.contains('사업장') || detail.contains('허용되지')) {
@@ -2021,7 +2023,9 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
     if (errStr.contains('409') || errStr.contains('이미')) {
       return '이미 이 관광지의 방문 인증 또는 후기가 있습니다.';
     }
-    if (errStr.contains('미래') || errStr.contains('90일') || errStr.contains('날짜')) {
+    if (errStr.contains('미래') ||
+        errStr.contains('90일') ||
+        errStr.contains('날짜')) {
       return '방문일자를 확인해 주세요.\n오늘부터 최근 90일 이내의 날짜만 선택할 수 있습니다.';
     }
     if (errStr.contains('401') || errStr.contains('로그인')) {
@@ -2030,7 +2034,6 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
 
     return '방문 확인을 처리하지 못했습니다.\n잠시 후 다시 시도해 주세요.';
   }
-
 
   void _showWarningDialog(String title, String message) {
     showDialog(
