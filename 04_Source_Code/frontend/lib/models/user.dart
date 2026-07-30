@@ -104,6 +104,15 @@ class User {
 
   bool get isAdmin => roles.contains('ADMIN') || role == 'admin';
 
+  bool hasRole(String targetRole) {
+    final upper = targetRole.toUpperCase();
+    return roles.any((r) => r.toUpperCase() == upper) ||
+        (upper == 'CUSTOMER') ||
+        (upper == 'ADMIN' &&
+            (role.toLowerCase() == 'admin' ||
+                role.toLowerCase() == 'super_admin'));
+  }
+
   User copyWith({
     String? id,
     String? email,

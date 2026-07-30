@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../models/user.dart';
 import '../providers/auth_provider.dart';
+
 import '../providers/app_mode_provider.dart';
 import '../registries/dashboard_widget_registry.dart';
 import '../services/business_service.dart';
@@ -177,7 +179,11 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
     }
   }
 
-  Widget _buildBuildInfoFooter() {
+  Widget _buildBuildInfoFooter(User? user) {
+    final userRoles = user?.roles.join(', ') ?? 'GUEST';
+    const currentMode = 'BUSINESS';
+    final switchAvailable = user == null || user.hasRole('CUSTOMER');
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 16.0),
@@ -186,7 +192,7 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
           const Divider(),
           const SizedBox(height: 12),
           Text(
-            '앱 빌드: HOTFIX-009',
+            '앱 빌드: HOTFIX-010',
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.bold,
@@ -195,16 +201,43 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            'Commit: d598ba5 (HOTFIX-009)',
+            'Commit: 371fc6d (HOTFIX-010)',
             style: TextStyle(fontSize: 11, color: Colors.grey[600]),
           ),
           const SizedBox(height: 2),
           Text(
-            'Build time: 2026-07-30 18:05 KST',
+            'Build time: 2026-07-30 18:30 KST',
             style: TextStyle(fontSize: 11, color: Colors.grey[600]),
           ),
-
-
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(8.0),
+            decoration: BoxDecoration(
+              color: Colors.blueGrey[50],
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.blueGrey[200]!),
+            ),
+            child: Column(
+              children: [
+                Text(
+                  'Roles: $userRoles',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.blueGrey[800],
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  'Current mode: $currentMode',
+                  style: TextStyle(fontSize: 11, color: Colors.blueGrey[800]),
+                ),
+                Text(
+                  'Mode switch available: $switchAvailable',
+                  style: TextStyle(fontSize: 11, color: Colors.blueGrey[800]),
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 12),
         ],
       ),
@@ -228,26 +261,54 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
       appBar: AppBar(
         title: const Text('사업자 대시보드'),
         actions: [
-          TextButton.icon(
-            onPressed: () {
-              final modeProvider = Provider.of<AppModeProvider>(
-                context,
-                listen: false,
-              );
-              final authProvider = Provider.of<AuthProvider>(
-                context,
-                listen: false,
-              );
-              modeProvider.switchMode(
-                AppMode.customer,
-                authProvider.currentUser,
-              );
-            },
-            icon: const Icon(Icons.swap_horiz, size: 18),
-            label: const Text('이용자 모드'),
-          ),
+          if (user == null || user.hasRole('CUSTOMER'))
+            InkWell(
+              onTap: () {
+                final modeProvider = Provider.of<AppModeProvider>(
+                  context,
+                  listen: false,
+                );
+                final authProvider = Provider.of<AuthProvider>(
+                  context,
+                  listen: false,
+                );
+                modeProvider.switchMode(
+                  AppMode.customer,
+                  authProvider.currentUser,
+                );
+              },
+              child: Container(
+                margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.6),
+                  ),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.swap_horiz, size: 16, color: Colors.white),
+                    SizedBox(width: 4),
+                    Text(
+                      '이용자 모드',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh, color: Colors.white),
             onPressed: _fetchDashboardData,
           ),
         ],
@@ -420,7 +481,7 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
                         );
                       },
                     ),
-              _buildBuildInfoFooter(),
+              _buildBuildInfoFooter(user),
             ],
           ),
         ),
