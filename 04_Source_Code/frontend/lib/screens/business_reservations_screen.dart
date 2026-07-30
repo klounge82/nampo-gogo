@@ -28,7 +28,7 @@ class _BusinessReservationsScreenState extends State<BusinessReservationsScreen>
   bool _isLoading = true;
   bool _isSaving = false;
   String? _storeId;
-  String? _errorMessage;
+  bool _hasError = false;
 
   Map<String, dynamic>? _settings;
   List<dynamic> _blackouts = [];
@@ -43,7 +43,8 @@ class _BusinessReservationsScreenState extends State<BusinessReservationsScreen>
   int _maxParty = 6;
   int _maxPerSlot = 1;
   bool _tempPauseEnabled = false;
-  TextEditingController _tempPauseReasonController = TextEditingController();
+  final TextEditingController _tempPauseReasonController =
+      TextEditingController();
 
   @override
   void initState() {
@@ -67,12 +68,17 @@ class _BusinessReservationsScreenState extends State<BusinessReservationsScreen>
   Future<void> _loadData() async {
     setState(() {
       _isLoading = true;
-      _errorMessage = null;
+      _hasError = false;
     });
 
     try {
-      final store = await _businessService.getManagedStore();
-      final storeId = store['id'] as String;
+      final storeRes = await _businessService.getManagedStore();
+      final storeMap = (storeRes['store'] as Map<String, dynamic>?) ?? storeRes;
+      final storeId = (storeMap['id'] ?? storeRes['id'])?.toString();
+
+      if (storeId == null || storeId.isEmpty) {
+        throw Exception('Store ID missing');
+      }
       _storeId = storeId;
 
       final settings = await _reservationService.getBusinessReservationSettings(
@@ -89,27 +95,29 @@ class _BusinessReservationsScreenState extends State<BusinessReservationsScreen>
           _blackouts = blackouts;
           _reservations = reservations;
 
-          // Populate controllers
+          // Null-safe extraction for settings
           _reservationsEnabled =
               settings['reservations_enabled'] as bool? ?? false;
-          _startHours = settings['operating_start_time'] as String? ?? "09:00";
-          _endHours = settings['operating_end_time'] as String? ?? "22:00";
-          _minAdvanceMins = settings['minimum_advance_minutes'] as int? ?? 120;
-          _minParty = settings['minimum_party_size'] as int? ?? 1;
-          _maxParty = settings['maximum_party_size'] as int? ?? 6;
-          _maxPerSlot = settings['max_reservations_per_slot'] as int? ?? 1;
+          _startHours = settings['operating_start_time']?.toString() ?? "09:00";
+          _endHours = settings['operating_end_time']?.toString() ?? "22:00";
+          _minAdvanceMins =
+              (settings['minimum_advance_minutes'] as num?)?.toInt() ?? 120;
+          _minParty = (settings['minimum_party_size'] as num?)?.toInt() ?? 1;
+          _maxParty = (settings['maximum_party_size'] as num?)?.toInt() ?? 6;
+          _maxPerSlot =
+              (settings['max_reservations_per_slot'] as num?)?.toInt() ?? 1;
           _tempPauseEnabled =
               settings['temporary_pause_enabled'] as bool? ?? false;
           _tempPauseReasonController.text =
-              settings['temporary_pause_reason'] as String? ?? "";
+              settings['temporary_pause_reason']?.toString() ?? "";
 
           _isLoading = false;
         });
       }
-    } catch (e) {
+    } catch (_) {
       if (mounted) {
         setState(() {
-          _errorMessage = e.toString().replaceAll('Exception:', '').trim();
+          _hasError = true;
           _isLoading = false;
         });
       }
@@ -148,14 +156,12 @@ class _BusinessReservationsScreenState extends State<BusinessReservationsScreen>
           ),
         );
       }
-    } catch (e) {
+    } catch (_) {
       if (mounted) {
         setState(() => _isSaving = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '저장 실패: ${e.toString().replaceAll('Exception:', '').trim()}',
-            ),
+          const SnackBar(
+            content: Text('설정 저장에 실패했습니다. 잠시 후 다시 시도해 주세요.'),
             backgroundColor: Colors.red,
           ),
         );
@@ -195,13 +201,11 @@ class _BusinessReservationsScreenState extends State<BusinessReservationsScreen>
           ),
         );
       }
-    } catch (e) {
+    } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '처리 실패: ${e.toString().replaceAll('Exception:', '').trim()}',
-            ),
+          const SnackBar(
+            content: Text('처리에 실패했습니다. 잠시 후 다시 시도해 주세요.'),
             backgroundColor: Colors.red,
           ),
         );
@@ -217,19 +221,31 @@ class _BusinessReservationsScreenState extends State<BusinessReservationsScreen>
   List<dynamic> _getFilteredReservations() {
     final todayStr = DateTime.now().toIso8601String().substring(0, 10);
     return _reservations.where((r) {
-      final resMap = r as Map<String, dynamic>;
-      final status = resMap['status'] as String? ?? '';
-      final date = resMap['reservation_date'] as String? ?? '';
+      if (r is! Map) return false;
+      final status = r['status']?.toString() ?? '';
+      final date = r['reservation_date']?.toString() ?? '';
 
       if (_currentFilter == 'TODAY') {
         return date == todayStr;
       } else if (_currentFilter == 'PENDING') {
         return status == 'PENDING';
-      } else if (_currentFilter == 'APPROVED') {
+      } else if (_currentFilter == 'APPROVED' ||
+          _currentFilter == 'COMPLETED') {
         return status == 'APPROVED' || status == 'COMPLETED';
       }
       return true; // ALL
     }).toList();
+  }
+
+  String _getEmptyMessage() {
+    if (_currentFilter == 'TODAY') {
+      return '오늘 예약이 없습니다.';
+    } else if (_currentFilter == 'PENDING') {
+      return '승인 대기 중인 예약이 없습니다.';
+    } else if (_currentFilter == 'APPROVED' || _currentFilter == 'COMPLETED') {
+      return '완료된 예약이 없습니다.';
+    }
+    return '예약이 없습니다.';
   }
 
   @override
@@ -254,16 +270,8 @@ class _BusinessReservationsScreenState extends State<BusinessReservationsScreen>
       body: SafeArea(
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
-            : _errorMessage != null
-            ? Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    _errorMessage!,
-                    style: const TextStyle(color: Colors.red),
-                  ),
-                ),
-              )
+            : _hasError
+            ? _buildErrorView()
             : TabBarView(
                 controller: _tabController,
                 children: [
@@ -272,6 +280,36 @@ class _BusinessReservationsScreenState extends State<BusinessReservationsScreen>
                   _buildBlackoutsTab(),
                 ],
               ),
+      ),
+    );
+  }
+
+  Widget _buildErrorView() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: Colors.orange),
+            const SizedBox(height: 16),
+            const Text(
+              '예약 정보를 불러오지 못했습니다.\n잠시 후 다시 시도해 주세요.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16, color: Colors.black87),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              onPressed: _loadData,
+              icon: const Icon(Icons.refresh),
+              label: const Text('다시 시도'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: BusinessTheme.primaryTeal,
+                foregroundColor: Colors.white,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -329,12 +367,15 @@ class _BusinessReservationsScreenState extends State<BusinessReservationsScreen>
             onRefresh: _loadData,
             child: filtered.isEmpty
                 ? ListView(
-                    children: const [
-                      SizedBox(height: 120),
+                    children: [
+                      const SizedBox(height: 120),
                       Center(
                         child: Text(
-                          '예약이 없습니다.',
-                          style: TextStyle(color: Colors.grey, fontSize: 16),
+                          _getEmptyMessage(),
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 16,
+                          ),
                         ),
                       ),
                     ],
@@ -343,14 +384,18 @@ class _BusinessReservationsScreenState extends State<BusinessReservationsScreen>
                     padding: const EdgeInsets.all(16.0),
                     itemCount: filtered.length,
                     itemBuilder: (ctx, idx) {
-                      final res = filtered[idx] as Map<String, dynamic>;
-                      final resId = res['id'] as String;
-                      final status = res['status'] as String;
-                      final dateStr = res['reservation_date'] ?? '';
-                      final timeStr = res['start_time'] ?? '';
-                      final partySize = res['party_size'] ?? 1;
-                      final userId = res['user_id'] as String? ?? '손님';
-                      final note = res['customer_note'] as String?;
+                      final res =
+                          (filtered[idx] as Map<String, dynamic>?) ?? {};
+                      final resId = res['id']?.toString() ?? '';
+                      final status = res['status']?.toString() ?? 'PENDING';
+                      final dateStr = res['reservation_date']?.toString() ?? '';
+                      final timeStr = res['start_time']?.toString() ?? '시간 미정';
+                      final partySize =
+                          (res['party_size'] as num?)?.toInt() ?? 1;
+                      final userId = res['user_id']?.toString() ?? '손님';
+                      final note = res['customer_note']?.toString();
+                      final productName =
+                          res['product_name']?.toString() ?? '일반 예약';
 
                       Color statusColor = Colors.grey;
                       String statusText = status;
@@ -430,6 +475,14 @@ class _BusinessReservationsScreenState extends State<BusinessReservationsScreen>
                                     style: const TextStyle(fontSize: 14),
                                   ),
                                 ],
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '상품: $productName',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey[800],
+                                ),
                               ),
                               if (note != null && note.isNotEmpty) ...[
                                 const SizedBox(height: 6),
@@ -722,15 +775,20 @@ class _BusinessReservationsScreenState extends State<BusinessReservationsScreen>
           )
         else
           ..._blackouts.map((bo) {
-            final boId = bo['id'] as String;
+            if (bo is! Map) return const SizedBox.shrink();
+            final boId = bo['id']?.toString() ?? '';
+            final startTime = bo['start_time']?.toString() ?? '';
+            final endTime = bo['end_time']?.toString() ?? '';
+            final reason = bo['reason']?.toString() ?? '피크타임 예약 중지';
+
             return Card(
               child: ListTile(
-                title: Text('${bo['start_time']} ~ ${bo['end_time']}'),
-                subtitle: Text(bo['reason'] ?? '피크타임 예약 중지'),
+                title: Text('$startTime ~ $endTime'),
+                subtitle: Text(reason),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),
                   onPressed: () async {
-                    if (_storeId != null) {
+                    if (_storeId != null && boId.isNotEmpty) {
                       await _reservationService
                           .deleteBusinessReservationBlackout(_storeId!, boId);
                       _loadData();
@@ -792,13 +850,11 @@ class _BusinessReservationsScreenState extends State<BusinessReservationsScreen>
                   );
                   if (ctx.mounted) Navigator.pop(ctx);
                   _loadData();
-                } catch (e) {
+                } catch (_) {
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          '추가 실패: ${e.toString().replaceAll('Exception:', '').trim()}',
-                        ),
+                      const SnackBar(
+                        content: Text('추가에 실패했습니다. 다시 시도해 주세요.'),
                         backgroundColor: Colors.red,
                       ),
                     );

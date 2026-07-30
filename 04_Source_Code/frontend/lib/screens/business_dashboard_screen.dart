@@ -186,7 +186,7 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
           const Divider(),
           const SizedBox(height: 12),
           Text(
-            '앱 빌드: HOTFIX-007',
+            '앱 빌드: HOTFIX-008',
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.bold,
@@ -195,14 +195,15 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            'Commit: 3828a3c (HOTFIX-007)',
+            'Commit: 4f5fe9b (HOTFIX-008)',
             style: TextStyle(fontSize: 11, color: Colors.grey[600]),
           ),
           const SizedBox(height: 2),
           Text(
-            'Build time: 2026-07-30 14:30 KST',
+            'Build time: 2026-07-30 14:45 KST',
             style: TextStyle(fontSize: 11, color: Colors.grey[600]),
           ),
+
           const SizedBox(height: 12),
         ],
       ),
@@ -219,7 +220,6 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
     final activeStoreId = memberships.isNotEmpty
         ? (memberships.first as Map)['store_id']
         : null;
-
 
     final availableWidgets = DashboardWidgetRegistry.businessWidgets;
 
