@@ -1276,32 +1276,79 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
       if (context.mounted) {
         showDialog(
           context: context,
-          builder: (ctx) => AlertDialog(
-            title: const Text(
-              '🎉 예약 신청 접수 완료',
-              style: TextStyle(fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
-            content: Text(
-              '${_place!.name} 매장에 예약 신청이 접수되었습니다.\n사업자가 확인한 후 승인 여부를 알려드립니다.',
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 14.0),
-            ),
-            actions: [
-              Center(
-                child: ElevatedButton(
-                  onPressed: () => Navigator.of(ctx).pop(),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                  ),
-                  child: const Text(
-                    '확인',
-                    style: TextStyle(color: Colors.white),
-                  ),
+          builder: (ctx) {
+            final screenWidth = MediaQuery.of(ctx).size.width;
+            final dialogWidth = screenWidth * 0.85;
+            final storeName = _place?.name ?? '매장';
+
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20.0),
+              ),
+              child: Container(
+                width: dialogWidth < 360 ? dialogWidth : 360,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20.0,
+                  vertical: 24.0,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      '🎉 예약 신청 접수 완료',
+                      style: TextStyle(
+                        fontSize: 18.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16.0),
+                    Text(
+                      '$storeName 매장에\n예약 신청이 접수되었습니다.',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 14.0,
+                        height: 1.4,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 10.0),
+                    const Text(
+                      '사업자가 확인한 후\n승인 여부를 알려드립니다.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13.0,
+                        color: Colors.grey,
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 24.0),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 46.0,
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                        ),
+                        child: const Text(
+                          '확인',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15.0,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            );
+          },
         );
       }
     } catch (e) {

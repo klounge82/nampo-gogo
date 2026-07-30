@@ -7,48 +7,7 @@ class ReservationRepository {
   final ReservationService _reservationService;
 
   // Local state cache for offline simulation fallback
-  static final List<Reservation> _mockReservations = [
-    Reservation(
-      id: 'res_mock_1',
-      userId: 'usr_mock_999',
-      storeId: 'store_mock_1',
-      reservationTime: DateTime.now().add(const Duration(days: 1, hours: 2)),
-      partySize: 2,
-      status: 'confirmed',
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-      store: Place(
-        id: 'store_mock_1',
-        name: '남포 숯불갈비',
-        category: '한식',
-        rating: 4.8,
-        address: '부산 중구 남포길 12-1',
-        description: '숯불로 구워내 더욱 풍미 깊은 양념갈비 맛집입니다.',
-        imageUrl: '',
-        createdAt: DateTime.now(),
-      ),
-    ),
-    Reservation(
-      id: 'res_mock_2',
-      userId: 'usr_mock_999',
-      storeId: 'store_mock_2',
-      reservationTime: DateTime.now().subtract(const Duration(days: 3)),
-      partySize: 4,
-      status: 'completed',
-      createdAt: DateTime.now().subtract(const Duration(days: 5)),
-      updatedAt: DateTime.now().subtract(const Duration(days: 3)),
-      store: Place(
-        id: 'store_mock_2',
-        name: '자갈치 신선 횟집',
-        category: '일식/회',
-        rating: 4.6,
-        address: '부산 중구 자갈치해안로 52',
-        description: '자갈치시장에서 갓 잡아 올린 싱싱한 모듬회 전문점.',
-        imageUrl: '',
-        createdAt: DateTime.now(),
-      ),
-    ),
-  ];
+  static final List<Reservation> _mockReservations = [];
 
   ReservationRepository({ReservationService? reservationService})
     : _reservationService = reservationService ?? ReservationService();
@@ -64,7 +23,8 @@ class ReservationRepository {
       final res = await _reservationService.createReservation(
         storeId: storeId,
         reservationDate: reservationTime.toIso8601String().substring(0, 10),
-        startTime: "${reservationTime.hour.toString().padLeft(2, '0')}:${reservationTime.minute.toString().padLeft(2, '0')}",
+        startTime:
+            "${reservationTime.hour.toString().padLeft(2, '0')}:${reservationTime.minute.toString().padLeft(2, '0')}",
         partySize: partySize,
         userId: userId,
       );
@@ -91,7 +51,7 @@ class ReservationRepository {
         updatedAt: DateTime.now(),
         store: Place(
           id: storeId,
-          name: storeId.contains('jagal') ? '자갈치 신선 횟집' : '남포 숯불갈비',
+          name: '매장 정보 확인 중',
           category: '음식점',
           rating: 4.5,
           address: '부산 중구 남포길 1',
@@ -109,11 +69,8 @@ class ReservationRepository {
   // Cancel Reservation
   Future<bool> cancelReservation(String reservationId, {String? userId}) async {
     try {
-      final res = await _reservationService.cancelReservation(
-        reservationId,
-      );
+      final res = await _reservationService.cancelReservation(reservationId);
       return res['success'] as bool? ?? false;
-
     } catch (e) {
       if (kDebugMode) {
         print(

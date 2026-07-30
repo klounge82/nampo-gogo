@@ -4,6 +4,7 @@ import '../constants/colors.dart';
 import '../models/reservation.dart';
 import '../repositories/reservation_repository.dart';
 import '../providers/auth_provider.dart';
+import '../utils/reservation_status_helper.dart';
 import 'reservation_detail_screen.dart';
 
 class MyReservationsScreen extends StatefulWidget {
@@ -51,12 +52,21 @@ class _MyReservationsScreenState extends State<MyReservationsScreen>
       );
 
       // Separate active vs past
-      final active = list
-          .where((r) => r.status == 'pending' || r.status == 'confirmed')
-          .toList();
-      final past = list
-          .where((r) => r.status == 'cancelled' || r.status == 'completed')
-          .toList();
+      final active = list.where((r) {
+        final st = r.status.toUpperCase();
+        return st == 'PENDING' || st == 'APPROVED' || st == 'CONFIRMED';
+      }).toList();
+
+      final past = list.where((r) {
+        final st = r.status.toUpperCase();
+        return st == 'REJECTED' ||
+            st == 'CANCELLED_BY_CUSTOMER' ||
+            st == 'CANCELLED_BY_BUSINESS' ||
+            st == 'CANCELLED' ||
+            st == 'COMPLETED' ||
+            st == 'NO_SHOW' ||
+            st == 'NOSHOW';
+      }).toList();
 
       setState(() {
         _activeReservations = active;
@@ -241,49 +251,22 @@ class _MyReservationsScreenState extends State<MyReservationsScreen>
   }
 
   Widget _buildStatusBadge(String status) {
-    Color bgColor;
-    Color textColor;
-    String label;
-
-    switch (status) {
-      case 'pending':
-        bgColor = Colors.orange.withAlpha(30);
-        textColor = Colors.orange.shade700;
-        label = '대기 중';
-        break;
-      case 'confirmed':
-        bgColor = Colors.green.withAlpha(30);
-        textColor = Colors.green.shade700;
-        label = '예약확정';
-        break;
-      case 'cancelled':
-        bgColor = Colors.red.withAlpha(30);
-        textColor = Colors.red.shade700;
-        label = '취소됨';
-        break;
-      case 'completed':
-        bgColor = Colors.blue.withAlpha(30);
-        textColor = Colors.blue.shade700;
-        label = '이용완료';
-        break;
-      default:
-        bgColor = Colors.grey.withAlpha(30);
-        textColor = Colors.grey;
-        label = '대기 중';
-    }
+    final color = ReservationStatusHelper.getStatusColor(status);
+    final label = ReservationStatusHelper.getKoreanLabel(status);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
       decoration: BoxDecoration(
-        color: bgColor,
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20.0),
+        border: Border.all(color: color.withValues(alpha: 0.5)),
       ),
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 10.0,
+          fontSize: 11.0,
           fontWeight: FontWeight.bold,
-          color: textColor,
+          color: color,
         ),
       ),
     );

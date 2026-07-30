@@ -79,10 +79,15 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
             final map = r as Map<String, dynamic>;
             final date = map['reservation_date'] as String? ?? '';
             final status = map['status'] as String? ?? '';
+            final statusUpper = status.toUpperCase();
 
             if (date == todayStr) todayCount++;
-            if (status == 'PENDING') pendingCount++;
-            if (status == 'APPROVED' || status == 'COMPLETED') completedCount++;
+            if (statusUpper == 'PENDING') pendingCount++;
+            if (statusUpper == 'APPROVED' ||
+                statusUpper == 'CONFIRMED' ||
+                statusUpper == 'COMPLETED') {
+              completedCount++;
+            }
           }
         } catch (_) {}
       }

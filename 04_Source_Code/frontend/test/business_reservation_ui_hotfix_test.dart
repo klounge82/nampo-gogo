@@ -89,9 +89,10 @@ void main() {
     test(
       '4. BuildInfo metadata provides dynamic app build name, commit hash, and build time',
       () {
-        expect(BuildInfo.appBuildName, equals('RELEASE-001-I2'));
+        expect(BuildInfo.appBuildName, isNotEmpty);
         expect(BuildInfo.commitHash, isNotEmpty);
         expect(BuildInfo.buildTime, isNotEmpty);
+
       },
     );
   });

@@ -229,15 +229,18 @@ class _BusinessReservationsScreenState extends State<BusinessReservationsScreen>
     return _reservations.where((r) {
       if (r is! Map) return false;
       final status = r['status']?.toString() ?? '';
+      final statusUpper = status.toUpperCase();
       final date = r['reservation_date']?.toString() ?? '';
 
       if (_currentFilter == 'TODAY') {
         return date == todayStr;
       } else if (_currentFilter == 'PENDING') {
-        return status == 'PENDING';
+        return statusUpper == 'PENDING';
       } else if (_currentFilter == 'APPROVED' ||
           _currentFilter == 'COMPLETED') {
-        return status == 'APPROVED' || status == 'COMPLETED';
+        return statusUpper == 'APPROVED' ||
+            statusUpper == 'CONFIRMED' ||
+            statusUpper == 'COMPLETED';
       }
       return true; // ALL
     }).toList();

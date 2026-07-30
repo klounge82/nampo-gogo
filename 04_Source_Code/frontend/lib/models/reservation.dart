@@ -24,22 +24,49 @@ class Reservation {
   });
 
   factory Reservation.fromJson(Map<String, dynamic> json) {
+    final rawTime =
+        json['reservation_time']?.toString() ??
+        (json['reservation_date'] != null && json['start_time'] != null
+            ? '${json['reservation_date']}T${json['start_time']}:00'
+            : null);
+
+    final parsedTime = rawTime != null
+        ? DateTime.tryParse(rawTime) ?? DateTime.now()
+        : DateTime.now();
+
+    final storeName =
+        json['store_name']?.toString() ??
+        (json['store'] is Map ? json['store']['name']?.toString() : null) ??
+        '매장 정보 확인 중';
+
+    final parsedStore =
+        json['store'] is Map && (json['store'] as Map).isNotEmpty
+        ? Place.fromJson(json['store'] as Map<String, dynamic>)
+        : Place(
+            id: json['store_id']?.toString() ?? '',
+            name: storeName.isNotEmpty ? storeName : '매장 정보 확인 중',
+            category: '매장',
+            rating: 5.0,
+            address: '',
+            description: '',
+            imageUrl: '',
+            createdAt: DateTime.now(),
+          );
+
     return Reservation(
-      id: json['id'] as String? ?? '',
-      userId: json['user_id'] as String? ?? '',
-      storeId: json['store_id'] as String? ?? '',
-      reservationTime: json['reservation_time'] != null
-          ? DateTime.parse(json['reservation_time'] as String)
-          : DateTime.now(),
-      partySize: json['party_size'] as int? ?? 2,
-      status: json['status'] as String? ?? 'pending',
+      id: json['id']?.toString() ?? '',
+      userId: json['user_id']?.toString() ?? '',
+      storeId: json['store_id']?.toString() ?? '',
+      reservationTime: parsedTime,
+      partySize: (json['party_size'] as num?)?.toInt() ?? 1,
+      status: json['status']?.toString() ?? 'PENDING',
       createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
+          ? DateTime.tryParse(json['created_at'].toString()) ?? DateTime.now()
           : DateTime.now(),
       updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'] as String)
+          ? DateTime.tryParse(json['updated_at'].toString()) ?? DateTime.now()
           : DateTime.now(),
-      store: Place.fromJson(json['store'] as Map<String, dynamic>? ?? {}),
+      store: parsedStore,
     );
   }
 

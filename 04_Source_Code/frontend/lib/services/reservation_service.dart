@@ -5,7 +5,9 @@ class ReservationService {
   Dio get _dio => ApiService().dio;
 
   // GET /stores/{store_id}/reservation-options
-  Future<Map<String, dynamic>> getPublicReservationOptions(String storeId) async {
+  Future<Map<String, dynamic>> getPublicReservationOptions(
+    String storeId,
+  ) async {
     try {
       final response = await _dio.get('/stores/$storeId/reservation-options');
       if (response.statusCode == 200 && response.data != null) {
@@ -18,7 +20,10 @@ class ReservationService {
   }
 
   // GET /stores/{store_id}/available-slots?date=YYYY-MM-DD
-  Future<Map<String, dynamic>> getAvailableSlots(String storeId, String date) async {
+  Future<Map<String, dynamic>> getAvailableSlots(
+    String storeId,
+    String date,
+  ) async {
     try {
       final response = await _dio.get(
         '/stores/$storeId/available-slots',
@@ -61,7 +66,6 @@ class ReservationService {
         return response.data as Map<String, dynamic>;
       }
       throw Exception('예약 신청에 실패했습니다.');
-
     } catch (e) {
       rethrow;
     }
@@ -99,8 +103,15 @@ class ReservationService {
     }
   }
 
-  // GET /users/reservations (Legacy compat)
+  // GET /users/reservations or /reservations/me
   Future<List<dynamic>> fetchUserReservations({String? userId}) async {
+    try {
+      final response = await _dio.get('/reservations/me');
+      if (response.statusCode == 200 && response.data != null) {
+        return response.data as List<dynamic>;
+      }
+    } catch (_) {}
+
     try {
       final response = await _dio.get(
         '/users/reservations',
@@ -109,14 +120,16 @@ class ReservationService {
       if (response.statusCode == 200 && response.data != null) {
         return response.data as List<dynamic>;
       }
-      throw Exception('예약 목록 로딩 실패');
+      return [];
     } catch (e) {
       rethrow;
     }
   }
 
   // GET /reservations/{reservation_id}
-  Future<Map<String, dynamic>> fetchReservationDetail(String reservationId) async {
+  Future<Map<String, dynamic>> fetchReservationDetail(
+    String reservationId,
+  ) async {
     try {
       final response = await _dio.get('/reservations/$reservationId');
       if (response.statusCode == 200 && response.data != null) {
@@ -130,9 +143,13 @@ class ReservationService {
 
   // --- BUSINESS RESERVATION APIs ---
 
-  Future<Map<String, dynamic>> getBusinessReservationSettings(String storeId) async {
+  Future<Map<String, dynamic>> getBusinessReservationSettings(
+    String storeId,
+  ) async {
     try {
-      final response = await _dio.get('/business/stores/$storeId/reservation-settings');
+      final response = await _dio.get(
+        '/business/stores/$storeId/reservation-settings',
+      );
       if (response.statusCode == 200 && response.data != null) {
         return response.data as Map<String, dynamic>;
       }
@@ -162,7 +179,9 @@ class ReservationService {
 
   Future<List<dynamic>> getBusinessReservationBlackouts(String storeId) async {
     try {
-      final response = await _dio.get('/business/stores/$storeId/reservation-blackouts');
+      final response = await _dio.get(
+        '/business/stores/$storeId/reservation-blackouts',
+      );
       if (response.statusCode == 200 && response.data != null) {
         return response.data as List<dynamic>;
       }
@@ -190,9 +209,14 @@ class ReservationService {
     }
   }
 
-  Future<void> deleteBusinessReservationBlackout(String storeId, String blackoutId) async {
+  Future<void> deleteBusinessReservationBlackout(
+    String storeId,
+    String blackoutId,
+  ) async {
     try {
-      await _dio.delete('/business/stores/$storeId/reservation-blackouts/$blackoutId');
+      await _dio.delete(
+        '/business/stores/$storeId/reservation-blackouts/$blackoutId',
+      );
     } catch (e) {
       rethrow;
     }
@@ -210,9 +234,13 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> approveBusinessReservation(String reservationId) async {
+  Future<Map<String, dynamic>> approveBusinessReservation(
+    String reservationId,
+  ) async {
     try {
-      final response = await _dio.post('/business/reservations/$reservationId/approve');
+      final response = await _dio.post(
+        '/business/reservations/$reservationId/approve',
+      );
       if (response.statusCode == 200 && response.data != null) {
         return response.data as Map<String, dynamic>;
       }
@@ -222,7 +250,10 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> rejectBusinessReservation(String reservationId, {String? reason}) async {
+  Future<Map<String, dynamic>> rejectBusinessReservation(
+    String reservationId, {
+    String? reason,
+  }) async {
     try {
       final response = await _dio.post(
         '/business/reservations/$reservationId/reject',
@@ -237,9 +268,13 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> completeBusinessReservation(String reservationId) async {
+  Future<Map<String, dynamic>> completeBusinessReservation(
+    String reservationId,
+  ) async {
     try {
-      final response = await _dio.post('/business/reservations/$reservationId/complete');
+      final response = await _dio.post(
+        '/business/reservations/$reservationId/complete',
+      );
       if (response.statusCode == 200 && response.data != null) {
         return response.data as Map<String, dynamic>;
       }
@@ -249,9 +284,13 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> noShowBusinessReservation(String reservationId) async {
+  Future<Map<String, dynamic>> noShowBusinessReservation(
+    String reservationId,
+  ) async {
     try {
-      final response = await _dio.post('/business/reservations/$reservationId/no-show');
+      final response = await _dio.post(
+        '/business/reservations/$reservationId/no-show',
+      );
       if (response.statusCode == 200 && response.data != null) {
         return response.data as Map<String, dynamic>;
       }

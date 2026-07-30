@@ -1873,6 +1873,38 @@ def get_my_reservations(
 
     return reservations
 
+@app.get("/users/reservations", response_model=List[schemas.ReservationOut], tags=["Reservations"])
+def get_user_reservations(
+    user_id: Optional[str] = None,
+    token: Optional[str] = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+    target_user_id = None
+    if token:
+        try:
+            payload = auth.decode_token(token)
+            target_user_id = payload.get("sub")
+        except Exception:
+            pass
+    if not target_user_id and user_id:
+        target_user_id = user_id
+        
+    if not target_user_id:
+        return []
+
+    reservations = db.query(models.StoreReservation).filter(
+        models.StoreReservation.user_id == target_user_id
+    ).order_by(models.StoreReservation.reservation_time.desc()).all()
+
+    for r in reservations:
+        r.store_name = r.store.name if r.store else "매장"
+        if r.product_id:
+            prod = db.query(models.Product).filter(models.Product.id == r.product_id).first()
+            r.product_name = prod.name if prod else None
+
+    return reservations
+
+
 @app.post("/reservations/{reservation_id}/cancel", tags=["Reservations"])
 def cancel_reservation(
     reservation_id: str,
