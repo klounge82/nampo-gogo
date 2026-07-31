@@ -1873,6 +1873,33 @@ def get_my_reservations(
 
     return reservations
 
+@app.get("/reservations/{reservation_id}", response_model=schemas.ReservationOut, tags=["Reservations"])
+def get_reservation_detail(
+    reservation_id: str,
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+    payload = auth.decode_token(token)
+    user_id = payload.get("sub")
+
+    res_obj = db.query(models.StoreReservation).filter(
+        models.StoreReservation.id == reservation_id
+    ).first()
+
+    if not res_obj:
+        raise HTTPException(status_code=404, detail="해당 예약을 찾을 수 없습니다.")
+
+    if res_obj.user_id != user_id:
+        raise HTTPException(status_code=403, detail="이 예약 정보를 확인할 권한이 없습니다.")
+
+    res_obj.store_name = res_obj.store.name if res_obj.store else "매장"
+    if res_obj.product_id:
+        prod = db.query(models.Product).filter(models.Product.id == res_obj.product_id).first()
+        res_obj.product_name = prod.name if prod else None
+
+    return res_obj
+
+
 @app.get("/users/reservations", response_model=List[schemas.ReservationOut], tags=["Reservations"])
 def get_user_reservations(
     user_id: Optional[str] = None,

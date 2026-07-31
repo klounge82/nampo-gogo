@@ -254,6 +254,68 @@ class TestReservationExceptionStates(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn("승인된 예약만 매장 취소", response.json()["detail"])
 
+    def test_13_get_reservation_detail_success(self):
+        res = self._create_reservation("APPROVED")
+        response = self.client.get(
+            f"/reservations/{res.id}",
+            headers={"Authorization": f"Bearer {self.customer_token}"},
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["id"], res.id)
+        self.assertEqual(data["status"], "APPROVED")
+        self.assertIn("K-Lounge", data["store_name"])
+
+
+    def test_14_get_reservation_detail_rejection_reason(self):
+        res = self._create_reservation("PENDING")
+        self.client.post(
+            f"/business/reservations/{res.id}/reject",
+            json={"reason": "재고 부족으로 거절"},
+            headers={"Authorization": f"Bearer {self.owner_token}"},
+        )
+        response = self.client.get(
+            f"/reservations/{res.id}",
+            headers={"Authorization": f"Bearer {self.customer_token}"},
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["status"], "REJECTED")
+        self.assertEqual(data["rejection_reason"], "재고 부족으로 거절")
+
+    def test_15_get_reservation_detail_cancellation_reasons(self):
+        res = self._create_reservation("APPROVED")
+        self.client.post(
+            f"/business/reservations/{res.id}/cancel",
+            json={"reason": "매장 임시휴업으로 취소"},
+            headers={"Authorization": f"Bearer {self.owner_token}"},
+        )
+        response = self.client.get(
+            f"/reservations/{res.id}",
+            headers={"Authorization": f"Bearer {self.customer_token}"},
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["status"], "CANCELLED_BY_BUSINESS")
+        self.assertEqual(data["cancellation_reason"], "매장 임시휴업으로 취소")
+
+    def test_16_get_reservation_detail_other_user_forbidden(self):
+        res = self._create_reservation("PENDING")
+        response = self.client.get(
+            f"/reservations/{res.id}",
+            headers={"Authorization": f"Bearer {self.other_customer_token}"},
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertIn("권한이 없습니다", response.json()["detail"])
+
+    def test_17_get_reservation_detail_not_found(self):
+        response = self.client.get(
+            "/reservations/non_existent_res_99999",
+            headers={"Authorization": f"Bearer {self.customer_token}"},
+        )
+        self.assertEqual(response.status_code, 404)
+
 if __name__ == '__main__':
     unittest.main()
+
 
