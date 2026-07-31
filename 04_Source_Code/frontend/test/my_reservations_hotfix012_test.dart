@@ -48,11 +48,11 @@ void main() {
       );
       expect(
         ReservationStatusHelper.getKoreanLabel('APPROVED'),
-        equals('승인 완료'),
+        equals('예약 승인'),
       );
       expect(
         ReservationStatusHelper.getKoreanLabel('CONFIRMED'),
-        equals('승인 완료'),
+        equals('예약 승인'),
       );
       expect(
         ReservationStatusHelper.getKoreanLabel('COMPLETED'),

@@ -286,13 +286,24 @@ class TestH4KLoungeLinkAndI1Reservations(unittest.TestCase):
         self.assertEqual(app_res.status_code, 200)
         self.assertEqual(app_res.json()["status"], "APPROVED")
 
-        # 3. Business completes reservation
+        # 3. Update reservation time in DB to past to allow completion test
+        past_dt = datetime.utcnow() - timedelta(hours=2)
+        res_db = self.db.query(models.StoreReservation).filter(models.StoreReservation.id == res_id).first()
+        if res_db:
+            res_db.reservation_date = past_dt.strftime("%Y-%m-%d")
+            res_db.start_time = past_dt.strftime("%H:%M")
+            res_db.reservation_time = past_dt
+            self.db.commit()
+
+        # 4. Business completes reservation
         comp_res = self.client.post(
             f"/business/reservations/{res_id}/complete",
             headers={"Authorization": f"Bearer {self.token_hwang}"}
         )
         self.assertEqual(comp_res.status_code, 200)
         self.assertEqual(comp_res.json()["status"], "COMPLETED")
+
+
 
 if __name__ == "__main__":
     unittest.main()

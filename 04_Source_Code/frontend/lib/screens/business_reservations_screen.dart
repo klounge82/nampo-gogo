@@ -177,14 +177,114 @@ class _BusinessReservationsScreenState extends State<BusinessReservationsScreen>
 
   final Set<String> _processingResIds = {};
 
+  DateTime? _parseReservationStartDateTime(Map<String, dynamic> res) {
+    final dateStr = res['reservation_date']?.toString();
+    final timeStr = res['start_time']?.toString();
+    if (dateStr == null || dateStr.isEmpty || timeStr == null || timeStr.isEmpty) {
+      return null;
+    }
+    try {
+      return DateTime.parse('${dateStr.trim()}T${timeStr.trim()}:00');
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String _formatKORDateTime(DateTime dt) {
+    final hour = dt.hour;
+    final period = hour >= 12 ? '오후' : '오전';
+    final displayHour = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
+    final minStr = dt.minute.toString().padLeft(2, '0');
+    return '${dt.year}년 ${dt.month}월 ${dt.day}일 $period $displayHour:$minStr';
+  }
+
+  String _formatKORTimeOnly(DateTime dt) {
+    final hour = dt.hour;
+    final period = hour >= 12 ? '오후' : '오전';
+    final displayHour = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
+    final minStr = dt.minute.toString().padLeft(2, '0');
+    return '$period $displayHour:$minStr';
+  }
+
+  void _showTimeRestrictionDialog({
+    required String title,
+    required String message,
+  }) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0),
+        ),
+        content: SingleChildScrollView(
+          child: Text(
+            message,
+            style: const TextStyle(fontSize: 14.0, height: 1.4),
+          ),
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: BusinessTheme.primaryTeal,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('확인'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _actionReservation(
     String resId,
     String action, {
     String? reason,
+    Map<String, dynamic>? resMap,
   }) async {
     if (_processingResIds.contains(resId)) return;
 
     String? actionReason = reason;
+
+    if (action == 'complete' && resMap != null) {
+      final startDt = _parseReservationStartDateTime(resMap);
+      final now = DateTime.now();
+      if (startDt == null) {
+        _showTimeRestrictionDialog(
+          title: '예약 시간 미정',
+          message: '예약 시간이 확인되지 않아 처리할 수 없습니다.\n예약정보를 확인해 주세요.',
+        );
+        return;
+      }
+      if (now.isBefore(startDt)) {
+        _showTimeRestrictionDialog(
+          title: '아직 이용 완료 처리 시간이 아닙니다',
+          message:
+              '예약 시작 시간이 지난 후 이용 완료로 처리할 수 있습니다.\n예약 시간: ${_formatKORDateTime(startDt)}',
+        );
+        return;
+      }
+    } else if (action == 'no-show' && resMap != null) {
+      final startDt = _parseReservationStartDateTime(resMap);
+      final now = DateTime.now();
+      if (startDt == null) {
+        _showTimeRestrictionDialog(
+          title: '예약 시간 미정',
+          message: '예약 시간이 확인되지 않아 처리할 수 없습니다.\n예약정보를 확인해 주세요.',
+        );
+        return;
+      }
+      final gracePeriodEnd = startDt.add(const Duration(minutes: 15));
+      if (now.isBefore(gracePeriodEnd)) {
+        _showTimeRestrictionDialog(
+          title: '아직 노쇼 처리 시간이 아닙니다',
+          message:
+              '예약 시작 시간으로부터 15분이 지난 후 노쇼로 처리할 수 있습니다.\n예약 시간: ${_formatKORDateTime(startDt)}\n노쇼 처리 가능: ${_formatKORTimeOnly(gracePeriodEnd)}부터',
+        );
+        return;
+      }
+    }
 
     if (action == 'reject') {
       actionReason = await _showReasonDialog(
@@ -192,14 +292,14 @@ class _BusinessReservationsScreenState extends State<BusinessReservationsScreen>
         hint: '거절 사유를 입력해 주세요 (예: 재료 소진, 예약 인원 초과)',
         confirmText: '거절하기',
       );
-      if (actionReason == null) return; // User cancelled dialog
+      if (actionReason == null) return;
     } else if (action == 'cancel') {
       actionReason = await _showReasonDialog(
         title: '매장 예약 취소',
         hint: '매장 취소 사유를 입력해 주세요 (예: 매장 임시 휴무)',
         confirmText: '취소하기',
       );
-      if (actionReason == null) return; // User cancelled dialog
+      if (actionReason == null) return;
     } else if (action == 'no-show') {
       final confirm = await showDialog<bool>(
         context: context,
@@ -262,9 +362,18 @@ class _BusinessReservationsScreenState extends State<BusinessReservationsScreen>
       }
     } catch (e) {
       if (mounted) {
+        String msg = '예약 상태를 변경하지 못했습니다.\n잠시 후 다시 시도해 주세요.';
+        final errStr = e.toString();
+        if (errStr.contains('RESERVATION_NOT_STARTED')) {
+          msg = '예약 시작 시간이 지난 후 이용 완료로 처리할 수 있습니다.';
+        } else if (errStr.contains('NO_SHOW_GRACE_PERIOD_NOT_ELAPSED')) {
+          msg = '예약 시작 시간으로부터 15분이 지난 후 노쇼로 처리할 수 있습니다.';
+        } else if (errStr.contains('RESERVATION_TIME_MISSING')) {
+          msg = '예약 시간이 확인되지 않아 처리할 수 없습니다.\n예약정보를 확인해 주세요.';
+        }
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('예약 상태를 변경하지 못했습니다.\n잠시 후 다시 시도해 주세요.'),
+          SnackBar(
+            content: Text(msg),
             backgroundColor: Colors.red,
           ),
         );
@@ -275,6 +384,7 @@ class _BusinessReservationsScreenState extends State<BusinessReservationsScreen>
       }
     }
   }
+
 
   Future<String?> _showReasonDialog({
     required String title,
@@ -613,39 +723,50 @@ class _BusinessReservationsScreenState extends State<BusinessReservationsScreen>
                                   ],
                                 ),
                               ] else if (status == 'APPROVED') ...[
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    OutlinedButton(
-                                      onPressed: () =>
-                                          _actionReservation(resId, 'cancel'),
-                                      style: OutlinedButton.styleFrom(
-                                        foregroundColor: Colors.red,
-                                      ),
-                                      child: const Text('취소'),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    OutlinedButton(
-                                      onPressed: () =>
-                                          _actionReservation(resId, 'no-show'),
-                                      style: OutlinedButton.styleFrom(
-                                        foregroundColor: Colors.purple,
-                                      ),
-                                      child: const Text('노쇼'),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    ElevatedButton(
-                                      onPressed: () =>
-                                          _actionReservation(resId, 'complete'),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.blue,
-                                        foregroundColor: Colors.white,
-                                      ),
-                                      child: const Text('이용 완료'),
-                                    ),
-                                  ],
+                                Builder(
+                                  builder: (context) {
+                                    final startDt = _parseReservationStartDateTime(res);
+                                    final now = DateTime.now();
+                                    final isCompleteReady = startDt != null && !now.isBefore(startDt);
+                                    final isNoShowReady = startDt != null && !now.isBefore(startDt.add(const Duration(minutes: 15)));
+
+                                    return Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        OutlinedButton(
+                                          onPressed: () =>
+                                              _actionReservation(resId, 'cancel', resMap: res),
+                                          style: OutlinedButton.styleFrom(
+                                            foregroundColor: Colors.red,
+                                          ),
+                                          child: const Text('취소'),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        OutlinedButton(
+                                          onPressed: () =>
+                                              _actionReservation(resId, 'no-show', resMap: res),
+                                          style: OutlinedButton.styleFrom(
+                                            foregroundColor: isNoShowReady ? Colors.purple : Colors.grey,
+                                            side: BorderSide(color: isNoShowReady ? Colors.purple : Colors.grey.shade300),
+                                          ),
+                                          child: Text('노쇼', style: TextStyle(color: isNoShowReady ? Colors.purple : Colors.grey.shade600)),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        ElevatedButton(
+                                          onPressed: () =>
+                                              _actionReservation(resId, 'complete', resMap: res),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: isCompleteReady ? Colors.blue : Colors.grey.shade300,
+                                            foregroundColor: isCompleteReady ? Colors.white : Colors.grey.shade700,
+                                          ),
+                                          child: const Text('이용 완료'),
+                                        ),
+                                      ],
+                                    );
+                                  },
                                 ),
                               ],
+
                             ],
                           ),
                         ),

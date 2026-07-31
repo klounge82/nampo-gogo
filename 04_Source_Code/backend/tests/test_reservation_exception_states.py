@@ -1,5 +1,5 @@
 import unittest
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -119,15 +119,22 @@ class TestReservationExceptionStates(unittest.TestCase):
         self.db.close()
         models.Base.metadata.drop_all(bind=self.engine)
 
-    def _create_reservation(self, status="PENDING", user_id=None):
+    def _create_reservation(self, status="PENDING", user_id=None, is_past=True):
         uid = user_id or self.customer.id
+        kst = timezone(timedelta(hours=9))
+        now_kst = datetime.now(kst)
+        if is_past:
+            res_dt = now_kst - timedelta(hours=2)
+        else:
+            res_dt = now_kst + timedelta(days=1)
+
         res = models.StoreReservation(
             id=f"res_test_{datetime.utcnow().timestamp()}",
             user_id=uid,
             store_id=self.store.id,
-            reservation_date="2026-08-01",
-            start_time="14:00",
-            reservation_time=datetime.utcnow() + timedelta(days=1),
+            reservation_date=res_dt.strftime("%Y-%m-%d"),
+            start_time=res_dt.strftime("%H:%M"),
+            reservation_time=res_dt.replace(tzinfo=None),
             party_size=2,
             status=status,
             customer_note="테스트 예약",
@@ -136,6 +143,7 @@ class TestReservationExceptionStates(unittest.TestCase):
         self.db.commit()
         self.db.refresh(res)
         return res
+
 
     def test_01_pending_to_rejected_with_reason(self):
         res = self._create_reservation("PENDING")
@@ -315,7 +323,43 @@ class TestReservationExceptionStates(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 404)
 
+    def test_18_future_reservation_complete_blocked(self):
+        res = self._create_reservation("APPROVED", is_past=False)
+        response = self.client.post(
+            f"/business/reservations/{res.id}/complete",
+            headers={"Authorization": f"Bearer {self.owner_token}"},
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("RESERVATION_NOT_STARTED", response.json()["detail"])
+
+    def test_19_future_reservation_no_show_blocked(self):
+        res = self._create_reservation("APPROVED", is_past=False)
+        response = self.client.post(
+            f"/business/reservations/{res.id}/no-show",
+            headers={"Authorization": f"Bearer {self.owner_token}"},
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("NO_SHOW_GRACE_PERIOD_NOT_ELAPSED", response.json()["detail"])
+
+    def test_20_past_reservation_complete_and_noshow_allowed(self):
+        res_complete = self._create_reservation("APPROVED", is_past=True)
+        resp_comp = self.client.post(
+            f"/business/reservations/{res_complete.id}/complete",
+            headers={"Authorization": f"Bearer {self.owner_token}"},
+        )
+        self.assertEqual(resp_comp.status_code, 200)
+        self.assertEqual(resp_comp.json()["status"], "COMPLETED")
+
+        res_noshow = self._create_reservation("APPROVED", is_past=True)
+        resp_noshow = self.client.post(
+            f"/business/reservations/{res_noshow.id}/no-show",
+            headers={"Authorization": f"Bearer {self.owner_token}"},
+        )
+        self.assertEqual(resp_noshow.status_code, 200)
+        self.assertEqual(resp_noshow.json()["status"], "NO_SHOW")
+
 if __name__ == '__main__':
     unittest.main()
+
 
 

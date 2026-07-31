@@ -5,6 +5,7 @@ import '../models/reservation.dart';
 import '../repositories/reservation_repository.dart';
 import '../providers/auth_provider.dart';
 import '../utils/reservation_status_helper.dart';
+import '../widgets/reservation_qr_widget.dart';
 import 'payment_screen.dart';
 
 class ReservationDetailScreen extends StatefulWidget {
@@ -309,6 +310,17 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
       icon = Icons.cancel_outlined;
     }
 
+    String reasonLabel = '사유';
+    if (st == 'REJECTED') {
+      reasonLabel = '거절 사유';
+    } else if (st == 'CANCELLED_BY_CUSTOMER') {
+      reasonLabel = '이용자 취소 사유';
+    } else if (st == 'CANCELLED_BY_BUSINESS') {
+      reasonLabel = '매장 취소 사유';
+    } else if (st.contains('CANCEL')) {
+      reasonLabel = '취소 사유';
+    }
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16.0),
@@ -336,14 +348,24 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
               ),
             ],
           ),
-          if (reason != null && reason.isNotEmpty) ...[
+          if (reason != null && reason.trim().isNotEmpty) ...[
             const SizedBox(height: 8.0),
             Text(
-              '사유: $reason',
+              '$reasonLabel: $reason',
               style: TextStyle(
                 fontSize: 13.0,
                 color: color.withValues(alpha: 0.9),
                 fontWeight: FontWeight.w500,
+              ),
+            ),
+          ] else if (st == 'REJECTED' || st.contains('CANCEL')) ...[
+            const SizedBox(height: 8.0),
+            Text(
+              '$reasonLabel: 등록된 사유가 없습니다.',
+              style: TextStyle(
+                fontSize: 13.0,
+                color: color.withValues(alpha: 0.7),
+                fontWeight: FontWeight.w400,
               ),
             ),
           ],
@@ -353,6 +375,8 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
   }
 
   Widget _buildTicketCard(Reservation res, String timeStr) {
+    final formattedCode = ReservationStatusHelper.formatReservationCode(res.id);
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -398,7 +422,7 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
                       ),
                     ),
                     Text(
-                      timeStr,
+                      timeStr.isNotEmpty ? timeStr : '시간 미정',
                       style: const TextStyle(
                         fontSize: 14.0,
                         fontWeight: FontWeight.bold,
@@ -428,11 +452,33 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 12.0),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      '예약번호',
+                      style: TextStyle(
+                        fontSize: 12.0,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    Text(
+                      formattedCode,
+                      style: const TextStyle(
+                        fontSize: 13.0,
+                        letterSpacing: 1.0,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
 
-          // Fake dotted divider line
+          // Dotted divider line
           Row(
             children: List.generate(30, (index) {
               return Expanded(
@@ -445,37 +491,23 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
             }),
           ),
 
-          // Fake Barcode section
+          // QR Code Section
           Padding(
             padding: const EdgeInsets.symmetric(
-              vertical: 24.0,
+              vertical: 20.0,
               horizontal: 20.0,
             ),
             child: Column(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(28, (index) {
-                    final isWide = index % 4 == 0 || index % 5 == 0;
-                    return Container(
-                      width: isWide ? 4.5 : 1.5,
-                      height: 50.0,
-                      color: res.status == 'cancelled'
-                          ? Colors.grey.shade400
-                          : Colors.black87,
-                    );
-                  }),
-                ),
-                const SizedBox(height: 8.0),
-                Text(
-                  'RES-${res.id.replaceAll('-', '').substring(0, 12).toUpperCase()}',
+                ReservationQrWidget(qrData: res.id, size: 140.0),
+                const SizedBox(height: 12.0),
+                const Text(
+                  '예약 확인용 QR',
                   style: TextStyle(
-                    fontSize: 10.0,
-                    letterSpacing: 2.0,
+                    fontSize: 11.0,
+                    letterSpacing: 1.5,
                     fontWeight: FontWeight.bold,
-                    color: res.status == 'cancelled'
-                        ? Colors.grey
-                        : AppColors.textPrimary,
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ],

@@ -114,7 +114,10 @@ class _MyReservationsScreenState extends State<MyReservationsScreen>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('예약 정보를 불러오지 못했습니다: $_errorMessage'),
+                  const Text(
+                    '예약 정보를 불러오지 못했습니다.\n잠시 후 다시 시도해 주세요.',
+                    textAlign: TextAlign.center,
+                  ),
                   const SizedBox(height: 16.0),
                   ElevatedButton(
                     onPressed: _loadReservations,

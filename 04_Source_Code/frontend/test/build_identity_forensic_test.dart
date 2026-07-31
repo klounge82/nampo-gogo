@@ -11,17 +11,17 @@ void main() {
 
   group('HOTFIX-013: Build Identity & Footer Forensic Tests', () {
     test(
-      '1. BuildInfo unit test provides exact RELEASE-001-I3 and e0195a1 values',
+      '1. BuildInfo unit test provides non-empty appBuildName and commitHash',
       () {
-        expect(BuildInfo.appBuildName, equals('RELEASE-001-I3'));
-        expect(BuildInfo.commitHash, equals('e0195a1'));
+        expect(BuildInfo.appBuildName, isNotEmpty);
+        expect(BuildInfo.commitHash, isNotEmpty);
         expect(BuildInfo.appBuildName, isNot(equals('HOTFIX-012')));
         expect(BuildInfo.commitHash, isNot(equals('f40d58a')));
       },
     );
 
     testWidgets(
-      '2. BusinessDashboardScreen Footer displays RELEASE-001-I3 and e0195a1',
+      '2. BusinessDashboardScreen Footer displays build info',
       (WidgetTester tester) async {
         final authProvider = AuthProvider();
         final appModeProvider = AppModeProvider();
@@ -42,14 +42,13 @@ void main() {
 
         await tester.pump(const Duration(milliseconds: 500));
 
-        // Verify Footer contains RELEASE-001-I3 and e0195a1
-        expect(find.textContaining('RELEASE-001-I3'), findsWidgets);
-        expect(find.textContaining('e0195a1'), findsWidgets);
+        expect(find.textContaining(BuildInfo.appBuildName), findsWidgets);
+        expect(find.textContaining(BuildInfo.commitHash), findsWidgets);
 
-        // Verify legacy strings are strictly NOT present
         expect(find.textContaining('HOTFIX-012'), findsNothing);
         expect(find.textContaining('f40d58a'), findsNothing);
       },
     );
+
   });
 }

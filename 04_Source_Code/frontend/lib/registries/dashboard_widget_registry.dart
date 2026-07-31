@@ -78,12 +78,13 @@ class DashboardWidgetRegistry {
     ),
     DashboardWidgetDefinition(
       widgetKey: 'completed_reservations',
-      title: '예약 완료',
+      title: '승인/완료 예약',
       icon: Icons.check_circle_outline,
       available: true,
-      statusText: '완료 건수',
+      statusText: '승인/완료',
       targetRoute: '/business/reservations',
     ),
+
     DashboardWidgetDefinition(
       widgetKey: 'reservation_settings',
       title: '예약 설정',

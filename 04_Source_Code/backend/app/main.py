@@ -1,4 +1,4 @@
-from datetime import datetime, time, timedelta
+from datetime import datetime, time, timedelta, timezone
 import math
 import hashlib
 from typing import Optional, List
@@ -2052,6 +2052,25 @@ def cancel_business_reservation(
     db.refresh(res_obj)
     return res_obj
 
+def _get_reservation_start_datetime(res_obj):
+    if res_obj.reservation_date and res_obj.start_time:
+        try:
+            dt_str = f"{res_obj.reservation_date.strip()} {res_obj.start_time.strip()}"
+            kst = timezone(timedelta(hours=9))
+            return datetime.strptime(dt_str, "%Y-%m-%d %H:%M").replace(tzinfo=kst)
+        except Exception:
+            pass
+
+    if res_obj.reservation_time:
+        res_dt = res_obj.reservation_time
+        if res_dt.tzinfo is None:
+            kst = timezone(timedelta(hours=9))
+            res_dt = res_dt.replace(tzinfo=kst)
+        return res_dt
+
+    return None
+
+
 @app.post("/business/reservations/{reservation_id}/complete", response_model=schemas.ReservationOut, tags=["BusinessReservations"])
 def complete_business_reservation(
     reservation_id: str,
@@ -2067,6 +2086,21 @@ def complete_business_reservation(
     check_business_store_access(db, user_id, res_obj.store_id)
     if res_obj.status in ["PENDING", "REJECTED", "CANCELLED_BY_CUSTOMER", "CANCELLED_BY_BUSINESS", "NO_SHOW"]:
         raise HTTPException(status_code=400, detail=f"승인된 예약만 완료 처리할 수 있습니다. (현재 상태: {res_obj.status})")
+
+    start_dt = _get_reservation_start_datetime(res_obj)
+    if not start_dt:
+        raise HTTPException(
+            status_code=400,
+            detail="RESERVATION_TIME_MISSING: 예약 시간이 확인되지 않아 처리할 수 없습니다."
+        )
+
+    kst = timezone(timedelta(hours=9))
+    now_kst = datetime.now(kst)
+    if now_kst < start_dt:
+        raise HTTPException(
+            status_code=400,
+            detail="RESERVATION_NOT_STARTED: Reservation cannot be completed before the scheduled start time."
+        )
 
     res_obj.status = "COMPLETED"
     db.commit()
@@ -2089,10 +2123,27 @@ def noshow_business_reservation(
     if res_obj.status in ["PENDING", "REJECTED", "CANCELLED_BY_CUSTOMER", "CANCELLED_BY_BUSINESS", "COMPLETED", "NO_SHOW"]:
         raise HTTPException(status_code=400, detail=f"승인된 예약만 노쇼 처리할 수 있습니다. (현재 상태: {res_obj.status})")
 
+    start_dt = _get_reservation_start_datetime(res_obj)
+    if not start_dt:
+        raise HTTPException(
+            status_code=400,
+            detail="RESERVATION_TIME_MISSING: 예약 시간이 확인되지 않아 처리할 수 없습니다."
+        )
+
+    kst = timezone(timedelta(hours=9))
+    now_kst = datetime.now(kst)
+    grace_period_end = start_dt + timedelta(minutes=15)
+    if now_kst < grace_period_end:
+        raise HTTPException(
+            status_code=400,
+            detail="NO_SHOW_GRACE_PERIOD_NOT_ELAPSED: Reservation cannot be marked as no-show before the grace period ends."
+        )
+
     res_obj.status = "NO_SHOW"
     db.commit()
     db.refresh(res_obj)
     return res_obj
+
 
 
 

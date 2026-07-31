@@ -1307,14 +1307,14 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                       '$storeName 매장에\n예약 신청이 접수되었습니다.',
                       textAlign: TextAlign.center,
                       style: const TextStyle(
-                        fontSize: 14.0,
+                        fontSize: 15.0,
                         height: 1.4,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 10.0),
+                    const SizedBox(height: 8.0),
                     const Text(
-                      '사업자가 확인한 후\n승인 여부를 알려드립니다.',
+                      '매장에서 확인한 후 예약 상태가 변경됩니다.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 13.0,
@@ -1322,6 +1322,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                         height: 1.4,
                       ),
                     ),
+
                     const SizedBox(height: 24.0),
                     SizedBox(
                       width: double.infinity,
