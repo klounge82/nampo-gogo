@@ -24,7 +24,7 @@ void main() {
     );
 
     testWidgets(
-      '2. ReservationQrWidget handles empty/null qrData safely',
+      '2. ReservationQrWidget handles empty/null qrData safely with fallback guidance text',
       (WidgetTester tester) async {
         await tester.pumpWidget(
           const MaterialApp(
@@ -32,7 +32,7 @@ void main() {
           ),
         );
 
-        expect(find.byType(ReservationQrWidget), findsOneWidget);
+        expect(find.text('예약 확인 코드가 없습니다.'), findsOneWidget);
       },
     );
 
@@ -104,20 +104,22 @@ void main() {
       },
     );
 
-    test('7. Time comparison logic calculates start time and 15min grace period accurately', () {
-      final startDt = DateTime.parse('2026-08-03T15:00:00');
-      final graceEnd = startDt.add(const Duration(minutes: 15));
+    test(
+      '7. Time comparison logic calculates start time and 15min grace period accurately',
+      () {
+        final startDt = DateTime.parse('2026-08-03T15:00:00');
+        final graceEnd = startDt.add(const Duration(minutes: 15));
 
-      final beforeStart = DateTime.parse('2026-08-03T14:59:00');
-      final atStart = DateTime.parse('2026-08-03T15:00:00');
-      final at14Min = DateTime.parse('2026-08-03T15:14:00');
-      final at15Min = DateTime.parse('2026-08-03T15:15:00');
+        final beforeStart = DateTime.parse('2026-08-03T14:59:00');
+        final atStart = DateTime.parse('2026-08-03T15:00:00');
+        final at14Min = DateTime.parse('2026-08-03T15:14:00');
+        final at15Min = DateTime.parse('2026-08-03T15:15:00');
 
-      expect(beforeStart.isBefore(startDt), isTrue);
-      expect(atStart.isBefore(startDt), isFalse);
-      expect(at14Min.isBefore(graceEnd), isTrue);
-      expect(at15Min.isBefore(graceEnd), isFalse);
-    });
+        expect(beforeStart.isBefore(startDt), isTrue);
+        expect(atStart.isBefore(startDt), isFalse);
+        expect(at14Min.isBefore(graceEnd), isTrue);
+        expect(at15Min.isBefore(graceEnd), isFalse);
+      },
+    );
   });
 }
-
