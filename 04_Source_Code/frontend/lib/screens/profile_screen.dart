@@ -21,6 +21,7 @@ import 'language_settings_screen.dart';
 import 'profile_edit_screen.dart';
 import 'change_password_screen.dart';
 import 'account_delete_screen.dart';
+import 'policy_viewer_screen.dart';
 import '../l10n/app_localizations.dart';
 import '../config/production_config.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -486,35 +487,59 @@ class ProfileScreen extends StatelessWidget {
                   _buildMenuCard([
                     _buildMenuItem(
                       context,
-                      icon: Icons.info_outline,
-                      title: '서비스 소개',
-                      onTap: () =>
-                          _launchURL(context, ProductionConfig.publicSiteUrl),
-                    ),
-                    _buildMenuItem(
-                      context,
                       icon: Icons.shield_outlined,
                       title: '개인정보 처리방침',
-                      onTap: () => _launchURL(
+                      onTap: () => PolicyViewerScreen.show(
                         context,
-                        ProductionConfig.privacyPolicyUrl,
+                        title: '개인정보 처리방침',
+                        content: PolicyTexts.privacyPolicy,
                       ),
                     ),
                     _buildMenuItem(
                       context,
                       icon: Icons.description_outlined,
-                      title: '이용약관',
-                      onTap: () => _launchURL(
+                      title: '서비스 이용약관',
+                      onTap: () => PolicyViewerScreen.show(
                         context,
-                        ProductionConfig.termsOfServiceUrl,
+                        title: '서비스 이용약관',
+                        content: PolicyTexts.termsOfService,
+                      ),
+                    ),
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.event_note_outlined,
+                      title: '예약 및 취소 운영정책',
+                      onTap: () => PolicyViewerScreen.show(
+                        context,
+                        title: '예약 및 취소 운영정책',
+                        content: PolicyTexts.reservationPolicy,
+                      ),
+                    ),
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.rate_review_outlined,
+                      title: '리뷰 및 방문 인증 정책',
+                      onTap: () => PolicyViewerScreen.show(
+                        context,
+                        title: '리뷰 및 방문 인증 운영정책',
+                        content: PolicyTexts.reviewVisitPolicy,
+                      ),
+                    ),
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.location_on_outlined,
+                      title: '위치 및 카메라 권한 안내',
+                      onTap: () => PolicyViewerScreen.show(
+                        context,
+                        title: '위치 및 카메라 권한 안내',
+                        content: PolicyTexts.locationCameraGuide,
                       ),
                     ),
                     _buildMenuItem(
                       context,
                       icon: Icons.support_agent_outlined,
                       title: '고객지원 센터',
-                      onTap: () =>
-                          _launchURL(context, ProductionConfig.supportUrl),
+                      onTap: () => _launchURL(context, ProductionConfig.supportUrl),
                     ),
                   ]),
 

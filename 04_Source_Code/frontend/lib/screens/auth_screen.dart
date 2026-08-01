@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../constants/colors.dart';
 import '../providers/auth_provider.dart';
 import 'business_pending_shell.dart';
+import 'policy_viewer_screen.dart';
 
 enum AuthViewMode { login, signupSelection, customerSignup, businessSignup }
 
@@ -21,6 +22,9 @@ class _AuthScreenState extends State<AuthScreen> {
   final _passwordController = TextEditingController();
   final _passwordConfirmController = TextEditingController();
   final _nicknameController = TextEditingController();
+
+  // Policy Agreement
+  bool _agreeToTerms = false;
 
   // Business controllers
   final _businessNameController = TextEditingController();
@@ -70,6 +74,10 @@ class _AuthScreenState extends State<AuthScreen> {
 
   Future<void> _submitCustomerSignup() async {
     if (!_formKey.currentState!.validate()) return;
+    if (!_agreeToTerms) {
+      _showErrorDialog('약관 동의 필요', '회원가입을 위해 서비스 이용약관 및 개인정보 처리방침 동의에 체크해 주세요.');
+      return;
+    }
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final email = _emailController.text.trim();
@@ -105,6 +113,10 @@ class _AuthScreenState extends State<AuthScreen> {
 
   Future<void> _submitBusinessSignup() async {
     if (!_formKey.currentState!.validate()) return;
+    if (!_agreeToTerms) {
+      _showErrorDialog('약관 동의 필요', '사업자 가입을 위해 서비스 이용약관 및 개인정보 처리방침 동의에 체크해 주세요.');
+      return;
+    }
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final email = _emailController.text.trim();
@@ -721,6 +733,57 @@ class _AuthScreenState extends State<AuthScreen> {
           },
         ),
         const SizedBox(height: 16.0),
+      ],
+
+      // Required Policy Agreement for Signup
+      if (isSignup) ...[
+        const SizedBox(height: 8.0),
+        Container(
+          padding: const EdgeInsets.all(12.0),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade50,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.grey.shade300),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CheckboxListTile(
+                value: _agreeToTerms,
+                onChanged: (val) => setState(() => _agreeToTerms = val ?? false),
+                title: const Text(
+                  '[필수] 이용약관 및 개인정보 처리방침 동의',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                ),
+                controlAffinity: ListTileControlAffinity.leading,
+                activeColor: isBusiness ? const Color(0xFF00897B) : AppColors.primary,
+                contentPadding: EdgeInsets.zero,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  TextButton(
+                    onPressed: () => PolicyViewerScreen.show(
+                      context,
+                      title: '서비스 이용약관',
+                      content: PolicyTexts.termsOfService,
+                    ),
+                    child: const Text('이용약관 보기', style: TextStyle(fontSize: 12)),
+                  ),
+                  const Text('|', style: TextStyle(color: Colors.grey)),
+                  TextButton(
+                    onPressed: () => PolicyViewerScreen.show(
+                      context,
+                      title: '개인정보 처리방침',
+                      content: PolicyTexts.privacyPolicy,
+                    ),
+                    child: const Text('개인정보 처리방침 보기', style: TextStyle(fontSize: 12)),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ],
     ];
   }

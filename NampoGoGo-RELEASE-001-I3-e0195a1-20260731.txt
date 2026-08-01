@@ -1,0 +1,9 @@
+Build: RELEASE-001-I3
+Commit: e0195a1
+APK filename: NampoGoGo-RELEASE-001-I3-e0195a1-20260731.apk
+APK byte size: 176554604
+SHA-256: c324e5c3f9c6bd5a3c1e1decaa96b8f554aae1f21972a247c2ccf61bcd8d4bcd
+Build time KST: 2026-07-31 14:19:45 KST
+Package name: com.nampogogo.app
+Version code: 1
+Version name: 1.0.0

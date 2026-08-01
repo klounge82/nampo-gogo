@@ -45,9 +45,28 @@ class _AccountDeleteScreenState extends State<AccountDeleteScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('탈퇴 처리 실패: $e')));
+        String errorMsg = e.toString();
+        if (errorMsg.contains('409') || errorMsg.contains('소유 중인 사업장')) {
+          showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: const Text('탈퇴 불가 안내'),
+              content: const Text(
+                '현재 소유 중인 사업장이 있어 계정을 삭제할 수 없습니다.\n다른 관리자에게 사업장 소유권을 이전하거나 고객지원(jazzbj@naver.com)으로 문의해 주세요.',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('확인'),
+                ),
+              ],
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('탈퇴 처리 실패: $errorMsg')),
+          );
+        }
       }
     } finally {
       if (mounted) {

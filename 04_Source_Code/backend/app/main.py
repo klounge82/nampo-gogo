@@ -4812,18 +4812,146 @@ def change_password(req: schemas.ChangePasswordRequest, current_user: models.Use
     return {"success": True, "message": "비밀번호가 성공적으로 변경되었습니다."}
 
 @app.delete("/users/me", tags=["Profile"])
+@app.delete("/auth/me", tags=["Auth"])
 def withdraw_account(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    # Check if user is an active OWNER of any store
+    owner_membership = db.query(models.BusinessMembership).filter(
+        models.BusinessMembership.user_id == current_user.id,
+        models.BusinessMembership.role == "OWNER"
+    ).first()
+    store_owner = db.query(models.StoreOwner).filter(
+        models.StoreOwner.user_id == current_user.id,
+        models.StoreOwner.role == "OWNER"
+    ).first()
+    if owner_membership or store_owner:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="소유 중인 사업장이 있어 계정을 삭제할 수 없습니다. 다른 관리자에게 사업장 소유권을 이전하거나 고객지원으로 문의해 주세요."
+        )
+
     current_user.status = "withdrawn"
     current_user.nickname = "탈퇴한 사용자"
+    current_user.email = f"withdrawn_{current_user.id[:8]}@deleted.local"
     current_user.profile_image_url = None
 
+    # Remove UserAuth row to clear password hash
+    db.query(models.UserAuth).filter(models.UserAuth.user_id == current_user.id).delete(synchronize_session=False)
+
     # Deactivate push tokens to block message delivery
-    db.query(models.NotificationToken).filter(models.NotificationToken.user_id == current_user.id).update({"is_active": False})
+    db.query(models.NotificationToken).filter(models.NotificationToken.user_id == current_user.id).update({"is_active": False}, synchronize_session=False)
 
     db.add(current_user)
     db.commit()
 
-    return {"success": True, "message": "회원탈퇴 처리가 완료되었습니다. 이용해주셔서 감사합니다."}
+    return {"success": True, "message": "계정 삭제가 완료되었습니다. 이용해 주셔서 감사합니다."}
+
+
+# --- PUBLIC POLICY & ACCOUNT DELETION HTML ROUTES ---
+from fastapi.responses import HTMLResponse
+
+def _generate_policy_page(title: str, body_html: str) -> HTMLResponse:
+    html_content = f"""<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} - 남포고고</title>
+    <style>
+        body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; }}
+        .container {{ background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }}
+        h1 {{ color: #1a1a1a; font-size: 24px; border-bottom: 2px solid #3b82f6; padding-bottom: 10px; margin-top: 0; }}
+        h2 {{ color: #2563eb; font-size: 18px; margin-top: 25px; }}
+        p, li {{ font-size: 15px; color: #4b5563; }}
+        .meta-box {{ background: #eff6ff; border-left: 4px solid #3b82f6; padding: 12px 16px; margin: 15px 0; border-radius: 4px; font-size: 14px; color: #1e40af; }}
+        .footer {{ margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 13px; color: #9ca3af; text-align: center; }}
+        .btn {{ display: inline-block; background: #2563eb; color: #ffffff; padding: 10px 18px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 15px; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>{title}</h1>
+        {body_html}
+        <div class="footer">
+            <p><strong>남포고고 (Nampo GoGo)</strong> | 대표자: 황병준 | 개인정보 보호책임자: 황병준</p>
+            <p>고객지원 이메일: <a href="mailto:jazzbj@naver.com">jazzbj@naver.com</a> | 고객지원 운영시간: 10:00 ~ 18:00</p>
+            <p>© 2026 Nampo GoGo. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>"""
+    return HTMLResponse(content=html_content)
+
+@app.get("/privacy", response_class=HTMLResponse, tags=["Public Policy"])
+def get_public_privacy_policy():
+    body = """
+    <div class="meta-box">시행일자: 2026년 8월 20일 | 버전: v1.0</div>
+    <p>남포고고는 정보주체의 개인정보를 보호하고 이와 관련한 고충을 신속하고 원활하게 처리할 수 있도록 개인정보 처리방침을 수립·공개합니다.</p>
+    <h2>1. 수집하는 개인정보 항목</h2>
+    <ul>
+        <li><strong>회원 정보:</strong> 이메일 주소, 비밀번호 해시(bcrypt), 닉네임</li>
+        <li><strong>선택 정보:</strong> 프로필 이미지, 언어 설정</li>
+        <li><strong>예약 정보:</strong> 예약일시, 인원수, 고객 요청사항, 예약 상태</li>
+        <li><strong>인증 정보:</strong> 1회성 GPS 검증(반경 300m), QR 인증 기록 (이동동선 미저장)</li>
+    </ul>
+    <h2>2. 개인정보 보유 및 파기</h2>
+    <p>회원 탈퇴 시 개인식별 정보는 즉시 파기 또는 익명화 처리되며, 관계 법령(전자상거래법 등)에 따른 거래 기록은 법정 기간 동안 안전하게 보존됩니다.</p>
+    <h2>3. 개인정보 보호책임자 및 문의</h2>
+    <p>책임자: 황병준 | 담당부서: 남포고고 개인정보 담당 | 이메일: jazzbj@naver.com</p>
+    """
+    return _generate_policy_page("개인정보 처리방침", body)
+
+@app.get("/terms", response_class=HTMLResponse, tags=["Public Policy"])
+def get_public_terms():
+    body = """
+    <div class="meta-box">시행일자: 2026년 8월 20일 | 버전: v1.0</div>
+    <p>본 약관은 남포고고(대표자: 황병준)가 제공하는 모바일 애플리케이션 및 제반 서비스 이용 조건을 규정합니다.</p>
+    <h2>1. 서비스의 성격</h2>
+    <p>남포고고는 이용자와 제휴 매장 간의 매장 정보 안내 및 예약 중개를 제공하는 플랫폼 서비스입니다. 예약은 매장의 승인 후 확정됩니다.</p>
+    <h2>2. 예약 및 이용 규칙</h2>
+    <p>이용자는 예약 확정 후 방문이 어려울 경우 사전 취소를 진행해야 하며, 사전 취소 없이 방문하지 않는 경우 노쇼(No-Show)로 처리될 수 있습니다.</p>
+    <h2>3. 문의 및 분쟁 접수</h2>
+    <p>이메일: jazzbj@naver.com (접수 시 예약번호 및 매장명을 함께 전달해 주세요.)</p>
+    """
+    return _generate_policy_page("서비스 이용약관", body)
+
+@app.get("/account-deletion", response_class=HTMLResponse, tags=["Public Policy"])
+@app.get("/delete-account", response_class=HTMLResponse, tags=["Public Policy"])
+def get_public_account_deletion_guide():
+    body = """
+    <div class="meta-box">Google Play 스토어 계정 및 데이터 삭제 안내</div>
+    <p>남포고고 이용자는 언제든지 계정 삭제 및 관련 데이터의 파기를 요청할 수 있습니다.</p>
+    <h2>1. 앱 내 계정 삭제 방법</h2>
+    <ol>
+        <li>남포고고 앱 실행 후 로그인</li>
+        <li>[마이페이지/프로필] → [계정 관리] → [회원탈퇴] 선택</li>
+        <li>안내사항 확인 및 체크 동의 후 <strong>[최종 회원탈퇴 진행]</strong> 클릭</li>
+    </ol>
+    <h2>2. 앱을 사용할 수 없는 경우 (웹/이메일 접수)</h2>
+    <p>앱 삭제 또는 비밀번호 분실로 앱 내 탈퇴가 불가능한 경우, 아래 이메일로 가입한 이메일 주소와 계정 삭제 요청을 보내 주시면 본인 확인 후 지체 없이 처리해 드립니다.</p>
+    <p><strong>접수 이메일:</strong> <a href="mailto:jazzbj@naver.com">jazzbj@naver.com</a></p>
+    <h2>3. 삭제 및 보관 데이터 범위</h2>
+    <ul>
+        <li><strong>즉시 파기:</strong> 이메일 주소, 비밀번호 해시, 닉네임, 프로필 이미지, 푸시 토큰</li>
+        <li><strong>익명화 보존:</strong> 작성한 리뷰 (닉네임 '탈퇴한 사용자'로 변경 및 개인정보 제거)</li>
+        <li><strong>법정 보관:</strong> 전자상거래법 등 법령에 따른 예약/거래 기록 (법정 기간 보관 후 자동 파기)</li>
+    </ul>
+    <h2>4. 사업자 회원 유의사항</h2>
+    <p>사업자 회원(OWNER)의 경우 소유 중인 매장의 관리 권한을 다른 관리자에게 이관한 후 계정 삭제가 가능합니다.</p>
+    """
+    return _generate_policy_page("남포고고 계정 및 데이터 삭제 안내", body)
+
+@app.get("/support", response_class=HTMLResponse, tags=["Public Policy"])
+def get_public_support():
+    body = """
+    <div class="meta-box">고객지원 센터</div>
+    <p>남포고고 서비스 이용 중 문의사항이나 불편사항이 있으시면 언제든지 연락해 주세요.</p>
+    <h2>1. 고객지원 문의</h2>
+    <p><strong>이메일:</strong> <a href="mailto:jazzbj@naver.com">jazzbj@naver.com</a></p>
+    <p><strong>운영시간:</strong> 10:00 ~ 18:00 (이메일 문의는 상시 접수되며 영업시간 내 순차 답변드립니다.)</p>
+    <h2>2. 예약 및 리뷰 이의신청</h2>
+    <p>예약 처리나 리뷰와 관련한 분쟁 또는 이의신청은 예약번호 또는 매장명을 기재하여 고객지원 이메일로 접수해 주시기 바랍니다.</p>
+    """
+    return _generate_policy_page("고객지원 센터", body)
 
 
 # --- INTEGRATED SEARCH MVP APIs ---

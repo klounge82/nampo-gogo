@@ -1,0 +1,9 @@
+Build: HOTFIX-014
+Commit: d22496a
+APK filename: NampoGoGo-HOTFIX-014-d22496a-20260731.apk
+APK byte size: 176554604
+SHA-256: bffc921d922a2fe51a821bd7d818073ebd8de0dfec4fa52fda3ad4917e3308cd
+Build time KST: 2026-07-31 15:08:51 KST
+Package name: com.nampogogo.app
+Version code: 1
+Version name: 1.0.0
