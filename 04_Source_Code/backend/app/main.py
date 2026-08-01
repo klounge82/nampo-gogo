@@ -4815,35 +4815,48 @@ def change_password(req: schemas.ChangePasswordRequest, current_user: models.Use
 @app.delete("/auth/me", tags=["Auth"])
 def withdraw_account(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
     # Check if user is an active OWNER of any store
-    owner_membership = db.query(models.BusinessMembership).filter(
-        models.BusinessMembership.user_id == current_user.id,
-        models.BusinessMembership.role == "OWNER"
-    ).first()
-    store_owner = db.query(models.StoreOwner).filter(
-        models.StoreOwner.user_id == current_user.id,
-        models.StoreOwner.role == "OWNER"
-    ).first()
-    if owner_membership or store_owner:
+    if current_user.role in ["BUSINESS", "OWNER"]:
+        owner_entry = db.query(models.StoreOwner).filter(
+            models.StoreOwner.user_id == current_user.id,
+            models.StoreOwner.status == "active"
+        ).first()
+        if owner_entry:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="소유 중인 사업장이 있어 계정을 삭제할 수 없습니다. 다른 관리자에게 사업장 소유권을 이전하거나 고객지원으로 문의해 주세요."
+            )
+
+    if current_user.status == "withdrawn":
+        return {"success": True, "message": "이미 계정 삭제가 완료된 사용자입니다."}
+
+    try:
+        current_user.status = "withdrawn"
+        current_user.nickname = "탈퇴한 사용자"
+        current_user.email = f"withdrawn_{current_user.id}@deleted.local"
+        current_user.profile_image_url = None
+
+        # Remove UserAuth instance safely within session
+        user_auth = db.query(models.UserAuth).filter(models.UserAuth.user_id == current_user.id).first()
+        if user_auth:
+            db.delete(user_auth)
+
+        # Deactivate push tokens
+        db.query(models.NotificationToken).filter(models.NotificationToken.user_id == current_user.id).update({"is_active": False}, synchronize_session="fetch")
+
+        db.add(current_user)
+        db.commit()
+
+        return {"success": True, "message": "계정 삭제가 완료되었습니다. 이용해 주셔서 감사합니다."}
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as e:
+        db.rollback()
+        print(f"[ERROR_LOG] ACCOUNT_DELETE_FAILED user_id={current_user.id[:8]}*** error_type={type(e).__name__}")
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="소유 중인 사업장이 있어 계정을 삭제할 수 없습니다. 다른 관리자에게 사업장 소유권을 이전하거나 고객지원으로 문의해 주세요."
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="회원탈퇴 처리 중 오류가 발생했습니다. 잠시 후 다시 시도하거나 고객지원으로 문의해 주세요."
         )
-
-    current_user.status = "withdrawn"
-    current_user.nickname = "탈퇴한 사용자"
-    current_user.email = f"withdrawn_{current_user.id[:8]}@deleted.local"
-    current_user.profile_image_url = None
-
-    # Remove UserAuth row to clear password hash
-    db.query(models.UserAuth).filter(models.UserAuth.user_id == current_user.id).delete(synchronize_session=False)
-
-    # Deactivate push tokens to block message delivery
-    db.query(models.NotificationToken).filter(models.NotificationToken.user_id == current_user.id).update({"is_active": False}, synchronize_session=False)
-
-    db.add(current_user)
-    db.commit()
-
-    return {"success": True, "message": "계정 삭제가 완료되었습니다. 이용해 주셔서 감사합니다."}
 
 
 # --- PUBLIC POLICY & ACCOUNT DELETION HTML ROUTES ---
