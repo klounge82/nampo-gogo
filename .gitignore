@@ -69,5 +69,6 @@ Thumbs.db
 05_Release/Netlify_Policy_Update/
 05_Release/Nampo_GoGo_Netlify_Final/
 *.apk
+*.aab
 scratch/
 
