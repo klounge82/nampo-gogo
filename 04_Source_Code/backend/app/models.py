@@ -150,6 +150,12 @@ class Store(Base):
     review_verification_type = Column(String(50), nullable=True, default="BUSINESS_QR") # 'BUSINESS_QR', 'ATTRACTION_LOCATION', 'OPEN_REVIEW'
     review_location_radius_m = Column(Integer, nullable=True, default=300)
     manual_visit_allowed = Column(Boolean, nullable=True, default=True)
+    is_attraction = Column(Boolean, nullable=True, default=False)
+    tier = Column(String(50), nullable=True, default="OFFICIAL") # 'TEST', 'VERIFIED_BETA', 'OFFICIAL'
+    is_test_data = Column(Boolean, nullable=True, default=False)
+    entrance_image_url = Column(String(500), nullable=True)
+    interior_images_json = Column(Text, nullable=True)
+    product_images_json = Column(Text, nullable=True)
     created_at = Column(DateTime, nullable=False, server_default=func.now())
 
     # One-to-many relationship with Mission
@@ -592,6 +598,7 @@ class Payment(Base):
     target_type = Column(String(50), nullable=False) # 'RESERVATION_DEPOSIT', 'POINT_CHARGE', 'OWNER_SUBSCRIPTION'
     target_id = Column(String(36), nullable=False) # ID of target reservation, points recharge, etc.
     status = Column(String(50), nullable=False, default="pending") # 'pending', 'authorized', 'paid', 'failed', 'cancelled', 'refunded'
+    is_test = Column(Boolean, nullable=False, default=True)
     idempotency_key = Column(String(255), nullable=False, unique=True)
     created_at = Column(DateTime, nullable=False, server_default=func.now())
     updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
@@ -600,6 +607,23 @@ class Payment(Base):
     user = relationship("User", back_populates="payments")
     logs = relationship("PaymentLog", back_populates="payment", cascade="all, delete-orphan")
     refunds = relationship("PaymentRefund", back_populates="payment", cascade="all, delete-orphan")
+
+class StoreRecommendation(Base):
+    __tablename__ = "store_recommendations"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    referrer_store_id = Column(String(36), ForeignKey("stores.id", ondelete="CASCADE"), nullable=False, index=True)
+    recommended_store_id = Column(String(36), ForeignKey("stores.id", ondelete="CASCADE"), nullable=False, index=True)
+    referrer_user_id = Column(String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    customer_user_id = Column(String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    reservation_id = Column(String(36), nullable=True)
+    status = Column(String(50), nullable=False, default="CREATED") # 'CREATED', 'RESERVED', 'VISITED', 'REWARDED', 'CANCELLED'
+    points_rewarded = Column(Integer, nullable=False, default=0)
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+    updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
+
+    referrer_store = relationship("Store", foreign_keys=[referrer_store_id])
+    recommended_store = relationship("Store", foreign_keys=[recommended_store_id])
 
 class PaymentLog(Base):
     __tablename__ = "payment_logs"

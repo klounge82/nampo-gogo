@@ -237,6 +237,12 @@ class StoreBase(BaseModel):
     review_verification_type: Optional[str] = "BUSINESS_QR"
     review_location_radius_m: Optional[int] = 300
     manual_visit_allowed: Optional[bool] = True
+    is_attraction: Optional[bool] = False
+    tier: Optional[str] = "OFFICIAL"
+    is_test_data: Optional[bool] = False
+    entrance_image_url: Optional[str] = None
+    interior_images_json: Optional[str] = None
+    product_images_json: Optional[str] = None
 
 class StoreCreate(StoreBase):
     pass

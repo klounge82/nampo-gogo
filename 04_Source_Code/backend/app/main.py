@@ -272,6 +272,15 @@ def on_startup():
         seed_stores()
         seed_missions()
         seed_coupons()
+        try:
+            from scripts.seed_beta_places import seed_beta_places
+            db_session = SessionLocal()
+            try:
+                seed_beta_places(db_session)
+            finally:
+                db_session.close()
+        except Exception as e:
+            print(f"[BETA SEED WARNING]: {type(e).__name__}")
 
 from sqlalchemy import text
 
@@ -517,7 +526,8 @@ def signup(
         email=user_in.email,
         nickname=user_in.nickname,
         role="member",
-        status="active"
+        status="active",
+        current_points=1000
     )
     db.add(new_user)
     db.flush()
@@ -525,6 +535,18 @@ def signup(
     # Always grant CUSTOMER role by default
     cust_role = models.UserRole(user_id=new_user.id, role="CUSTOMER")
     db.add(cust_role)
+
+    # Insert 1000P Signup Welcome Point History
+    signup_point_history = models.PointHistory(
+        id=str(uuid.uuid4()),
+        user_id=new_user.id,
+        points=1000,
+        activity_type="EARN",
+        activity_name="회원가입 축하 포인트",
+        description="회원가입 축하 포인트 +1,000P가 적립되었습니다.",
+        created_at=datetime.utcnow()
+    )
+    db.add(signup_point_history)
 
     hashed_pwd = auth.get_password_hash(user_in.password)
     new_auth = models.UserAuth(
