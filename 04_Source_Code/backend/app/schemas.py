@@ -113,9 +113,17 @@ class BusinessSignupCreate(BaseModel):
     requested_store_id: Optional[str] = None
     guest_id: Optional[str] = None
 
+# --- PRODUCT SCHEMAS ---
+
 class ProductCreate(BaseModel):
     name: str
     description: Optional[str] = None
+    name_en: Optional[str] = None
+    name_ja: Optional[str] = None
+    name_zh: Optional[str] = None
+    description_en: Optional[str] = None
+    description_ja: Optional[str] = None
+    description_zh: Optional[str] = None
     price: int
     sale_price: Optional[int] = None
     duration_minutes: Optional[int] = None
@@ -127,6 +135,12 @@ class ProductCreate(BaseModel):
 class ProductUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
+    name_en: Optional[str] = None
+    name_ja: Optional[str] = None
+    name_zh: Optional[str] = None
+    description_en: Optional[str] = None
+    description_ja: Optional[str] = None
+    description_zh: Optional[str] = None
     price: Optional[int] = None
     sale_price: Optional[int] = None
     duration_minutes: Optional[int] = None
@@ -140,6 +154,12 @@ class ProductOut(BaseModel):
     store_id: str
     name: str
     description: Optional[str] = None
+    name_en: Optional[str] = None
+    name_ja: Optional[str] = None
+    name_zh: Optional[str] = None
+    description_en: Optional[str] = None
+    description_ja: Optional[str] = None
+    description_zh: Optional[str] = None
     price: int
     sale_price: Optional[int] = None
     duration_minutes: Optional[int] = None
@@ -147,24 +167,6 @@ class ProductOut(BaseModel):
     image_url: Optional[str] = None
     display_order: int
     status: str
-    created_at: datetime
-    updated_at: datetime
-
-    class Config:
-        from_attributes = True
-
-class BusinessApplicationOut(BaseModel):
-    id: str
-    user_id: str
-    business_name: str
-    business_registration_number: str
-    representative_name: str
-    phone: str
-    requested_store_id: Optional[str] = None
-    status: str
-    rejection_reason: Optional[str] = None
-    reviewed_by: Optional[str] = None
-    reviewed_at: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
 
@@ -230,6 +232,13 @@ class StoreBase(BaseModel):
     description_en: Optional[str] = None
     description_ja: Optional[str] = None
     description_zh: Optional[str] = None
+    address_en: Optional[str] = None
+    address_ja: Optional[str] = None
+    address_zh: Optional[str] = None
+    short_description: Optional[str] = None
+    short_description_en: Optional[str] = None
+    short_description_ja: Optional[str] = None
+    short_description_zh: Optional[str] = None
     status: Optional[str] = "영업중"
     operating_hours: Optional[str] = "09:00 - 22:00"
     phone_number: Optional[str] = "051-123-4567"
@@ -261,6 +270,12 @@ class MissionBase(BaseModel):
     store_id: str
     title: str
     description: str
+    title_en: Optional[str] = None
+    title_ja: Optional[str] = None
+    title_zh: Optional[str] = None
+    description_en: Optional[str] = None
+    description_ja: Optional[str] = None
+    description_zh: Optional[str] = None
     points: int
     auth_type: str  # 'GPS', 'QR', 'PHOTO'
     status: Optional[str] = "active"

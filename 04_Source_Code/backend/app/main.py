@@ -1053,14 +1053,89 @@ def get_business_reviews(
         "reviews": reviews_out
     }
 
+# --- LOCALIZATION HELPERS ---
+
+def resolve_locale(accept_language: Optional[str] = Header(None), locale: Optional[str] = Query(None)) -> str:
+    loc = locale or ""
+    if not loc and accept_language:
+        loc = accept_language.split(",")[0].split(";")[0].strip()
+    if not loc:
+        return "ko"
+    loc = loc.replace("-", "_").lower()
+    if loc in ["zh_hans", "zh_cn", "zh", "zh_sg"]:
+        return "zh"
+    if loc.startswith("ja"):
+        return "ja"
+    if loc.startswith("en"):
+        return "en"
+    return "ko"
+
+def get_localized_str(obj: any, field_name: str, target_locale: str) -> str:
+    val = getattr(obj, field_name, None)
+    if not target_locale or target_locale == "ko":
+        return val or ""
+    
+    loc_col = f"{field_name}_{target_locale}"
+    loc_val = getattr(obj, loc_col, None)
+    if loc_val and str(loc_val).strip():
+        return loc_val
+    
+    # Fallback to English if target is not EN
+    if target_locale != "en":
+        en_col = f"{field_name}_en"
+        en_val = getattr(obj, en_col, None)
+        if en_val and str(en_val).strip():
+            return en_val
+            
+    # Ultimate fallback: Korean base field
+    return val or ""
+
+def localize_store_obj(store: models.Store, loc: str):
+    if not store:
+        return store
+    l_name = get_localized_str(store, "name", loc)
+    l_desc = get_localized_str(store, "description", loc)
+    l_addr = get_localized_str(store, "address", loc)
+    l_sdesc = get_localized_str(store, "short_description", loc)
+    
+    store.name = l_name
+    store.description = l_desc
+    store.address = l_addr
+    if l_sdesc:
+        store.short_description = l_sdesc
+    return store
+
+def localize_product_obj(product: models.Product, loc: str):
+    if not product:
+        return product
+    l_name = get_localized_str(product, "name", loc)
+    l_desc = get_localized_str(product, "description", loc)
+    product.name = l_name
+    if l_desc:
+        product.description = l_desc
+    return product
+
+def localize_mission_obj(mission: models.Mission, loc: str):
+    if not mission:
+        return mission
+    l_title = get_localized_str(mission, "title", loc)
+    l_desc = get_localized_str(mission, "description", loc)
+    mission.title = l_title
+    mission.description = l_desc
+    return mission
+
 # --- PLACE / STORE MVP APIs ---
 
 @app.get("/stores", response_model=List[schemas.StoreOut], tags=["Stores"])
-def get_stores(category: Optional[str] = None, db: Session = Depends(get_db)):
+def get_stores(category: Optional[str] = None, locale: Optional[str] = Query(None), accept_language: Optional[str] = Header(None), db: Session = Depends(get_db)):
+    target_loc = resolve_locale(accept_language=accept_language, locale=locale)
     query = db.query(models.Store).filter(models.Store.status != "DRAFT")
     if category:
         query = query.filter(models.Store.category == category)
-    return query.all()
+    stores = query.all()
+    for s in stores:
+        localize_store_obj(s, target_loc)
+    return stores
 
 @app.get("/stores/categories", response_model=List[str], tags=["Stores"])
 def get_categories(db: Session = Depends(get_db)):
@@ -1068,38 +1143,62 @@ def get_categories(db: Session = Depends(get_db)):
     return [cat[0] for cat in categories]
 
 @app.get("/stores/search", response_model=List[schemas.StoreOut], tags=["Stores"])
-def search_stores(q: str, db: Session = Depends(get_db)):
-    return db.query(models.Store).filter(
+def search_stores(q: str, locale: Optional[str] = Query(None), accept_language: Optional[str] = Header(None), db: Session = Depends(get_db)):
+    target_loc = resolve_locale(accept_language=accept_language, locale=locale)
+    stores = db.query(models.Store).filter(
         models.Store.status != "DRAFT",
-        (models.Store.name.contains(q)) | (models.Store.description.contains(q))
+        (models.Store.name.contains(q)) | (models.Store.description.contains(q)) | (models.Store.name_en.contains(q)) | (models.Store.name_ja.contains(q)) | (models.Store.name_zh.contains(q))
     ).all()
+    for s in stores:
+        localize_store_obj(s, target_loc)
+    return stores
 
 @app.get("/stores/{store_id}", response_model=schemas.StoreOut, tags=["Stores"])
-def get_store(store_id: str, db: Session = Depends(get_db)):
+def get_store(store_id: str, locale: Optional[str] = Query(None), accept_language: Optional[str] = Header(None), db: Session = Depends(get_db)):
+    target_loc = resolve_locale(accept_language=accept_language, locale=locale)
     store = db.query(models.Store).filter(models.Store.id == store_id).first()
     if not store:
         raise HTTPException(status_code=404, detail="해당 장소를 찾을 수 없습니다.")
-    return store
+    return localize_store_obj(store, target_loc)
+
+@app.get("/stores/{store_id}/products", response_model=List[schemas.ProductOut], tags=["Stores"])
+def get_store_products(store_id: str, locale: Optional[str] = Query(None), accept_language: Optional[str] = Header(None), db: Session = Depends(get_db)):
+    target_loc = resolve_locale(accept_language=accept_language, locale=locale)
+    products = db.query(models.Product).filter(
+        models.Product.store_id == store_id
+    ).order_by(models.Product.display_order.asc()).all()
+    for p in products:
+        localize_product_obj(p, target_loc)
+    return products
 
 # --- MISSION MVP APIs ---
 
 @app.get("/missions", response_model=List[schemas.MissionOut], tags=["Missions"])
-def get_missions(store_id: Optional[str] = None, db: Session = Depends(get_db)):
+def get_missions(store_id: Optional[str] = None, locale: Optional[str] = Query(None), accept_language: Optional[str] = Header(None), db: Session = Depends(get_db)):
+    target_loc = resolve_locale(accept_language=accept_language, locale=locale)
     query = db.query(models.Mission)
     if store_id:
         query = query.filter(models.Mission.store_id == store_id)
-    return query.all()
+    missions = query.all()
+    for m in missions:
+        localize_mission_obj(m, target_loc)
+    return missions
 
 @app.get("/missions/{mission_id}", response_model=schemas.MissionOut, tags=["Missions"])
-def get_mission(mission_id: str, db: Session = Depends(get_db)):
+def get_mission(mission_id: str, locale: Optional[str] = Query(None), accept_language: Optional[str] = Header(None), db: Session = Depends(get_db)):
+    target_loc = resolve_locale(accept_language=accept_language, locale=locale)
     mission = db.query(models.Mission).filter(models.Mission.id == mission_id).first()
     if not mission:
         raise HTTPException(status_code=404, detail="해당 미션을 찾을 수 없습니다.")
-    return mission
+    return localize_mission_obj(mission, target_loc)
 
 @app.get("/stores/{store_id}/missions", response_model=List[schemas.MissionOut], tags=["Missions"])
-def get_store_missions(store_id: str, db: Session = Depends(get_db)):
-    return db.query(models.Mission).filter(models.Mission.store_id == store_id).all()
+def get_store_missions(store_id: str, locale: Optional[str] = Query(None), accept_language: Optional[str] = Header(None), db: Session = Depends(get_db)):
+    target_loc = resolve_locale(accept_language=accept_language, locale=locale)
+    missions = db.query(models.Mission).filter(models.Mission.store_id == store_id).all()
+    for m in missions:
+        localize_mission_obj(m, target_loc)
+    return missions
 
 # --- MISSION VERIFICATION / QR VERIFY API ---
 
