@@ -538,13 +538,9 @@ def signup(
 
     # Insert 1000P Signup Welcome Point History
     signup_point_history = models.PointHistory(
-        id=str(uuid.uuid4()),
         user_id=new_user.id,
         points=1000,
-        activity_type="EARN",
-        activity_name="회원가입 축하 포인트",
-        description="회원가입 축하 포인트 +1,000P가 적립되었습니다.",
-        created_at=datetime.utcnow()
+        activity="회원가입 축하 포인트"
     )
     db.add(signup_point_history)
 
