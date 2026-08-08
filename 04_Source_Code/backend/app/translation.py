@@ -1,5 +1,7 @@
 import os
-import httpx
+import json
+import urllib.request
+import urllib.error
 from typing import Optional
 
 class TranslationProviderAdapter:
@@ -42,30 +44,59 @@ class TranslationProviderAdapter:
         if source_locale:
             payload["source"] = source_locale
 
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            res = await client.post(url, json=payload)
-            if res.status_code == 200:
-                data = res.json()
-                return data["data"]["translations"][0]["translatedText"]
-            else:
-                raise RuntimeError(f"Google Translate API Error ({res.status_code}): {res.text}")
+        data_bytes = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(
+            url,
+            data=data_bytes,
+            headers={"Content-Type": "application/json", "User-Agent": "NampoGoGo-Backend/1.0"},
+            method="POST"
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=10.0) as response:
+                res_data = json.loads(response.read().decode("utf-8"))
+                return res_data["data"]["translations"][0]["translatedText"]
+        except urllib.error.HTTPError as he:
+            err_body = he.read().decode("utf-8", errors="ignore")
+            raise RuntimeError(f"Google Translate API Error ({he.code}): {err_body}")
+        except Exception as e:
+            raise RuntimeError(f"Google Translate Connection Error: {str(e)}")
 
     async def _translate_deepl(self, text: str, target_locale: str, source_locale: Optional[str]) -> str:
-        target = "ZH" if target_locale.lower() in ["zh_hans", "zh-hans", "zh"] else target_locale.upper()
+        loc_lower = target_locale.lower()
+        if "zh" in loc_lower:
+            target = "ZH"
+        elif loc_lower.startswith("en"):
+            target = "EN"
+        elif loc_lower.startswith("ja"):
+            target = "JA"
+        elif loc_lower.startswith("ko"):
+            target = "KO"
+        else:
+            target = target_locale.upper()
+
         url = "https://api-free.deepl.com/v2/translate" if "free" in self.api_key or ":fx" in self.api_key else "https://api.deepl.com/v2/translate"
         headers = {
             "Authorization": f"DeepL-Auth-Key {self.api_key}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "User-Agent": "NampoGoGo-Backend/1.0"
         }
         payload = {
             "text": [text],
             "target_lang": target
         }
-
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            res = await client.post(url, json=payload, headers=headers)
-            if res.status_code == 200:
-                data = res.json()
-                return data["translations"][0]["text"]
-            else:
-                raise RuntimeError(f"DeepL API Error ({res.status_code}): {res.text}")
+        data_bytes = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(
+            url,
+            data=data_bytes,
+            headers=headers,
+            method="POST"
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=10.0) as response:
+                res_data = json.loads(response.read().decode("utf-8"))
+                return res_data["translations"][0]["text"]
+        except urllib.error.HTTPError as he:
+            err_body = he.read().decode("utf-8", errors="ignore")
+            raise RuntimeError(f"DeepL API Error ({he.code}): {err_body}")
+        except Exception as e:
+            raise RuntimeError(f"DeepL Connection Error: {str(e)}")
