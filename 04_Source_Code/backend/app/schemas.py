@@ -484,6 +484,16 @@ class MyReviewOut(BaseModel):
         from_attributes = True
         orm_mode = True
 
+class ReviewTranslationRequest(BaseModel):
+    target_locale: str
+
+class ReviewTranslationOut(BaseModel):
+    review_id: str
+    source_locale: str
+    target_locale: str
+    translated_text: str
+    cached: bool
+
 # --- ADMIN SCHEMAS ---
 
 class AdminAuditLogOut(BaseModel):
@@ -560,6 +570,7 @@ class RecommendationRequest(BaseModel):
     transport_mode: str # 'WALK', 'TRANSIT', 'DRIVE'
     latitude: Optional[float] = None
     longitude: Optional[float] = None
+    locale: Optional[str] = "ko"
     
     # Personalization options
     use_personalization: Optional[bool] = False

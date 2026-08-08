@@ -11,6 +11,7 @@ import json
 
 from .database import engine, Base, SessionLocal, get_db
 from . import models, schemas, auth, config
+from .translation import TranslationProviderAdapter
 
 import os
 
@@ -3321,6 +3322,62 @@ def rewrite_review(
         raise HTTPException(status_code=500, detail=f"리뷰 다시 작성 중 오류 발생: {str(e)}")
 
     return attach_ownership_flags(review, user_id=req.user_id, guest_id=eff_guest_id)
+
+# In-memory translation cache (review_id + target_locale -> (updated_at_iso, translated_text))
+_review_translation_cache = {}
+
+@app.post("/reviews/{review_id}/translate", response_model=schemas.ReviewTranslationOut, tags=["Reviews"])
+async def translate_review(
+    review_id: str,
+    req: schemas.ReviewTranslationRequest,
+    db: Session = Depends(get_db)
+):
+    review = db.query(models.Review).filter(models.Review.id == review_id).first()
+    if not review:
+        raise HTTPException(status_code=404, detail="해당 리뷰를 찾을 수 없습니다.")
+
+    target_loc = req.target_locale.lower()
+    norm_target = "zh_Hans" if "zh" in target_loc else req.target_locale
+    cache_key = f"{review_id}_{norm_target}"
+    review_updated_iso = review.updated_at.isoformat()
+
+    # 1. Check cache (validate against review_updated_at for cache invalidation)
+    if cache_key in _review_translation_cache:
+        cached_updated_iso, cached_text = _review_translation_cache[cache_key]
+        if cached_updated_iso == review_updated_iso:
+            return schemas.ReviewTranslationOut(
+                review_id=review_id,
+                source_locale="auto",
+                target_locale=norm_target,
+                translated_text=cached_text,
+                cached=True
+            )
+
+    # 2. Call Translation Provider Adapter (Google / DeepL API)
+    adapter = TranslationProviderAdapter()
+    try:
+        translated_text = await adapter.translate_text(
+            text=review.content,
+            target_locale=norm_target
+        )
+        _review_translation_cache[cache_key] = (review_updated_iso, translated_text)
+        return schemas.ReviewTranslationOut(
+            review_id=review_id,
+            source_locale="auto",
+            target_locale=norm_target,
+            translated_text=translated_text,
+            cached=False
+        )
+    except ValueError as ve:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(ve)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"Translation API 오류: {str(e)}"
+        )
 
 # --- ADMIN MVP APIs ---
 
