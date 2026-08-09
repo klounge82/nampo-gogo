@@ -3999,12 +3999,26 @@ def deploy_beta_data_endpoint(db: Session = Depends(get_db)):
 
         created_products = 0
         for pr in products:
-            pd = db.query(models.Product).filter(models.Product.id == pr['id']).first()
+            pr_data = {
+                "id": pr["id"],
+                "store_id": pr["store_id"],
+                "name": pr["name"],
+                "name_en": pr.get("name_en"),
+                "name_ja": pr.get("name_ja"),
+                "name_zh": pr.get("name_zh"),
+                "description": pr.get("description"),
+                "description_en": pr.get("description_en"),
+                "description_ja": pr.get("description_ja"),
+                "description_zh": pr.get("description_zh"),
+                "price": pr["price"],
+                "status": "ACTIVE"
+            }
+            pd = db.query(models.Product).filter(models.Product.id == pr_data['id']).first()
             if not pd:
-                pd = models.Product(**pr)
+                pd = models.Product(**pr_data)
                 db.add(pd)
             else:
-                for k, v in pr.items():
+                for k, v in pr_data.items():
                     setattr(pd, k, v)
             created_products += 1
 
