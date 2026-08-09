@@ -3972,12 +3972,28 @@ def deploy_beta_data_endpoint(db: Session = Depends(get_db)):
 
         created_missions = 0
         for m in missions:
-            ms = db.query(models.Mission).filter(models.Mission.id == m['id']).first()
+            # Filter fields to match models.Mission columns exactly
+            m_data = {
+                "id": m["id"],
+                "store_id": m["store_id"],
+                "title": m["title"],
+                "title_en": m.get("title_en"),
+                "title_ja": m.get("title_ja"),
+                "title_zh": m.get("title_zh"),
+                "description": m["description"],
+                "description_en": m.get("description_en"),
+                "description_ja": m.get("description_ja"),
+                "description_zh": m.get("description_zh"),
+                "auth_type": m.get("auth_type", "QR"),
+                "points": m.get("points", 100),
+                "status": "active"
+            }
+            ms = db.query(models.Mission).filter(models.Mission.id == m_data['id']).first()
             if not ms:
-                ms = models.Mission(**m)
+                ms = models.Mission(**m_data)
                 db.add(ms)
             else:
-                for k, v in m.items():
+                for k, v in m_data.items():
                     setattr(ms, k, v)
             created_missions += 1
 
