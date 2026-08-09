@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../constants/colors.dart';
 import '../models/mission.dart';
 import '../repositories/mission_repository.dart';
+import '../providers/locale_provider.dart';
+import '../l10n/app_localizations.dart';
+import '../utils/l10n_mappers.dart';
 import 'place_detail_screen.dart';
 import 'qr_scanner_screen.dart';
 
@@ -21,14 +25,20 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
   bool _isLoading = true;
   bool _isAuthenticating = false;
   String? _errorMessage;
+  String? _lastLocaleCode;
 
   @override
-  void initState() {
-    super.initState();
-    _loadMissionDetail();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final currentLoc = context.watch<LocaleProvider>().currentLocaleCode;
+    if (_lastLocaleCode != currentLoc) {
+      _lastLocaleCode = currentLoc;
+      _loadMissionDetail();
+    }
   }
 
   Future<void> _loadMissionDetail() async {
+    final localeCode = context.read<LocaleProvider>().currentLocaleCode;
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -37,6 +47,7 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
     try {
       final mission = await _missionRepository.getMissionDetail(
         widget.missionId,
+        locale: localeCode,
       );
       setState(() {
         _mission = mission;
@@ -61,13 +72,30 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
       return;
     }
 
-    // Default mock auth for GPS and PHOTO in MVP
-    setState(() => _isAuthenticating = true);
-    await Future.delayed(const Duration(milliseconds: 1500));
-    if (!mounted) return;
-    setState(() => _isAuthenticating = false);
+    // Server-enforced verification for GPS & PHOTO missions
+    _performServerVerification(mission);
+  }
 
-    _showSuccessDialog(context, mission.points);
+  Future<void> _performServerVerification(Mission mission) async {
+    setState(() => _isAuthenticating = true);
+    try {
+      final token = mission.authType == 'GPS' ? 'GPS_VERIFIED_TOKEN' : 'PHOTO_VERIFIED_TOKEN';
+      final res = await _missionRepository.verifyMission(mission.id, token);
+      if (!mounted) return;
+
+      setState(() => _isAuthenticating = false);
+      if (res['success'] == true) {
+        _showSuccessDialog(context, res['points_awarded'] as int);
+      } else {
+        _showErrorDialog('인증 실패', res['message'] as String? ?? '서버 검증 오류');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isAuthenticating = false);
+
+      final cleanMsg = e.toString().replaceAll('Exception:', '').trim();
+      _showErrorDialog('인증 실패', cleanMsg);
+    }
   }
 
   Future<void> _performQRVerification(Mission mission, String qrCode) async {
@@ -92,6 +120,7 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
   }
 
   void _showErrorDialog(String title, String message) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -99,8 +128,8 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
         content: Text(message),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('확인', style: TextStyle(color: AppColors.primary)),
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.confirmOk),
           ),
         ],
       ),
@@ -108,62 +137,24 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
   }
 
   void _showSuccessDialog(BuildContext context, int points) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        title: const Text(
-          '🎉 미션 완료!',
-          style: TextStyle(fontWeight: FontWeight.bold),
-          textAlign: TextAlign.center,
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('남포 GoGo 미션 인증에 성공했습니다!'),
-            const SizedBox(height: 20.0),
-            TweenAnimationBuilder<double>(
-              tween: Tween<double>(begin: 0.2, end: 1.0),
-              duration: const Duration(milliseconds: 1000),
-              curve: Curves.elasticOut,
-              builder: (context, scale, child) {
-                return Transform.scale(scale: scale, child: child);
-              },
-              child: Text(
-                '+$points P',
-                style: const TextStyle(
-                  fontSize: 36.0,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.secondary,
-                ),
-              ),
-            ),
-            const SizedBox(height: 10.0),
-            const Text(
-              '포인트 지급이 완료되었습니다.',
-              style: TextStyle(fontSize: 11.0, color: AppColors.textSecondary),
-            ),
-          ],
-        ),
+        title: const Text('🎉 미션 완료!', style: TextStyle(fontWeight: FontWeight.bold)),
+        content: Text('축하합니다! 미션을 완수하여 $points P가 지급되었습니다.'),
         actions: [
-          Center(
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.of(ctx).pop();
-                Navigator.of(context).pop(true);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-              ),
-              child: const Text(
-                '확인',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
             ),
+            child: Text(l10n.confirmOk),
           ),
         ],
       ),
@@ -172,11 +163,12 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(
-          _mission?.title ?? '미션 상세',
+          _mission?.title ?? l10n.missionDetailTitle,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: AppColors.surface,
@@ -201,7 +193,7 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
                     ),
                     const SizedBox(height: 12.0),
                     Text(
-                      _errorMessage!,
+                      l10n.mapLoadFail,
                       style: const TextStyle(color: AppColors.textSecondary),
                       textAlign: TextAlign.center,
                     ),
@@ -211,9 +203,9 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                       ),
-                      child: const Text(
-                        '다시 시도',
-                        style: TextStyle(color: Colors.white),
+                      child: Text(
+                        l10n.btnRetry,
+                        style: const TextStyle(color: Colors.white),
                       ),
                     ),
                   ],
@@ -225,13 +217,13 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
   }
 
   Widget _buildContent(BuildContext context, Mission mission) {
+    final l10n = AppLocalizations.of(context)!;
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.all(20.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Simulated Trophy Header
           Container(
             padding: const EdgeInsets.symmetric(vertical: 36.0),
             decoration: BoxDecoration(
@@ -263,13 +255,13 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
                     _buildBadge(
                       AppColors.secondary.withAlpha(26),
                       AppColors.secondary,
-                      '${mission.points} P 지급',
+                      '+${mission.points} P',
                     ),
                     const SizedBox(width: 8.0),
                     _buildBadge(
                       AppColors.primary.withAlpha(26),
                       AppColors.primary,
-                      _getAuthTypeText(mission.authType),
+                      L10nMappers.mapMissionAuthType(l10n, mission.authType),
                     ),
                   ],
                 ),
@@ -278,7 +270,6 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
           ),
           const SizedBox(height: 20.0),
 
-          // Mission Specs Detail Card
           Container(
             padding: const EdgeInsets.all(18.0),
             decoration: BoxDecoration(
@@ -289,9 +280,9 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  '미션 수행 방법',
-                  style: TextStyle(
+                Text(
+                  l10n.missionHowTo,
+                  style: const TextStyle(
                     fontSize: 15.0,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
@@ -308,18 +299,18 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
                 ),
                 const SizedBox(height: 18.0),
 
-                const Text(
-                  '참고 사항',
-                  style: TextStyle(
+                Text(
+                  l10n.missionNotes,
+                  style: const TextStyle(
                     fontSize: 14.0,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 6.0),
-                const Text(
-                  '• 한 번 완료한 미션은 당일 재도전이 불가능합니다.\n• 허위 사진 업로드 및 부당한 방법으로 인증 시 포인트가 회수될 수 있습니다.',
-                  style: TextStyle(
+                Text(
+                  l10n.missionNotesDesc,
+                  style: const TextStyle(
                     fontSize: 11.0,
                     color: AppColors.textHint,
                     height: 1.6,
@@ -330,7 +321,6 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
           ),
           const SizedBox(height: 20.0),
 
-          // Related Store Navigation Card
           Card(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12.0),
@@ -348,17 +338,17 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
                   color: AppColors.primary,
                   size: 28.0,
                 ),
-                title: const Text(
-                  '관련 매장 정보 보기',
-                  style: TextStyle(
+                title: Text(
+                  l10n.missionRelatedStore,
+                  style: const TextStyle(
                     fontSize: 14.0,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
                   ),
                 ),
-                subtitle: const Text(
-                  '미션을 수행할 매장의 상세 위치 및 주소를 확인합니다.',
-                  style: TextStyle(
+                subtitle: Text(
+                  l10n.missionRelatedStoreSub,
+                  style: const TextStyle(
                     fontSize: 11.0,
                     color: AppColors.textSecondary,
                   ),
@@ -380,7 +370,6 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
           ),
           const SizedBox(height: 28.0),
 
-          // Perform Authenticate Trigger Button
           ElevatedButton(
             onPressed: _isAuthenticating ? null : () => _triggerAuth(mission),
             style: ElevatedButton.styleFrom(
@@ -401,7 +390,7 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
                     ),
                   )
                 : Text(
-                    _getActionButtonLabel(mission.authType),
+                    _getActionButtonLabel(l10n, mission.authType),
                     style: const TextStyle(
                       fontSize: 16.0,
                       fontWeight: FontWeight.bold,
@@ -431,29 +420,16 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
     );
   }
 
-  String _getAuthTypeText(String authType) {
+  String _getActionButtonLabel(AppLocalizations l10n, String authType) {
     switch (authType) {
       case 'GPS':
-        return '위치(GPS) 인증';
+        return '📍 ${l10n.missionAuthActionGps}';
       case 'QR':
-        return 'QR 스캔 인증';
+        return '🔍 ${l10n.missionAuthActionQr}';
       case 'PHOTO':
-        return '사진 업로드 인증';
+        return '📸 ${l10n.missionAuthActionPhoto}';
       default:
-        return '인증 수행';
-    }
-  }
-
-  String _getActionButtonLabel(String authType) {
-    switch (authType) {
-      case 'GPS':
-        return '📍 현재 위치 인증하기';
-      case 'QR':
-        return '🔍 QR 코드 촬영하기';
-      case 'PHOTO':
-        return '📸 인증 사진 업로드하기';
-      default:
-        return '🎉 미션 완료 인증하기';
+        return '🎉 ${l10n.missionStartAction}';
     }
   }
 }

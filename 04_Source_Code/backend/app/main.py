@@ -3773,6 +3773,237 @@ def update_coupon_status(coupon_id: str, req: schemas.CouponStatusUpdate, admin:
     log_admin_action(db, admin.id, "UPDATE_COUPON_STATUS", coupon_id, f"Changed coupon status from {old_status} to {req.status}")
     return coupon
 
+@app.post("/admin/deploy-beta-data", tags=["Admin"])
+def deploy_beta_data_endpoint(db: Session = Depends(get_db)):
+    """
+    Major-05B Production Beta Data Package Atomic Deployment Endpoint
+    """
+    places = [
+        {
+            "id": "yongdusan-park-busan-tower-001",
+            "name": "용두산공원", "name_en": "Yongdusan Park", "name_ja": "龍頭山公園", "name_zh": "龙头山公园",
+            "category": "ATTRACTION",
+            "description": "부산 남포동 중심에 위치한 용두산공원은 부산타워와 함께 부산항 전경을 한눈에 감상할 수 있는 대표 명소입니다.",
+            "description_en": "Located in the heart of Nampo-dong, Yongdusan Park featuring Busan Tower offers panoramic views of Busan Port and the city skyline.",
+            "description_ja": "南浦洞の中心に位置する龍頭山公園は、釜山タワーとともに釜山港のパノラマ全景を一望できる代表的な名所です。",
+            "description_zh": "位于南浦洞中心的龙头山公园配有釜山塔，是能一览釜山港全景的代表性观光名胜。",
+            "short_description": "부산의 상징 부산타워가 위치한 용두산공원",
+            "address": "부산 중구 용두산길 37",
+            "latitude": 35.1006, "longitude": 129.0326, "phone": None, "review_location_radius_m": 150.0,
+            "business_hours": "00:00 - 24:00 (연중무휴)",
+            "image_url": "https://raw.githubusercontent.com/klounge82/nampo-gogo/main/assets/images/yongdusan_park.jpg",
+            "review_verification_type": "ATTRACTION_LOCATION", "reservation_enabled": False
+        },
+        {
+            "id": "jagalchi-market-002",
+            "name": "자갈치시장", "name_en": "Jagalchi Market", "name_ja": "チャガルチ市場", "name_zh": "札嘎其市场",
+            "category": "MARKET",
+            "description": "한국 최대의 수산물 시장으로, 갓 잡은 싱싱한 해산물과 부산 아지매들의 정겨운 활력을 직접 체험할 수 있습니다.",
+            "description_en": "Korea's largest seafood market, famous for freshly caught seafood and vibrant ocean-front market culture.",
+            "description_ja": "韓国最大の水産市場で、獲れたての新鮮な海鮮と釜山活力を直接体験できます。",
+            "description_zh": "韩国最大的水产市场，可亲自体验新鲜海鲜与热情的市场活力。",
+            "short_description": "싱싱한 해산물과 부산 활력이 넘치는 자갈치시장",
+            "address": "부산 중구 자갈치해안로 52",
+            "latitude": 35.0966, "longitude": 129.0306, "phone": None, "review_location_radius_m": 150.0,
+            "business_hours": "05:00 - 22:00 (매달 첫째, 셋째 화요일 휴무)",
+            "image_url": "https://raw.githubusercontent.com/klounge82/nampo-gogo/main/assets/images/jagalchi_market.jpg",
+            "review_verification_type": "ATTRACTION_LOCATION", "reservation_enabled": False
+        },
+        {
+            "id": "gukje-market-003",
+            "name": "국제시장", "name_en": "Gukje Market", "name_ja": "国際市場", "name_zh": "国际市场",
+            "category": "MARKET",
+            "description": "부산의 근현대 역사와 영화 '국제시장'의 배경지로, 아리랑거리와 구제 골목 등 다채로운 볼거리와 쇼핑을 만날 수 있습니다.",
+            "description_en": "A historic traditional market featured in the famous movie 'Ode to My Father', filled with vintage goods, souvenirs, and local street food.",
+            "description_ja": "釜山の近現代史と映画『国際市場』の舞台。アリラン通りや古着街など多彩な見どころとショッピングが楽しめます。",
+            "description_zh": "釜山近现代历史与电影《国际市场》的背景地，拥有阿里郎街、古着巷等丰富多彩的看点与购物街。",
+            "short_description": "역사와 전통이 살아있는 국제시장",
+            "address": "부산 중구 중구로 36",
+            "latitude": 35.1009, "longitude": 129.0289, "phone": None, "review_location_radius_m": 150.0,
+            "business_hours": "09:00 - 20:00 (매달 첫째, 셋째 일요일 휴무)",
+            "image_url": "https://raw.githubusercontent.com/klounge82/nampo-gogo/main/assets/images/gukje_market.jpg",
+            "review_verification_type": "ATTRACTION_LOCATION", "reservation_enabled": False
+        },
+        {
+            "id": "biff-square-004",
+            "name": "BIFF광장", "name_en": "BIFF Square", "name_ja": "BIFF広場", "name_zh": "BIFF广场",
+            "category": "ATTRACTION",
+            "description": "부산국제영화제의 발상지로, 핸드프린팅 스트리트와 유명한 씨앗호떡 등 남포동 대표 길거리 음식을 즐길 수 있는 문화 공간입니다.",
+            "description_en": "The iconic birthplace of Busan International Film Festival, renowned for movie star handprints and famous Ssiat Hotteok street food.",
+            "description_ja": "釜山国際映画祭の発祥の地。ハンドプリンティングや有名なシアホットクなど街頭グルメが楽しめます。",
+            "description_zh": "釜山国际电影节的发源地，集合了名导手印手印墙与知名糖饼等名吃美食。",
+            "short_description": "영화의 거리와 명물 씨앗호떡이 모인 BIFF광장",
+            "address": "부산 중구 구덕로 58-1",
+            "latitude": 35.0987, "longitude": 129.0304, "phone": None, "review_location_radius_m": 100.0,
+            "business_hours": "00:00 - 24:00 (연중무휴)",
+            "image_url": "https://raw.githubusercontent.com/klounge82/nampo-gogo/main/assets/images/biff_square.jpg",
+            "review_verification_type": "ATTRACTION_LOCATION", "reservation_enabled": False
+        },
+        {
+            "id": "31b96920-2eb3-4f93-ab51-546fd8d933d1",
+            "name": "K-Lounge", "name_en": "K-Lounge", "name_ja": "K-Lounge", "name_zh": "K-Lounge",
+            "category": "EXPERIENCE",
+            "description": "외국인 관광객 및 남포동 방문객을 위한 프리미엄 K-컬처 체험 라운지 및 쉼터 공간입니다.",
+            "description_en": "Premium K-Culture experience lounge and rest zone for international visitors in Nampo-dong.",
+            "description_ja": "外国人観光客と南浦洞訪問客のためのプレミアムK-カルチャー体験ラウンジ＆休憩空間。",
+            "description_zh": "面向外国游客及南浦洞访客的高级K-文化体验休息酒廊与服务 center。",
+            "short_description": "프리미엄 K-컬처 체험 라운지 K-Lounge",
+            "address": "부산 중구 광복로 50-1 2층",
+            "latitude": 35.0995, "longitude": 129.0315, "phone": "051-246-8888", "review_location_radius_m": 50.0,
+            "business_hours": "10:00 - 20:00",
+            "image_url": "https://raw.githubusercontent.com/klounge82/nampo-gogo/main/assets/images/klounge_store.jpg",
+            "review_verification_type": "BUSINESS_QR", "reservation_enabled": True
+        },
+        {
+            "id": "nampo-toast-store-006",
+            "name": "남포토스트", "name_en": "Nampo Toast", "name_ja": "南浦トースト", "name_zh": "南浦吐司",
+            "category": "FOOD",
+            "description": "달콤하고 고소한 남포동 명물 전통 가판 토스트 전문점입니다.",
+            "description_en": "Famous street-side toast shop in Nampo-dong offering warm, crispy Korean-style toasts.",
+            "description_ja": "甘く香ばしい南浦洞名物の伝統街頭トースト専門店。",
+            "description_zh": "香甜酥脆的南浦洞特产传统街头吐司专卖店。",
+            "short_description": "남포동 명물 바삭한 가판 토스트 전문점",
+            "address": "부산 중구 광복로55번길 12",
+            "latitude": 35.0988, "longitude": 129.0302, "phone": None, "review_location_radius_m": 50.0,
+            "business_hours": "08:00 - 20:00",
+            "image_url": "https://raw.githubusercontent.com/klounge82/nampo-gogo/main/assets/images/nampo_toast.jpg",
+            "review_verification_type": "BUSINESS_QR", "reservation_enabled": False
+        },
+        {
+            "id": "nampo-dwaeji-gukbap-007",
+            "name": "남포돼지국밥", "name_en": "Nampo Dwaeji Gukbap", "name_ja": "南浦デジクッパ", "name_zh": "南浦猪肉汤饭",
+            "category": "FOOD",
+            "description": "진한 사골 육수와 푸짐한 돼지고기가 어우러진 부산의 으뜸 힐링 푸드 돼지국밥 전문점입니다.",
+            "description_en": "Authentic Busan pork soup with deep bone broth and generous pork slices.",
+            "description_ja": "濃厚な豚骨スープとたっぷりの豚肉が調和した釜山代表デジクッパ専門店。",
+            "description_zh": "浓郁猪骨汤底与丰富猪肉片完美配合的釜山特色猪肉汤饭专卖店。",
+            "short_description": "진한 육수와 푸짐한 수육의 부산 돼지국밥",
+            "address": "부산 중구 자갈치로 18",
+            "latitude": 35.0975, "longitude": 129.0298, "phone": None, "review_location_radius_m": 50.0,
+            "business_hours": "08:00 - 22:00",
+            "image_url": "https://raw.githubusercontent.com/klounge82/nampo-gogo/main/assets/images/dwaeji_gukbap.jpg",
+            "review_verification_type": "BUSINESS_QR", "reservation_enabled": False
+        },
+        {
+            "id": "nampo-bokguk-008",
+            "name": "남포복국", "name_en": "Nampo Bokguk", "name_ja": "南浦フグ汁", "name_zh": "南浦河豚汤",
+            "category": "FOOD",
+            "description": "시원하고 담백한 맑은 복국 지리로 여행의 피로를 깔끔하게 풀어주는 전통 복요리 전문점입니다.",
+            "description_en": "Refreshing and soothing pufferfish soup, perfect for recovering after a day of travel.",
+            "description_ja": "あっさり澄んだフグ汁で旅行の疲労を爽やかにほぐす伝統フグ料理専門店。",
+            "description_zh": "清爽鲜美的河豚汤，完美解乏的传统河豚料理店。",
+            "short_description": "시원하고 맑은 지리탕이 일품인 전통 복국",
+            "address": "부산 중구 국제로 24",
+            "latitude": 35.0998, "longitude": 129.0285, "phone": None, "review_location_radius_m": 50.0,
+            "business_hours": "10:00 - 21:00",
+            "image_url": "https://raw.githubusercontent.com/klounge82/nampo-gogo/main/assets/images/nampo_bokguk.jpg",
+            "review_verification_type": "BUSINESS_QR", "reservation_enabled": False
+        }
+    ]
+
+    missions = [
+        {
+            "id": "4b9c1d2e-3f4a-5b6c-7d8e-9f0a1b2c3d4e", "store_id": "31b96920-2eb3-4f93-ab51-546fd8d933d1",
+            "title": "K-Lounge QR 방문 인증", "title_en": "K-Lounge QR Visit Verification", "title_ja": "K-Lounge QR訪問認証", "title_zh": "K-Lounge QR到店打卡",
+            "description": "K-Lounge 매장에 방문하여 매장에 비치된 QR 코드를 스캔하고 방문 인증을 완료하세요.",
+            "description_en": "Visit K-Lounge, scan the official QR code at the counter, and complete your visit verification.",
+            "description_ja": "K-Lounge店舗を訪問し、店頭のQRコードをスキャンして訪問認証を完了してください。",
+            "description_zh": "到访K-Lounge门店，扫描柜台官方QR码完成到店打卡。",
+            "category": "FOOD", "auth_type": "QR_VERIFICATION", "points": 100,
+            "reward": "K-Lounge Welcome Drink Coupon", "reward_en": "K-Lounge Welcome Drink Coupon", "reward_ja": "K-Loungeウェルカムドリンククーポン", "reward_zh": "K-Lounge迎宾饮料优惠券", "is_active": True
+        },
+        {
+            "id": "5c0d2e3f-4a5b-6c7d-8e9f-0a1b2c3d4e5f", "store_id": "yongdusan-park-busan-tower-001",
+            "title": "용두산공원 부산타워 방문 인증", "title_en": "Yongdusan Park Busan Tower Visit", "title_ja": "龍頭山公園釜山タワー訪問認証", "title_zh": "龙头山公园釜山塔打卡",
+            "description": "용두산공원 부산타워 근처(반경 150m 이내)로 이동하여 GPS 위치 인증을 완료하세요.",
+            "description_en": "Go near Yongdusan Park Busan Tower (within 150m) and verify your location via GPS.",
+            "description_ja": "龍頭山公園釜山タワー付近（半径150m以内）に移動し、GPS位置認証を完了してください。",
+            "description_zh": "前往龙头山公园釜山塔附近（150米范围内），完成GPS位置打卡。",
+            "category": "ATTRACTION", "auth_type": "GPS_VERIFICATION", "points": 100,
+            "reward": "100 포인트 적립", "reward_en": "100 Points Earned", "reward_ja": "100ポイント獲得", "reward_zh": "获得 100 积分", "is_active": True
+        },
+        {
+            "id": "6d1e3f4a-5b6c-7d8e-9f0a-1b2c3d4e5f6a", "store_id": "jagalchi-market-002",
+            "title": "자갈치시장 수산물 탐방 인증", "title_en": "Jagalchi Seafood Market Tour", "title_ja": "チャガルチ市場海鮮探訪認証", "title_zh": "札嘎其海鲜市场游览打卡",
+            "description": "자갈치시장 건물 및 해안 산책로 근처(반경 150m 이내)에서 GPS 인증을 완료하세요.",
+            "description_en": "Verify your GPS location within 150m of Jagalchi Market and coastal boardwalk.",
+            "description_ja": "チャガルチ市場建物および海岸遊歩道付近（半径150m以内）でGPS認証を完了してください。",
+            "description_zh": "在札嘎其市场大楼及海岸散步道附近（150米范围内）完成GPS打卡。",
+            "category": "ATTRACTION", "auth_type": "GPS_VERIFICATION", "points": 100,
+            "reward": "100 포인트 적립", "reward_en": "100 Points Earned", "reward_ja": "100ポイント獲得", "reward_zh": "获得 100 积分", "is_active": True
+        },
+        {
+            "id": "7e2f4a5b-6c7d-8e9f-0a1b-2c3d4e5f6a7b", "store_id": "gukje-market-003",
+            "title": "국제시장 아리랑거리 탐방 인증", "title_en": "Gukje Market Arirang Street Tour", "title_ja": "国際市場アリラン通り探訪認証", "title_zh": "国际市场阿里郎街游览打卡",
+            "description": "국제시장 아리랑거리 근처(반경 150m 이내)에서 GPS 인증을 완료하세요.",
+            "description_en": "Verify your location via GPS near Gukje Market Arirang Street (within 150m).",
+            "description_ja": "国際市場アリラン通り付近（半径150m以内）でGPS認証를 완료してください。",
+            "description_zh": "在国际市场阿里郎街附近（150米范围内）完成GPS打卡。",
+            "category": "ATTRACTION", "auth_type": "GPS_VERIFICATION", "points": 100,
+            "reward": "100 포인트 적립", "reward_en": "100 Points Earned", "reward_ja": "100ポイント獲得", "reward_zh": "获得 100 积分", "is_active": True
+        },
+        {
+            "id": "8f3a5b6c-7d8e-9f0a-1b2c-3d4e5f6a7b8c", "store_id": "biff-square-004",
+            "title": "BIFF광장 씨앗호떡 사진 인증", "title_en": "BIFF Square Ssiat Hotteok Photo Verification", "title_ja": "BIFF広場シアホットク写真認証", "title_zh": "BIFF广场糖饼照片打卡",
+            "description": "BIFF광장에서 대표 길거리 음식 씨앗호떡 또는 현장 모습을 직접 촬영하여 업로드하세요.",
+            "description_en": "Take a photo of famous Ssiat Hotteok or BIFF Square street view and upload to complete photo verification.",
+            "description_ja": "BIFF広場で名物シアホットクまたは現場の雰囲気を撮影してアップロードしてください。",
+            "description_zh": "在BIFF广场拍摄名吃糖饼或现场照片并上传完成打卡。",
+            "category": "ATTRACTION", "auth_type": "PHOTO_VERIFICATION", "points": 100,
+            "reward": "100 포인트 적립", "reward_en": "100 Points Earned", "reward_ja": "100ポイント獲得", "reward_zh": "获得 100 积分", "is_active": True
+        }
+    ]
+
+    products = [
+        {"id": "prod-klounge-001", "store_id": "31b96920-2eb3-4f93-ab51-546fd8d933d1", "name": "K-Lounge 원데이 웰컴 패키지", "name_en": "K-Lounge 1-Day Welcome Package", "name_ja": "K-Lounge 1Dayウェルカムパッケージ", "name_zh": "K-Lounge 单日畅享体验套餐", "price": 10000, "description": "음료 1잔 + 한복/K-드라마 의상 체험 30분 + 짐 보관 서비스 1일 이용권", "is_active": True},
+        {"id": "prod-nampotoast-001", "store_id": "nampo-toast-store-006", "name": "원조 스페셜 토스트", "name_en": "Original Special Toast", "name_ja": "元祖スペシャル・トースト", "name_zh": "元祖特制吐司", "price": 4000, "description": "달콤한 특제 소스에 계란, 치즈, 햄, 야채가 듬뿍 들어간 원조 토스트", "is_active": True},
+        {"id": "prod-gukbap-001", "store_id": "nampo-dwaeji-gukbap-007", "name": "전통 돼지국밥", "name_en": "Traditional Pork Soup & Rice", "name_ja": "伝統デジクッパ", "name_zh": "传统猪肉汤饭", "price": 9500, "description": "진한 사골 육수에 살코기와 수육이 가득한 남포동 대표 돼지국밥", "is_active": True},
+        {"id": "prod-bokguk-001", "store_id": "nampo-bokguk-008", "name": "은복 지리탕", "name_en": "Silver Pufferfish Clear Soup", "name_ja": "銀フグ・ちり鍋", "name_zh": "银河豚清汤", "price": 14000, "description": "미나리와 콩나물이 듬뿍 들어가 시원하고 담백한 은복 지리탕", "is_active": True}
+    ]
+
+    try:
+        updated_places = 0
+        for p in places:
+            st = db.query(models.Store).filter(models.Store.id == p['id']).first()
+            if st:
+                for k, v in p.items():
+                    setattr(st, k, v)
+                updated_places += 1
+
+        created_missions = 0
+        for m in missions:
+            ms = db.query(models.Mission).filter(models.Mission.id == m['id']).first()
+            if not ms:
+                ms = models.Mission(**m)
+                db.add(ms)
+            else:
+                for k, v in m.items():
+                    setattr(ms, k, v)
+            created_missions += 1
+
+        created_products = 0
+        for pr in products:
+            pd = db.query(models.Product).filter(models.Product.id == pr['id']).first()
+            if not pd:
+                pd = models.Product(**pr)
+                db.add(pd)
+            else:
+                for k, v in pr.items():
+                    setattr(pd, k, v)
+            created_products += 1
+
+        db.commit()
+        return {
+            "success": True,
+            "message": "Major-05B Beta Data Package deployed successfully.",
+            "updated_places": updated_places,
+            "created_missions": created_missions,
+            "created_products": created_products
+        }
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"DEPLOY ERROR: {str(e)}")
+
 VALID_RESERVATION_STATUSES = {"pending", "confirmed", "cancelled", "completed"}
 
 def validate_and_update_reservation_status(
