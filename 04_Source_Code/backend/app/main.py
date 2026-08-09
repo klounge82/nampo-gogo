@@ -1166,7 +1166,8 @@ def get_store(store_id: str, locale: Optional[str] = Query(None), accept_languag
 def get_store_products(store_id: str, locale: Optional[str] = Query(None), accept_language: Optional[str] = Header(None), db: Session = Depends(get_db)):
     target_loc = resolve_locale(accept_language=accept_language, locale=locale)
     products = db.query(models.Product).filter(
-        models.Product.store_id == store_id
+        models.Product.store_id == store_id,
+        models.Product.status == "ACTIVE"
     ).order_by(models.Product.display_order.asc()).all()
     for p in products:
         localize_product_obj(p, target_loc)
@@ -3955,10 +3956,10 @@ def deploy_beta_data_endpoint(db: Session = Depends(get_db)):
     ]
 
     products = [
-        {"id": "prod-klounge-001", "store_id": "31b96920-2eb3-4f93-ab51-546fd8d933d1", "name": "K-Lounge 원데이 웰컴 패키지", "name_en": "K-Lounge 1-Day Welcome Package", "name_ja": "K-Lounge 1Dayウェルカムパッケージ", "name_zh": "K-Lounge 单日畅享体验套餐", "price": 10000, "description": "음료 1잔 + 한복/K-드라마 의상 체험 30분 + 짐 보관 서비스 1일 이용권", "is_active": True},
-        {"id": "prod-nampotoast-001", "store_id": "nampo-toast-store-006", "name": "원조 스페셜 토스트", "name_en": "Original Special Toast", "name_ja": "元祖スペシャル・トースト", "name_zh": "元祖特制吐司", "price": 4000, "description": "달콤한 특제 소스에 계란, 치즈, 햄, 야채가 듬뿍 들어간 원조 토스트", "is_active": True},
-        {"id": "prod-gukbap-001", "store_id": "nampo-dwaeji-gukbap-007", "name": "전통 돼지국밥", "name_en": "Traditional Pork Soup & Rice", "name_ja": "伝統デジクッパ", "name_zh": "传统猪肉汤饭", "price": 9500, "description": "진한 사골 육수에 살코기와 수육이 가득한 남포동 대표 돼지국밥", "is_active": True},
-        {"id": "prod-bokguk-001", "store_id": "nampo-bokguk-008", "name": "은복 지리탕", "name_en": "Silver Pufferfish Clear Soup", "name_ja": "銀フグ・ちり鍋", "name_zh": "银河豚清汤", "price": 14000, "description": "미나리와 콩나물이 듬뿍 들어가 시원하고 담백한 은복 지리탕", "is_active": True}
+        {"id": "prod-klounge-001", "store_id": "31b96920-2eb3-4f93-ab51-546fd8d933d1", "name": "K-Lounge 원데이 웰컴 패키지", "name_en": "K-Lounge 1-Day Welcome Package", "name_ja": "K-Lounge 1Dayウェルカムパッケージ", "name_zh": "K-Lounge 单日畅享体验套餐", "price": 10000, "description": "음료 1잔 + 한복/K-드라마 의상 체험 30분 + 짐 보관 서비스 1일 이용권", "status": "ACTIVE"},
+        {"id": "prod-nampotoast-001", "store_id": "nampo-toast-store-006", "name": "원조 스페셜 토스트", "name_en": "Original Special Toast", "name_ja": "元祖スペシャル・トースト", "name_zh": "元祖特制吐司", "price": 4000, "description": "달콤한 특제 소스에 계란, 치즈, 햄, 야채가 듬뿍 들어간 원조 토스트", "status": "INACTIVE"},
+        {"id": "prod-gukbap-001", "store_id": "nampo-dwaeji-gukbap-007", "name": "전통 돼지국밥", "name_en": "Traditional Pork Soup & Rice", "name_ja": "伝統デジクッパ", "name_zh": "传统猪肉汤饭", "price": 9500, "description": "진한 사골 육수에 살코기와 수육이 가득한 남포동 대표 돼지국밥", "status": "INACTIVE"},
+        {"id": "prod-bokguk-001", "store_id": "nampo-bokguk-008", "name": "은복 지리탕", "name_en": "Silver Pufferfish Clear Soup", "name_ja": "銀フグ・ちり鍋", "name_zh": "银河豚清汤", "price": 14000, "description": "미나리와 콩나물이 듬뿍 들어가 시원하고 담백한 은복 지리탕", "status": "INACTIVE"}
     ]
 
     try:
@@ -4011,7 +4012,7 @@ def deploy_beta_data_endpoint(db: Session = Depends(get_db)):
                 "description_ja": pr.get("description_ja"),
                 "description_zh": pr.get("description_zh"),
                 "price": pr["price"],
-                "status": "ACTIVE"
+                "status": pr.get("status", "ACTIVE")
             }
             pd = db.query(models.Product).filter(models.Product.id == pr_data['id']).first()
             if not pd:
