@@ -4035,6 +4035,37 @@ def deploy_beta_data_endpoint(db: Session = Depends(get_db)):
         db.rollback()
         raise HTTPException(status_code=500, detail=f"DEPLOY ERROR: {str(e)}")
 
+@app.get("/admin/audit-klounge-qr-credentials", tags=["Admin"])
+def audit_klounge_qr_credentials(db: Session = Depends(get_db)):
+    """
+    READ-ONLY Audit of all StoreQrCredential rows for K-Lounge
+    """
+    store_id = "31b96920-2eb3-4f93-ab51-546fd8d933d1"
+    creds = db.query(models.StoreQrCredential).filter(
+        models.StoreQrCredential.store_id == store_id
+    ).order_by(models.StoreQrCredential.created_at.asc()).all()
+
+    results = []
+    for c in creds:
+        results.append({
+            "credential_id": c.id,
+            "store_id": c.store_id,
+            "status": c.status,
+            "purpose": c.purpose,
+            "issued_at": c.issued_at.isoformat() if c.issued_at else None,
+            "expires_at": c.expires_at.isoformat() if c.expires_at else None,
+            "revoked_at": c.revoked_at.isoformat() if c.revoked_at else None,
+            "token_fingerprint": c.token_hash[:12] if c.token_hash else None,
+            "token_hash": c.token_hash
+        })
+
+    return {
+        "store_id": store_id,
+        "total_credentials": len(results),
+        "active_credentials": len([x for x in results if x["status"] == "ACTIVE"]),
+        "credentials": results
+    }
+
 VALID_RESERVATION_STATUSES = {"pending", "confirmed", "cancelled", "completed"}
 
 def validate_and_update_reservation_status(
