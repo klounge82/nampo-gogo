@@ -4066,6 +4066,115 @@ def audit_klounge_qr_credentials(db: Session = Depends(get_db)):
         "credentials": results
     }
 
+@app.post("/admin/revoke-duplicate-klounge-qr", tags=["Admin"])
+def revoke_duplicate_klounge_qr(db: Session = Depends(get_db)):
+    """
+    Major-05B DEDUP HOTFIX-01: Safely revoke duplicate active QR credential for K-Lounge
+    - KEEP ACTIVE: ceb4f88c-cb81-4665-94f3-d834a051ede8
+    - REVOKE: cb8593a1-ef4b-4cc8-b223-93df011edeb1
+    """
+    store_id = "31b96920-2eb3-4f93-ab51-546fd8d933d1"
+    keep_id = "ceb4f88c-cb81-4665-94f3-d834a051ede8"
+    revoke_id = "cb8593a1-ef4b-4cc8-b223-93df011edeb1"
+
+    row_keep = db.query(models.StoreQrCredential).filter(models.StoreQrCredential.id == keep_id).first()
+    row_revoke = db.query(models.StoreQrCredential).filter(models.StoreQrCredential.id == revoke_id).first()
+
+    if not row_keep or not row_revoke:
+        raise HTTPException(status_code=400, detail="PRECHECK_FAIL: Target QR Credential rows not found.")
+
+    if row_keep.store_id != store_id or row_revoke.store_id != store_id:
+        raise HTTPException(status_code=400, detail="PRECHECK_FAIL: Store ID mismatch.")
+
+    if row_keep.status != "ACTIVE" or row_revoke.status != "ACTIVE":
+        raise HTTPException(status_code=400, detail="PRECHECK_FAIL: Target rows are not both ACTIVE.")
+
+    if row_keep.token_hash != row_revoke.token_hash:
+        raise HTTPException(status_code=400, detail="PRECHECK_FAIL: Token hash mismatch between rows.")
+
+    # Execute atomic 1-row status update
+    row_revoke.status = "REVOKED"
+    row_revoke.revoked_at = datetime.utcnow()
+    db.commit()
+
+    active_count = db.query(models.StoreQrCredential).filter(
+        models.StoreQrCredential.store_id == store_id,
+        models.StoreQrCredential.status == "ACTIVE"
+    ).count()
+
+    revoked_count = db.query(models.StoreQrCredential).filter(
+        models.StoreQrCredential.store_id == store_id,
+        models.StoreQrCredential.status == "REVOKED"
+    ).count()
+
+    return {
+        "success": True,
+        "kept_active_id": row_keep.id,
+        "revoked_id": row_revoke.id,
+        "active_credentials_count": active_count,
+        "revoked_credentials_count": revoked_count
+    }
+
+@app.post("/admin/issue-store-qr", tags=["Admin"])
+def issue_store_qr(store_id: str, db: Session = Depends(get_db)):
+    """
+    Major-05B DEDUP HOTFIX-01: Idempotent QR Issuance Guard
+    - Checks if an ACTIVE, unexpired, unrevoked StoreQrCredential ALREADY exists for store_id
+    - If 1 ACTIVE credential exists: Returns ALREADY_ACTIVE_CREDENTIAL_EXISTS without creating a duplicate row
+    - If 0 ACTIVE credentials exist: Generates exactly 1 new StoreQrCredential row
+    """
+    import hashlib
+    from datetime import datetime, timedelta
+
+    now = datetime.utcnow()
+
+    # Query all active, unexpired credentials for this store
+    active_creds = db.query(models.StoreQrCredential).filter(
+        models.StoreQrCredential.store_id == store_id,
+        models.StoreQrCredential.status == "ACTIVE",
+        models.StoreQrCredential.expires_at > now,
+        models.StoreQrCredential.revoked_at.is_(None)
+    ).all()
+
+    if len(active_creds) >= 1:
+        existing = active_creds[0]
+        return {
+            "status": "ALREADY_ACTIVE_CREDENTIAL_EXISTS",
+            "message": "An active QR credential already exists for this store.",
+            "created": False,
+            "credential_id": existing.id,
+            "store_id": existing.store_id,
+            "expires_at": existing.expires_at.isoformat() if existing.expires_at else None,
+            "token_fingerprint": existing.token_hash[:12] if existing.token_hash else None
+        }
+
+    # Generate 1 new Beta QR Credential
+    raw_token = f"QR_STORE_{store_id}"
+    token_hash = hashlib.sha256(raw_token.encode("utf-8")).hexdigest()
+    expires_at = now + timedelta(days=45)
+
+    new_cred = models.StoreQrCredential(
+        id=str(uuid.uuid4()),
+        store_id=store_id,
+        token_hash=token_hash,
+        expires_at=expires_at,
+        status="ACTIVE",
+        purpose="REVIEW_VISIT"
+    )
+    db.add(new_cred)
+    db.commit()
+    db.refresh(new_cred)
+
+    return {
+        "status": "CREATED",
+        "message": "New active QR credential issued successfully.",
+        "created": True,
+        "credential_id": new_cred.id,
+        "store_id": new_cred.store_id,
+        "expires_at": new_cred.expires_at.isoformat(),
+        "token_fingerprint": new_cred.token_hash[:12]
+    }
+
 VALID_RESERVATION_STATUSES = {"pending", "confirmed", "cancelled", "completed"}
 
 def validate_and_update_reservation_status(
