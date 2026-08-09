@@ -4035,21 +4035,62 @@ def deploy_beta_data_endpoint(db: Session = Depends(get_db)):
         db.rollback()
         raise HTTPException(status_code=500, detail=f"DEPLOY ERROR: {str(e)}")
 
-@app.post("/admin/inactivate-placeholder-products", tags=["Admin"])
-def inactivate_placeholder_products(db: Session = Depends(get_db)):
+@app.post("/admin/issue-klounge-beta-qr", tags=["Admin"])
+def issue_klounge_beta_qr(db: Session = Depends(get_db)):
     """
-    Major-05B Post-Deploy Cleanup: Safely set status='INACTIVE' for 3 placeholder products
+    Issue or reuse 1 Production Beta QR Credential for K-Lounge (45 days validity)
     """
-    placeholder_product_ids = ["prod-nampotoast-001", "prod-gukbap-001", "prod-bokguk-001"]
-    updated = db.query(models.Product).filter(models.Product.id.in_(placeholder_product_ids)).update({"status": "INACTIVE"}, synchronize_session=False)
-    db.commit()
-    return {
-        "success": True,
-        "message": "Placeholder products inactivated successfully.",
-        "inactivated_count": updated
-    }
+    import hashlib
+    from datetime import datetime, timedelta
 
-VALID_RESERVATION_STATUSES = {"pending", "confirmed", "cancelled", "completed"}
+    store_id = "31b96920-2eb3-4f93-ab51-546fd8d933d1"
+    existing = db.query(models.StoreQrCredential).filter(
+        models.StoreQrCredential.store_id == store_id,
+        models.StoreQrCredential.status == "ACTIVE"
+    ).all()
+
+    if len(existing) > 1:
+        raise HTTPException(status_code=400, detail="Multiple active QR credentials found for K-Lounge. Review required.")
+
+    if len(existing) == 1:
+        cred = existing[0]
+        token_str = f"QR_STORE_{store_id}"
+        return {
+            "reused": True,
+            "credential_id": cred.id,
+            "store_id": cred.store_id,
+            "status": cred.status,
+            "expires_at": cred.expires_at.isoformat() if cred.expires_at else None,
+            "token_str": token_str,
+            "token_fingerprint": cred.token_hash[:12]
+        }
+
+    # Generate 1 new Beta QR Credential
+    raw_token = f"QR_STORE_{store_id}"
+    token_hash = hashlib.sha256(raw_token.encode("utf-8")).hexdigest()
+    expires_at = datetime.utcnow() + timedelta(days=45)
+
+    new_cred = models.StoreQrCredential(
+        id=str(uuid.uuid4()),
+        store_id=store_id,
+        token_hash=token_hash,
+        expires_at=expires_at,
+        status="ACTIVE",
+        purpose="REVIEW_VISIT"
+    )
+    db.add(new_cred)
+    db.commit()
+    db.refresh(new_cred)
+
+    return {
+        "reused": False,
+        "credential_id": new_cred.id,
+        "store_id": new_cred.store_id,
+        "status": new_cred.status,
+        "expires_at": new_cred.expires_at.isoformat(),
+        "token_str": raw_token,
+        "token_fingerprint": token_hash[:12]
+    }
 
 def validate_and_update_reservation_status(
     res: models.StoreReservation,
