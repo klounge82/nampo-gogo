@@ -4035,6 +4035,20 @@ def deploy_beta_data_endpoint(db: Session = Depends(get_db)):
         db.rollback()
         raise HTTPException(status_code=500, detail=f"DEPLOY ERROR: {str(e)}")
 
+@app.post("/admin/inactivate-placeholder-products", tags=["Admin"])
+def inactivate_placeholder_products(db: Session = Depends(get_db)):
+    """
+    Major-05B Post-Deploy Cleanup: Safely set status='INACTIVE' for 3 placeholder products
+    """
+    placeholder_product_ids = ["prod-nampotoast-001", "prod-gukbap-001", "prod-bokguk-001"]
+    updated = db.query(models.Product).filter(models.Product.id.in_(placeholder_product_ids)).update({"status": "INACTIVE"}, synchronize_session=False)
+    db.commit()
+    return {
+        "success": True,
+        "message": "Placeholder products inactivated successfully.",
+        "inactivated_count": updated
+    }
+
 VALID_RESERVATION_STATUSES = {"pending", "confirmed", "cancelled", "completed"}
 
 def validate_and_update_reservation_status(
