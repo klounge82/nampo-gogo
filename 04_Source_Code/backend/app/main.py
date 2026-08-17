@@ -126,6 +126,35 @@ def get_current_user(token: Optional[str] = Depends(oauth2_scheme), db: Session 
 
     return db_user
 
+def get_current_user_optional(token: Optional[str] = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> Optional[models.User]:
+    if not token:
+        return None
+    try:
+        payload = auth.decode_token(token)
+        user_id = payload.get("sub")
+        if not user_id:
+            return None
+        return db.query(models.User).filter(models.User.id == user_id).first()
+    except Exception:
+        return None
+
+def is_authorized_qa_tester(user: Optional[models.User]) -> bool:
+    if not user:
+        return False
+    if user.email and user.email.strip().lower() == "jazzbj@naver.com":
+        return True
+    if getattr(user, "role", "").upper() == "ADMIN":
+        return True
+    return False
+
+def apply_store_qa_filter(query, user: Optional[models.User] = None):
+    if is_authorized_qa_tester(user):
+        return query
+    return query.filter(
+        (models.Store.is_test_data != True) | (models.Store.is_test_data.is_(None)),
+        (models.Store.tier != "TEST") | (models.Store.tier.is_(None))
+    )
+
 # Seeding logic for stores
 def seed_stores():
     db = SessionLocal()
@@ -1128,9 +1157,10 @@ def localize_mission_obj(mission: models.Mission, loc: str):
 # --- PLACE / STORE MVP APIs ---
 
 @app.get("/stores", response_model=List[schemas.StoreOut], tags=["Stores"])
-def get_stores(category: Optional[str] = None, locale: Optional[str] = Query(None), accept_language: Optional[str] = Header(None), db: Session = Depends(get_db)):
+def get_stores(category: Optional[str] = None, locale: Optional[str] = Query(None), accept_language: Optional[str] = Header(None), current_user: Optional[models.User] = Depends(get_current_user_optional), db: Session = Depends(get_db)):
     target_loc = resolve_locale(accept_language=accept_language, locale=locale)
     query = db.query(models.Store).filter(models.Store.status != "DRAFT")
+    query = apply_store_qa_filter(query, current_user)
     if category:
         query = query.filter(models.Store.category == category)
     stores = query.all()
@@ -1139,17 +1169,21 @@ def get_stores(category: Optional[str] = None, locale: Optional[str] = Query(Non
     return stores
 
 @app.get("/stores/categories", response_model=List[str], tags=["Stores"])
-def get_categories(db: Session = Depends(get_db)):
-    categories = db.query(models.Store.category).filter(models.Store.status != "DRAFT").distinct().all()
+def get_categories(current_user: Optional[models.User] = Depends(get_current_user_optional), db: Session = Depends(get_db)):
+    query = db.query(models.Store.category).filter(models.Store.status != "DRAFT")
+    query = apply_store_qa_filter(query, current_user)
+    categories = query.distinct().all()
     return [cat[0] for cat in categories]
 
 @app.get("/stores/search", response_model=List[schemas.StoreOut], tags=["Stores"])
-def search_stores(q: str, locale: Optional[str] = Query(None), accept_language: Optional[str] = Header(None), db: Session = Depends(get_db)):
+def search_stores(q: str, locale: Optional[str] = Query(None), accept_language: Optional[str] = Header(None), current_user: Optional[models.User] = Depends(get_current_user_optional), db: Session = Depends(get_db)):
     target_loc = resolve_locale(accept_language=accept_language, locale=locale)
-    stores = db.query(models.Store).filter(
+    query = db.query(models.Store).filter(
         models.Store.status != "DRAFT",
         (models.Store.name.contains(q)) | (models.Store.description.contains(q)) | (models.Store.name_en.contains(q)) | (models.Store.name_ja.contains(q)) | (models.Store.name_zh.contains(q))
-    ).all()
+    )
+    query = apply_store_qa_filter(query, current_user)
+    stores = query.all()
     for s in stores:
         localize_store_obj(s, target_loc)
     return stores
@@ -4364,13 +4398,15 @@ def calculate_distance(lat1, lon1, lat2, lon2):
     return R * c
 
 @app.post("/recommendations/courses", response_model=schemas.RecommendationResult, status_code=status.HTTP_201_CREATED, tags=["Recommendation"])
-def generate_recommendation_course(req: schemas.RecommendationRequest, db: Session = Depends(get_db)):
+def generate_recommendation_course(req: schemas.RecommendationRequest, current_user: Optional[models.User] = Depends(get_current_user_optional), db: Session = Depends(get_db)):
     # Fallback to Busan Station coordinates if location is missing
     lat = req.latitude if req.latitude is not None else 35.1152
     lon = req.longitude if req.longitude is not None else 129.0422
 
     # Load active stores
-    stores = db.query(models.Store).all()
+    query = db.query(models.Store)
+    query = apply_store_qa_filter(query, current_user)
+    stores = query.all()
     if not stores:
         raise HTTPException(status_code=404, detail="추천을 진행할 매장 데이터가 존재하지 않습니다.")
 
@@ -5277,8 +5313,9 @@ def update_user_language_preference(req: schemas.UserLanguageUpdate, user_id: Op
     return {"success": True, "language_code": db_user.language_code, "message": "언어 설정이 정상적으로 동기화되었습니다."}
 
 @app.get("/localization/stores", tags=["Localization"])
-def get_localized_stores(category: Optional[str] = None, lang: str = Depends(get_accept_language), db: Session = Depends(get_db)):
+def get_localized_stores(category: Optional[str] = None, lang: str = Depends(get_accept_language), current_user: Optional[models.User] = Depends(get_current_user_optional), db: Session = Depends(get_db)):
     query = db.query(models.Store)
+    query = apply_store_qa_filter(query, current_user)
     if category:
         query = query.filter(models.Store.category == category)
     stores = query.all()
@@ -5602,6 +5639,7 @@ def get_integrated_search(
     longitude: Optional[float] = None,
     radius: Optional[float] = 5000.0, # default 5km
     sort: str = "relevance", # 'relevance', 'distance', 'rating'
+    current_user: Optional[models.User] = Depends(get_current_user_optional),
     db: Session = Depends(get_db)
 ):
     query_str = q.strip().lower()
@@ -5659,7 +5697,9 @@ def get_integrated_search(
 
     # 1. Search Stores (PLACE)
     if type in ["all", "place"]:
-        stores = db.query(models.Store).filter(models.Store.status != "DRAFT").all()
+        store_query = db.query(models.Store).filter(models.Store.status != "DRAFT")
+        store_query = apply_store_qa_filter(store_query, current_user)
+        stores = store_query.all()
         for s in stores:
             title, title_score = get_multilingual_value(s, "name", lang)
             subtitle, desc_score = get_multilingual_value(s, "description", lang)
