@@ -1207,6 +1207,8 @@ def get_store_missions(store_id: str, locale: Optional[str] = Query(None), accep
 class VerifyRequest(BaseModel):
     qr_code: str
     user_id: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
 
 @app.post("/missions/{mission_id}/verify", tags=["Missions"])
 def verify_mission(mission_id: str, req: VerifyRequest, db: Session = Depends(get_db)):
@@ -1257,6 +1259,39 @@ def verify_mission(mission_id: str, req: VerifyRequest, db: Session = Depends(ge
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="유효하지 않은 QR 코드입니다."
         )
+
+    # 4.5 Policy-Driven Verification Requirements (Explicit QR_GPS policy)
+    store = db.query(models.Store).filter(models.Store.id == mission.store_id).first() if mission.store_id else None
+    auth_type_upper = (mission.auth_type or "").upper()
+    store_vtype_upper = (store.review_verification_type or "").upper() if store else ""
+    
+    # Explicit policy rules:
+    # QR_GPS / GPS / GPS_VERIFICATION / ATTRACTION_LOCATION -> Requires GPS
+    # QR / QR_VERIFICATION -> Pure QR verification (GPS NOT required)
+    is_gps_required = (
+        auth_type_upper in ["QR_GPS", "GPS", "GPS_VERIFICATION"] or
+        ("GPS" in auth_type_upper and auth_type_upper not in ["QR", "QR_VERIFICATION"]) or
+        store_vtype_upper == "ATTRACTION_LOCATION"
+    )
+
+    if is_gps_required:
+        if req.latitude is None or req.longitude is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="위치 인증을 위해 현재 GPS 좌표가 필요합니다."
+            )
+        if not store or store.latitude is None or store.longitude is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="매장 위치 정보를 확인할 수 없어 방문 인증을 진행할 수 없습니다."
+            )
+        dist_m = haversine_distance_m(req.latitude, req.longitude, store.latitude, store.longitude)
+        allowed_radius = float(store.review_location_radius_m or 50.0)
+        if dist_m > allowed_radius:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"현재 위치에서는 이 관광지 방문을 확인할 수 없습니다. (반경 {int(allowed_radius)}m 이내 스캔 필요)"
+            )
 
     # 5. Save completed record and award points (Transaction)
     try:
