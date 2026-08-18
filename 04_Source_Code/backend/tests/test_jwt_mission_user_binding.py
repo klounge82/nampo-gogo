@@ -52,8 +52,9 @@ class TestJwtMissionUserBinding(unittest.TestCase):
 
         self.store_photo = models.Store(id="store_photo_001", name="QA 수영강변 Photo", category="볼거리", address="부산 수영구 수영강변", description="사진 테스트", latitude=35.1635, longitude=129.1245, review_location_radius_m=100, review_verification_type="ATTRACTION_LOCATION", is_test_data=True, tier="TEST")
         self.mission_photo = models.Mission(id="mission_photo_001", store_id="store_photo_001", title="QA Photo", description="사진 테스트", points=100, auth_type="PHOTO_VERIFICATION", status="active")
+        self.mission_photo_gps = models.Mission(id="mission_photo_gps_001", store_id="store_photo_001", title="QA Photo GPS", description="사진 GPS 테스트", points=100, auth_type="PHOTO_GPS", status="active")
 
-        db.add_all([self.user1, self.user2, self.store_gps, self.mission_gps, self.store_qr, self.mission_qr, self.store_photo, self.mission_photo])
+        db.add_all([self.user1, self.user2, self.store_gps, self.mission_gps, self.store_qr, self.mission_qr, self.store_photo, self.mission_photo, self.mission_photo_gps])
         db.commit()
         db.close()
 
@@ -179,6 +180,75 @@ class TestJwtMissionUserBinding(unittest.TestCase):
         self.assertEqual(detail["code"], "GPS_OUTSIDE_RADIUS")
         self.assertGreater(detail["distance_m"], detail["allowed_radius_m"])
         self.assertEqual(detail["outside_by_m"], detail["distance_m"] - detail["allowed_radius_m"])
+
+    def test_11_photo_gps_inside_radius_success(self):
+        raw_jpeg = b"\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x01\x00`\x00`\x00\x00" + b"\x00" * 100
+        base64_photo = base64.b64encode(raw_jpeg).decode("utf-8")
+        headers = {"Authorization": f"Bearer {self.jazz_token}"}
+
+        # Inside store_photo_001 geofence (35.1635, 129.1245)
+        resp = self.client.post(
+            "/missions/mission_photo_gps_001/verify",
+            json={"qr_code": "mission_photo_gps_001", "image_base64": base64_photo, "latitude": 35.1635, "longitude": 129.1245},
+            headers=headers
+        )
+        self.assertEqual(resp.status_code, 200)
+
+        db = self.TestingSessionLocal()
+        u2 = db.query(models.User).filter(models.User.id == "usr_jazz_002").first()
+        self.assertEqual(u2.current_points, 100)
+        db.close()
+
+    def test_12_photo_gps_outside_radius_returns_photo_gps_outside_code(self):
+        raw_jpeg = b"\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x01\x00`\x00`\x00\x00" + b"\x00" * 100
+        base64_photo = base64.b64encode(raw_jpeg).decode("utf-8")
+        headers = {"Authorization": f"Bearer {self.jazz_token}"}
+
+        # Far away coordinates (37.5665, 126.9780)
+        resp = self.client.post(
+            "/missions/mission_photo_gps_001/verify",
+            json={"qr_code": "mission_photo_gps_001", "image_base64": base64_photo, "latitude": 37.5665, "longitude": 126.9780},
+            headers=headers
+        )
+        self.assertEqual(resp.status_code, 400)
+        detail = resp.json()["detail"]
+        self.assertEqual(detail["code"], "PHOTO_GPS_OUTSIDE_RADIUS")
+
+        db = self.TestingSessionLocal()
+        u2 = db.query(models.User).filter(models.User.id == "usr_jazz_002").first()
+        self.assertEqual(u2.current_points, 0)
+        db.close()
+
+    def test_13_photo_gps_no_coordinates_reject(self):
+        raw_jpeg = b"\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x01\x00`\x00`\x00\x00" + b"\x00" * 100
+        base64_photo = base64.b64encode(raw_jpeg).decode("utf-8")
+        headers = {"Authorization": f"Bearer {self.jazz_token}"}
+
+        resp = self.client.post(
+            "/missions/mission_photo_gps_001/verify",
+            json={"qr_code": "mission_photo_gps_001", "image_base64": base64_photo},
+            headers=headers
+        )
+        self.assertEqual(resp.status_code, 400)
+
+    def test_14_photo_gps_no_image_reject(self):
+        headers = {"Authorization": f"Bearer {self.jazz_token}"}
+        resp = self.client.post(
+            "/missions/mission_photo_gps_001/verify",
+            json={"qr_code": "mission_photo_gps_001", "latitude": 35.1635, "longitude": 129.1245},
+            headers=headers
+        )
+        self.assertEqual(resp.status_code, 400)
+
+    def test_15_photo_gps_unauthenticated_reject(self):
+        raw_jpeg = b"\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x01\x00`\x00`\x00\x00" + b"\x00" * 100
+        base64_photo = base64.b64encode(raw_jpeg).decode("utf-8")
+
+        resp = self.client.post(
+            "/missions/mission_photo_gps_001/verify",
+            json={"qr_code": "mission_photo_gps_001", "image_base64": base64_photo, "latitude": 35.1635, "longitude": 129.1245}
+        )
+        self.assertEqual(resp.status_code, 401)
 
 if __name__ == "__main__":
     unittest.main()

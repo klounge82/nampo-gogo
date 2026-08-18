@@ -84,13 +84,31 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
 
   Future<void> _performServerVerification(Mission mission) async {
     final authUpper = mission.authType.toUpperCase();
+    final isPhotoGps = authUpper.contains('PHOTO_GPS');
     final isPhoto = authUpper.contains('PHOTO');
 
     String? imageBase64;
     double? latitude;
     double? longitude;
 
-    if (isPhoto) {
+    if (isPhotoGps) {
+      try {
+        final pos = await LocationService().getCurrentLocation();
+        latitude = pos.latitude;
+        longitude = pos.longitude;
+      } catch (locErr) {
+        if (!mounted) return;
+        final errStr = locErr.toString();
+        if (errStr.contains('LocationServicesDisabledException') || errStr.contains('위치 서비스')) {
+          _showErrorDialog('위치 서비스를 켜주세요', '현재 휴대폰의 위치 서비스가 꺼져 있어 미션 장소와의 거리를 확인할 수 없습니다. 위치 서비스를 켠 후 다시 시도해 주세요.');
+        } else if (errStr.contains('PermissionDeniedException') || errStr.contains('위치 권한')) {
+          _showErrorDialog('위치 권한이 필요합니다', '이 미션은 현재 위치 확인이 필요합니다. 앱의 위치 권한을 허용한 후 다시 시도해 주세요.');
+        } else {
+          _showErrorDialog('현재 위치를 확인할 수 없습니다', 'GPS 위치 정보를 가져오지 못했습니다. 잠시 후 다시 시도하거나 위치 서비스 상태를 확인해 주세요.');
+        }
+        return;
+      }
+
       try {
         final picker = ImagePicker();
         final pickedFile = await picker.pickImage(
@@ -100,7 +118,25 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
           imageQuality: 80,
         );
         if (pickedFile == null) {
-          // User canceled camera capture -> abort verification (0P awarded)
+          return;
+        }
+        final bytes = await pickedFile.readAsBytes();
+        imageBase64 = base64Encode(bytes);
+      } catch (camErr) {
+        if (!mounted) return;
+        _showErrorDialog('카메라 오류', '사진을 촬영할 수 없습니다. 카메라 권한을 확인해주세요.');
+        return;
+      }
+    } else if (isPhoto) {
+      try {
+        final picker = ImagePicker();
+        final pickedFile = await picker.pickImage(
+          source: ImageSource.camera,
+          maxWidth: 1024,
+          maxHeight: 1024,
+          imageQuality: 80,
+        );
+        if (pickedFile == null) {
           return;
         }
         final bytes = await pickedFile.readAsBytes();
@@ -111,7 +147,6 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
         return;
       }
     } else {
-      // GPS verification position acquisition
       try {
         final pos = await LocationService().getCurrentLocation();
         latitude = pos.latitude;
@@ -208,13 +243,17 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
         detailMap = Map<String, dynamic>.from(data['detail'] as Map);
       }
 
-      if (detailMap != null && detailMap['code'] == 'GPS_OUTSIDE_RADIUS') {
+      if (detailMap != null && (detailMap['code'] == 'GPS_OUTSIDE_RADIUS' || detailMap['code'] == 'PHOTO_GPS_OUTSIDE_RADIUS')) {
         final dist = detailMap['distance_m'] as int? ?? 0;
         final radius = detailMap['allowed_radius_m'] as int? ?? 0;
         final outsideBy = detailMap['outside_by_m'] as int? ?? 0;
         final isQrValid = detailMap['is_qr_valid'] as bool? ?? false;
+        final isPhotoGps = detailMap['code'] == 'PHOTO_GPS_OUTSIDE_RADIUS';
 
-        if (isQrValid) {
+        if (isPhotoGps) {
+          title = '현장 사진 인증 범위 밖입니다';
+          body = '현재 지정된 사진 인증 지점에서 약 ${dist}m 떨어져 있습니다.\n\n사진 인증 가능 범위는 ${radius}m 이내입니다.\n\n약 ${outsideBy}m 더 가까이 이동한 후 사진을 촬영해 주세요.';
+        } else if (isQrValid) {
           title = 'QR은 정상적으로 인식되었습니다';
           body = '하지만 현재 위치가 인증 범위를 벗어났습니다.\n\n현재 거리: 약 ${dist}m\n인증 가능 범위: ${radius}m 이내\n\n약 ${outsideBy}m 더 가까이 이동한 후 다시 시도해 주세요.';
         } else {
@@ -588,7 +627,9 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
 
   String _getActionButtonLabel(AppLocalizations l10n, String authType) {
     final type = authType.toUpperCase();
-    if (type.contains('QR')) {
+    if (type.contains('PHOTO_GPS')) {
+      return '📸📍 현장사진 인증 시작하기';
+    } else if (type.contains('QR')) {
       return '🔍 ${l10n.missionAuthActionQr}';
     } else if (type.contains('GPS') || type.contains('LOCATION')) {
       return '📍 ${l10n.missionAuthActionGps}';

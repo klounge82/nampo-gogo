@@ -1292,8 +1292,49 @@ def verify_mission(
 
     auth_type_upper = (mission.auth_type or "").upper()
     is_photo_mission = "PHOTO" in auth_type_upper
+    store = db.query(models.Store).filter(models.Store.id == mission.store_id).first() if mission.store_id else None
+    store_vtype_upper = (store.review_verification_type or "").upper() if store else ""
 
-    # 4. Verify Photo Evidence or QR Code value
+    # Explicit policy rules for GPS requirement:
+    # PHOTO_GPS / QR_GPS / GPS / GPS_VERIFICATION -> Requires GPS
+    # PHOTO / PHOTO_VERIFICATION / QR / QR_VERIFICATION -> Pure mode (GPS NOT required by default)
+    is_gps_required = (
+        auth_type_upper in ["PHOTO_GPS", "QR_GPS", "GPS", "GPS_VERIFICATION"] or
+        ("GPS" in auth_type_upper and auth_type_upper not in ["QR", "QR_VERIFICATION", "PHOTO", "PHOTO_VERIFICATION"]) or
+        (store_vtype_upper == "ATTRACTION_LOCATION" and "PHOTO" not in auth_type_upper)
+    )
+
+    # 4. GPS & Geofence Validation (executed before image/QR payload processing for PHOTO_GPS)
+    if is_gps_required:
+        if req.latitude is None or req.longitude is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="위치 인증을 위해 현재 GPS 좌표가 필요합니다."
+            )
+        if not store or store.latitude is None or store.longitude is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="매장 위치 정보를 확인할 수 없어 방문 인증을 진행할 수 없습니다."
+            )
+        dist_m = int(round(haversine_distance_m(req.latitude, req.longitude, store.latitude, store.longitude)))
+        allowed_radius = int(store.review_location_radius_m or 50.0)
+        outside_by_m = max(0, dist_m - allowed_radius)
+
+        if dist_m > allowed_radius:
+            err_code = "PHOTO_GPS_OUTSIDE_RADIUS" if auth_type_upper == "PHOTO_GPS" else "GPS_OUTSIDE_RADIUS"
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={
+                    "code": err_code,
+                    "message": f"현재 위치에서는 인증을 완료할 수 없습니다. (반경 {allowed_radius}m 이내 스캔/촬영 필요)",
+                    "distance_m": dist_m,
+                    "allowed_radius_m": allowed_radius,
+                    "outside_by_m": outside_by_m,
+                    "is_qr_valid": True if (not is_photo_mission and req.qr_code) else False
+                }
+            )
+
+    # 5. Verify Photo Evidence or QR Code value
     if is_photo_mission:
         if not req.image_base64 or not req.image_base64.strip():
             raise HTTPException(
@@ -1339,48 +1380,6 @@ def verify_mission(
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="유효하지 않은 QR 코드입니다."
-            )
-
-    # 4.5 Policy-Driven Verification Requirements (Explicit QR_GPS policy)
-    store = db.query(models.Store).filter(models.Store.id == mission.store_id).first() if mission.store_id else None
-    auth_type_upper = (mission.auth_type or "").upper()
-    store_vtype_upper = (store.review_verification_type or "").upper() if store else ""
-    
-    # Explicit policy rules:
-    # QR_GPS / GPS / GPS_VERIFICATION / ATTRACTION_LOCATION -> Requires GPS
-    # QR / QR_VERIFICATION / PHOTO -> GPS NOT required by default
-    is_gps_required = not is_photo_mission and (
-        auth_type_upper in ["QR_GPS", "GPS", "GPS_VERIFICATION"] or
-        ("GPS" in auth_type_upper and auth_type_upper not in ["QR", "QR_VERIFICATION"]) or
-        (store_vtype_upper == "ATTRACTION_LOCATION" and "PHOTO" not in auth_type_upper)
-    )
-
-    if is_gps_required:
-        if req.latitude is None or req.longitude is None:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="위치 인증을 위해 현재 GPS 좌표가 필요합니다."
-            )
-        if not store or store.latitude is None or store.longitude is None:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="매장 위치 정보를 확인할 수 없어 방문 인증을 진행할 수 없습니다."
-            )
-        dist_m = int(round(haversine_distance_m(req.latitude, req.longitude, store.latitude, store.longitude)))
-        allowed_radius = int(store.review_location_radius_m or 50.0)
-        outside_by_m = max(0, dist_m - allowed_radius)
-
-        if dist_m > allowed_radius:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail={
-                    "code": "GPS_OUTSIDE_RADIUS",
-                    "message": f"현재 위치에서는 이 관광지 방문을 확인할 수 없습니다. (반경 {allowed_radius}m 이내 스캔 필요)",
-                    "distance_m": dist_m,
-                    "allowed_radius_m": allowed_radius,
-                    "outside_by_m": outside_by_m,
-                    "is_qr_valid": True if (not is_photo_mission and req.qr_code) else False
-                }
             )
 
     # 5. Save completed record and award points (Transaction)

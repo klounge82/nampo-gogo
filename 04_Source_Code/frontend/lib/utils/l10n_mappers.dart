@@ -13,6 +13,8 @@ class L10nMappers {
       case 'QR_GPS':
         return l10n.authTypeQr;
       case 'PHOTO':
+      case 'PHOTO_VERIFICATION':
+      case 'PHOTO_GPS':
         return l10n.authTypePhoto;
       default:
         return l10n.authTypeManual;

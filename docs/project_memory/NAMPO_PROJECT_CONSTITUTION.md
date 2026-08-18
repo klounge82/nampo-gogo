@@ -376,3 +376,25 @@ Never rely on first database user, first matching record, arbitrary fallback use
 ### Q15. MANDATORY DELETION EXCEPTION
 If legal, privacy, security, or mandatory policy requires actual deletion: identify exact scope, verify target identity, avoid unrelated deletion, and confirm completion without violating mandatory rules.
 
+## R. OFFICIAL VERIFICATION MATRIX & POLICY
+
+Verification modes in Nampo GoGo are explicitly governed by `Mission.auth_type`. Never re-interpret completed historical missions, and never make `store.review_verification_type` silently override an explicit `Mission.auth_type`.
+
+### Official Verification Modes
+1. **`QR`**:
+   - Requires authenticated JWT user + valid QR token.
+   - GPS is NOT required unless explicitly part of policy.
+
+2. **`GPS_VERIFICATION`**:
+   - Requires authenticated JWT user + current GPS coordinates within configured geofence.
+
+3. **`QR_GPS`**:
+   - Requires authenticated JWT user + valid QR token + current GPS coordinates within configured geofence.
+
+4. **`PHOTO_VERIFICATION`**:
+   - Requires authenticated JWT user + valid image proof.
+   - GPS is NOT required.
+
+5. **`PHOTO_GPS`**:
+   - Requires authenticated JWT user + current GPS coordinates within configured geofence + valid newly captured image proof.
+   - ALL conditions (Auth, Dup Check, GPS within radius, Image, Duplicate protection) are strictly required.
