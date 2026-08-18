@@ -125,20 +125,23 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
 
     setState(() => _isAuthenticating = true);
     try {
+      final token = context.read<AuthProvider>().accessToken;
       final res = await _missionRepository.verifyMission(
         mission.id,
         mission.id,
         latitude: latitude,
         longitude: longitude,
         imageBase64: imageBase64,
+        authToken: token,
       );
       if (!mounted) return;
 
       setState(() => _isAuthenticating = false);
       if (res['success'] == true) {
         try {
-          context.read<AuthProvider>().refreshUser();
+          await context.read<AuthProvider>().refreshUser();
         } catch (_) {}
+        if (!mounted) return;
         _showSuccessDialog(context, res['points_awarded'] as int);
       } else {
         _showErrorDialog('인증 실패', _mapErrorMessage(res['message'] as String? ?? '서버 검증 오류'));
@@ -147,7 +150,7 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
       if (!mounted) return;
       setState(() => _isAuthenticating = false);
 
-      _showErrorDialog('인증 실패', _extractErrorMessage(e));
+      _handleVerificationError(e);
     }
   }
 
@@ -166,19 +169,22 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
         longitude = pos.longitude;
       } catch (_) {}
 
+      final token = context.read<AuthProvider>().accessToken;
       final res = await _missionRepository.verifyMission(
         mission.id,
         qrCode,
         latitude: latitude,
         longitude: longitude,
+        authToken: token,
       );
       if (!mounted) return;
 
       setState(() => _isAuthenticating = false);
       if (res['success'] == true) {
         try {
-          context.read<AuthProvider>().refreshUser();
+          await context.read<AuthProvider>().refreshUser();
         } catch (_) {}
+        if (!mounted) return;
         _showSuccessDialog(context, res['points_awarded'] as int);
       } else {
         _showErrorDialog('인증 실패', _mapErrorMessage(res['message'] as String? ?? '검증 오류'));
@@ -187,8 +193,54 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
       if (!mounted) return;
       setState(() => _isAuthenticating = false);
 
-      _showErrorDialog('인증 실패', _extractErrorMessage(e));
+      _handleVerificationError(e);
     }
+  }
+
+  void _handleVerificationError(dynamic error) {
+    String title = '인증 실패';
+    String body = '미션 인증 처리 중 오류가 발생했습니다.';
+
+    if (error is DioException && error.response?.data != null) {
+      final data = error.response!.data;
+      Map<String, dynamic>? detailMap;
+      if (data is Map && data['detail'] is Map) {
+        detailMap = Map<String, dynamic>.from(data['detail'] as Map);
+      }
+
+      if (detailMap != null && detailMap['code'] == 'GPS_OUTSIDE_RADIUS') {
+        final dist = detailMap['distance_m'] as int? ?? 0;
+        final radius = detailMap['allowed_radius_m'] as int? ?? 0;
+        final outsideBy = detailMap['outside_by_m'] as int? ?? 0;
+        final isQrValid = detailMap['is_qr_valid'] as bool? ?? false;
+
+        if (isQrValid) {
+          title = 'QR은 정상적으로 인식되었습니다';
+          body = '하지만 현재 위치가 인증 범위를 벗어났습니다.\n\n현재 거리: 약 ${dist}m\n인증 가능 범위: ${radius}m 이내\n\n약 ${outsideBy}m 더 가까이 이동한 후 다시 시도해 주세요.';
+        } else {
+          title = '위치 인증 범위 밖입니다';
+          body = '현재 미션 장소에서 약 ${dist}m 떨어져 있습니다.\n\n인증 가능 범위는 ${radius}m 이내입니다.\n\n약 ${outsideBy}m 더 가까이 이동한 후 다시 시도해 주세요.';
+        }
+        _showErrorDialog(title, body);
+        return;
+      }
+    }
+
+    final errStr = error.toString();
+    if (errStr.contains('LocationServicesDisabledException') || errStr.contains('위치 서비스가 꺼져')) {
+      title = '위치 서비스를 켜주세요';
+      body = '현재 휴대폰의 위치 서비스가 꺼져 있어 미션 장소와의 거리를 확인할 수 없습니다. 위치 서비스를 켠 후 다시 시도해 주세요.';
+    } else if (errStr.contains('PermissionDeniedException') || errStr.contains('위치 권한')) {
+      title = '위치 권한이 필요합니다';
+      body = '이 미션은 현재 위치 확인이 필요합니다. 앱의 위치 권한을 허용한 후 다시 시도해 주세요.';
+    } else if (errStr.contains('LocationUnavailableException') || errStr.contains('GPS 위치 정보')) {
+      title = '현재 위치를 확인할 수 없습니다';
+      body = 'GPS 위치 정보를 가져오지 못했습니다. 잠시 후 다시 시도하거나 위치 서비스 상태를 확인해 주세요.';
+    } else {
+      body = _extractErrorMessage(error);
+    }
+
+    _showErrorDialog(title, body);
   }
 
   String _extractErrorMessage(dynamic error) {

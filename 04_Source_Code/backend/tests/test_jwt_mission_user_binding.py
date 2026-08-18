@@ -156,5 +156,29 @@ class TestJwtMissionUserBinding(unittest.TestCase):
         self.assertEqual(u2.current_points, 100)
         db.close()
 
+    def test_09_photo_verification_without_gps_coordinates_success(self):
+        raw_jpeg = b"\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x01\x00`\x00`\x00\x00" + b"\x00" * 100
+        base64_photo = base64.b64encode(raw_jpeg).decode("utf-8")
+
+        headers = {"Authorization": f"Bearer {self.jazz_token}"}
+        # PHOTO verification with valid JWT + image, NO latitude or longitude
+        resp = self.client.post("/missions/mission_photo_001/verify", json={"qr_code": "mission_photo_001", "image_base64": base64_photo}, headers=headers)
+        self.assertEqual(resp.status_code, 200)
+
+        db = self.TestingSessionLocal()
+        u2 = db.query(models.User).filter(models.User.id == "usr_jazz_002").first()
+        self.assertEqual(u2.current_points, 100)
+        db.close()
+
+    def test_10_gps_outside_radius_returns_structured_error(self):
+        headers = {"Authorization": f"Bearer {self.jazz_token}"}
+        # Coordinates far from store (store_gampo_001 is at 35.167413, 129.118103)
+        resp = self.client.post("/missions/mission_gampo_001/verify", json={"qr_code": "mission_gampo_001", "latitude": 37.5665, "longitude": 126.9780}, headers=headers)
+        self.assertEqual(resp.status_code, 400)
+        detail = resp.json()["detail"]
+        self.assertEqual(detail["code"], "GPS_OUTSIDE_RADIUS")
+        self.assertGreater(detail["distance_m"], detail["allowed_radius_m"])
+        self.assertEqual(detail["outside_by_m"], detail["distance_m"] - detail["allowed_radius_m"])
+
 if __name__ == "__main__":
     unittest.main()

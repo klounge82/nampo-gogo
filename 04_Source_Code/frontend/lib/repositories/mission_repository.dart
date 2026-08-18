@@ -213,6 +213,7 @@ class MissionRepository {
     double? latitude,
     double? longitude,
     String? imageBase64,
+    String? authToken,
   }) async {
     try {
       final res = await _missionService.verifyMission(
@@ -222,6 +223,7 @@ class MissionRepository {
         latitude: latitude,
         longitude: longitude,
         imageBase64: imageBase64,
+        authToken: authToken,
       );
       return {
         'success': res['success'] as bool,

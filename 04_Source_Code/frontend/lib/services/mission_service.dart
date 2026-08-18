@@ -69,9 +69,14 @@ class MissionService {
   }
 
   // Helper to get Auth headers
-  Future<Options> _getAuthOptions() async {
-    const storage = FlutterSecureStorage();
-    final token = await storage.read(key: 'access_token');
+  Future<Options> _getAuthOptions({String? authToken}) async {
+    String? token = authToken;
+    if (token == null || token.isEmpty) {
+      try {
+        const storage = FlutterSecureStorage();
+        token = await storage.read(key: 'access_token');
+      } catch (_) {}
+    }
     if (token != null && token.isNotEmpty) {
       return Options(headers: {'Authorization': 'Bearer $token'});
     }
@@ -86,6 +91,7 @@ class MissionService {
     double? latitude,
     double? longitude,
     String? imageBase64,
+    String? authToken,
   }) async {
     try {
       final payload = <String, dynamic>{
@@ -96,7 +102,7 @@ class MissionService {
       if (longitude != null) payload['longitude'] = longitude;
       if (imageBase64 != null) payload['image_base64'] = imageBase64;
 
-      final options = await _getAuthOptions();
+      final options = await _getAuthOptions(authToken: authToken);
       final response = await _dio.post(
         '/missions/$id/verify',
         data: payload,

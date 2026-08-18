@@ -278,7 +278,15 @@ class AuthService {
   // Fetch current user details from GET /auth/me
   Future<Map<String, dynamic>?> getMe() async {
     try {
-      final response = await _dio.get('/auth/me');
+      final token = await _storage.read(key: _keyAccessToken);
+      final response = await _dio.get(
+        '/auth/me',
+        options: Options(
+          headers: {
+            if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
+          },
+        ),
+      );
       if (response.statusCode == 200 && response.data != null) {
         return response.data as Map<String, dynamic>;
       }

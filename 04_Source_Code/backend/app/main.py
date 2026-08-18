@@ -1348,11 +1348,11 @@ def verify_mission(
     
     # Explicit policy rules:
     # QR_GPS / GPS / GPS_VERIFICATION / ATTRACTION_LOCATION -> Requires GPS
-    # QR / QR_VERIFICATION -> Pure QR verification (GPS NOT required)
-    is_gps_required = (
+    # QR / QR_VERIFICATION / PHOTO -> GPS NOT required by default
+    is_gps_required = not is_photo_mission and (
         auth_type_upper in ["QR_GPS", "GPS", "GPS_VERIFICATION"] or
         ("GPS" in auth_type_upper and auth_type_upper not in ["QR", "QR_VERIFICATION"]) or
-        store_vtype_upper == "ATTRACTION_LOCATION"
+        (store_vtype_upper == "ATTRACTION_LOCATION" and "PHOTO" not in auth_type_upper)
     )
 
     if is_gps_required:
@@ -1366,12 +1366,21 @@ def verify_mission(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="매장 위치 정보를 확인할 수 없어 방문 인증을 진행할 수 없습니다."
             )
-        dist_m = haversine_distance_m(req.latitude, req.longitude, store.latitude, store.longitude)
-        allowed_radius = float(store.review_location_radius_m or 50.0)
+        dist_m = int(round(haversine_distance_m(req.latitude, req.longitude, store.latitude, store.longitude)))
+        allowed_radius = int(store.review_location_radius_m or 50.0)
+        outside_by_m = max(0, dist_m - allowed_radius)
+
         if dist_m > allowed_radius:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"현재 위치에서는 이 관광지 방문을 확인할 수 없습니다. (반경 {int(allowed_radius)}m 이내 스캔 필요)"
+                detail={
+                    "code": "GPS_OUTSIDE_RADIUS",
+                    "message": f"현재 위치에서는 이 관광지 방문을 확인할 수 없습니다. (반경 {allowed_radius}m 이내 스캔 필요)",
+                    "distance_m": dist_m,
+                    "allowed_radius_m": allowed_radius,
+                    "outside_by_m": outside_by_m,
+                    "is_qr_valid": True if (not is_photo_mission and req.qr_code) else False
+                }
             )
 
     # 5. Save completed record and award points (Transaction)
