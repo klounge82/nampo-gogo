@@ -129,6 +129,8 @@ def get_current_user(token: Optional[str] = Depends(oauth2_scheme), db: Session 
 def get_current_user_optional(token: Optional[str] = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> Optional[models.User]:
     if not token:
         return None
+    if isinstance(token, str) and token.startswith("Bearer "):
+        token = token.split(" ", 1)[1].strip()
     try:
         payload = auth.decode_token(token)
         user_id = payload.get("sub")
@@ -1250,7 +1252,12 @@ class VerifyRequest(BaseModel):
     image_base64: Optional[str] = None
 
 @app.post("/missions/{mission_id}/verify", tags=["Missions"])
-def verify_mission(mission_id: str, req: VerifyRequest, db: Session = Depends(get_db)):
+def verify_mission(
+    mission_id: str,
+    req: VerifyRequest,
+    db: Session = Depends(get_db),
+    current_user: Optional[models.User] = Depends(get_current_user_optional)
+):
     import base64
     import re
 
@@ -1259,27 +1266,18 @@ def verify_mission(mission_id: str, req: VerifyRequest, db: Session = Depends(ge
     if not mission:
         raise HTTPException(status_code=404, detail="해당 미션을 찾을 수 없습니다.")
 
-    # 2. Get target user (default to first user or mock)
-    target_user_id = req.user_id
-    user_obj = None
-    if target_user_id:
-        user_obj = db.query(models.User).filter(models.User.id == target_user_id).first()
-    
+    # 2. Resolve authenticated target user via JWT Bearer token or req.user_id
+    user_obj = current_user
+    if not user_obj and req.user_id:
+        user_obj = db.query(models.User).filter(models.User.id == req.user_id).first()
+
     if not user_obj:
-        user_obj = db.query(models.User).first()
-        if not user_obj:
-            # Fallback mock user creation if database has no users
-            user_obj = models.User(
-                id="usr_mock_999",
-                email="nampo_gogo@mock.com",
-                nickname="김남포 (Mock)",
-                role="member",
-                status="active"
-            )
-            db.add(user_obj)
-            db.commit()
-            db.refresh(user_obj)
-        target_user_id = user_obj.id
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="미션 인증을 진행하려면 로그인이 필요합니다."
+        )
+
+    target_user_id = user_obj.id
 
     # 3. Check if already completed
     existing_record = db.query(models.UserMission).filter(

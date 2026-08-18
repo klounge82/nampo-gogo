@@ -271,3 +271,108 @@ Large or elongated attractions that cannot be represented safely by one circle s
 - **Gwangalli Beach**: Broad/elongated attraction requiring wider or future multi-point/area logic.
 - **Suyeong Riverside**: Must define which riverside section is intended before GPS registration.
 
+### COORDINATE VALIDATION STANDARD
+
+Permanent rules for all current and future place coordinate registration:
+
+1. **No Arbitrary Geocoding**: Never approve a Production location coordinate solely from an arbitrary address geocode or district center.
+2. **Geographic Identity Verification**: Verify what the place name geographically represents before assigning coordinates.
+3. **POI / Official Priority**: Prefer actual POI / official location over district-center geocoding.
+4. **Cross-Check**: Where possible cross-check: reference POI vs field device GPS.
+5. **Field GPS Role**: Device GPS alone is supporting evidence, not automatically the canonical POI coordinate.
+6. **Precision by Auth Type**: Narrow-radius `QR_GPS` locations require higher coordinate precision than broad attractions.
+7. **No Hiding Bad Coordinates**: A bad coordinate must be corrected. Do NOT increase radius merely to hide a coordinate error.
+8. **Spatial Extent Review**: For parks, markets, beaches, riversides and other spatially large places: review the real visitor area before determining center/radius.
+9. **Mandatory Checklist Before Production Write**:
+   - `PLACE_NAME=`
+   - `SPATIAL_TYPE=`
+   - `ACTUAL_AREA_REVIEWED=`
+   - `REFERENCE_SOURCE=`
+   - `REFERENCE_LAT=`
+   - `REFERENCE_LONG=`
+   - `FIELD_GPS_CHECK=`
+   - `DB_TO_REFERENCE_DISTANCE_M=`
+   - `GEOFENCE_TYPE=`
+   - `RADIUS=`
+   - `COORDINATE_APPROVED=`
+10. **Mandatory Approval Gate**: `COORDINATE_APPROVED` must equal `YES` before new GPS-dependent Production place registration.
+
+## Q. DATA LINEAGE, STORAGE, RETENTION & NON-DESTRUCTIVE DELETION STANDARD
+
+This is a permanent NAMPO GOGO project rule for all persistent data and generated files.
+
+### Q1. DATA LINEAGE REQUIRED
+Every feature that creates, changes, stores, derives, archives, or removes persistent information must document:
+- `DATA_NAME=`
+- `CREATED_BY=`
+- `SOURCE_OF_TRUTH=`
+- `PRIMARY_STORAGE=`
+- `DERIVED_STORAGE=`
+- `CACHE_STORAGE=`
+- `BACKUP_STORAGE=`
+- `RELATED_TABLES=`
+- `RELATED_FILES=`
+- `RELATED_USER_ID=`
+- `RELATED_STORE_ID=`
+- `RELATED_MISSION_ID=`
+- `RELATED_BUSINESS_ID=`
+- `CREATES_DERIVED_DATA=`
+- `DERIVED_DATA_LIST=`
+- `SAFE_TO_MODIFY=`
+- `MUST_NOT_TOUCH=`
+- `RESTORE_METHOD=`
+- `DELETE_BEHAVIOR=`
+
+Unknown data lineage = STOP.
+
+### Q2. SOURCE OF TRUTH
+Every important Data Family must explicitly define its Source of Truth. Derived/cache/UI values must never silently overwrite it.
+- Authentication identity -> validated JWT authenticated user
+- Mission completion -> `UserMission` authoritative completion record
+- Point transaction history -> `PointHistory`
+- Current persisted point balance -> `users.current_points`
+- Photo evidence -> documented canonical evidence storage (`static/mission_evidence/`)
+
+### Q3. DATA FAMILY / DEPENDENCY
+One logical event creates multiple related artifacts. For example, `MISSION_COMPLETION_FAMILY` includes `UserMission`, `PointHistory`, `users.current_points` delta, photo/QR evidence, and verification records. Never modify one family member blindly.
+
+### Q4. NO ARBITRARY HARD DELETE
+Production hard deletion is prohibited by default (`DELETE FROM`, `rm`, `unlink`, `shutil.rmtree`).
+Preferred lifecycle: ACTIVE -> INACTIVE / ARCHIVED / DELETED_PENDING -> QUARANTINE / RETENTION -> dependency verification -> PM final approval -> physical purge only if safe.
+
+### Q5. QUARANTINE / ARCHIVE
+Files considered obsolete must not immediately disappear. Use controlled quarantine/archive first with metadata (`ORIGINAL_PATH`, `QUARANTINE_PATH`, `REASON`, `CHECKSUM`, `RESTORE_TARGET`, `PURGE_APPROVED=NO`).
+
+### Q6. DATABASE RETENTION
+Prefer flags (`status`, `is_active`, `deleted_at`, tombstone) before physical row deletion. Never delete a Production row merely because it appears unused.
+
+### Q7. THREE-STAGE DELETE
+- Stage 1: LOGICAL HIDE / DEACTIVATE
+- Stage 2: QUARANTINE / ARCHIVE / RETAIN
+- Stage 3: PHYSICAL PURGE (Requires explicit PM approval, no active references, backup verified, production impact none).
+
+### Q8. INCIDENT / ERROR EVIDENCE RETENTION
+Erroneous Production data must not be erased merely to make the database look clean. User-facing financial/point state must be corrected while preserving sufficient audit evidence for investigation.
+*(Rule Application Note: The QA Gampo wrong-user +100P incident is governed by Section Q. Future correction must restore correct user financial state and preserve incident audit evidence without arbitrary hard deletion).*
+
+### Q9. AUTOMATIC CLEANUP RESTRICTION
+No automatic destructive cleanup without PM review. All file/media/database cleanup scripts must support `DRY_RUN`, `CANDIDATE_LIST`, `DEPENDENCY_CHECK`, and `PM_REVIEW`.
+
+### Q10. DATA / FILE IMPACT REPORT
+Significant persistent-data tasks must report created/modified/archived/deleted files and DB rows, primary vs derived storage, and restore path.
+
+### Q11. GENERATED ARTIFACT LOCATION
+Whenever files are generated (QR PNG, photo evidence, APK artifacts, translations), document canonical output path, derived paths, temp paths, consumers, and `SAFE_TO_REGENERATE` status. Important files must never survive only in undocumented scratch/temp folders.
+
+### Q12. TEMP / SCRATCH RULE
+`scratch`, `temp`, `.tmp`, and Antigravity brain scratch are NOT canonical permanent storage. Every important artifact there must be classified as `TEMPORARY` or `CANONICAL_COPY_EXISTS_ELSEWHERE`.
+
+### Q13. PRODUCTION WRITE PREVIEW
+Before every Production persistent-data mutation, report target, source of truth, expected inserts/updates/archives/deletes, affected files, and rollback/restore method.
+
+### Q14. USER / BUSINESS SCALE SAFETY
+Never rely on first database user, first matching record, arbitrary fallback user, or unverified relationship for financial, ownership, authorization, or destructive operations. Identity and ownership must be explicit and verifiable.
+
+### Q15. MANDATORY DELETION EXCEPTION
+If legal, privacy, security, or mandatory policy requires actual deletion: identify exact scope, verify target identity, avoid unrelated deletion, and confirm completion without violating mandatory rules.
+

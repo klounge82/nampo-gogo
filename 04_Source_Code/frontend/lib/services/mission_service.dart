@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../config/api_config.dart';
 
 class MissionService {
@@ -67,6 +68,16 @@ class MissionService {
     }
   }
 
+  // Helper to get Auth headers
+  Future<Options> _getAuthOptions() async {
+    const storage = FlutterSecureStorage();
+    final token = await storage.read(key: 'access_token');
+    if (token != null && token.isNotEmpty) {
+      return Options(headers: {'Authorization': 'Bearer $token'});
+    }
+    return Options();
+  }
+
   // POST /missions/{mission_id}/verify
   Future<Map<String, dynamic>> verifyMission(
     String id,
@@ -85,9 +96,11 @@ class MissionService {
       if (longitude != null) payload['longitude'] = longitude;
       if (imageBase64 != null) payload['image_base64'] = imageBase64;
 
+      final options = await _getAuthOptions();
       final response = await _dio.post(
         '/missions/$id/verify',
         data: payload,
+        options: options,
       );
       if (response.statusCode == 200 && response.data != null) {
         return response.data as Map<String, dynamic>;

@@ -215,9 +215,10 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
     if (clean.contains('403') || clean.contains('유효하지 않거나') || clean.contains('만료된') || clean.contains('폐기된') || clean.contains('INVALID')) {
       return '유효하지 않은 QR 코드입니다.';
     } else if (clean.contains('반경') || clean.contains('거리') || clean.contains('위치') || clean.contains('GPS')) {
-      return clean.contains('50m')
-          ? clean
-          : '현재 위치에서는 이 미션을 수행할 수 없습니다. (매장 근처 50m 이내 스캔 필요)';
+      if (clean.length > 5 && !clean.contains('{') && !clean.contains('Instance of')) {
+        return clean;
+      }
+      return '현재 위치에서는 이 미션을 수행할 수 없습니다. 장소와의 거리를 확인한 후 다시 시도해 주세요.';
     } else if (clean.contains('이미') || clean.contains('완료')) {
       return '이미 완료한 미션입니다.';
     } else if (clean.contains('권한') || clean.contains('permission')) {
@@ -227,7 +228,7 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
     } else if (clean.contains('네트워크') || clean.contains('Connection') || clean.contains('SocketException')) {
       return '네트워크 연결을 확인해 주세요.';
     } else if (clean.contains('400')) {
-      return '현재 위치에서는 이 미션을 수행할 수 없습니다. (매장 근처 50m 이내 스캔 필요)';
+      return '현재 위치에서는 이 미션을 수행할 수 없습니다. 장소와의 거리를 확인한 후 다시 시도해 주세요.';
     }
     return clean.isEmpty ? '유효하지 않은 QR 코드입니다.' : clean;
   }
