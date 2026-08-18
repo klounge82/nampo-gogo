@@ -69,8 +69,12 @@ class LanguageSettingsScreen extends StatelessWidget {
                   ? const Icon(Icons.check_circle, color: Colors.blueAccent)
                   : const Icon(Icons.circle_outlined, color: Colors.grey),
               onTap: () {
+                final code = lang['code']!;
+                final targetLocale = code == 'zh'
+                    ? const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans')
+                    : Locale(code);
                 localeProvider.setLocale(
-                  Locale(lang['code']!),
+                  targetLocale,
                   userId: auth.currentUser?.id,
                 );
               },

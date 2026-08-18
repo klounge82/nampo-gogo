@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../constants/colors.dart';
-import '../constants/strings.dart';
 import '../models/mission.dart';
 import '../repositories/mission_repository.dart';
 import '../providers/auth_provider.dart';
+import '../providers/locale_provider.dart';
+import '../l10n/app_localizations.dart';
+import '../utils/l10n_mappers.dart';
 import 'mission_detail_screen.dart';
 
 class MissionScreen extends StatefulWidget {
@@ -19,17 +21,23 @@ class _MissionScreenState extends State<MissionScreen> {
 
   List<Mission> _missions = [];
   bool _isLoading = false;
+  String? _lastLocaleCode;
 
   @override
-  void initState() {
-    super.initState();
-    _loadMissions();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final currentLoc = context.watch<LocaleProvider>().currentLocaleCode;
+    if (_lastLocaleCode != currentLoc) {
+      _lastLocaleCode = currentLoc;
+      _loadMissions();
+    }
   }
 
   Future<void> _loadMissions() async {
+    final localeCode = context.read<LocaleProvider>().currentLocaleCode;
     setState(() => _isLoading = true);
     try {
-      final list = await _missionRepository.getMissions();
+      final list = await _missionRepository.getMissions(locale: localeCode);
       setState(() {
         _missions = list;
       });
@@ -41,14 +49,15 @@ class _MissionScreenState extends State<MissionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isLoggedIn = context.watch<AuthProvider>().isLoggedIn;
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
-          AppStrings.missionTitle,
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          l10n.missionTitle,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
@@ -88,9 +97,9 @@ class _MissionScreenState extends State<MissionScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        '나의 획득 포인트',
-                        style: TextStyle(
+                      Text(
+                        l10n.missionMyPoints,
+                        style: const TextStyle(
                           color: Colors.white70,
                           fontSize: 13.0,
                           fontWeight: FontWeight.bold,
@@ -122,14 +131,16 @@ class _MissionScreenState extends State<MissionScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            isLoggedIn ? '완료한 미션: 2개' : '완료한 미션: 0개',
+                            isLoggedIn
+                                ? l10n.completedMissionsCountFormat(2)
+                                : l10n.completedMissionsCountFormat(0),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 12.0,
                             ),
                           ),
                           Text(
-                            isLoggedIn ? '상위 15% 관광객' : '오프라인/게스트',
+                            isLoggedIn ? l10n.missionTopGrade : l10n.guestModeNotice,
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 12.0,
@@ -144,9 +155,9 @@ class _MissionScreenState extends State<MissionScreen> {
                 const SizedBox(height: 28.0),
 
                 // Section Header
-                const Text(
-                  '전체 미션 목록',
-                  style: TextStyle(
+                Text(
+                  l10n.missionAllList,
+                  style: const TextStyle(
                     fontSize: 18.0,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
@@ -165,12 +176,12 @@ class _MissionScreenState extends State<MissionScreen> {
                         ),
                       )
                     : _missions.isEmpty
-                    ? const Center(
+                    ? Center(
                         child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 40.0),
+                          padding: const EdgeInsets.symmetric(vertical: 40.0),
                           child: Text(
-                            '진행 가능한 미션이 없습니다.',
-                            style: TextStyle(color: AppColors.textSecondary),
+                            l10n.missionEmpty,
+                            style: const TextStyle(color: AppColors.textSecondary),
                           ),
                         ),
                       )
@@ -261,7 +272,10 @@ class _MissionScreenState extends State<MissionScreen> {
                             ),
                           ),
                           Text(
-                            _getAuthTypeText(mission.authType),
+                            L10nMappers.mapMissionAuthType(
+                              AppLocalizations.of(context)!,
+                              mission.authType,
+                            ),
                             style: const TextStyle(
                               fontSize: 10.0,
                               color: AppColors.textSecondary,
@@ -300,18 +314,5 @@ class _MissionScreenState extends State<MissionScreen> {
         ),
       ),
     );
-  }
-
-  String _getAuthTypeText(String authType) {
-    switch (authType) {
-      case 'GPS':
-        return '📍 위치 인증';
-      case 'QR':
-        return '🔍 QR 스캔';
-      case 'PHOTO':
-        return '📸 사진 등록';
-      default:
-        return '✏️ 일반 인증';
-    }
   }
 }

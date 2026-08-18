@@ -181,7 +181,7 @@ class _BusinessStoreScreenState extends State<BusinessStoreScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Role badge
+                    // Role & Tier badge
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -193,20 +193,66 @@ class _BusinessStoreScreenState extends State<BusinessStoreScreen> {
                             color: BusinessTheme.darkSlate,
                           ),
                         ),
-                        Chip(
-                          label: Text(
-                            '권한: $_membershipRole',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
+                        Wrap(
+                          spacing: 6.0,
+                          children: [
+                            Chip(
+                              label: const Text(
+                                '베타 등급: VERIFIED_BETA',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 11,
+                                ),
+                              ),
+                              backgroundColor: Colors.teal.shade700,
                             ),
-                          ),
-                          backgroundColor: _canEdit
-                              ? BusinessTheme.primaryTeal
-                              : Colors.grey,
+                            Chip(
+                              label: Text(
+                                '권한: $_membershipRole',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 11,
+                                ),
+                              ),
+                              backgroundColor: _canEdit
+                                  ? BusinessTheme.primaryTeal
+                                  : Colors.grey,
+                            ),
+                          ],
                         ),
                       ],
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Registration Photo Completion Notice
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12.0),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade50,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.blue.shade200),
+                      ),
+                      child: const Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '📸 매장 필수 사진 등록 안내 (완성도 85%)',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.indigo,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            '필수사진: 대표 1장 (완료), 입구 1장 (완료), 내부 2장 이상 (완료), 상품 3장 이상 (진행 중)\nVERIFIED_BETA 이상 등급은 상품 사진 3장 이상 등록 시 OFFICIAL 승인됩니다.',
+                            style: TextStyle(fontSize: 11.5, color: Colors.black87, height: 1.3),
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 16),
 

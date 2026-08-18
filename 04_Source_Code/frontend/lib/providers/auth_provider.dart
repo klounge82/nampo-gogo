@@ -80,9 +80,12 @@ class AuthProvider extends ChangeNotifier {
         email: email,
         password: password,
       );
+      debugPrint('NG_LOGIN_DIAG REPOSITORY_RETURN_OK');
       _accessToken = session['access_token'] as String;
       _refreshToken = session['refresh_token'] as String;
       _currentUser = session['user'] as User;
+      debugPrint('NG_LOGIN_DIAG USER_MODEL_OK');
+      debugPrint('NG_LOGIN_DIAG ROLE_PARSE_OK');
       _isLoggedIn = true;
       notifyListeners();
 
@@ -91,6 +94,8 @@ class AuthProvider extends ChangeNotifier {
 
       return true;
     } catch (e) {
+      debugPrint('NG_LOGIN_DIAG FAILURE_STAGE=AUTH_PROVIDER_LOGIN');
+      debugPrint('NG_LOGIN_DIAG EXCEPTION_TYPE=${e.runtimeType}');
       return false;
     } finally {
       _setLoading(false);
@@ -135,6 +140,18 @@ class AuthProvider extends ChangeNotifier {
     } finally {
       _setLoading(false);
     }
+  }
+
+  // Refresh current user data from GET /auth/me
+  Future<void> refreshUser() async {
+    if (!_isLoggedIn) return;
+    try {
+      final freshUser = await _authRepository.getMe();
+      if (freshUser != null) {
+        _currentUser = freshUser;
+        notifyListeners();
+      }
+    } catch (_) {}
   }
 
   // FCM Token Helpers

@@ -2,13 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../constants/colors.dart';
 import '../providers/auth_provider.dart';
+import '../providers/locale_provider.dart';
+import '../l10n/app_localizations.dart';
 import 'business_pending_shell.dart';
 import 'policy_viewer_screen.dart';
+import '../widgets/signup_celebration_dialog.dart';
+import 'auth_choice_screen.dart';
+import 'main_navigation_screen.dart';
 
 enum AuthViewMode { login, signupSelection, customerSignup, businessSignup }
 
 class AuthScreen extends StatefulWidget {
-  const AuthScreen({super.key});
+  final AuthViewMode initialMode;
+
+  const AuthScreen({
+    super.key,
+    this.initialMode = AuthViewMode.login,
+  });
 
   @override
   State<AuthScreen> createState() => _AuthScreenState();
@@ -32,9 +42,15 @@ class _AuthScreenState extends State<AuthScreen> {
   final _repNameController = TextEditingController();
   final _phoneController = TextEditingController();
 
-  AuthViewMode _viewMode = AuthViewMode.login;
+  late AuthViewMode _viewMode;
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _viewMode = widget.initialMode;
+  }
 
   @override
   void dispose() {
@@ -52,6 +68,7 @@ class _AuthScreenState extends State<AuthScreen> {
   Future<void> _submitLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
+    debugPrint('NG_LOGIN_DIAG UI_SUBMIT');
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final email = _emailController.text.trim();
     final password = _passwordController.text;
@@ -59,14 +76,19 @@ class _AuthScreenState extends State<AuthScreen> {
     final success = await authProvider.login(email: email, password: password);
     if (mounted) {
       if (success) {
+        debugPrint('NG_LOGIN_DIAG PROVIDER_LOGIN_SUCCESS');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('로그인 성공! 계정이 연결되었습니다.'),
             backgroundColor: AppColors.primary,
           ),
         );
-        Navigator.of(context).pop();
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+          (route) => false,
+        );
       } else {
+        debugPrint('NG_LOGIN_DIAG UI_LOGIN_FAILED_DIALOG');
         _showErrorDialog('로그인 실패', '이메일 또는 비밀번호가 올바르지 않습니다.');
       }
     }
@@ -85,22 +107,39 @@ class _AuthScreenState extends State<AuthScreen> {
     final nickname = _nicknameController.text.trim();
 
     try {
-      final user = await authProvider.signUp(
+      await authProvider.signUp(
         email: email,
         password: password,
         nickname: nickname,
       );
+
+      // Auto login after signup to establish session & load 1,000P
+      final loginSuccess = await authProvider.login(
+        email: email,
+        password: password,
+      );
+
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('일반회원 가입이 완료되었습니다.'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        // Switch to login
-        setState(() {
-          _viewMode = AuthViewMode.login;
-        });
+        if (loginSuccess) {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (_) => SignupCelebrationDialog(
+              onStartTrip: () {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(
+                    builder: (_) => const MainNavigationScreen(),
+                  ),
+                  (route) => false,
+                );
+              },
+            ),
+          );
+        } else {
+          setState(() {
+            _viewMode = AuthViewMode.login;
+          });
+        }
       }
     } catch (e) {
       final msg = e.toString().replaceAll('Exception: ', '');
@@ -318,14 +357,19 @@ class _AuthScreenState extends State<AuthScreen> {
             // Bottom Mode Toggle
             TextButton(
               onPressed: () {
-                setState(() {
-                  if (_viewMode == AuthViewMode.login) {
-                    _viewMode = AuthViewMode.signupSelection;
-                  } else {
+                if (_viewMode == AuthViewMode.login) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const AuthChoiceScreen(),
+                    ),
+                  );
+                } else {
+                  setState(() {
                     _viewMode = AuthViewMode.login;
-                  }
-                  _formKey.currentState?.reset();
-                });
+                    _formKey.currentState?.reset();
+                  });
+                }
               },
               child: Text(
                 _viewMode == AuthViewMode.login
@@ -763,21 +807,29 @@ class _AuthScreenState extends State<AuthScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   TextButton(
-                    onPressed: () => PolicyViewerScreen.show(
-                      context,
-                      title: '서비스 이용약관',
-                      content: PolicyTexts.termsOfService,
-                    ),
-                    child: const Text('이용약관 보기', style: TextStyle(fontSize: 12)),
+                    onPressed: () {
+                      final l10n = AppLocalizations.of(context);
+                      final loc = context.read<LocaleProvider>().currentLocaleCode;
+                      PolicyViewerScreen.show(
+                        context,
+                        title: l10n?.profileTerms ?? '서비스 이용약관',
+                        content: PolicyTexts.getTermsOfService(loc),
+                      );
+                    },
+                    child: Text(AppLocalizations.of(context)?.profileTerms ?? '이용약관 보기', style: const TextStyle(fontSize: 12)),
                   ),
                   const Text('|', style: TextStyle(color: Colors.grey)),
                   TextButton(
-                    onPressed: () => PolicyViewerScreen.show(
-                      context,
-                      title: '개인정보 처리방침',
-                      content: PolicyTexts.privacyPolicy,
-                    ),
-                    child: const Text('개인정보 처리방침 보기', style: TextStyle(fontSize: 12)),
+                    onPressed: () {
+                      final l10n = AppLocalizations.of(context);
+                      final loc = context.read<LocaleProvider>().currentLocaleCode;
+                      PolicyViewerScreen.show(
+                        context,
+                        title: l10n?.profilePrivacyPolicy ?? '개인정보 처리방침',
+                        content: PolicyTexts.getPrivacyPolicy(loc),
+                      );
+                    },
+                    child: Text(AppLocalizations.of(context)?.profilePrivacyPolicy ?? '개인정보 처리방침 보기', style: const TextStyle(fontSize: 12)),
                   ),
                 ],
               ),

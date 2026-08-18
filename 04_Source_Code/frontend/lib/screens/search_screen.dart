@@ -39,7 +39,7 @@ class _SearchScreenState extends State<SearchScreen> {
     _focusNode.unfocus();
     setState(() => _hasSearched = true);
 
-    final lang = context.read<LocaleProvider>().locale.languageCode;
+    final lang = context.read<LocaleProvider>().currentLocaleCode;
     context.read<SearchProvider>().triggerSearch(query: query, lang: lang);
   }
 
@@ -53,7 +53,7 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     final searchProvider = context.watch<SearchProvider>();
-    final lang = context.read<LocaleProvider>().locale.languageCode;
+    final lang = context.read<LocaleProvider>().currentLocaleCode;
 
     return Scaffold(
       appBar: AppBar(

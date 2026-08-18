@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../main.dart';
 import '../constants/colors.dart';
+import '../config/production_config.dart';
+import '../utils/l10n_mappers.dart';
 import '../providers/auth_provider.dart';
 import '../providers/app_mode_provider.dart';
+import '../providers/locale_provider.dart';
 import 'business_application_screen.dart';
 import 'auth_screen.dart';
 import 'point_history_screen.dart';
@@ -23,11 +27,27 @@ import 'change_password_screen.dart';
 import 'account_delete_screen.dart';
 import 'policy_viewer_screen.dart';
 import '../l10n/app_localizations.dart';
+import '../widgets/language_selector_button.dart';
 import '../config/production_config.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        Provider.of<AuthProvider>(context, listen: false).refreshUser();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,9 +67,9 @@ class ProfileScreen extends StatelessWidget {
         foregroundColor: AppColors.textPrimary,
         elevation: 0.5,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () => _showComingSoon(context, '설정'),
+          const Padding(
+            padding: EdgeInsets.only(right: 8.0),
+            child: Center(child: LanguageSelectorButton()),
           ),
         ],
       ),
@@ -100,6 +120,26 @@ class ProfileScreen extends StatelessWidget {
                             ),
                             if (isLoggedIn) ...[
                               const SizedBox(width: 8.0),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                                ),
+                                child: Text(
+                                  L10nMappers.mapUserTier(
+                                    l10n,
+                                    user?.currentPoints ?? 0,
+                                  ),
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8.0),
                               GestureDetector(
                                 onTap: () {
                                   Navigator.of(context).push(
@@ -123,7 +163,7 @@ class ProfileScreen extends StatelessWidget {
                               ? (user?.email != null
                                     ? _maskEmail(user!.email)
                                     : '')
-                              : '게스트 모드로 이용 중 (로그인 시 데이터 연결)',
+                              : l10n.guestModeNotice,
                           style: const TextStyle(
                             fontSize: 13.0,
                             color: AppColors.textSecondary,
@@ -142,9 +182,9 @@ class ProfileScreen extends StatelessWidget {
                               borderRadius: BorderRadius.circular(20.0),
                             ),
                           ),
-                          child: const Text(
-                            '로그아웃',
-                            style: TextStyle(fontSize: 12.0),
+                          child: Text(
+                            l10n.profileLogout,
+                            style: const TextStyle(fontSize: 12.0),
                           ),
                         )
                       : Column(
@@ -168,9 +208,9 @@ class ProfileScreen extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(20.0),
                                 ),
                               ),
-                              child: const Text(
-                                '로그인',
-                                style: TextStyle(
+                              child: Text(
+                                l10n.loginTitle,
+                                style: const TextStyle(
                                   fontSize: 12.0,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -197,7 +237,7 @@ class ProfileScreen extends StatelessWidget {
                     icon: Icons.monetization_on,
                     iconColor: AppColors.primary,
                     value: isLoggedIn ? '${user?.currentPoints ?? 0} P' : '0 P',
-                    label: '보유 포인트',
+                    label: l10n.profilePointsLabel,
                     onTap: () {
                       if (isLoggedIn) {
                         Navigator.of(context).push(
@@ -216,8 +256,8 @@ class ProfileScreen extends StatelessWidget {
                   _buildAssetColumn(
                     icon: Icons.confirmation_number,
                     iconColor: AppColors.secondary,
-                    value: isLoggedIn ? '확인하기' : '0 개',
-                    label: '보유 쿠폰',
+                    value: isLoggedIn ? l10n.profileCheckAction : '0 개',
+                    label: l10n.profileCouponsLabel,
                     onTap: () {
                       if (isLoggedIn) {
                         Navigator.of(context).push(
@@ -242,11 +282,11 @@ class ProfileScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.only(left: 8.0, bottom: 8.0, top: 12.0),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0, bottom: 8.0, top: 12.0),
                     child: Text(
-                      '서비스 설정',
-                      style: TextStyle(
+                      l10n.profileServiceSettings,
+                      style: const TextStyle(
                         fontSize: 14.0,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textSecondary,
@@ -285,7 +325,7 @@ class ProfileScreen extends StatelessWidget {
                     _buildMenuItem(
                       context,
                       icon: Icons.storefront,
-                      title: '포인트 교환소',
+                      title: l10n.profilePointStore,
                       onTap: () {
                         if (isLoggedIn) {
                           Navigator.of(context).push(
@@ -305,7 +345,7 @@ class ProfileScreen extends StatelessWidget {
                     _buildMenuItem(
                       context,
                       icon: Icons.calendar_month,
-                      title: '내 예약 내역',
+                      title: l10n.profileMyReservations,
                       onTap: () {
                         if (isLoggedIn) {
                           Navigator.of(context).push(
@@ -325,7 +365,7 @@ class ProfileScreen extends StatelessWidget {
                     _buildMenuItem(
                       context,
                       icon: Icons.rate_review_outlined,
-                      title: '내가 작성한 리뷰',
+                      title: l10n.profileMyReviews,
                       onTap: () {
                         if (isLoggedIn) {
                           Navigator.of(context).push(
@@ -350,13 +390,22 @@ class ProfileScreen extends StatelessWidget {
                             : Icons.storefront,
                         title: user?.isApprovedBusiness == true
                             ? '사업자 모드로 전환'
-                            : '사업자 회원 신청',
-                        onTap: () {
+                            : l10n.profileBusinessApply,
+                        onTap: () async {
                           if (user?.isApprovedBusiness == true) {
-                            Provider.of<AppModeProvider>(
+                            await Provider.of<AppModeProvider>(
                               context,
                               listen: false,
                             ).switchMode(AppMode.business, user);
+
+                            if (context.mounted) {
+                              Navigator.of(context).pushAndRemoveUntil(
+                                MaterialPageRoute(
+                                  builder: (_) => const RootNavigationSelector(),
+                                ),
+                                (route) => false,
+                              );
+                            }
                           } else {
                             Navigator.of(context).push(
                               MaterialPageRoute(
@@ -370,7 +419,7 @@ class ProfileScreen extends StatelessWidget {
                     _buildMenuItem(
                       context,
                       icon: Icons.history,
-                      title: '내 활동 기록',
+                      title: l10n.profileActivityLog,
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
@@ -382,7 +431,7 @@ class ProfileScreen extends StatelessWidget {
                     _buildMenuItem(
                       context,
                       icon: Icons.payment,
-                      title: '결제 및 이용 이력',
+                      title: l10n.profilePaymentHistory,
                       onTap: () {
                         if (isLoggedIn) {
                           Navigator.of(context).push(
@@ -402,7 +451,7 @@ class ProfileScreen extends StatelessWidget {
                     _buildMenuItem(
                       context,
                       icon: Icons.favorite_border,
-                      title: '즐겨찾기 보관함',
+                      title: l10n.profileFavorites,
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
@@ -414,7 +463,7 @@ class ProfileScreen extends StatelessWidget {
                     _buildMenuItem(
                       context,
                       icon: Icons.feedback_outlined,
-                      title: '내 피드백 & 문의',
+                      title: l10n.profileFeedback,
                       onTap: () =>
                           _launchURL(context, ProductionConfig.supportUrl),
                     ),
@@ -473,11 +522,11 @@ class ProfileScreen extends StatelessWidget {
                     ),
                   ]),
 
-                  const Padding(
-                    padding: EdgeInsets.only(left: 8.0, bottom: 8.0, top: 20.0),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0, bottom: 8.0, top: 20.0),
                     child: Text(
-                      '정보 및 지원',
-                      style: TextStyle(
+                      l10n.profileInfoSupport,
+                      style: const TextStyle(
                         fontSize: 14.0,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textSecondary,
@@ -488,71 +537,86 @@ class ProfileScreen extends StatelessWidget {
                     _buildMenuItem(
                       context,
                       icon: Icons.shield_outlined,
-                      title: '개인정보 처리방침',
-                      onTap: () => PolicyViewerScreen.show(
-                        context,
-                        title: '개인정보 처리방침',
-                        content: PolicyTexts.privacyPolicy,
-                      ),
+                      title: l10n.profilePrivacyPolicy,
+                      onTap: () {
+                        final loc = context.read<LocaleProvider>().currentLocaleCode;
+                        PolicyViewerScreen.show(
+                          context,
+                          title: l10n.profilePrivacyPolicy,
+                          content: PolicyTexts.getPrivacyPolicy(loc),
+                        );
+                      },
                     ),
                     _buildMenuItem(
                       context,
                       icon: Icons.description_outlined,
-                      title: '서비스 이용약관',
-                      onTap: () => PolicyViewerScreen.show(
-                        context,
-                        title: '서비스 이용약관',
-                        content: PolicyTexts.termsOfService,
-                      ),
+                      title: l10n.profileTerms,
+                      onTap: () {
+                        final loc = context.read<LocaleProvider>().currentLocaleCode;
+                        PolicyViewerScreen.show(
+                          context,
+                          title: l10n.profileTerms,
+                          content: PolicyTexts.getTermsOfService(loc),
+                        );
+                      },
                     ),
                     _buildMenuItem(
                       context,
                       icon: Icons.event_note_outlined,
-                      title: '예약 및 취소 운영정책',
-                      onTap: () => PolicyViewerScreen.show(
-                        context,
-                        title: '예약 및 취소 운영정책',
-                        content: PolicyTexts.reservationPolicy,
-                      ),
+                      title: l10n.policyRefundTitle,
+                      onTap: () {
+                        final loc = context.read<LocaleProvider>().currentLocaleCode;
+                        PolicyViewerScreen.show(
+                          context,
+                          title: l10n.policyRefundTitle,
+                          content: PolicyTexts.getReservationPolicy(loc),
+                        );
+                      },
                     ),
                     _buildMenuItem(
                       context,
                       icon: Icons.rate_review_outlined,
-                      title: '리뷰 및 방문 인증 정책',
-                      onTap: () => PolicyViewerScreen.show(
-                        context,
-                        title: '리뷰 및 방문 인증 운영정책',
-                        content: PolicyTexts.reviewVisitPolicy,
-                      ),
+                      title: l10n.profileMyReviews,
+                      onTap: () {
+                        final loc = context.read<LocaleProvider>().currentLocaleCode;
+                        PolicyViewerScreen.show(
+                          context,
+                          title: l10n.profileMyReviews,
+                          content: PolicyTexts.getReviewVisitPolicy(loc),
+                        );
+                      },
                     ),
                     _buildMenuItem(
                       context,
                       icon: Icons.location_on_outlined,
-                      title: '위치 및 카메라 권한 안내',
-                      onTap: () => PolicyViewerScreen.show(
-                        context,
-                        title: '위치 및 카메라 권한 안내',
-                        content: PolicyTexts.locationCameraGuide,
-                      ),
+                      title: l10n.locationInfoTitle,
+                      onTap: () {
+                        final loc = context.read<LocaleProvider>().currentLocaleCode;
+                        PolicyViewerScreen.show(
+                          context,
+                          title: l10n.locationInfoTitle,
+                          content: PolicyTexts.getLocationCameraGuide(loc),
+                        );
+                      },
                     ),
                     _buildMenuItem(
                       context,
                       icon: Icons.support_agent_outlined,
-                      title: '고객지원 센터',
+                      title: l10n.customerSupportCenter,
                       onTap: () => _launchURL(context, ProductionConfig.supportUrl),
                     ),
                   ]),
 
                   if (isLoggedIn) ...[
-                    const Padding(
-                      padding: EdgeInsets.only(
+                    Padding(
+                      padding: const EdgeInsets.only(
                         left: 8.0,
                         bottom: 8.0,
                         top: 20.0,
                       ),
                       child: Text(
-                        '계정 관리',
-                        style: TextStyle(
+                        l10n.profileAccountManagement,
+                        style: const TextStyle(
                           fontSize: 14.0,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textSecondary,
@@ -563,7 +627,7 @@ class ProfileScreen extends StatelessWidget {
                       _buildMenuItem(
                         context,
                         icon: Icons.lock_reset_outlined,
-                        title: '비밀번호 변경',
+                        title: l10n.changePassword,
                         onTap: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
@@ -575,7 +639,7 @@ class ProfileScreen extends StatelessWidget {
                       _buildMenuItem(
                         context,
                         icon: Icons.no_accounts_outlined,
-                        title: '회원탈퇴',
+                        title: l10n.deleteAccount,
                         onTap: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
@@ -586,6 +650,17 @@ class ProfileScreen extends StatelessWidget {
                       ),
                     ]),
                   ],
+                  const SizedBox(height: 20.0),
+                  const Center(
+                    child: Text(
+                      ProductionConfig.currentBuildMarker,
+                      style: TextStyle(
+                        fontSize: 11.0,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 28.0),
                 ],
               ),

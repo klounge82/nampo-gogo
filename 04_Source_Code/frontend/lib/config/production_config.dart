@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 enum AppEnvironment { development, staging, production }
 
 class ProductionConfig {
@@ -185,4 +183,7 @@ class ProductionConfig {
   static const int defaultVerificationRadiusMeters = 300;
   static const int defaultMaxVisitDateDaysAgo = 90;
   static const double maxAllowedLocationAccuracyMeters = 500.0;
+
+  // Single Source of Truth for Build Marker
+  static const String currentBuildMarker = 'BUILD: M05B-BETA-DATA-VRF-01';
 }

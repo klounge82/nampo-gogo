@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/personalization_provider.dart';
 import '../providers/auth_provider.dart';
+import '../l10n/app_localizations.dart';
 
 class RecommendationFeedbackWidget extends StatefulWidget {
   final String storeId;
@@ -18,11 +19,12 @@ class _RecommendationFeedbackWidgetState
   String? _currentFeedback; // 'LIKE' or 'DISMISS'
 
   Future<void> _submitFeedback(String type) async {
+    final l10n = AppLocalizations.of(context);
     final token = context.read<AuthProvider>().accessToken;
     if (token == null || token.isEmpty) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('로그인 후 피드백을 제출할 수 있습니다.')));
+      ).showSnackBar(SnackBar(content: Text(l10n?.loginRequiredFeedbackMsg ?? '로그인 후 피드백을 제출할 수 있습니다.')));
       return;
     }
 
@@ -34,10 +36,13 @@ class _RecommendationFeedbackWidgetState
     );
 
     if (success) {
+      if (!mounted) return;
       setState(() {
         _currentFeedback = type;
       });
-      final msg = type == 'LIKE' ? '추천 장소가 마음에 듭니다!' : '관심 없는 장소로 분류되었습니다.';
+      final msg = type == 'LIKE'
+          ? (l10n?.recommendFeedbackLikeMsg ?? '추천 장소가 마음에 듭니다!')
+          : (l10n?.recommendFeedbackDismissMsg ?? '관심 없는 장소로 분류되었습니다.');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(msg), duration: const Duration(seconds: 1)),
       );
@@ -46,12 +51,13 @@ class _RecommendationFeedbackWidgetState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        const Text(
-          '추천 결과 피드백:',
-          style: TextStyle(fontSize: 11, color: Colors.grey),
+        Text(
+          l10n?.recommendFeedbackTitle ?? '추천 결과 피드백:',
+          style: const TextStyle(fontSize: 11, color: Colors.grey),
         ),
         const SizedBox(width: 8),
         IconButton(
@@ -61,7 +67,7 @@ class _RecommendationFeedbackWidgetState
             color: _currentFeedback == 'LIKE' ? Colors.blue : Colors.grey,
           ),
           onPressed: () => _submitFeedback('LIKE'),
-          tooltip: '좋아요',
+          tooltip: l10n?.tooltipLike ?? '좋아요',
         ),
         IconButton(
           icon: Icon(
@@ -70,7 +76,7 @@ class _RecommendationFeedbackWidgetState
             color: _currentFeedback == 'DISMISS' ? Colors.red : Colors.grey,
           ),
           onPressed: () => _submitFeedback('DISMISS'),
-          tooltip: '관심 없음',
+          tooltip: l10n?.tooltipNotInterested ?? '관심 없음',
         ),
       ],
     );

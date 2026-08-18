@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:dio/dio.dart';
 import '../providers/profile_provider.dart';
+import '../l10n/app_localizations.dart';
 
 class AccountDeleteScreen extends StatefulWidget {
   const AccountDeleteScreen({super.key});
@@ -14,7 +15,7 @@ class _AccountDeleteScreenState extends State<AccountDeleteScreen> {
   bool _agreeToTerms = false;
   bool _isSubmitting = false;
 
-  Future<void> _submitWithdrawal() async {
+  Future<void> _submitWithdrawal(AppLocalizations l10n) async {
     if (!_agreeToTerms) return;
 
     setState(() => _isSubmitting = true);
@@ -25,10 +26,8 @@ class _AccountDeleteScreenState extends State<AccountDeleteScreen> {
           context: context,
           barrierDismissible: false,
           builder: (ctx) => AlertDialog(
-            title: const Text('회원탈퇴 완료'),
-            content: const Text(
-              '그동안 남포 GoGo 앱을 이용해주셔서 감사합니다. 정상적으로 회원탈퇴가 완료되었습니다.',
-            ),
+            title: Text(l10n.accountDeleteDoneTitle),
+            content: Text(l10n.accountDeleteDoneBody),
             actions: [
               TextButton(
                 onPressed: () {
@@ -38,7 +37,7 @@ class _AccountDeleteScreenState extends State<AccountDeleteScreen> {
                     context,
                   ).pushNamedAndRemoveUntil('/', (route) => false);
                 },
-                child: const Text('확인'),
+                child: Text(l10n.confirmOk),
               ),
             ],
           ),
@@ -56,12 +55,12 @@ class _AccountDeleteScreenState extends State<AccountDeleteScreen> {
           showDialog(
             context: context,
             builder: (ctx) => AlertDialog(
-              title: const Text('인증 만료'),
-              content: const Text('로그인이 만료되었습니다. 다시 로그인해 주세요.'),
+              title: Text(l10n.loginTitle),
+              content: Text(l10n.reservationMemberOnlyNotice),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(ctx),
-                  child: const Text('확인'),
+                  child: Text(l10n.confirmOk),
                 ),
               ],
             ),
@@ -70,14 +69,12 @@ class _AccountDeleteScreenState extends State<AccountDeleteScreen> {
           showDialog(
             context: context,
             builder: (ctx) => AlertDialog(
-              title: const Text('탈퇴 불가 안내'),
-              content: const Text(
-                '현재 소유 중인 사업장이 있어 계정을 삭제할 수 없습니다.\n다른 관리자에게 사업장 소유권을 이전하거나 고객지원(jazzbj@naver.com)으로 문의해 주세요.',
-              ),
+              title: Text(l10n.accountDeleteBlockedTitle),
+              content: Text(l10n.accountDeleteBlockedBody),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(ctx),
-                  child: const Text('확인'),
+                  child: Text(l10n.confirmOk),
                 ),
               ],
             ),
@@ -85,12 +82,12 @@ class _AccountDeleteScreenState extends State<AccountDeleteScreen> {
         } else {
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               behavior: SnackBarBehavior.floating,
-              duration: Duration(seconds: 4),
+              duration: const Duration(seconds: 4),
               content: Text(
-                '회원탈퇴 처리 중 오류가 발생했습니다.\n잠시 후 다시 시도하거나 고객지원으로 문의해 주세요.',
-                style: TextStyle(fontSize: 13),
+                l10n.accountDeleteErrorSnackBar,
+                style: const TextStyle(fontSize: 13),
               ),
             ),
           );
@@ -105,9 +102,12 @@ class _AccountDeleteScreenState extends State<AccountDeleteScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    debugPrint('AccountDeleteScreen locale = ${l10n.localeName}');
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('회원탈퇴'),
+        title: Text(l10n.deleteAccount),
         centerTitle: true,
         elevation: 0,
       ),
@@ -119,6 +119,15 @@ class _AccountDeleteScreenState extends State<AccountDeleteScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  const Text(
+                    'ACCOUNT-DELETE: M04J',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey,
+                    ),
+                  ),
                   const SizedBox(height: 10),
                   const Icon(
                     Icons.warning_amber_rounded,
@@ -126,10 +135,10 @@ class _AccountDeleteScreenState extends State<AccountDeleteScreen> {
                     size: 64,
                   ),
                   const SizedBox(height: 20),
-                  const Text(
-                    '회원탈퇴 진행 전 반드시 확인해 주세요.',
+                  Text(
+                    l10n.accountDeleteNoticeTitle,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: Colors.black87,
@@ -144,47 +153,47 @@ class _AccountDeleteScreenState extends State<AccountDeleteScreen> {
                         borderRadius: BorderRadius.circular(8.0),
                         border: Border.all(color: Colors.red[200]!),
                       ),
-                      child: const SingleChildScrollView(
+                      child: SingleChildScrollView(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '1. 보유 포인트 전액 소멸',
-                              style: TextStyle(
+                              l10n.accountDeleteSec1Title,
+                              style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
                               ),
                             ),
                             Text(
-                              '탈퇴 완료 즉시 현재 보유하고 계신 모든 미션 포인트는 전액 영구 소멸되며, 복구가 불가능합니다.\n',
+                              '${l10n.accountDeleteSec1Body}\n',
                             ),
                             Text(
-                              '2. 미션 및 쿠폰 내역 삭제',
-                              style: TextStyle(
+                              l10n.accountDeleteSec2Title,
+                              style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
                               ),
                             ),
-                            Text('진행 중인 미션 스탬프와 구매 후 미사용된 모든 쿠폰 또한 즉시 무효화됩니다.\n'),
+                            Text('${l10n.accountDeleteSec2Body}\n'),
                             Text(
-                              '3. 개인 식별 정보 파기',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
-                            ),
-                            Text(
-                              '계정에 기입된 이메일 정보와 프로필 데이터 등은 개인정보 처리 방침에 의거하여 마스킹 및 물리 격리 파기됩니다.\n',
-                            ),
-                            Text(
-                              '4. 예약 히스토리 보존',
-                              style: TextStyle(
+                              l10n.accountDeleteSec3Title,
+                              style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
                               ),
                             ),
                             Text(
-                              '관광 통계 및 상가 거래 증빙을 위해 예약 기록은 삭제되지 않고 익명화 보존됩니다.',
+                              '${l10n.accountDeleteSec3Body}\n',
+                            ),
+                            Text(
+                              l10n.accountDeleteSec4Title,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                            Text(
+                              l10n.accountDeleteSec4Body,
                             ),
                           ],
                         ),
@@ -193,9 +202,9 @@ class _AccountDeleteScreenState extends State<AccountDeleteScreen> {
                   ),
                   const SizedBox(height: 20),
                   CheckboxListTile(
-                    title: const Text(
-                      '위 안내사항을 모두 확인하였으며, 이에 동의합니다.',
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                    title: Text(
+                      l10n.accountDeleteAgreeCheckbox,
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                     ),
                     value: _agreeToTerms,
                     activeColor: Colors.redAccent,
@@ -210,16 +219,26 @@ class _AccountDeleteScreenState extends State<AccountDeleteScreen> {
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: (_agreeToTerms && !_isSubmitting)
-                        ? _submitWithdrawal
+                        ? () => _submitWithdrawal(l10n)
                         : null,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       backgroundColor: Colors.redAccent,
                       disabledBackgroundColor: Colors.grey[300],
                     ),
-                    child: const Text(
-                      '최종 회원탈퇴 진행',
-                      style: TextStyle(color: Colors.white),
+                    child: Text(
+                      l10n.accountDeleteFinalButton,
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'ACCOUNT-DELETE: M04J',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey,
                     ),
                   ),
                 ],

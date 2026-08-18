@@ -16,11 +16,15 @@ class MissionService {
   );
 
   // GET /missions
-  Future<List<dynamic>> fetchMissions({String? storeId}) async {
+  Future<List<dynamic>> fetchMissions({String? storeId, String? locale}) async {
     try {
+      final params = <String, dynamic>{};
+      if (storeId != null) params['store_id'] = storeId;
+      if (locale != null) params['locale'] = locale;
+
       final response = await _dio.get(
         '/missions',
-        queryParameters: storeId != null ? {'store_id': storeId} : null,
+        queryParameters: params.isNotEmpty ? params : null,
       );
       if (response.statusCode == 200 && response.data != null) {
         return response.data as List<dynamic>;
@@ -32,9 +36,15 @@ class MissionService {
   }
 
   // GET /missions/{mission_id}
-  Future<Map<String, dynamic>> fetchMissionDetail(String id) async {
+  Future<Map<String, dynamic>> fetchMissionDetail(String id, {String? locale}) async {
     try {
-      final response = await _dio.get('/missions/$id');
+      final params = <String, dynamic>{};
+      if (locale != null) params['locale'] = locale;
+
+      final response = await _dio.get(
+        '/missions/$id',
+        queryParameters: params.isNotEmpty ? params : null,
+      );
       if (response.statusCode == 200 && response.data != null) {
         return response.data as Map<String, dynamic>;
       }
@@ -62,11 +72,22 @@ class MissionService {
     String id,
     String qrCode, {
     String? userId,
+    double? latitude,
+    double? longitude,
+    String? imageBase64,
   }) async {
     try {
+      final payload = <String, dynamic>{
+        'qr_code': qrCode,
+        'user_id': userId,
+      };
+      if (latitude != null) payload['latitude'] = latitude;
+      if (longitude != null) payload['longitude'] = longitude;
+      if (imageBase64 != null) payload['image_base64'] = imageBase64;
+
       final response = await _dio.post(
         '/missions/$id/verify',
-        data: {'qr_code': qrCode, 'user_id': userId},
+        data: payload,
       );
       if (response.statusCode == 200 && response.data != null) {
         return response.data as Map<String, dynamic>;

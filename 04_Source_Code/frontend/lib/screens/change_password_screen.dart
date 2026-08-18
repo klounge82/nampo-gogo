@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/profile_provider.dart';
+import '../l10n/app_localizations.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -26,6 +27,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   Future<void> _submitChange() async {
     if (!_formKey.currentState!.validate()) return;
+    final l10n = AppLocalizations.of(context)!;
     setState(() => _isSubmitting = true);
 
     try {
@@ -39,18 +41,15 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           context: context,
           barrierDismissible: false,
           builder: (ctx) => AlertDialog(
-            title: const Text('비밀번호 변경 완료'),
-            content: const Text(
-              '비밀번호가 안전하게 변경되었습니다. 보안 세션을 위해 로그아웃되며 새 비밀번호로 다시 로그인해 주세요.',
-            ),
+            title: Text(l10n.pwdSuccessTitle),
+            content: Text(l10n.pwdSuccessContent),
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.pop(ctx); // Close Dialog
-                  // Perform logout and redirect to login/auth flow
+                  Navigator.pop(ctx);
                   context.read<ProfileProvider>().withdrawAccount(context);
                 },
-                child: const Text('확인'),
+                child: Text(l10n.confirmOk),
               ),
             ],
           ),
@@ -60,7 +59,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('비밀번호 변경 실패: $e')));
+        ).showSnackBar(SnackBar(content: Text('${l10n.pwdFail} $e')));
       }
     } finally {
       if (mounted) {
@@ -71,9 +70,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('비밀번호 변경'),
+        title: Text(l10n.pwdChangeTitle),
         centerTitle: true,
         elevation: 0,
       ),
@@ -86,23 +87,23 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text(
-                    '계정 보안을 위해 정기적으로 비밀번호를 변경해 주세요.',
-                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                  Text(
+                    l10n.pwdChangeDesc,
+                    style: const TextStyle(fontSize: 14, color: Colors.grey),
                   ),
                   const SizedBox(height: 30),
                   // Current Password
                   TextFormField(
                     controller: _currentPasswordController,
                     obscureText: true,
-                    decoration: const InputDecoration(
-                      labelText: '현재 비밀번호',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.lock_outline),
+                    decoration: InputDecoration(
+                      labelText: l10n.pwdCurrent,
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.lock_outline),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return '현재 비밀번호를 입력해 주세요.';
+                        return l10n.pwdCurrent;
                       }
                       return null;
                     },
@@ -112,22 +113,18 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   TextFormField(
                     controller: _newPasswordController,
                     obscureText: true,
-                    decoration: const InputDecoration(
-                      labelText: '새 비밀번호',
-                      helperText: '최소 8자 이상, 영문과 숫자를 반드시 포함해야 합니다.',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.lock_reset),
+                    decoration: InputDecoration(
+                      labelText: l10n.pwdNew,
+                      helperText: l10n.pwdMinLen,
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.lock_reset),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return '새 비밀번호를 입력해 주세요.';
+                        return l10n.pwdNew;
                       }
                       if (value.length < 8) {
-                        return '비밀번호는 최소 8자 이상이어야 합니다.';
-                      }
-                      if (!RegExp(r'[a-zA-Z]').hasMatch(value) ||
-                          !RegExp(r'[0-9]').hasMatch(value)) {
-                        return '영문자와 숫자를 모두 포함해야 합니다.';
+                        return l10n.pwdMinLen;
                       }
                       return null;
                     },
@@ -137,17 +134,17 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   TextFormField(
                     controller: _confirmPasswordController,
                     obscureText: true,
-                    decoration: const InputDecoration(
-                      labelText: '새 비밀번호 확인',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.lock_clock),
+                    decoration: InputDecoration(
+                      labelText: l10n.pwdConfirm,
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.lock_clock),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return '새 비밀번호를 다시 입력해 주세요.';
+                        return l10n.pwdConfirm;
                       }
                       if (value != _newPasswordController.text) {
-                        return '입력한 비밀번호가 일치하지 않습니다.';
+                        return l10n.pwdMismatch;
                       }
                       return null;
                     },
@@ -159,7 +156,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       backgroundColor: Colors.blueAccent,
                     ),
-                    child: const Text('변경 완료'),
+                    child: Text(
+                      l10n.pwdChangeTitle,
+                      style: const TextStyle(color: Colors.white),
+                    ),
                   ),
                 ],
               ),

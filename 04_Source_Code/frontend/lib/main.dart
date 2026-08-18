@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/app_localizations.dart';
-import 'constants/colors.dart';
 import 'constants/strings.dart';
 import 'providers/auth_provider.dart';
 import 'providers/notification_provider.dart';
@@ -21,6 +20,8 @@ import 'screens/business_app_shell.dart';
 import 'screens/business_pending_shell.dart';
 import 'theme/customer_theme.dart';
 import 'theme/business_theme.dart';
+import 'screens/brand_splash_screen.dart';
+import 'screens/auth_choice_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,10 +37,14 @@ void main() async {
 
   final appModeProvider = AppModeProvider();
 
+  // Initialize Auth session on boot before rendering UI
+  final authProvider = AuthProvider();
+  await authProvider.autoLogin();
+
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider.value(value: authProvider),
         ChangeNotifierProvider(create: (_) => NotificationProvider()),
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
         ChangeNotifierProvider(create: (_) => SearchProvider()),
@@ -50,22 +55,20 @@ void main() async {
         ChangeNotifierProvider.value(value: localeProvider),
         ChangeNotifierProvider.value(value: appModeProvider),
       ],
-      child: const MyApp(),
+      child: const NampoGoGoApp(),
     ),
   );
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class NampoGoGoApp extends StatelessWidget {
+  const NampoGoGoApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final localeProvider = context.watch<LocaleProvider>();
-    final modeProvider = context.watch<AppModeProvider>();
-
-    final activeTheme = modeProvider.isBusinessMode
+    final activeTheme = context.watch<AppModeProvider>().isBusinessMode
         ? BusinessTheme.themeData
         : CustomerTheme.themeData;
+    final localeProvider = context.watch<LocaleProvider>();
 
     return MaterialApp(
       title: AppStrings.appName,
@@ -83,9 +86,11 @@ class MyApp extends StatelessWidget {
         Locale('ja'),
         Locale('zh'),
         Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans'),
+        Locale('ru'),
+        Locale('vi'),
       ],
       theme: activeTheme,
-      home: const RootNavigationSelector(),
+      home: const BrandSplashScreen(),
       routes: {'/admin': (context) => const AdminAppShell()},
     );
   }
@@ -100,11 +105,15 @@ class RootNavigationSelector extends StatelessWidget {
     final authProvider = context.watch<AuthProvider>();
     final user = authProvider.currentUser;
 
+    // Unauthenticated landing screen
+    if (!authProvider.isLoggedIn || user == null) {
+      return const AuthChoiceScreen();
+    }
+
     // Initialize mode if needed
     modeProvider.syncUser(user);
 
-    if (user != null &&
-        user.businessApplicationStatus == 'PENDING' &&
+    if (user.businessApplicationStatus == 'PENDING' &&
         modeProvider.isBusinessMode) {
       return const BusinessPendingShell();
     }

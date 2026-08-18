@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../constants/colors.dart';
-import '../constants/strings.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/auth_provider.dart';
 import 'home_screen.dart';
 import 'explore_screen.dart';
@@ -52,68 +52,77 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(index: _currentIndex, children: _screens),
-      bottomNavigationBar: NavigationBarTheme(
-        data: NavigationBarThemeData(
-          indicatorColor: AppColors.primary.withAlpha(38), // 0.15 opacity
-          labelTextStyle: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.selected)) {
-              return const TextStyle(
-                fontSize: 12.0,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primary,
-              );
-            }
-            return const TextStyle(
-              fontSize: 12.0,
-              color: AppColors.textSecondary,
-            );
-          }),
-        ),
-        child: NavigationBar(
-          selectedIndex: _currentIndex,
-          onDestinationSelected: (int index) {
-            setState(() {
-              _currentIndex = index;
-            });
-          },
-          backgroundColor: AppColors.surface,
-          elevation: 8.0,
-          destinations: const [
-            NavigationDestination(
-              icon: Icon(Icons.home_outlined),
-              selectedIcon: Icon(Icons.home, color: AppColors.primary),
-              label: AppStrings.tabHome,
+    final l10n = AppLocalizations.of(context)!;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final screenWidth = constraints.maxWidth;
+        final isNarrow = screenWidth < 360;
+        final fontSize = isNarrow ? 10.0 : 11.0;
+
+        return Scaffold(
+          body: IndexedStack(index: _currentIndex, children: _screens),
+          bottomNavigationBar: NavigationBarTheme(
+            data: NavigationBarThemeData(
+              indicatorColor: AppColors.primary.withAlpha(38), // 0.15 opacity
+              labelBehavior: isNarrow
+                  ? NavigationDestinationLabelBehavior.alwaysShow
+                  : NavigationDestinationLabelBehavior.alwaysShow,
+              labelTextStyle: WidgetStateProperty.resolveWith((states) {
+                final isSelected = states.contains(WidgetState.selected);
+                return TextStyle(
+                  fontSize: fontSize,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                  overflow: TextOverflow.ellipsis,
+                );
+              }),
             ),
-            NavigationDestination(
-              icon: Icon(Icons.explore_outlined),
-              selectedIcon: Icon(Icons.explore, color: AppColors.primary),
-              label: AppStrings.tabExplore,
+            child: NavigationBar(
+              selectedIndex: _currentIndex,
+              onDestinationSelected: (int index) {
+                setState(() {
+                  _currentIndex = index;
+                });
+              },
+              backgroundColor: AppColors.surface,
+              elevation: 8.0,
+              destinations: [
+                NavigationDestination(
+                  icon: const Icon(Icons.home_outlined),
+                  selectedIcon: const Icon(Icons.home, color: AppColors.primary),
+                  label: l10n.homeTitle,
+                ),
+                NavigationDestination(
+                  icon: const Icon(Icons.explore_outlined),
+                  selectedIcon: const Icon(Icons.explore, color: AppColors.primary),
+                  label: l10n.exploreTitle,
+                ),
+                NavigationDestination(
+                  icon: const Icon(Icons.map_outlined),
+                  selectedIcon: const Icon(Icons.map, color: AppColors.primary),
+                  label: l10n.mapTitle,
+                ),
+                NavigationDestination(
+                  icon: const Icon(Icons.auto_awesome_outlined),
+                  selectedIcon: const Icon(Icons.auto_awesome, color: AppColors.primary),
+                  label: l10n.recommendTitle,
+                ),
+                NavigationDestination(
+                  icon: const Icon(Icons.assignment_outlined),
+                  selectedIcon: const Icon(Icons.assignment, color: AppColors.primary),
+                  label: l10n.missionTitle,
+                ),
+                NavigationDestination(
+                  icon: const Icon(Icons.person_outlined),
+                  selectedIcon: const Icon(Icons.person, color: AppColors.primary),
+                  label: l10n.profileTitle,
+                ),
+              ],
             ),
-            NavigationDestination(
-              icon: Icon(Icons.map_outlined),
-              selectedIcon: Icon(Icons.map, color: AppColors.primary),
-              label: '지도',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.auto_awesome_outlined),
-              selectedIcon: Icon(Icons.auto_awesome, color: AppColors.primary),
-              label: '추천',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.assignment_outlined),
-              selectedIcon: Icon(Icons.assignment, color: AppColors.primary),
-              label: AppStrings.tabMission,
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.person_outlined),
-              selectedIcon: Icon(Icons.person, color: AppColors.primary),
-              label: AppStrings.tabProfile,
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

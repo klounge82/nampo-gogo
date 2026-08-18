@@ -189,6 +189,21 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
                 ),
               ),
               Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 3.0),
+                decoration: BoxDecoration(
+                  color: Colors.amber.shade700,
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                child: const Text(
+                  '베타 가상분석',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 10.0,
                   vertical: 4.0,

@@ -138,7 +138,11 @@ def get_current_user_optional(token: Optional[str] = Depends(oauth2_scheme), db:
     except Exception:
         return None
 
+ENABLE_QA_LOCAL_TEST = os.environ.get("ENABLE_QA_LOCAL_TEST", "true").lower() == "true"
+
 def is_authorized_qa_tester(user: Optional[models.User]) -> bool:
+    if not ENABLE_QA_LOCAL_TEST:
+        return False
     if not user:
         return False
     if user.email and user.email.strip().lower() == "jazzbj@naver.com":
@@ -1243,9 +1247,13 @@ class VerifyRequest(BaseModel):
     user_id: Optional[str] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
+    image_base64: Optional[str] = None
 
 @app.post("/missions/{mission_id}/verify", tags=["Missions"])
 def verify_mission(mission_id: str, req: VerifyRequest, db: Session = Depends(get_db)):
+    import base64
+    import re
+
     # 1. Check if mission exists
     mission = db.query(models.Mission).filter(models.Mission.id == mission_id).first()
     if not mission:
@@ -1284,15 +1292,56 @@ def verify_mission(mission_id: str, req: VerifyRequest, db: Session = Depends(ge
             detail="이미 완료한 미션입니다."
         )
 
-    # 4. Verify QR code value
-    valid_tokens = ["QR_SUCCESS_TOKEN", "nampo_gogo_qr_token", f"QR_{mission_id}"]
-    is_valid_qr = req.qr_code in valid_tokens or mission.store_id in req.qr_code or mission_id in req.qr_code
+    auth_type_upper = (mission.auth_type or "").upper()
+    is_photo_mission = "PHOTO" in auth_type_upper
 
-    if not is_valid_qr:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="유효하지 않은 QR 코드입니다."
+    # 4. Verify Photo Evidence or QR Code value
+    if is_photo_mission:
+        if not req.image_base64 or not req.image_base64.strip():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="사진 인증을 위해 촬영되거나 선택된 이미지 데이터가 필요합니다."
+            )
+
+        raw_b64 = req.image_base64.strip()
+        if "," in raw_b64:
+            raw_b64 = raw_b64.split(",")[-1]
+
+        try:
+            decoded_bytes = base64.b64decode(raw_b64)
+        except Exception:
+            raise HTTPException(status_code=400, detail="유효하지 않은 Base64 이미지 데이터 형식입니다.")
+
+        if len(decoded_bytes) > 5 * 1024 * 1024:
+            raise HTTPException(status_code=400, detail="업로드 사진 크기가 한도(5MB)를 초과합니다.")
+
+        is_valid_image = (
+            decoded_bytes.startswith(b'\xff\xd8\xff') or
+            decoded_bytes.startswith(b'\x89PNG\r\n\x1a\n') or
+            (decoded_bytes.startswith(b'RIFF') and b'WEBP' in decoded_bytes[8:16])
         )
+        if not is_valid_image:
+            raise HTTPException(status_code=400, detail="업로드된 파일이 유효한 이미지 헤더(JPEG, PNG, WebP)를 갖고 있지 않습니다.")
+
+        # Save photo proof locally under static/mission_evidence
+        os.makedirs("static/mission_evidence", exist_ok=True)
+        proof_filename = f"photo_proof_{mission_id}_{target_user_id}_{str(uuid.uuid4())[:8]}.jpg"
+        proof_path = os.path.join("static/mission_evidence", proof_filename)
+        try:
+            with open(proof_path, "wb") as f:
+                f.write(decoded_bytes)
+        except Exception:
+            pass
+
+    else:
+        valid_tokens = ["QR_SUCCESS_TOKEN", "nampo_gogo_qr_token", f"QR_{mission_id}"]
+        is_valid_qr = req.qr_code in valid_tokens or (mission.store_id and mission.store_id in req.qr_code) or mission_id in req.qr_code
+
+        if not is_valid_qr:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="유효하지 않은 QR 코드입니다."
+            )
 
     # 4.5 Policy-Driven Verification Requirements (Explicit QR_GPS policy)
     store = db.query(models.Store).filter(models.Store.id == mission.store_id).first() if mission.store_id else None

@@ -10,6 +10,9 @@ import '../repositories/reservation_repository.dart';
 import '../repositories/review_repository.dart';
 import '../providers/auth_provider.dart';
 import '../providers/favorite_provider.dart';
+import '../providers/locale_provider.dart';
+import '../l10n/app_localizations.dart';
+import '../utils/l10n_mappers.dart';
 import '../widgets/favorite_button.dart';
 import 'auth_screen.dart';
 import '../models/review.dart' as model_review;
@@ -19,6 +22,9 @@ import 'qr_scanner_screen.dart';
 import '../services/map_service.dart';
 import '../services/auth_service.dart';
 import '../services/reservation_service.dart';
+
+import '../services/review_translation_service.dart';
+import '../widgets/review_card_widget.dart';
 
 class PlaceDetailScreen extends StatefulWidget {
   final String placeId;
@@ -33,6 +39,62 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
   final PlaceRepository _placeRepository = PlaceRepository();
   final ReviewRepository _reviewRepository = ReviewRepository();
   final MapService _mapService = MapService();
+  final ReviewTranslationService _translationService = ReviewTranslationService();
+
+  final Set<String> _translatedReviewIds = {};
+  final Map<String, String> _translatedTexts = {};
+  final Set<String> _translatingReviewIds = {};
+  final Set<String> _failedReviewIds = {};
+
+  Future<void> _toggleReviewTranslation(
+    model_review.Review rev,
+    AppLocalizations l10n,
+    String currentLocaleCode,
+  ) async {
+    final reviewId = rev.id;
+    if (_translatedReviewIds.contains(reviewId)) {
+      setState(() {
+        _translatedReviewIds.remove(reviewId);
+        _failedReviewIds.remove(reviewId);
+      });
+      return;
+    }
+
+    if (_translatedTexts.containsKey(reviewId)) {
+      setState(() {
+        _translatedReviewIds.add(reviewId);
+        _failedReviewIds.remove(reviewId);
+      });
+      return;
+    }
+
+    setState(() {
+      _translatingReviewIds.add(reviewId);
+      _failedReviewIds.remove(reviewId);
+    });
+
+    try {
+      final result = await _translationService.translateReview(
+        reviewId: reviewId,
+        content: rev.content,
+        targetLocale: currentLocaleCode,
+      );
+      if (mounted) {
+        setState(() {
+          _translatedTexts[reviewId] = result;
+          _translatedReviewIds.add(reviewId);
+          _translatingReviewIds.remove(reviewId);
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _translatingReviewIds.remove(reviewId);
+          _failedReviewIds.add(reviewId);
+        });
+      }
+    }
+  }
 
   Place? _place;
   List<model_review.Review> _reviews = [];
@@ -46,18 +108,24 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
   String? _errorMessage;
   bool _reservationsEnabled = false;
   int _maxAdvanceDays = 30;
+  String? _lastLocaleCode;
 
   @override
-  void initState() {
-    super.initState();
-    _loadPlaceDetail();
-    _loadReviews();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final currentLoc = context.watch<LocaleProvider>().currentLocaleCode;
+    if (_lastLocaleCode != currentLoc) {
+      _lastLocaleCode = currentLoc;
+      _loadPlaceDetail();
+      _loadReviews();
+    }
   }
 
   Future<void> _loadPlaceDetail() async {
+    final localeCode = context.read<LocaleProvider>().currentLocaleCode;
     setState(() => _isLoading = true);
     try {
-      final place = await _placeRepository.getPlaceDetail(widget.placeId);
+      final place = await _placeRepository.getPlaceDetail(widget.placeId, locale: localeCode);
       bool resEnabled = false;
       int maxAdvDays = 30;
       try {
@@ -149,23 +217,24 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
   }
 
   void _confirmDeleteReview(model_review.Review rev) {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text(
-          '리뷰를 삭제하시겠습니까?',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0),
+        title: Text(
+          l10n?.deleteReviewConfirmTitle ?? '리뷰를 삭제하시겠습니까?',
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0),
         ),
-        content: const Text(
-          '삭제한 리뷰는 다른 사용자에게 표시되지 않습니다.\n이 후기란에서 언제든 복구하거나 다시 작성할 수 있습니다.',
-          style: TextStyle(fontSize: 13.0, height: 1.4),
+        content: Text(
+          l10n?.deleteReviewConfirmContent ?? '삭제한 리뷰는 다른 사용자에게 표시되지 않습니다.',
+          style: const TextStyle(fontSize: 13.0, height: 1.4),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text(
-              '취소',
-              style: TextStyle(color: AppColors.textSecondary),
+            child: Text(
+              l10n?.confirmCancel ?? '취소',
+              style: const TextStyle(color: AppColors.textSecondary),
             ),
           ),
           ElevatedButton(
@@ -177,7 +246,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
-            child: const Text('삭제'),
+            child: Text(l10n?.delete ?? '삭제'),
           ),
         ],
       ),
@@ -195,13 +264,14 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
       _loadReviews();
 
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('리뷰가 삭제되었습니다.'),
+            content: Text(l10n?.reviewDeletedMsg ?? '리뷰가 삭제되었습니다.'),
             behavior: SnackBarBehavior.floating,
             action: SnackBarAction(
-              label: '실행 취소',
+              label: l10n?.undoAction ?? '실행 취소',
               textColor: Colors.amber,
               onPressed: () => _restoreMyReview(reviewId),
             ),
@@ -273,11 +343,12 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(
-          _place?.name ?? '장소 상세',
+          _place?.name ?? l10n?.mapViewDetail ?? '장소 상세',
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: AppColors.surface,
@@ -314,7 +385,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                     ),
                     const SizedBox(height: 12.0),
                     Text(
-                      _errorMessage!,
+                      l10n?.mapLoadFail ?? '장소 정보를 불러올 수 없습니다.',
                       style: const TextStyle(color: AppColors.textSecondary),
                       textAlign: TextAlign.center,
                     ),
@@ -324,9 +395,9 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                       ),
-                      child: const Text(
-                        '다시 시도',
-                        style: TextStyle(color: Colors.white),
+                      child: Text(
+                        l10n?.mapRetry ?? '다시 시도',
+                        style: const TextStyle(color: Colors.white),
                       ),
                     ),
                   ],
@@ -342,6 +413,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
   }
 
   Widget _buildContent(BuildContext context, Place place) {
+    final l10n = AppLocalizations.of(context);
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.only(bottom: 24.0),
@@ -409,23 +481,51 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8.0,
-                        vertical: 4.0,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withAlpha(26),
-                        borderRadius: BorderRadius.circular(4.0),
-                      ),
-                      child: Text(
-                        place.category,
-                        style: const TextStyle(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12.0,
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8.0,
+                            vertical: 4.0,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withAlpha(26),
+                            borderRadius: BorderRadius.circular(4.0),
+                          ),
+                          child: Text(
+                            L10nMappers.mapCategory(
+                              AppLocalizations.of(context)!,
+                              place.category,
+                            ),
+                            style: const TextStyle(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12.0,
+                            ),
+                          ),
                         ),
-                      ),
+                        if (place.isTestData) ...[
+                          const SizedBox(width: 6.0),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8.0,
+                              vertical: 4.0,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.amber.shade800,
+                              borderRadius: BorderRadius.circular(4.0),
+                            ),
+                            child: const Text(
+                              '테스트용',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12.0,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                     Row(
                       children: [
@@ -461,9 +561,9 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                 const SizedBox(height: 16.0),
 
                 // Description Card
-                const Text(
-                  '장소 소개',
-                  style: TextStyle(
+                Text(
+                  l10n?.placeDescriptionTitle ?? '장소 소개',
+                  style: const TextStyle(
                     fontSize: 15.0,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
@@ -481,9 +581,9 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                 const SizedBox(height: 24.0),
 
                 // Simulated Map Widget
-                const Text(
-                  '위치 정보',
-                  style: TextStyle(
+                Text(
+                  l10n?.locationInfoTitle ?? '위치 정보',
+                  style: const TextStyle(
                     fontSize: 15.0,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
@@ -509,17 +609,17 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                         const SizedBox(height: 6.0),
                         Text(
                           place.latitude != null && place.longitude != null
-                              ? '위경도: (${place.latitude}, ${place.longitude})'
-                              : '위치 좌표 없음',
+                              ? '${l10n?.locationInfoTitle ?? "위치 정보"}: (${place.latitude}, ${place.longitude})'
+                              : (l10n?.noLocationCoordinates ?? '위치 좌표 없음'),
                           style: const TextStyle(
                             color: AppColors.textSecondary,
                             fontSize: 11.0,
                           ),
                         ),
                         const SizedBox(height: 2.0),
-                        const Text(
-                          '상세 지도 및 로드뷰는 향후 활성화됩니다.',
-                          style: TextStyle(
+                        Text(
+                          l10n?.detailedMapFeatureNotice ?? '상세 지도 및 로드뷰는 향후 활성화됩니다.',
+                          style: const TextStyle(
                             color: AppColors.textHint,
                             fontSize: 10.0,
                           ),
@@ -543,9 +643,9 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                             );
                           },
                           icon: const Icon(Icons.directions_walk, size: 14.0),
-                          label: const Text(
-                            '도보 길찾기',
-                            style: TextStyle(fontSize: 11.5),
+                          label: Text(
+                            l10n?.routeWalkBtn ?? '도보 길찾기',
+                            style: const TextStyle(fontSize: 11.5),
                           ),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: AppColors.primary,
@@ -572,9 +672,9 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                             size: 14.0,
                             color: Colors.white,
                           ),
-                          label: const Text(
-                            '네이버 지도',
-                            style: TextStyle(
+                          label: Text(
+                            l10n?.routeNaverBtn ?? '네이버 지도',
+                            style: const TextStyle(
                               fontSize: 11.5,
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -602,7 +702,8 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '방문자 후기 (${_reviews.length}개)',
+                      l10n?.visitorReviewsCount(_reviews.length) ??
+                          '${l10n?.visitorReviewsTitle ?? "방문자 후기"} (${_reviews.length}${l10n?.countUnit ?? "개"})',
                       style: const TextStyle(
                         fontSize: 15.0,
                         fontWeight: FontWeight.bold,
@@ -622,9 +723,9 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                         const SizedBox(width: 8.0),
                         TextButton(
                           onPressed: () => _handleReviewGate(context, place),
-                          child: const Text(
-                            '후기 남기기',
-                            style: TextStyle(
+                          child: Text(
+                            l10n?.writeReviewBtn ?? '후기 남기기',
+                            style: const TextStyle(
                               fontSize: 12.0,
                               fontWeight: FontWeight.bold,
                               color: AppColors.primary,
@@ -761,10 +862,10 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                           borderRadius: BorderRadius.circular(12.0),
                           border: Border.all(color: AppColors.border),
                         ),
-                        child: const Center(
+                        child: Center(
                           child: Text(
-                            '아직 작성된 후기가 없습니다.\n첫 번째 후기를 남겨보세요!',
-                            style: TextStyle(
+                            '${l10n?.noReviewsYet ?? "작성된 후기가 없습니다."}\n${l10n?.beFirstReviewer ?? "첫 번째 후기를 남겨보세요!"}',
+                            style: const TextStyle(
                               fontSize: 12.0,
                               color: AppColors.textHint,
                             ),
@@ -774,244 +875,25 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                       )
                     : Column(
                         children: _reviews.map((rev) {
+                          final activeUserId = Provider.of<AuthProvider>(context, listen: false).currentUser?.id ?? _currentUserId;
                           final isMyReview =
                               rev.isOwner ||
                               (_myReview != null && rev.id == _myReview!.id) ||
-                              (_currentUserId != null &&
-                                  rev.userId == _currentUserId) ||
-                              (_currentUserId == null &&
+                              (activeUserId != null && rev.userId != null && rev.userId == activeUserId) ||
+                              (activeUserId == null &&
                                   _currentGuestId.isNotEmpty &&
                                   rev.guestId == _currentGuestId &&
                                   rev.userId == null);
 
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 12.0),
-                            padding: const EdgeInsets.all(14.0),
-                            decoration: BoxDecoration(
-                              color: AppColors.surface,
-                              borderRadius: BorderRadius.circular(12.0),
-                              border: Border.all(
-                                color: isMyReview
-                                    ? AppColors.primary.withValues(alpha: 0.4)
-                                    : AppColors.border,
-                                width: isMyReview ? 1.5 : 1.0,
-                              ),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Text(
-                                          rev.user.nickname,
-                                          style: const TextStyle(
-                                            fontSize: 12.0,
-                                            fontWeight: FontWeight.bold,
-                                            color: AppColors.textPrimary,
-                                          ),
-                                        ),
-                                        if (isMyReview) ...[
-                                          const SizedBox(width: 6.0),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 6.0,
-                                              vertical: 2.0,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: AppColors.primary
-                                                  .withValues(alpha: 0.1),
-                                              borderRadius:
-                                                  BorderRadius.circular(4.0),
-                                              border: Border.all(
-                                                color: AppColors.primary
-                                                    .withValues(alpha: 0.3),
-                                                width: 0.8,
-                                              ),
-                                            ),
-                                            child: const Text(
-                                              '내가 작성한 후기',
-                                              style: TextStyle(
-                                                fontSize: 10.0,
-                                                fontWeight: FontWeight.bold,
-                                                color: AppColors.primary,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ],
-                                    ),
-                                    if (isMyReview)
-                                      Row(
-                                        children: [
-                                          TextButton(
-                                            onPressed: () =>
-                                                _navigateToEdit(rev),
-                                            style: TextButton.styleFrom(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 6.0,
-                                                    vertical: 2.0,
-                                                  ),
-                                              minimumSize: Size.zero,
-                                              tapTargetSize:
-                                                  MaterialTapTargetSize
-                                                      .shrinkWrap,
-                                            ),
-                                            child: const Text(
-                                              '수정',
-                                              style: TextStyle(
-                                                fontSize: 11.5,
-                                                color: AppColors.primary,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(width: 4.0),
-                                          TextButton(
-                                            onPressed: () =>
-                                                _confirmDeleteReview(rev),
-                                            style: TextButton.styleFrom(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 6.0,
-                                                    vertical: 2.0,
-                                                  ),
-                                              minimumSize: Size.zero,
-                                              tapTargetSize:
-                                                  MaterialTapTargetSize
-                                                      .shrinkWrap,
-                                            ),
-                                            child: const Text(
-                                              '삭제',
-                                              style: TextStyle(
-                                                fontSize: 11.5,
-                                                color: Colors.red,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      )
-                                    else
-                                      Row(
-                                        children: List.generate(
-                                          5,
-                                          (index) => Icon(
-                                            index < rev.rating
-                                                ? Icons.star
-                                                : Icons.star_border,
-                                            color: index < rev.rating
-                                                ? Colors.amber
-                                                : Colors.grey.shade300,
-                                            size: 13.0,
-                                          ),
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                                if (isMyReview) ...[
-                                  const SizedBox(height: 4.0),
-                                  Row(
-                                    children: List.generate(
-                                      5,
-                                      (index) => Icon(
-                                        index < rev.rating
-                                            ? Icons.star
-                                            : Icons.star_border,
-                                        color: index < rev.rating
-                                            ? Colors.amber
-                                            : Colors.grey.shade300,
-                                        size: 13.0,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                                if (rev.verificationBadge != null &&
-                                    rev.verificationBadge!.isNotEmpty) ...[
-                                  const SizedBox(height: 4.0),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 6.0,
-                                      vertical: 2.0,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color:
-                                          rev.verificationMethod ==
-                                              'BUSINESS_QR'
-                                          ? Colors.green.shade50
-                                          : (rev.verificationMethod ==
-                                                    'ATTRACTION_GPS'
-                                                ? Colors.blue.shade50
-                                                : Colors.grey.shade100),
-                                      borderRadius: BorderRadius.circular(4.0),
-                                      border: Border.all(
-                                        color:
-                                            rev.verificationMethod ==
-                                                'BUSINESS_QR'
-                                            ? Colors.green.shade300
-                                            : (rev.verificationMethod ==
-                                                      'ATTRACTION_GPS'
-                                                  ? Colors.blue.shade300
-                                                  : Colors.grey.shade300),
-                                        width: 0.8,
-                                      ),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(
-                                          rev.verificationMethod ==
-                                                  'BUSINESS_QR'
-                                              ? Icons.verified
-                                              : (rev.verificationMethod ==
-                                                        'ATTRACTION_GPS'
-                                                    ? Icons.location_on
-                                                    : Icons.article),
-                                          size: 11.0,
-                                          color:
-                                              rev.verificationMethod ==
-                                                  'BUSINESS_QR'
-                                              ? Colors.green.shade700
-                                              : (rev.verificationMethod ==
-                                                        'ATTRACTION_GPS'
-                                                    ? Colors.blue.shade700
-                                                    : Colors.grey.shade700),
-                                        ),
-                                        const SizedBox(width: 3.0),
-                                        Text(
-                                          rev.verificationBadge!,
-                                          style: TextStyle(
-                                            fontSize: 10.0,
-                                            fontWeight: FontWeight.bold,
-                                            color:
-                                                rev.verificationMethod ==
-                                                    'BUSINESS_QR'
-                                                ? Colors.green.shade800
-                                                : (rev.verificationMethod ==
-                                                          'ATTRACTION_GPS'
-                                                      ? Colors.blue.shade800
-                                                      : Colors.grey.shade800),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                                const SizedBox(height: 8.0),
-                                Text(
-                                  rev.content,
-                                  style: const TextStyle(
-                                    fontSize: 12.5,
-                                    color: AppColors.textPrimary,
-                                    height: 1.35,
-                                  ),
-                                ),
-                              ],
-                            ),
+                          return ReviewCardWidget(
+                            key: ValueKey('review_card_${rev.id}'),
+                            review: rev,
+                            isMyReview: isMyReview,
+                            onEdit: isMyReview ? () => _navigateToEdit(rev) : null,
+                            onDelete: isMyReview ? () => _confirmDeleteReview(rev) : null,
+                            onRestore: (_myReview != null && rev.id == _myReview!.id && _myReview!.isDeleted)
+                                ? () => _restoreMyReview(rev.id)
+                                : null,
                           );
                         }).toList(),
                       ),
@@ -1418,6 +1300,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
   }
 
   Widget _buildBottomActionBar(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return SafeArea(
       top: false,
       child: Container(
@@ -1430,9 +1313,9 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
           children: [
             Expanded(
               child: OutlinedButton.icon(
-                onPressed: () => _showActionFeedback('길찾기'),
+                onPressed: () => _showActionFeedback(l10n?.findRouteBtn ?? '길찾기'),
                 icon: const Icon(Icons.navigation_outlined, size: 18.0),
-                label: const Text('길찾기', style: TextStyle(fontSize: 12.0)),
+                label: Text(l10n?.findRouteBtn ?? '길찾기', style: const TextStyle(fontSize: 12.0)),
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(color: AppColors.primary),
                   foregroundColor: AppColors.primary,
@@ -1449,7 +1332,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                 child: ElevatedButton.icon(
                   onPressed: () => _showReservationBottomSheet(context),
                   icon: const Icon(Icons.calendar_today, size: 18.0),
-                  label: const Text('예약하기', style: TextStyle(fontSize: 12.0)),
+                  label: Text(l10n?.reservationAction ?? '예약하기', style: const TextStyle(fontSize: 12.0)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.secondary,
                     foregroundColor: Colors.white,
@@ -1465,9 +1348,9 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
             const SizedBox(width: 8.0),
             Expanded(
               child: ElevatedButton.icon(
-                onPressed: () => _showActionFeedback('미션 도전'),
+                onPressed: () => _showActionFeedback(l10n?.missionStartAction ?? '미션 도전'),
                 icon: const Icon(Icons.stars, size: 18.0),
-                label: const Text('미션 도전', style: TextStyle(fontSize: 12.0)),
+                label: Text(l10n?.missionStartAction ?? '미션 도전', style: const TextStyle(fontSize: 12.0)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,

@@ -142,6 +142,34 @@ class _PaymentScreenState extends State<PaymentScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Beta Virtual Payment Notice
+              Container(
+                width: double.infinity,
+                margin: const EdgeInsets.only(bottom: 16.0),
+                padding: const EdgeInsets.all(12.0),
+                decoration: BoxDecoration(
+                  color: AppColors.accent.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10.0),
+                  border: Border.all(color: AppColors.accent.withValues(alpha: 0.3)),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.info_outline, color: AppColors.accent, size: 18),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '베타 테스트용 가상결제이며 실제 금액은 결제되지 않습니다.',
+                        style: TextStyle(
+                          fontSize: 12.0,
+                          color: AppColors.accent,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
               // Order summary
               Container(
                 width: double.infinity,

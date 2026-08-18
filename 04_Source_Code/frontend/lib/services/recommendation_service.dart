@@ -26,6 +26,7 @@ class RecommendationService {
     bool? usePersonalization,
     bool? excludeVisited,
     bool? preferRewards,
+    String? locale,
   }) async {
     try {
       final response = await _dio.post(
@@ -42,6 +43,7 @@ class RecommendationService {
           'exclude_visited': excludeVisited ?? false,
           'prefer_new_places': excludeVisited ?? false,
           'prefer_rewards': preferRewards ?? false,
+          if (locale != null) 'locale': locale,
         },
       );
       if (response.statusCode == 201 && response.data != null) {

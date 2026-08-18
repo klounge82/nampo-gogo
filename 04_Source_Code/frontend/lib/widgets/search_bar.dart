@@ -1,15 +1,25 @@
 import 'package:flutter/material.dart';
 import '../constants/colors.dart';
 import '../constants/strings.dart';
+import '../l10n/app_localizations.dart';
 
 class NampoSearchBar extends StatelessWidget {
   final ValueChanged<String>? onChanged;
   final VoidCallback? onTap;
+  final bool readOnly;
 
-  const NampoSearchBar({super.key, this.onChanged, this.onTap});
+  const NampoSearchBar({
+    super.key,
+    this.onChanged,
+    this.onTap,
+    this.readOnly = false,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final hint = l10n?.homeSearchHint ?? AppStrings.homeSearchHint;
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
@@ -23,10 +33,11 @@ class NampoSearchBar extends StatelessWidget {
         ],
       ),
       child: TextField(
+        readOnly: readOnly,
         onChanged: onChanged,
         onTap: onTap,
         decoration: InputDecoration(
-          hintText: AppStrings.homeSearchHint,
+          hintText: hint,
           hintStyle: const TextStyle(color: AppColors.textHint, fontSize: 14.0),
           prefixIcon: const Icon(Icons.search, color: AppColors.primary),
           suffixIcon: IconButton(

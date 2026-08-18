@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import '../models/user.dart';
 import '../services/auth_service.dart';
 
@@ -7,17 +6,6 @@ class AuthRepository {
 
   AuthRepository({AuthService? authService})
     : _authService = authService ?? AuthService();
-
-  // Mock Fallback User asset
-  static final User _mockUser = User(
-    id: 'usr_mock_999',
-    email: 'nampo_gogo@mock.com',
-    nickname: '김남포 (Mock)',
-    role: 'member',
-    status: 'active',
-    createdAt: DateTime.now(),
-    updatedAt: DateTime.now(),
-  );
 
   // Sign Up
   Future<User> signUp({
@@ -111,5 +99,14 @@ class AuthRepository {
   Future<void> logout() async {
     await _authService.clearSession();
     await _authService.rotateGuestId();
+  }
+
+  // Fetch latest user details
+  Future<User?> getMe() async {
+    final res = await _authService.getMe();
+    if (res != null) {
+      return User.fromJson(res);
+    }
+    return null;
   }
 }

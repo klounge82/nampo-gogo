@@ -7,6 +7,8 @@ import '../repositories/recommendation_repository.dart';
 import '../providers/auth_provider.dart';
 import '../providers/favorite_provider.dart';
 import '../widgets/recommendation_feedback_widget.dart';
+import '../l10n/app_localizations.dart';
+import '../utils/l10n_mappers.dart';
 import 'place_detail_screen.dart';
 
 class RecommendationResultScreen extends StatefulWidget {
@@ -68,6 +70,7 @@ class _RecommendationResultScreenState
       _errorMessage = null;
     });
 
+    final l10n = AppLocalizations.of(context);
     try {
       final course = await _repository.getRecommendedCourse(
         userId: widget.userId,
@@ -80,13 +83,14 @@ class _RecommendationResultScreenState
         usePersonalization: widget.usePersonalization,
         excludeVisited: widget.excludeVisited,
         preferRewards: widget.preferRewards,
+        locale: l10n?.localeName ?? 'ko',
       );
       setState(() {
         _recommendation = course;
       });
     } catch (e) {
       setState(() {
-        _errorMessage = '추천 코스를 가져오지 못했습니다.';
+        _errorMessage = l10n?.courseFetchErrorMsg ?? '추천 코스를 가져오지 못했습니다.';
       });
     } finally {
       setState(() => _isLoading = false);
@@ -98,6 +102,7 @@ class _RecommendationResultScreenState
 
     final bool targetState = !_recommendation!.isSaved;
     setState(() => _isSaving = true);
+    final l10n = AppLocalizations.of(context);
 
     try {
       final updated = await _repository.saveCourse(
@@ -121,7 +126,9 @@ class _RecommendationResultScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              targetState ? '📂 추천 코스가 보관함에 저장되었습니다.' : '코스 저장이 해제되었습니다.',
+              targetState
+                  ? (l10n?.courseSavedMsg ?? '📂 추천 코스가 보관함에 저장되었습니다.')
+                  : (l10n?.courseUnsavedMsg ?? '코스 저장이 해제되었습니다.'),
             ),
             backgroundColor: targetState ? Colors.green : Colors.grey.shade700,
             behavior: SnackBarBehavior.floating,
@@ -140,8 +147,11 @@ class _RecommendationResultScreenState
       }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('코스를 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.'),
+          SnackBar(
+            content: Text(
+              l10n?.courseSaveErrorMsg ??
+                  '코스를 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.',
+            ),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
@@ -154,41 +164,15 @@ class _RecommendationResultScreenState
     }
   }
 
-  String _translateReason(String code) {
-    switch (code) {
-      case 'REASON_CATEGORY':
-        return '선택하신 관심 카테고리 테마에 잘 부합하는 장소입니다.';
-      case 'REASON_CLOSE':
-        return '현재 기준 위치에서 도보로 가깝게 접근할 수 있습니다.';
-      case 'REASON_MISSION':
-        return '보너스 포인트를 획득할 수 있는 액티브 미션이 있습니다.';
-      case 'REASON_COUPON':
-        return '혜택을 누릴 수 있는 제휴 쿠폰 상점이 마련되어 있습니다.';
-      case 'REASON_MISSION_COUPON':
-        return '참여 가능한 인증 미션과 교환 쿠폰이 모두 연계되어 있습니다.';
-      case 'REASON_FAVORITE':
-        return '즐겨찾기 목록에 보관하신 매장입니다.';
-      case 'REASON_FAVORITE_CAT':
-        return '즐겨찾기 취향과 유사한 스타일의 매장입니다.';
-      case 'REASON_RECENT_SEARCH':
-        return '최근 검색하시거나 관심을 보인 관심 테마입니다.';
-      case 'REASON_REWARD':
-        return '아직 도전하지 않은 보상 미션이 대기 중인 장소입니다.';
-      case 'REASON_VISITED':
-        return '이미 방문하셨으나 다시 들르기 매력적인 장소입니다.';
-      default:
-        return '남포동 명소 추천 조건에 만족하는 인기 장소입니다.';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
-          '추천 코스 결과',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          l10n?.recommendResultTitle ?? '추천 코스 결과',
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
@@ -203,17 +187,23 @@ class _RecommendationResultScreenState
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('추천 코스 생성을 실패하였습니다: $_errorMessage'),
+                  Text(
+                    '${l10n?.courseFetchErrorMsg ?? '추천 코스 생성을 실패하였습니다'}: $_errorMessage',
+                  ),
                   const SizedBox(height: 16.0),
                   ElevatedButton(
                     onPressed: _fetchCourse,
-                    child: const Text('다시 추천받기'),
+                    child: Text(l10n?.regenerateRecommendationAction ?? '다시 추천받기'),
                   ),
                 ],
               ),
             )
           : _recommendation == null || _recommendation!.items.isEmpty
-          ? const Center(child: Text('조건에 부합하는 코스를 찾을 수 없습니다.'))
+          ? Center(
+              child: Text(
+                l10n?.noMatchingCourseMsg ?? '조건에 부합하는 코스를 찾을 수 없습니다.',
+              ),
+            )
           : Column(
               children: [
                 // Course overview Banner
@@ -269,6 +259,25 @@ class _RecommendationResultScreenState
     final int totalTimeMin =
         ((totalDist * 1000) / walkSpeed).round() +
         (itemsCount * 30); // 30 mins per place stay
+    final l10n = AppLocalizations.of(context);
+    final String companionStr = l10n != null
+        ? L10nMappers.mapCompanion(l10n, widget.travelType)
+        : (widget.travelType == "SOLO" ? "나홀로" : widget.travelType == "COUPLE" ? "커플" : "가족/친구");
+    final String transportStr = l10n != null
+        ? L10nMappers.mapTransport(l10n, widget.transportMode)
+        : (widget.transportMode == 'WALK' ? '도보 코스' : '차량/대중교통');
+    final String personalizedTitle = l10n?.recommendOptPersonalized ?? '개인화 맞춤 코스 반영';
+
+    final String courseTitleStr = l10n != null
+        ? l10n.recommendCourseFormat(companionStr)
+        : '$companionStr 남포동 나들이';
+    final String metricsStr = l10n != null
+        ? l10n.recommendMetricsFormat(
+            itemsCount.toString(),
+            totalDist.toStringAsFixed(1),
+            totalTimeMin.toString(),
+          )
+        : '총 이동거리: ${totalDist.toStringAsFixed(1)} km  |  예상 소요시간: 약 $totalTimeMin분 ($itemsCount개 매장)';
 
     return Container(
       width: double.infinity,
@@ -299,7 +308,7 @@ class _RecommendationResultScreenState
                   ),
                   const SizedBox(width: 4.0),
                   Text(
-                    '개인화 맞춤 코스 반영',
+                    personalizedTitle,
                     style: TextStyle(
                       fontSize: 10.5,
                       fontWeight: FontWeight.bold,
@@ -313,18 +322,19 @@ class _RecommendationResultScreenState
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                '${widget.travelType == "SOLO"
-                    ? "나홀로"
-                    : widget.travelType == "COUPLE"
-                    ? "커플"
-                    : "가족/친구"} 남포동 나들이',
-                style: const TextStyle(
-                  fontSize: 15.0,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+              Expanded(
+                child: Text(
+                  courseTitleStr,
+                  style: const TextStyle(
+                    fontSize: 15.0,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
+              const SizedBox(width: 8.0),
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 8.0,
@@ -335,7 +345,7 @@ class _RecommendationResultScreenState
                   borderRadius: BorderRadius.circular(6.0),
                 ),
                 child: Text(
-                  widget.transportMode == 'WALK' ? '도보 코스' : '차량/대중교통',
+                  transportStr,
                   style: const TextStyle(
                     fontSize: 10.0,
                     fontWeight: FontWeight.bold,
@@ -347,7 +357,7 @@ class _RecommendationResultScreenState
           ),
           const SizedBox(height: 8.0),
           Text(
-            '총 이동거리: ${totalDist.toStringAsFixed(1)} km  |  예상 소요시간: 약 $totalTimeMin분 ($itemsCount개 매장)',
+            metricsStr,
             style: const TextStyle(
               fontSize: 12.0,
               color: AppColors.textSecondary,
@@ -359,6 +369,18 @@ class _RecommendationResultScreenState
   }
 
   Widget _buildTimelineItem(CourseItemModel item, bool isLast) {
+    final l10n = AppLocalizations.of(context);
+    final localeCode = l10n?.localeName ?? 'ko';
+    final placeName = L10nMappers.mapPlaceName(item.store, localeCode);
+    final placeAddress = L10nMappers.mapPlaceAddress(item.store, localeCode);
+    final placeDesc = L10nMappers.mapPlaceDescription(item.store, localeCode);
+    final categoryStr = l10n != null
+        ? L10nMappers.mapCategory(l10n, item.store.category)
+        : item.store.category;
+    final reasonStr = l10n != null
+        ? L10nMappers.mapRecommendReason(l10n, item.recommendReasonCode)
+        : '남포동 명소 추천 조건에 만족하는 인기 장소입니다.';
+
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -422,16 +444,21 @@ class _RecommendationResultScreenState
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              item.store.name,
-                              style: const TextStyle(
-                                fontSize: 14.0,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.textPrimary,
+                            Expanded(
+                              child: Text(
+                                placeName,
+                                style: const TextStyle(
+                                  fontSize: 14.0,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textPrimary,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
+                            const SizedBox(width: 8.0),
                             Text(
-                              item.store.category,
+                              categoryStr,
                               style: const TextStyle(
                                 fontSize: 11.0,
                                 color: AppColors.textHint,
@@ -441,7 +468,7 @@ class _RecommendationResultScreenState
                         ),
                         const SizedBox(height: 4.0),
                         Text(
-                          item.store.address,
+                          placeAddress,
                           style: const TextStyle(
                             fontSize: 11.5,
                             color: AppColors.textSecondary,
@@ -449,7 +476,7 @@ class _RecommendationResultScreenState
                         ),
                         const SizedBox(height: 8.0),
                         Text(
-                          item.store.description,
+                          placeDesc,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
@@ -472,7 +499,7 @@ class _RecommendationResultScreenState
                             const SizedBox(width: 6.0),
                             Expanded(
                               child: Text(
-                                _translateReason(item.recommendReasonCode),
+                                reasonStr,
                                 style: const TextStyle(
                                   fontSize: 11.0,
                                   color: AppColors.secondary,
@@ -497,7 +524,12 @@ class _RecommendationResultScreenState
   }
 
   Widget _buildFooterActions() {
+    final l10n = AppLocalizations.of(context);
     final bool isSaved = _recommendation?.isSaved ?? false;
+    final String labelStr = isSaved
+        ? (l10n?.savedCourseBadge ?? '보관함 저장됨')
+        : (l10n?.saveCourseAction ?? '이 코스 보관함 저장');
+
     return SafeArea(
       top: false,
       child: Container(
@@ -527,7 +559,7 @@ class _RecommendationResultScreenState
                           size: 18.0,
                         ),
                   label: Text(
-                    isSaved ? '보관함 저장됨' : '이 코스 보관함 저장',
+                    labelStr,
                     style: const TextStyle(
                       fontSize: 13.0,
                       fontWeight: FontWeight.bold,

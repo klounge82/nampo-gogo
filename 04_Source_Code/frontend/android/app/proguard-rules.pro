@@ -1,0 +1,11 @@
+# Targeted Keep rules for flutter_secure_storage to preserve runtime reflection and class resolution
+-keep class com.it_nomads.fluttersecurestorage.** { *; }
+-keep enum com.it_nomads.fluttersecurestorage.** { *; }
+-keep interface com.it_nomads.fluttersecurestorage.** { *; }
+-keepclassmembers class com.it_nomads.fluttersecurestorage.** { *; }
+-keepclassmembers enum com.it_nomads.fluttersecurestorage.** { *; }
+-keep class com.it_nomads.fluttersecurestorage.ciphers.** { *; }
+-keep enum com.it_nomads.fluttersecurestorage.ciphers.** { *; }
+-keep interface com.it_nomads.fluttersecurestorage.ciphers.** { *; }
+-keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod
+-dontwarn com.it_nomads.fluttersecurestorage.**

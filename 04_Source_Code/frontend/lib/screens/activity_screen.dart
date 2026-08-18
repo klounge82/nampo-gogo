@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../providers/activity_provider.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/activity_card.dart';
+import 'travel_log_screen.dart';
 
 class ActivityScreen extends StatefulWidget {
   const ActivityScreen({super.key});
@@ -71,6 +72,15 @@ class _ActivityScreenState extends State<ActivityScreen> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.auto_stories),
+            tooltip: '여행로그 완성',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const TravelLogScreen()),
+              );
+            },
+          ),
           IconButton(icon: const Icon(Icons.refresh), onPressed: _refreshList),
         ],
       ),

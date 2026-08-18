@@ -17,11 +17,22 @@ class LocaleProvider with ChangeNotifier {
 
   Locale get locale => _locale;
 
+  String get currentLocaleCode {
+    if (_locale.languageCode == 'zh' && _locale.scriptCode == 'Hans') {
+      return 'zh_Hans';
+    }
+    return _locale.languageCode;
+  }
+
   Future<void> initLocale() async {
     // 1. Check local cache
     final cached = await _storage.getCachedLanguage();
     if (cached != null) {
-      _locale = Locale(cached);
+      if (cached == 'zh_Hans' || cached == 'zh-Hans') {
+        _locale = const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans');
+      } else {
+        _locale = Locale(cached);
+      }
       notifyListeners();
       return;
     }
@@ -29,32 +40,38 @@ class LocaleProvider with ChangeNotifier {
     // 2. Fallback to system language detection
     try {
       final String systemLang = Platform.localeName.split('_')[0].toLowerCase();
-      if (['ko', 'en', 'ja', 'zh', 'zh-Hans'].contains(systemLang)) {
+      if (systemLang == 'zh') {
+        _locale = const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans');
+      } else if (['ko', 'en', 'ja'].contains(systemLang)) {
         _locale = Locale(systemLang);
       } else {
-        _locale = const Locale('en'); // Default default fallback
+        _locale = const Locale('ko'); // Default fallback
       }
     } catch (_) {
-      _locale = const Locale('en');
+      _locale = const Locale('ko');
     }
     notifyListeners();
   }
 
   Future<void> setLocale(Locale newLocale, {String? userId}) async {
-    if (!['ko', 'en', 'ja', 'zh', 'zh-Hans'].contains(newLocale.languageCode))
-      return;
+    final langCode = newLocale.languageCode;
+    if (!['ko', 'en', 'ja', 'zh'].contains(langCode)) return;
 
     _locale = newLocale;
     notifyListeners();
 
+    final cacheCode = (langCode == 'zh' && newLocale.scriptCode == 'Hans')
+        ? 'zh_Hans'
+        : langCode;
+
     // Cache locally
-    await _storage.cacheLanguage(newLocale.languageCode);
+    await _storage.cacheLanguage(cacheCode);
 
     // Sync to backend DB if logged in
     try {
       await _dio.patch(
         '/users/language',
-        data: {'language_code': newLocale.languageCode},
+        data: {'language_code': cacheCode},
         queryParameters: {if (userId != null) 'user_id': userId},
       );
     } catch (_) {

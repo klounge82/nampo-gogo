@@ -182,6 +182,7 @@ class RecommendationRepository {
     bool? usePersonalization,
     bool? excludeVisited,
     bool? preferRewards,
+    String? locale,
   }) async {
     try {
       final res = await _recommendationService.generateCourse(
@@ -195,6 +196,7 @@ class RecommendationRepository {
         usePersonalization: usePersonalization,
         excludeVisited: excludeVisited,
         preferRewards: preferRewards,
+        locale: locale,
       );
       return RecommendationModel.fromJson(res);
     } catch (e) {
@@ -204,6 +206,11 @@ class RecommendationRepository {
         );
       }
 
+      final loc = (locale ?? 'ko').toLowerCase();
+      final isZh = loc.contains('zh');
+      final isEn = loc.startsWith('en');
+      final isJa = loc.startsWith('ja');
+
       // Simulate default 3 stores course (HALF_DAY)
       final dummyItems = [
         CourseItemModel(
@@ -212,14 +219,26 @@ class RecommendationRepository {
           recommendReasonCode: 'REASON_CATEGORY',
           store: Place(
             id: 'store_biff_dummy',
-            name: 'BIFF 광장 씨앗호떡',
+            name: isZh ? 'BIFF广场 葵花籽糖饼' : (isEn ? 'BIFF Square Seed Hotteok' : (isJa ? 'BIFF広場 シアホットク' : 'BIFF 광장 씨앗호떡')),
             category: '맛집',
             rating: 4.5,
-            address: '부산 중구 구덕로 58-1',
-            description: '호떡 속에 씨앗이 가득하여 씹는 맛이 있는 남포동 명물입니다.',
+            address: isZh ? '釜山 中区 九德路 58-1' : (isEn ? '58-1 Gudeok-ro, Jung-gu, Busan' : (isJa ? '釜山広域市中区九徳路58-1' : '부산 중구 구덕로 58-1')),
+            description: isZh ? '糖饼中塞满坚果香酥可口的南浦洞招牌美食。' : (isEn ? 'Famous Nampo-dong hotteok filled with crunchy seeds.' : (isJa ? 'ホットクの中に種がたっぷりと入った食感を楽しめる南浦洞の名物です。' : '호떡 속에 씨앗이 가득하여 씹는 맛이 있는 남포동 명물입니다.')),
             latitude: 35.0987,
             longitude: 129.0289,
             createdAt: DateTime.now(),
+            nameTranslations: {
+              'ko': 'BIFF 광장 씨앗호떡',
+              'en': 'BIFF Square Seed Hotteok',
+              'ja': 'BIFF広場 シアホットク',
+              'zh': 'BIFF广场 葵花籽糖饼',
+            },
+            descriptionTranslations: {
+              'ko': '호떡 속에 씨앗이 가득하여 씹는 맛이 있는 남포동 명물입니다.',
+              'en': 'Famous Nampo-dong hotteok filled with crunchy seeds.',
+              'ja': 'ホットクの中に種がたっぷりと入った食感を楽しめる南浦洞の名物です。',
+              'zh': '糖饼中塞满坚果香酥可口的南浦洞招牌美食。',
+            },
           ),
         ),
         CourseItemModel(
@@ -228,14 +247,26 @@ class RecommendationRepository {
           recommendReasonCode: 'REASON_CLOSE',
           store: Place(
             id: 'store_tower_dummy',
-            name: '용두산공원 부산타워',
+            name: isZh ? '龙头山公园 釜山塔' : (isEn ? 'Yongdusan Park Busan Tower' : (isJa ? '龍頭山公園 釜山タワー' : '용두산공원 부산타워')),
             category: '볼거리',
             rating: 4.6,
-            address: '부산 중구 용두산길 37-55',
-            description: '전망대에서 부산 시내 전경을 볼 수 있는 필수 관광 명소입니다.',
+            address: isZh ? '釜山 中区 龙头山路 37-55' : (isEn ? '37-55 Yongdusan-gil, Jung-gu, Busan' : (isJa ? '釜山広域市中区龍頭山路37-55' : '부산 중구 용두산길 37-55')),
+            description: isZh ? '可在观景台一览釜山市区全景的必游观光胜地。' : (isEn ? 'A must-visit landmark offering panoramic views of Busan from the observatory.' : (isJa ? '展望台から釜山市内の全景が一望できる必須観光名所です。' : '전망대에서 부산 시내 전경을 볼 수 있는 필수 관광 명소입니다.')),
             latitude: 35.1008,
             longitude: 129.0326,
             createdAt: DateTime.now(),
+            nameTranslations: {
+              'ko': '용두산공원 부산타워',
+              'en': 'Yongdusan Park Busan Tower',
+              'ja': '龍頭山公園 釜山タワー',
+              'zh': '龙头山公园 釜山塔',
+            },
+            descriptionTranslations: {
+              'ko': '전망대에서 부산 시내 전경을 볼 수 있는 필수 관광 명소입니다.',
+              'en': 'A must-visit landmark offering panoramic views of Busan from the observatory.',
+              'ja': '展望台から釜山市内の全景が一望できる必須観光名所です。',
+              'zh': '可在观景台一览釜山市区全景的必游观光胜地。',
+            },
           ),
         ),
         CourseItemModel(
@@ -244,14 +275,26 @@ class RecommendationRepository {
           recommendReasonCode: 'REASON_MISSION_COUPON',
           store: Place(
             id: 'store_jagal_dummy',
-            name: '자갈치시장 신선한 횟집',
+            name: isZh ? '札嘎其市场 新鲜海鲜刺身' : (isEn ? 'Jagalchi Market Fresh Fish' : (isJa ? 'チャガルチ市場 新鮮刺身店' : '자갈치시장 신선한 횟집')),
             category: '맛집',
             rating: 4.7,
-            address: '부산 중구 자갈치해안로 52',
-            description: '신선한 생선회와 맛있는 식사가 준비되어 있는 명소입니다.',
+            address: isZh ? '釜山 中区 札嘎其海岸路 52' : (isEn ? '52 Jagalchihaean-ro, Jung-gu, Busan' : (isJa ? '釜山広域市中区チャガルチ海岸路52' : '부산 중구 자갈치해안로 52')),
+            description: isZh ? '代表釜山的活鱼海鲜市场，可品尝到新鲜的海鲜料理。' : (isEn ? 'Busan\'s representative seafood market offering fresh raw fish.' : (isJa ? '釜山を代表する鮮魚市場で新鮮な海鮮を味わえます。' : '신선한 생선회와 맛있는 식사가 준비되어 있는 명소입니다.')),
             latitude: 35.0967,
             longitude: 129.0305,
             createdAt: DateTime.now(),
+            nameTranslations: {
+              'ko': '자갈치시장 신선한 횟집',
+              'en': 'Jagalchi Market Fresh Fish',
+              'ja': 'チャガルチ市場 新鮮刺身店',
+              'zh': '札嘎其市场 新鲜海鲜刺身',
+            },
+            descriptionTranslations: {
+              'ko': '신선한 생선회와 맛있는 식사가 준비되어 있는 명소입니다.',
+              'en': 'Busan\'s representative seafood market offering fresh raw fish.',
+              'ja': '釜山を代表する鮮魚市場で新鮮な海鮮を味わえます。',
+              'zh': '代表釜山的活鱼海鲜市场，可品尝到新鲜的海鲜料理。',
+            },
           ),
         ),
       ];

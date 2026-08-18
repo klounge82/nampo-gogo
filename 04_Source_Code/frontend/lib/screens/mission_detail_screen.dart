@@ -1,11 +1,16 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:dio/dio.dart';
+import 'package:image_picker/image_picker.dart';
 import '../constants/colors.dart';
 import '../models/mission.dart';
 import '../repositories/mission_repository.dart';
 import '../providers/locale_provider.dart';
+import '../providers/auth_provider.dart';
 import '../l10n/app_localizations.dart';
 import '../utils/l10n_mappers.dart';
+import '../services/location_service.dart';
 import 'place_detail_screen.dart';
 import 'qr_scanner_screen.dart';
 
@@ -62,7 +67,8 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
   }
 
   Future<void> _triggerAuth(Mission mission) async {
-    if (mission.authType == 'QR') {
+    final authUpper = mission.authType.toUpperCase();
+    if (authUpper.contains('QR')) {
       final scannedCode = await Navigator.of(context).push<String>(
         MaterialPageRoute(builder: (_) => const QrScannerScreen()),
       );
@@ -77,46 +83,153 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
   }
 
   Future<void> _performServerVerification(Mission mission) async {
+    final authUpper = mission.authType.toUpperCase();
+    final isPhoto = authUpper.contains('PHOTO');
+
+    String? imageBase64;
+    double? latitude;
+    double? longitude;
+
+    if (isPhoto) {
+      try {
+        final picker = ImagePicker();
+        final pickedFile = await picker.pickImage(
+          source: ImageSource.camera,
+          maxWidth: 1024,
+          maxHeight: 1024,
+          imageQuality: 80,
+        );
+        if (pickedFile == null) {
+          // User canceled camera capture -> abort verification (0P awarded)
+          return;
+        }
+        final bytes = await pickedFile.readAsBytes();
+        imageBase64 = base64Encode(bytes);
+      } catch (camErr) {
+        if (!mounted) return;
+        _showErrorDialog('카메라 오류', '사진을 촬영할 수 없습니다. 카메라 권한을 확인해주세요.');
+        return;
+      }
+    } else {
+      // GPS verification position acquisition
+      try {
+        final pos = await LocationService().getCurrentLocation();
+        latitude = pos.latitude;
+        longitude = pos.longitude;
+      } catch (locErr) {
+        if (!mounted) return;
+        _showErrorDialog('위치 오류', 'GPS 위치 정보를 가져올 수 없습니다. 위치 권한 및 GPS를 확인해주세요.');
+        return;
+      }
+    }
+
     setState(() => _isAuthenticating = true);
     try {
-      final token = mission.authType == 'GPS' ? 'GPS_VERIFIED_TOKEN' : 'PHOTO_VERIFIED_TOKEN';
-      final res = await _missionRepository.verifyMission(mission.id, token);
+      final res = await _missionRepository.verifyMission(
+        mission.id,
+        mission.id,
+        latitude: latitude,
+        longitude: longitude,
+        imageBase64: imageBase64,
+      );
       if (!mounted) return;
 
       setState(() => _isAuthenticating = false);
       if (res['success'] == true) {
+        try {
+          context.read<AuthProvider>().refreshUser();
+        } catch (_) {}
         _showSuccessDialog(context, res['points_awarded'] as int);
       } else {
-        _showErrorDialog('인증 실패', res['message'] as String? ?? '서버 검증 오류');
+        _showErrorDialog('인증 실패', _mapErrorMessage(res['message'] as String? ?? '서버 검증 오류'));
       }
     } catch (e) {
       if (!mounted) return;
       setState(() => _isAuthenticating = false);
 
-      final cleanMsg = e.toString().replaceAll('Exception:', '').trim();
-      _showErrorDialog('인증 실패', cleanMsg);
+      _showErrorDialog('인증 실패', _extractErrorMessage(e));
     }
   }
 
   Future<void> _performQRVerification(Mission mission, String qrCode) async {
+    if (qrCode.trim().isEmpty) {
+      _showErrorDialog('인증 실패', '유효하지 않은 QR 코드입니다.');
+      return;
+    }
     setState(() => _isAuthenticating = true);
     try {
-      final res = await _missionRepository.verifyMission(mission.id, qrCode);
+      double? latitude;
+      double? longitude;
+      try {
+        final pos = await LocationService().getCurrentLocation();
+        latitude = pos.latitude;
+        longitude = pos.longitude;
+      } catch (_) {}
+
+      final res = await _missionRepository.verifyMission(
+        mission.id,
+        qrCode,
+        latitude: latitude,
+        longitude: longitude,
+      );
       if (!mounted) return;
 
       setState(() => _isAuthenticating = false);
       if (res['success'] == true) {
+        try {
+          context.read<AuthProvider>().refreshUser();
+        } catch (_) {}
         _showSuccessDialog(context, res['points_awarded'] as int);
       } else {
-        _showErrorDialog('인증 실패', res['message'] as String? ?? '검증 오류');
+        _showErrorDialog('인증 실패', _mapErrorMessage(res['message'] as String? ?? '검증 오류'));
       }
     } catch (e) {
       if (!mounted) return;
       setState(() => _isAuthenticating = false);
 
-      final cleanMsg = e.toString().replaceAll('Exception:', '').trim();
-      _showErrorDialog('인증 실패', cleanMsg);
+      _showErrorDialog('인증 실패', _extractErrorMessage(e));
     }
+  }
+
+  String _extractErrorMessage(dynamic error) {
+    if (error is DioException && error.response?.data != null) {
+      final data = error.response!.data;
+      if (data is Map && data.containsKey('detail') && data['detail'] is String) {
+        return _mapErrorMessage(data['detail'] as String);
+      } else if (data is String && data.isNotEmpty) {
+        return _mapErrorMessage(data);
+      }
+    }
+    return _mapErrorMessage(error.toString());
+  }
+
+  String _mapErrorMessage(String raw) {
+    final clean = raw
+        .replaceAll('Exception:', '')
+        .replaceAll('DioException', '')
+        .replaceAll('RequestOptions', '')
+        .replaceAll('validateStatus', '')
+        .replaceAll('[bad response]', '')
+        .trim();
+
+    if (clean.contains('403') || clean.contains('유효하지 않거나') || clean.contains('만료된') || clean.contains('폐기된') || clean.contains('INVALID')) {
+      return '유효하지 않은 QR 코드입니다.';
+    } else if (clean.contains('반경') || clean.contains('거리') || clean.contains('위치') || clean.contains('GPS')) {
+      return clean.contains('50m')
+          ? clean
+          : '현재 위치에서는 이 미션을 수행할 수 없습니다. (매장 근처 50m 이내 스캔 필요)';
+    } else if (clean.contains('이미') || clean.contains('완료')) {
+      return '이미 완료한 미션입니다.';
+    } else if (clean.contains('권한') || clean.contains('permission')) {
+      return 'QR 스캔을 위해 카메라 권한이 필요합니다.';
+    } else if (clean.contains('위치 서비스') || clean.contains('location')) {
+      return '위치 서비스를 켜주세요.';
+    } else if (clean.contains('네트워크') || clean.contains('Connection') || clean.contains('SocketException')) {
+      return '네트워크 연결을 확인해 주세요.';
+    } else if (clean.contains('400')) {
+      return '현재 위치에서는 이 미션을 수행할 수 없습니다. (매장 근처 50m 이내 스캔 필요)';
+    }
+    return clean.isEmpty ? '유효하지 않은 QR 코드입니다.' : clean;
   }
 
   void _showErrorDialog(String title, String message) {
@@ -421,15 +534,14 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
   }
 
   String _getActionButtonLabel(AppLocalizations l10n, String authType) {
-    switch (authType) {
-      case 'GPS':
-        return '📍 ${l10n.missionAuthActionGps}';
-      case 'QR':
-        return '🔍 ${l10n.missionAuthActionQr}';
-      case 'PHOTO':
-        return '📸 ${l10n.missionAuthActionPhoto}';
-      default:
-        return '🎉 ${l10n.missionStartAction}';
+    final type = authType.toUpperCase();
+    if (type.contains('QR')) {
+      return '🔍 ${l10n.missionAuthActionQr}';
+    } else if (type.contains('GPS') || type.contains('LOCATION')) {
+      return '📍 ${l10n.missionAuthActionGps}';
+    } else if (type.contains('PHOTO') || type.contains('사진')) {
+      return '📸 ${l10n.missionAuthActionPhoto}';
     }
+    return '🎉 ${l10n.missionStartAction}';
   }
 }

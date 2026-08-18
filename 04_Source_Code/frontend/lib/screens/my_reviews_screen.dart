@@ -7,6 +7,12 @@ import '../providers/auth_provider.dart';
 import 'review_edit_screen.dart';
 import 'review_write_screen.dart';
 
+import '../services/review_translation_service.dart';
+import '../providers/locale_provider.dart';
+import '../l10n/app_localizations.dart';
+import '../utils/l10n_mappers.dart';
+import '../widgets/review_card_widget.dart';
+
 class MyReviewsScreen extends StatefulWidget {
   const MyReviewsScreen({super.key});
 
@@ -17,7 +23,63 @@ class MyReviewsScreen extends StatefulWidget {
 class _MyReviewsScreenState extends State<MyReviewsScreen>
     with SingleTickerProviderStateMixin {
   final ReviewRepository _reviewRepository = ReviewRepository();
+  final ReviewTranslationService _translationService = ReviewTranslationService();
   late TabController _tabController;
+
+  final Set<String> _translatedReviewIds = {};
+  final Map<String, String> _translatedTexts = {};
+  final Set<String> _translatingReviewIds = {};
+  final Set<String> _failedReviewIds = {};
+
+  Future<void> _toggleReviewTranslation(
+    Review rev,
+    AppLocalizations l10n,
+    String currentLocaleCode,
+  ) async {
+    final reviewId = rev.id;
+    if (_translatedReviewIds.contains(reviewId)) {
+      setState(() {
+        _translatedReviewIds.remove(reviewId);
+        _failedReviewIds.remove(reviewId);
+      });
+      return;
+    }
+
+    if (_translatedTexts.containsKey(reviewId)) {
+      setState(() {
+        _translatedReviewIds.add(reviewId);
+        _failedReviewIds.remove(reviewId);
+      });
+      return;
+    }
+
+    setState(() {
+      _translatingReviewIds.add(reviewId);
+      _failedReviewIds.remove(reviewId);
+    });
+
+    try {
+      final result = await _translationService.translateReview(
+        reviewId: reviewId,
+        content: rev.content,
+        targetLocale: currentLocaleCode,
+      );
+      if (mounted) {
+        setState(() {
+          _translatedTexts[reviewId] = result;
+          _translatedReviewIds.add(reviewId);
+          _translatingReviewIds.remove(reviewId);
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _translatingReviewIds.remove(reviewId);
+          _failedReviewIds.add(reviewId);
+        });
+      }
+    }
+  }
 
   List<Review> _activeReviews = [];
   List<Review> _deletedReviews = [];
@@ -240,12 +302,13 @@ class _MyReviewsScreenState extends State<MyReviewsScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
-          '내가 작성한 리뷰',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          l10n?.reviews ?? '내가 작성한 리뷰',
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
@@ -314,240 +377,44 @@ class _MyReviewsScreenState extends State<MyReviewsScreen>
   }
 
   Widget _buildReviewCard(Review review, {required bool isDeletedTab}) {
-    final dateStr =
-        '${review.createdAt.year}.${review.createdAt.month.toString().padLeft(2, '0')}.${review.createdAt.day.toString().padLeft(2, '0')}';
-    final isEdited =
-        review.updatedAt.difference(review.createdAt).inSeconds > 2;
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16.0),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16.0),
-        border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(5),
-            blurRadius: 6.0,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Store Name & Date & Edited Badge
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      review.store?.name ?? '매장 후기',
-                      style: const TextStyle(
-                        fontSize: 15.0,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    if (!isDeletedTab && isEdited) ...[
-                      const SizedBox(width: 6.0),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 4.0,
-                          vertical: 1.0,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade200,
-                          borderRadius: BorderRadius.circular(4.0),
-                        ),
-                        child: const Text(
-                          '수정됨',
-                          style: TextStyle(
-                            fontSize: 10.0,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
+    final l10n = AppLocalizations.of(context);
+    return ReviewCardWidget(
+      key: ValueKey('my_review_card_${review.id}'),
+      review: review,
+      isMyReview: true,
+      showStoreName: true,
+      onEdit: isDeletedTab
+          ? null
+          : () async {
+              final needRefresh = await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => ReviewEditScreen(review: review),
                 ),
-                Text(
-                  dateStr,
-                  style: const TextStyle(
-                    fontSize: 11.0,
-                    color: AppColors.textHint,
+              );
+              if (needRefresh == true) {
+                _loadMyReviews();
+              }
+            },
+      onDelete: isDeletedTab ? null : () => _confirmDelete(review.id),
+      onRestore: isDeletedTab ? () => _confirmRestore(review.id) : null,
+      onRewrite: isDeletedTab
+          ? () async {
+              final needRefresh = await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => ReviewWriteScreen(
+                    storeId: review.storeId,
+                    storeName: review.store?.name ?? (l10n?.storeReview ?? '매장 후기'),
+                    rewriteReviewId: review.id,
+                    initialRating: review.rating,
+                    initialContent: review.content,
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 6.0),
-
-            // Stars
-            Row(
-              children: List.generate(5, (index) {
-                return Icon(
-                  index < review.rating ? Icons.star : Icons.star_border,
-                  color: index < review.rating
-                      ? Colors.amber
-                      : Colors.grey.shade300,
-                  size: 16.0,
-                );
-              }),
-            ),
-            if (review.verificationBadge != null &&
-                review.verificationBadge!.isNotEmpty) ...[
-              const SizedBox(height: 6.0),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 6.0,
-                  vertical: 2.0,
-                ),
-                decoration: BoxDecoration(
-                  color: review.verificationMethod == 'BUSINESS_QR'
-                      ? Colors.green.shade50
-                      : (review.verificationMethod == 'ATTRACTION_GPS'
-                            ? Colors.blue.shade50
-                            : Colors.grey.shade100),
-                  borderRadius: BorderRadius.circular(4.0),
-                  border: Border.all(
-                    color: review.verificationMethod == 'BUSINESS_QR'
-                        ? Colors.green.shade300
-                        : (review.verificationMethod == 'ATTRACTION_GPS'
-                              ? Colors.blue.shade300
-                              : Colors.grey.shade300),
-                    width: 0.8,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      review.verificationMethod == 'BUSINESS_QR'
-                          ? Icons.verified
-                          : (review.verificationMethod == 'ATTRACTION_GPS'
-                                ? Icons.location_on
-                                : Icons.article),
-                      size: 11.0,
-                      color: review.verificationMethod == 'BUSINESS_QR'
-                          ? Colors.green.shade700
-                          : (review.verificationMethod == 'ATTRACTION_GPS'
-                                ? Colors.blue.shade700
-                                : Colors.grey.shade700),
-                    ),
-                    const SizedBox(width: 3.0),
-                    Text(
-                      review.verificationBadge!,
-                      style: TextStyle(
-                        fontSize: 10.0,
-                        fontWeight: FontWeight.bold,
-                        color: review.verificationMethod == 'BUSINESS_QR'
-                            ? Colors.green.shade800
-                            : (review.verificationMethod == 'ATTRACTION_GPS'
-                                  ? Colors.blue.shade800
-                                  : Colors.grey.shade800),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-            const SizedBox(height: 12.0),
-
-            // Content
-            Text(
-              review.content,
-              style: TextStyle(
-                fontSize: 13.0,
-                color: isDeletedTab
-                    ? AppColors.textSecondary
-                    : AppColors.textPrimary,
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: 16.0),
-            const Divider(height: 1.0, thickness: 1.0, color: AppColors.border),
-            const SizedBox(height: 8.0),
-
-            // Actions
-            if (!isDeletedTab)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton.icon(
-                    onPressed: () async {
-                      final needRefresh = await Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => ReviewEditScreen(review: review),
-                        ),
-                      );
-                      if (needRefresh == true) {
-                        _loadMyReviews();
-                      }
-                    },
-                    icon: const Icon(Icons.edit_outlined, size: 14.0),
-                    label: const Text('수정', style: TextStyle(fontSize: 12.0)),
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppColors.primary,
-                    ),
-                  ),
-                  const SizedBox(width: 8.0),
-                  TextButton.icon(
-                    onPressed: () => _confirmDelete(review.id),
-                    icon: const Icon(Icons.delete_outline, size: 14.0),
-                    label: const Text('삭제', style: TextStyle(fontSize: 12.0)),
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppColors.secondary,
-                    ),
-                  ),
-                ],
-              )
-            else
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton.icon(
-                    onPressed: () => _confirmRestore(review.id),
-                    icon: const Icon(Icons.restore_outlined, size: 14.0),
-                    label: const Text('복구하기', style: TextStyle(fontSize: 12.0)),
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppColors.primary,
-                    ),
-                  ),
-                  const SizedBox(width: 8.0),
-                  TextButton.icon(
-                    onPressed: () async {
-                      final needRefresh = await Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => ReviewWriteScreen(
-                            storeId: review.storeId,
-                            storeName: review.store?.name ?? '매장 후기 다시 작성',
-                            rewriteReviewId: review.id,
-                            initialRating: review.rating,
-                            initialContent: review.content,
-                          ),
-                        ),
-                      );
-                      if (needRefresh == true) {
-                        _loadMyReviews();
-                      }
-                    },
-                    icon: const Icon(Icons.rate_review_outlined, size: 14.0),
-                    label: const Text(
-                      '다시 작성',
-                      style: TextStyle(fontSize: 12.0),
-                    ),
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppColors.primary,
-                    ),
-                  ),
-                ],
-              ),
-          ],
-        ),
-      ),
+              );
+              if (needRefresh == true) {
+                _loadMyReviews();
+              }
+            }
+          : null,
     );
   }
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../constants/colors.dart';
 import '../models/recommendation.dart';
+import '../l10n/app_localizations.dart';
+import '../utils/l10n_mappers.dart';
 
 class RecommendationCard extends StatelessWidget {
   final Recommendation recommendation;
@@ -82,7 +84,10 @@ class RecommendationCard extends StatelessWidget {
                               borderRadius: BorderRadius.circular(4.0),
                             ),
                             child: Text(
-                              recommendation.category,
+                              L10nMappers.mapCategory(
+                                AppLocalizations.of(context)!,
+                                recommendation.category,
+                              ),
                               style: const TextStyle(
                                 color: AppColors.primary,
                                 fontSize: 10.0,
@@ -139,8 +144,9 @@ class RecommendationCard extends StatelessWidget {
                         spacing: 4.0,
                         runSpacing: 4.0,
                         children: recommendation.tags.take(2).map((tag) {
+                          final l10n = AppLocalizations.of(context)!;
                           return Text(
-                            '#$tag',
+                            '#${L10nMappers.mapTag(l10n, tag)}',
                             style: const TextStyle(
                               fontSize: 10.0,
                               color: AppColors.accent,

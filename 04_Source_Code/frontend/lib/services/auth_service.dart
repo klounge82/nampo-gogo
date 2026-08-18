@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../config/api_config.dart';
@@ -112,6 +113,7 @@ class AuthService {
     required String password,
     String? guestId,
   }) async {
+    debugPrint('NG_LOGIN_DIAG REQUEST_START endpoint=/auth/login');
     try {
       final response = await _dio.post(
         '/auth/login',
@@ -127,29 +129,45 @@ class AuthService {
         ),
       );
 
+      debugPrint('NG_LOGIN_DIAG HTTP_STATUS=${response.statusCode}');
+
       if (response.statusCode == 200 && response.data != null) {
         final data = response.data as Map<String, dynamic>;
+        debugPrint('NG_LOGIN_DIAG RESPONSE_PARSED_OK');
 
         // Save tokens securely
+        debugPrint('NG_LOGIN_DIAG ACCESS_TOKEN_SAVE_START');
         await _storage.write(
           key: _keyAccessToken,
           value: data['access_token'] as String,
         );
+        debugPrint('NG_LOGIN_DIAG ACCESS_TOKEN_SAVE_OK');
+
+        debugPrint('NG_LOGIN_DIAG REFRESH_TOKEN_SAVE_START');
         await _storage.write(
           key: _keyRefreshToken,
           value: data['refresh_token'] as String,
         );
+        debugPrint('NG_LOGIN_DIAG REFRESH_TOKEN_SAVE_OK');
 
         return data;
       }
+      debugPrint('NG_LOGIN_DIAG FAILURE_STAGE=AUTH_SERVICE_NON_200');
       throw Exception('이메일 또는 비밀번호가 올바르지 않습니다.');
     } on DioException catch (e) {
+      debugPrint('NG_LOGIN_DIAG FAILURE_STAGE=AUTH_SERVICE_DIO_EXCEPTION');
+      debugPrint('NG_LOGIN_DIAG EXCEPTION_TYPE=${e.runtimeType}');
+      if (e.response?.statusCode != null) {
+        debugPrint('NG_LOGIN_DIAG HTTP_STATUS=${e.response?.statusCode}');
+      }
       if (e.response?.statusCode == 401 || e.response?.statusCode == 400) {
         final msg = e.response?.data is Map ? e.response?.data['detail'] : null;
         throw Exception(msg?.toString() ?? '이메일 또는 비밀번호가 올바르지 않습니다.');
       }
       throw Exception('로그인 서비스에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.');
     } catch (e) {
+      debugPrint('NG_LOGIN_DIAG FAILURE_STAGE=AUTH_SERVICE_GENERIC_EXCEPTION');
+      debugPrint('NG_LOGIN_DIAG EXCEPTION_TYPE=${e.runtimeType}');
       rethrow;
     }
   }
@@ -184,22 +202,44 @@ class AuthService {
     }
   }
 
-  // Auto Login (checks tokens and validates via refresh api)
+  // Auto Login (checks tokens and validates via /auth/me or refresh api)
   Future<Map<String, dynamic>?> checkStoredSession() async {
     try {
+      final accessToken = await _storage.read(key: _keyAccessToken);
       final refreshToken = await _storage.read(key: _keyRefreshToken);
-      if (refreshToken == null) {
+
+      if (accessToken == null && refreshToken == null) {
         return null; // No session stored
       }
 
-      // Attempt to refresh & validate session
-      final sessionData = await refreshTokens(refreshToken);
-      return sessionData;
+      // 1. Try validating existing access_token with GET /auth/me
+      if (accessToken != null && accessToken.isNotEmpty) {
+        try {
+          final response = await _dio.get(
+            '/auth/me',
+            options: Options(
+              headers: {'Authorization': 'Bearer $accessToken'},
+            ),
+          );
+          if (response.statusCode == 200 && response.data != null) {
+            return {
+              'access_token': accessToken,
+              'refresh_token': refreshToken ?? '',
+              'user': response.data as Map<String, dynamic>,
+            };
+          }
+        } catch (_) {}
+      }
+
+      // 2. If access_token invalid/expired, try refresh_token
+      if (refreshToken != null && refreshToken.isNotEmpty) {
+        final sessionData = await refreshTokens(refreshToken);
+        return sessionData;
+      }
     } catch (e) {
-      // Secure storage data might be invalid or network is offline
-      // Handled in repository fallback
-      rethrow;
+      await clearSession();
     }
+    return null;
   }
 
   // Clear Secure Session
@@ -234,4 +274,15 @@ class AuthService {
       await _storage.read(key: _keyAccessToken);
   Future<String?> getRefreshToken() async =>
       await _storage.read(key: _keyRefreshToken);
+
+  // Fetch current user details from GET /auth/me
+  Future<Map<String, dynamic>?> getMe() async {
+    try {
+      final response = await _dio.get('/auth/me');
+      if (response.statusCode == 200 && response.data != null) {
+        return response.data as Map<String, dynamic>;
+      }
+    } catch (_) {}
+    return null;
+  }
 }

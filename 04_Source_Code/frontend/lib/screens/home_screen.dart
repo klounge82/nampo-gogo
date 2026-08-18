@@ -1,26 +1,84 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../constants/colors.dart';
-import '../constants/strings.dart';
 import '../data/mock_data.dart';
+import '../models/place.dart';
+import '../models/mission.dart';
+import '../models/recommendation.dart';
+import '../repositories/place_repository.dart';
+import '../repositories/mission_repository.dart';
+import '../repositories/system_repository.dart';
+import '../providers/locale_provider.dart';
+import '../providers/notification_provider.dart';
+import '../providers/auth_provider.dart';
 import '../widgets/search_bar.dart';
 import '../widgets/recommendation_card.dart';
 import '../widgets/mission_card.dart';
-import '../repositories/system_repository.dart';
+import '../widgets/language_selector_button.dart';
+import '../l10n/app_localizations.dart';
 import 'place_detail_screen.dart';
 import 'mission_detail_screen.dart';
-import 'package:provider/provider.dart';
-import '../providers/notification_provider.dart';
-import '../providers/auth_provider.dart';
 import 'notification_history_screen.dart';
 import 'auth_screen.dart';
 import 'search_screen.dart';
-import '../config/production_config.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final PlaceRepository _placeRepository = PlaceRepository();
+  final MissionRepository _missionRepository = MissionRepository();
+
+  List<Place> _places = [];
+  List<Mission> _missions = [];
+  String? _lastLocaleCode;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final currentLoc = context.watch<LocaleProvider>().currentLocaleCode;
+    if (_lastLocaleCode != currentLoc) {
+      _lastLocaleCode = currentLoc;
+      _loadDynamicData();
+    }
+  }
+
+  Future<void> _loadDynamicData() async {
+    final localeCode = context.read<LocaleProvider>().currentLocaleCode;
+    try {
+      final places = await _placeRepository.getPlaces(locale: localeCode);
+      final missions = await _missionRepository.getMissions(locale: localeCode);
+      if (mounted) {
+        setState(() {
+          _places = places;
+          _missions = missions;
+        });
+      }
+    } catch (_) {
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    // Convert Place list to Recommendation list for UI rendering if places exist
+    final recommendationsToDisplay = _places.isNotEmpty
+        ? _places.map((p) => Recommendation(
+            id: p.id,
+            name: p.name,
+            category: p.category,
+            rating: p.rating,
+            address: p.address,
+            description: p.description,
+            tags: const ['AI 추천', '남포동 명소'],
+          )).toList()
+        : MockData.recommendations;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -34,93 +92,119 @@ class HomeScreen extends StatelessWidget {
                 const SizedBox(height: 24.0),
 
                 // Welcome Section
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
-                          '${AppStrings.homeWelcomeTitle} 👋',
-                          style: TextStyle(
-                            fontSize: 24.0,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        SizedBox(height: 4.0),
-                        Text(
-                          AppStrings.homeWelcomeSubtitle,
-                          style: TextStyle(
-                            fontSize: 14.0,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Consumer2<AuthProvider, NotificationProvider>(
-                      builder: (context, auth, notif, _) {
-                        final isLoggedIn = auth.isLoggedIn;
-                        final count = notif.unreadCount;
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final screenWidth = constraints.maxWidth;
+                    final isNarrow = screenWidth < 360;
 
-                        return Stack(
-                          clipBehavior: Clip.none,
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            IconButton(
-                              onPressed: () {
-                                if (isLoggedIn) {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) =>
-                                          const NotificationHistoryScreen(),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${l10n.welcomeGreeting} ${l10n.welcomeTitle}',
+                                    style: TextStyle(
+                                      fontSize: isNarrow ? 18.0 : 22.0,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.textPrimary,
+                                      height: 1.2,
                                     ),
-                                  );
-                                } else {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => const AuthScreen(),
+                                    softWrap: true,
+                                  ),
+                                  const SizedBox(height: 4.0),
+                                  Text(
+                                    l10n.welcomeSlogan,
+                                    style: TextStyle(
+                                      fontSize: isNarrow ? 12.0 : 13.0,
+                                      color: AppColors.textSecondary,
                                     ),
-                                  );
-                                }
-                              },
-                              icon: const Icon(
-                                Icons.notifications_none,
-                                size: 28.0,
-                                color: AppColors.textPrimary,
+                                    softWrap: true,
+                                  ),
+                                ],
                               ),
                             ),
-                            if (isLoggedIn && count > 0)
-                              Positioned(
-                                right: 4,
-                                top: 4,
-                                child: Container(
-                                  padding: const EdgeInsets.all(4),
-                                  decoration: const BoxDecoration(
-                                    color: Colors.redAccent,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  constraints: const BoxConstraints(
-                                    minWidth: 16,
-                                    minHeight: 16,
-                                  ),
-                                  child: Text(
-                                    '$count',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
+                            const SizedBox(width: 8.0),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const LanguageSelectorButton(),
+                                const SizedBox(width: 4.0),
+                                Consumer2<AuthProvider, NotificationProvider>(
+                                  builder: (context, auth, notif, _) {
+                                    final isLoggedIn = auth.isLoggedIn;
+                                    final count = notif.unreadCount;
+
+                                    return Stack(
+                                      clipBehavior: Clip.none,
+                                      children: [
+                                        IconButton(
+                                          onPressed: () {
+                                            if (isLoggedIn) {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (_) =>
+                                                      const NotificationHistoryScreen(),
+                                                ),
+                                              );
+                                            } else {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (_) => const AuthScreen(),
+                                                ),
+                                              );
+                                            }
+                                          },
+                                          icon: const Icon(
+                                            Icons.notifications_none,
+                                            size: 26.0,
+                                            color: AppColors.textPrimary,
+                                          ),
+                                        ),
+                                        if (isLoggedIn && count > 0)
+                                          Positioned(
+                                            right: 4,
+                                            top: 4,
+                                            child: Container(
+                                              padding: const EdgeInsets.all(4),
+                                              decoration: const BoxDecoration(
+                                                color: Colors.redAccent,
+                                                shape: BoxShape.circle,
+                                              ),
+                                              constraints: const BoxConstraints(
+                                                minWidth: 16,
+                                                minHeight: 16,
+                                              ),
+                                              child: Text(
+                                                '$count',
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 9,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                                textAlign: TextAlign.center,
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    );
+                                  },
                                 ),
-                              ),
+                              ],
+                            ),
                           ],
-                        );
-                      },
-                    ),
-                  ],
+                        ),
+                      ],
+                    );
+                  },
                 ),
 
                 const SizedBox(height: 12.0),
@@ -129,7 +213,7 @@ class HomeScreen extends StatelessWidget {
                 FutureBuilder<String>(
                   future: SystemRepository().getSystemStatus(),
                   builder: (context, snapshot) {
-                    final statusText = snapshot.data ?? '서버 상태 확인 중...';
+                    final statusText = snapshot.data ?? l10n.apiChecking;
                     final isOnline =
                         snapshot.hasData && !statusText.contains('오프라인');
 
@@ -157,10 +241,8 @@ class HomeScreen extends StatelessWidget {
                             children: [
                               Text(
                                 isOnline
-                                    ? '🟢 API 연결됨'
-                                    : (ProductionConfig.isProduction
-                                          ? '🔴 서버 연결 실패 (네트워크를 확인해 주세요)'
-                                          : '🔴 오프라인 모드 (Mock 데이터 사용)'),
+                                    ? l10n.apiConnected
+                                    : l10n.apiDisconnected,
                                 style: TextStyle(
                                   fontSize: 13.0,
                                   fontWeight: FontWeight.bold,
@@ -174,7 +256,7 @@ class HomeScreen extends StatelessWidget {
                           if (isOnline) ...[
                             const SizedBox(height: 4.0),
                             Text(
-                              statusText,
+                              l10n.apiRunning,
                               style: const TextStyle(
                                 fontSize: 12.0,
                                 color: AppColors.textSecondary,
@@ -192,19 +274,12 @@ class HomeScreen extends StatelessWidget {
 
                 // Search Bar
                 NampoSearchBar(
+                  readOnly: true,
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => SearchScreen()),
+                      MaterialPageRoute(builder: (_) => const SearchScreen()),
                     );
-                  },
-                  onChanged: (value) {
-                    if (value.trim().isNotEmpty) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => SearchScreen()),
-                      );
-                    }
                   },
                 ),
 
@@ -213,9 +288,9 @@ class HomeScreen extends StatelessWidget {
                 // AI Recommendation Header
                 _buildSectionHeader(
                   context,
-                  title: AppStrings.homeRecommendTitle,
+                  title: l10n.aiRecommendTitle,
                   onMorePressed: () =>
-                      _showComingSoon(context, AppStrings.homeRecommendTitle),
+                      _showComingSoon(context, l10n.aiRecommendTitle),
                 ),
 
                 const SizedBox(height: 12.0),
@@ -226,9 +301,9 @@ class HomeScreen extends StatelessWidget {
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     physics: const BouncingScrollPhysics(),
-                    itemCount: MockData.recommendations.length,
+                    itemCount: recommendationsToDisplay.length,
                     itemBuilder: (context, index) {
-                      final recommendation = MockData.recommendations[index];
+                      final recommendation = recommendationsToDisplay[index];
                       return RecommendationCard(
                         recommendation: recommendation,
                         onTap: () {
@@ -249,36 +324,45 @@ class HomeScreen extends StatelessWidget {
                 // Today's Mission Header
                 _buildSectionHeader(
                   context,
-                  title: AppStrings.homeMissionTitle,
+                  title: l10n.todaysMissionTitle,
                   onMorePressed: () =>
-                      _showComingSoon(context, AppStrings.homeMissionTitle),
+                      _showComingSoon(context, l10n.todaysMissionTitle),
                 ),
 
                 const SizedBox(height: 12.0),
 
                 // Today's Mission List (Vertical)
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: MockData.missions.length,
-                  itemBuilder: (context, index) {
-                    final mission = MockData.missions[index];
-                    return MissionCard(
-                      mission: mission,
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                MissionDetailScreen(missionId: mission.id),
-                          ),
-                        );
-                      },
-                      onActionButtonTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                MissionDetailScreen(missionId: mission.id),
-                          ),
+                Builder(
+                  builder: (context) {
+                    final localeCode = context.watch<LocaleProvider>().currentLocaleCode;
+                    final displayMissions = _missions.isNotEmpty
+                        ? _missions
+                        : _missionRepository.getMockMissions(locale: localeCode);
+
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: displayMissions.length,
+                      itemBuilder: (context, index) {
+                        final mission = displayMissions[index];
+                        return MissionCard(
+                          mission: mission,
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    MissionDetailScreen(missionId: mission.id),
+                              ),
+                            );
+                          },
+                          onActionButtonTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    MissionDetailScreen(missionId: mission.id),
+                              ),
+                            );
+                          },
                         );
                       },
                     );
@@ -299,6 +383,8 @@ class HomeScreen extends StatelessWidget {
     required String title,
     required VoidCallback onMorePressed,
   }) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -317,9 +403,9 @@ class HomeScreen extends StatelessWidget {
             minimumSize: Size.zero,
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
-          child: const Text(
-            AppStrings.homeMore,
-            style: TextStyle(
+          child: Text(
+            l10n.more,
+            style: const TextStyle(
               color: AppColors.primary,
               fontSize: 13.0,
               fontWeight: FontWeight.bold,

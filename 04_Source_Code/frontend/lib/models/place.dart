@@ -18,11 +18,17 @@ class Place {
   final String? phoneNumber;
   final String? homepageUrl;
 
-  // Review Verification Policy fields
+  // Review Verification Policy & Beta Tier fields
   final String
   reviewVerificationType; // 'BUSINESS_QR', 'ATTRACTION_LOCATION', 'OPEN_REVIEW'
   final int reviewLocationRadiusM;
   final bool manualVisitAllowed;
+  final bool isAttraction;
+  final String tier; // 'TEST', 'VERIFIED_BETA', 'OFFICIAL'
+  final bool isTestData;
+  final String? entranceImageUrl;
+  final String? interiorImagesJson;
+  final String? productImagesJson;
 
   const Place({
     required this.id,
@@ -44,6 +50,12 @@ class Place {
     this.reviewVerificationType = 'BUSINESS_QR',
     this.reviewLocationRadiusM = 300,
     this.manualVisitAllowed = true,
+    this.isAttraction = false,
+    this.tier = 'OFFICIAL',
+    this.isTestData = false,
+    this.entranceImageUrl,
+    this.interiorImagesJson,
+    this.productImagesJson,
   });
 
   factory Place.fromJson(Map<String, dynamic> json) {
@@ -116,6 +128,12 @@ class Place {
           json['review_verification_type'] as String? ?? defaultPolicy,
       reviewLocationRadiusM: json['review_location_radius_m'] as int? ?? 300,
       manualVisitAllowed: json['manual_visit_allowed'] as bool? ?? true,
+      isAttraction: json['is_attraction'] as bool? ?? isAttractionFallback,
+      tier: json['tier'] as String? ?? 'OFFICIAL',
+      isTestData: (json['is_test_data'] as bool? ?? false) || (json['tier'] == 'TEST') || (json['name'] as String? ?? '').contains('[QA'),
+      entranceImageUrl: json['entrance_image_url'] as String?,
+      interiorImagesJson: json['interior_images_json'] as String?,
+      productImagesJson: json['product_images_json'] as String?,
     );
   }
 

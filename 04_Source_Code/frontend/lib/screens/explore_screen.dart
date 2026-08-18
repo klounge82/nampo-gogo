@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../constants/colors.dart';
-import '../constants/strings.dart';
 import '../models/place.dart';
+import '../providers/locale_provider.dart';
 import '../repositories/place_repository.dart';
+import '../l10n/app_localizations.dart';
+import '../utils/l10n_mappers.dart';
 import 'place_detail_screen.dart';
 import 'main_navigation_screen.dart';
 import 'search_screen.dart';
@@ -23,11 +26,16 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
   String _selectedCategory = '전체';
   bool _isLoading = false;
+  String? _lastLocaleCode;
 
   @override
-  void initState() {
-    super.initState();
-    _loadInitialData();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final currentLoc = context.watch<LocaleProvider>().currentLocaleCode;
+    if (_lastLocaleCode != currentLoc) {
+      _lastLocaleCode = currentLoc;
+      _loadInitialData();
+    }
   }
 
   @override
@@ -37,10 +45,11 @@ class _ExploreScreenState extends State<ExploreScreen> {
   }
 
   Future<void> _loadInitialData() async {
+    final localeCode = context.read<LocaleProvider>().currentLocaleCode;
     setState(() => _isLoading = true);
     try {
       final categories = await _placeRepository.getCategories();
-      final places = await _placeRepository.getPlaces();
+      final places = await _placeRepository.getPlaces(locale: localeCode);
 
       setState(() {
         _categories = ['전체', ...categories];
@@ -54,6 +63,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
   }
 
   Future<void> _onCategorySelected(String category) async {
+    final localeCode = context.read<LocaleProvider>().currentLocaleCode;
     if (_selectedCategory == category) return;
 
     setState(() {
@@ -64,7 +74,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
     try {
       final filterCat = category == '전체' ? null : category;
-      final places = await _placeRepository.getPlaces(category: filterCat);
+      final places = await _placeRepository.getPlaces(category: filterCat, locale: localeCode);
       setState(() {
         _places = places;
       });
@@ -74,38 +84,15 @@ class _ExploreScreenState extends State<ExploreScreen> {
     }
   }
 
-  Future<void> _onSearch(String query) async {
-    setState(() {
-      _isLoading = true;
-      _selectedCategory = '전체'; // Reset category when searching
-    });
-
-    try {
-      if (query.trim().isEmpty) {
-        final places = await _placeRepository.getPlaces();
-        setState(() {
-          _places = places;
-        });
-      } else {
-        final places = await _placeRepository.searchPlaces(query);
-        setState(() {
-          _places = places;
-        });
-      }
-    } catch (_) {
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
-          AppStrings.exploreTitle,
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          l10n.exploreTitle,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
@@ -137,15 +124,15 @@ class _ExploreScreenState extends State<ExploreScreen> {
                         MaterialPageRoute(builder: (_) => const SearchScreen()),
                       );
                     },
-                    decoration: const InputDecoration(
-                      hintText: '장소 이름이나 설명 검색...',
-                      hintStyle: TextStyle(
+                    decoration: InputDecoration(
+                      hintText: l10n.searchHint,
+                      hintStyle: const TextStyle(
                         color: AppColors.textHint,
                         fontSize: 13.0,
                       ),
-                      prefixIcon: Icon(Icons.search, color: AppColors.primary),
+                      prefixIcon: const Icon(Icons.search, color: AppColors.primary),
                       border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(vertical: 12.0),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 12.0),
                     ),
                   ),
                 ),
@@ -164,7 +151,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                       return Padding(
                         padding: const EdgeInsets.only(right: 8.0),
                         child: ChoiceChip(
-                          label: Text(category),
+                          label: Text(L10nMappers.mapCategory(l10n, category)),
                           selected: isSelected,
                           onSelected: (_) => _onCategorySelected(category),
                           selectedColor: AppColors.primary,
@@ -206,16 +193,16 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Icon(
+                      children: [
+                        const Icon(
                           Icons.search_off,
                           size: 48.0,
                           color: AppColors.textHint,
                         ),
-                        SizedBox(height: 12.0),
+                        const SizedBox(height: 12.0),
                         Text(
-                          '검색 결과에 맞는 장소가 없습니다.',
-                          style: TextStyle(color: AppColors.textSecondary),
+                          l10n.emptySearch,
+                          style: const TextStyle(color: AppColors.textSecondary),
                         ),
                       ],
                     ),
@@ -239,15 +226,16 @@ class _ExploreScreenState extends State<ExploreScreen> {
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.map),
-        label: const Text(
-          '주변 지도 보기',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        label: Text(
+          l10n.mapViewNearby,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
     );
   }
 
   Widget _buildPlaceCard(BuildContext context, Place place) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       margin: const EdgeInsets.only(bottom: 12.0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
@@ -314,7 +302,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                               borderRadius: BorderRadius.circular(4.0),
                             ),
                             child: Text(
-                              place.category,
+                              L10nMappers.mapCategory(l10n, place.category),
                               style: const TextStyle(
                                 color: AppColors.primary,
                                 fontSize: 10.0,

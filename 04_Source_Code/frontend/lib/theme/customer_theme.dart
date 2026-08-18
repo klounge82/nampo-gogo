@@ -11,7 +11,7 @@ class CustomerTheme {
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primary,
         primary: AppColors.primary,
-        secondary: const Color(0xFFFFB800),
+        secondary: AppColors.secondary,
         surface: Colors.white,
       ),
       appBarTheme: const AppBarTheme(

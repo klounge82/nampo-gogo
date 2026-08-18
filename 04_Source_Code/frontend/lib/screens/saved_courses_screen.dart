@@ -168,6 +168,61 @@ class _SavedCoursesListViewState extends State<SavedCoursesListView> {
     }
   }
 
+  void _shareCourse(RecommendationModel course) {
+    final shareCode = 'NAMPO-${course.id.length > 8 ? course.id.substring(0, 8).toUpperCase() : "COURSE"}';
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.share, color: AppColors.primary),
+            SizedBox(width: 8),
+            Text('추천 코스 공유', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('내 맞춤 남포동 여행 코스를 친구와 공유하세요!'),
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: SelectableText(
+                'https://nampogogo.app/course/$shareCode',
+                style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('코스 공유 링크가 클립보드에 복사되었습니다.'),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            },
+            child: const Text('링크 복사'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('닫기'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -305,13 +360,25 @@ class _SavedCoursesListViewState extends State<SavedCoursesListView> {
                       color: AppColors.textPrimary,
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(
-                      Icons.delete_outline,
-                      size: 20.0,
-                      color: AppColors.textHint,
-                    ),
-                    onPressed: () => _deleteCourse(course),
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(
+                          Icons.share_outlined,
+                          size: 20.0,
+                          color: AppColors.primary,
+                        ),
+                        onPressed: () => _shareCourse(course),
+                      ),
+                      IconButton(
+                        icon: const Icon(
+                          Icons.delete_outline,
+                          size: 20.0,
+                          color: AppColors.textHint,
+                        ),
+                        onPressed: () => _deleteCourse(course),
+                      ),
+                    ],
                   ),
                 ],
               ),
