@@ -302,8 +302,36 @@ def seed_coupons():
     finally:
         db.close()
 
+def reconcile_qa_signup_bonus_policy():
+    db = SessionLocal()
+    try:
+        qa_user = db.query(models.User).filter(models.User.id == "2abb6e52-d447-4338-8beb-e638890a5ecc").first()
+        if qa_user and qa_user.current_points == 1000:
+            existing_corr = db.query(models.PointHistory).filter(
+                models.PointHistory.user_id == qa_user.id,
+                models.PointHistory.points == -700
+            ).first()
+            if not existing_corr:
+                corr_history = models.PointHistory(
+                    id=str(uuid.uuid4()),
+                    user_id=qa_user.id,
+                    points=-700,
+                    activity="공식 가입 보너스 정책 보정 (-700P)",
+                    transaction_type="CORRECTION",
+                    source_type="SYSTEM"
+                )
+                db.add(corr_history)
+                qa_user.current_points = 300
+                db.commit()
+                print(f"[VC53 RECONCILE]: QA user {qa_user.id} reconciled to 300P (-700P correction entry added).")
+    except Exception as e:
+        print(f"[VC53 RECONCILE ERROR]: {e}")
+    finally:
+        db.close()
+
 @app.on_event("startup")
 def on_startup():
+    reconcile_qa_signup_bonus_policy()
     if APP_ENV != "production":
         seed_stores()
         seed_missions()

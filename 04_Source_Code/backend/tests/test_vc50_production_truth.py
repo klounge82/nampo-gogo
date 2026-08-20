@@ -33,23 +33,30 @@ class TestVC50ProductionTruth(unittest.TestCase):
         models.Base.metadata.create_all(bind=db_engine)
 
         db = self.SessionLocal()
-        # Seed test user matching exact Live Production Railway truth
+        # Seed test user matching exact Live Production Railway truth after 300P policy reconciliation
         self.user = models.User(
             id="2abb6e52-d447-4338-8beb-e638890a5ecc",
             email="jazzbj@naver.com",
             nickname="jazzbj",
-            current_points=1000,
+            current_points=300,
             lifetime_earned_points=0,
             role="member",
             status="active"
         )
-        history = models.PointHistory(
+        history_signup = models.PointHistory(
             id="ph_signup_001",
             user_id="2abb6e52-d447-4338-8beb-e638890a5ecc",
             points=1000,
             activity="신규 가입 웰컴 축하 포인트"
         )
-        db.add_all([self.user, history])
+        history_corr = models.PointHistory(
+            id="ph_corr_001",
+            user_id="2abb6e52-d447-4338-8beb-e638890a5ecc",
+            points=-700,
+            activity="공식 가입 보너스 정책 보정 (-700P)",
+            transaction_type="CORRECTION"
+        )
+        db.add_all([self.user, history_signup, history_corr])
         db.commit()
         db.close()
 
@@ -60,16 +67,16 @@ class TestVC50ProductionTruth(unittest.TestCase):
         resp = self.client.get("/auth/me", headers=headers)
         self.assertEqual(resp.status_code, 200)
         data = resp.json()
-        self.assertEqual(data["current_points"], 1000)
+        self.assertEqual(data["current_points"], 300)
         self.assertEqual(data["lifetime_earned_points"], 0)
 
     def test_02_point_history_returns_exact_signup_bonus_record(self):
         resp = self.client.get("/users/points/history?user_id=2abb6e52-d447-4338-8beb-e638890a5ecc")
         self.assertEqual(resp.status_code, 200)
         data = resp.json()
-        self.assertEqual(len(data), 1)
-        self.assertEqual(data[0]["points"], 1000)
-        self.assertIn("가입", data[0]["activity"])
+        self.assertEqual(len(data), 2)
+        net_pts = sum(row["points"] for row in data)
+        self.assertEqual(net_pts, 300)
 
 if __name__ == "__main__":
     unittest.main()
