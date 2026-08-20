@@ -12,6 +12,7 @@ class User(Base):
     role = Column(String(50), nullable=False, default="member") # 'member', 'admin'
     status = Column(String(50), nullable=False, default="active") # 'active', 'blocked'
     current_points = Column(Integer, nullable=False, default=0)
+    lifetime_earned_points = Column(Integer, nullable=False, default=0)
     language_code = Column(String(10), nullable=False, default="ko") # 'ko', 'en', 'ja', 'zh'
     profile_image_url = Column(String(500), nullable=True)
     created_at = Column(DateTime, nullable=False, server_default=func.now())
@@ -285,6 +286,10 @@ class PointHistory(Base):
     user_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     points = Column(Integer, nullable=False)
     activity = Column(String(255), nullable=False)
+    transaction_type = Column(String(50), nullable=True) # 'MISSION_REWARD', 'REVIEW_REWARD', 'VISIT_REWARD', 'SIGNUP_BONUS', 'SPEND_COUPON', 'ADMIN_CREDIT'
+    source_type = Column(String(50), nullable=True)
+    source_id = Column(String(36), nullable=True)
+    correction_of_history_id = Column(String(36), nullable=True)
     created_at = Column(DateTime, nullable=False, server_default=func.now())
 
     # Relationships

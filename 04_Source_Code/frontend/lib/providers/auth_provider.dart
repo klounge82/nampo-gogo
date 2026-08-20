@@ -181,9 +181,12 @@ class AuthProvider extends ChangeNotifier {
   }
 
   // Update local user points cache and notify UI listeners
-  void updatePoints(int newPoints) {
+  void updatePoints(int newPoints, {int? newLifetimeEarnedPoints}) {
     if (_currentUser != null) {
-      _currentUser = _currentUser!.copyWith(currentPoints: newPoints);
+      _currentUser = _currentUser!.copyWith(
+        currentPoints: newPoints,
+        lifetimeEarnedPoints: newLifetimeEarnedPoints ?? _currentUser!.lifetimeEarnedPoints,
+      );
       notifyListeners();
     }
   }

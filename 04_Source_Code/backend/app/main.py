@@ -497,6 +497,7 @@ def build_user_out_dict(db: Session, user: models.User) -> dict:
         "role": user.role,
         "status": user.status,
         "current_points": user.current_points,
+        "lifetime_earned_points": getattr(user, "lifetime_earned_points", 0),
         "language_code": user.language_code,
         "created_at": user.created_at,
         "updated_at": user.updated_at,
@@ -563,7 +564,8 @@ def signup(
         nickname=user_in.nickname,
         role="member",
         status="active",
-        current_points=1000
+        current_points=300,
+        lifetime_earned_points=0
     )
     db.add(new_user)
     db.flush()
@@ -572,11 +574,13 @@ def signup(
     cust_role = models.UserRole(user_id=new_user.id, role="CUSTOMER")
     db.add(cust_role)
 
-    # Insert 1000P Signup Welcome Point History
+    # Insert Signup Welcome Point History (Lifetime EXCLUDES signup bonus)
     signup_point_history = models.PointHistory(
         user_id=new_user.id,
-        points=1000,
-        activity="회원가입 축하 포인트"
+        points=300,
+        activity="신규 회원가입 축하 포인트",
+        transaction_type="SIGNUP_BONUS",
+        source_type="SYSTEM"
     )
     db.add(signup_point_history)
 
@@ -1216,15 +1220,32 @@ def get_store_products(store_id: str, locale: Optional[str] = Query(None), accep
 # --- MISSION MVP APIs ---
 
 @app.get("/missions", response_model=List[schemas.MissionOut], tags=["Missions"])
-def get_missions(store_id: Optional[str] = None, locale: Optional[str] = Query(None), accept_language: Optional[str] = Header(None), db: Session = Depends(get_db)):
+def get_missions(
+    store_id: Optional[str] = None,
+    locale: Optional[str] = Query(None),
+    accept_language: Optional[str] = Header(None),
+    db: Session = Depends(get_db),
+    current_user: Optional[models.User] = Depends(get_current_user_optional)
+):
     target_loc = resolve_locale(accept_language=accept_language, locale=locale)
     query = db.query(models.Mission)
     if store_id:
         query = query.filter(models.Mission.store_id == store_id)
     missions = query.all()
+
+    completed_mission_ids = set()
+    if current_user:
+        user_missions = db.query(models.UserMission.mission_id).filter(models.UserMission.user_id == current_user.id).all()
+        completed_mission_ids = {um[0] for um in user_missions}
+
+    result = []
     for m in missions:
-        localize_mission_obj(m, target_loc)
-    return missions
+        m_out = schemas.MissionOut.model_validate(m)
+        m_out.is_completed = (m.id in completed_mission_ids)
+        localize_mission_obj(m_out, target_loc)
+        result.append(m_out)
+
+    return result
 
 @app.get("/missions/{mission_id}", response_model=schemas.MissionOut, tags=["Missions"])
 def get_mission(mission_id: str, locale: Optional[str] = Query(None), accept_language: Optional[str] = Header(None), db: Session = Depends(get_db)):
@@ -1392,12 +1413,16 @@ def verify_mission(
 
         # Award points to user
         user_obj.current_points += mission.points
+        user_obj.lifetime_earned_points += mission.points
 
         # Add point history
         new_history = models.PointHistory(
             user_id=target_user_id,
             points=mission.points,
-            activity=f"'{mission.title}' 미션 완료 보상"
+            activity=f"미션 완료: {mission.title}",
+            transaction_type="MISSION_REWARD",
+            source_type="MISSION",
+            source_id=mission_id
         )
         db.add(new_history)
         
@@ -1451,7 +1476,8 @@ def get_user_points(user_id: Optional[str] = None, db: Session = Depends(get_db)
         
     return {
         "user_id": user.id,
-        "current_points": user.current_points
+        "current_points": user.current_points,
+        "lifetime_earned_points": user.lifetime_earned_points
     }
 
 @app.get("/users/points/history", response_model=List[schemas.PointHistoryOut], tags=["Points"])
@@ -1599,11 +1625,14 @@ def exchange_coupon(coupon_id: str, req: ExchangeRequest, db: Session = Depends(
         # 1. Deduct user points
         user.current_points -= coupon.cost_points
 
-        # 2. Add point history
+        # 2. Add point history (Lifetime points UNCHANGED)
         point_history = models.PointHistory(
             user_id=target_user_id,
             points=-coupon.cost_points,
-            activity=f"'{coupon.title}' 쿠폰 교환"
+            activity=f"쿠폰 교환: {coupon.title}",
+            transaction_type="SPEND_COUPON",
+            source_type="COUPON",
+            source_id=coupon_id
         )
         db.add(point_history)
 

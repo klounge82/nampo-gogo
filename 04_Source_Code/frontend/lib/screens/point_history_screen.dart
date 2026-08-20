@@ -36,14 +36,17 @@ class _PointHistoryScreenState extends State<PointHistoryScreen> {
     final userId = authProvider.currentUser?.id;
 
     try {
-      final points = await _pointRepository.getUserPoints(userId: userId);
+      final pointsData = await _pointRepository.getUserPointsData(userId: userId);
       final history = await _pointRepository.getPointHistory(userId: userId);
 
-      // Sync AuthProvider status
-      authProvider.updatePoints(points);
+      final currentPts = pointsData['current_points'] ?? 0;
+      final lifetimePts = pointsData['lifetime_earned_points'] ?? 0;
+
+      // Sync AuthProvider status with both current and lifetime earned points
+      authProvider.updatePoints(currentPts, newLifetimeEarnedPoints: lifetimePts);
 
       setState(() {
-        _currentPoints = points;
+        _currentPoints = currentPts;
         _histories = history;
       });
     } catch (e) {

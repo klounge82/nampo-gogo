@@ -23,9 +23,15 @@ class MissionService {
       if (storeId != null) params['store_id'] = storeId;
       if (locale != null) params['locale'] = locale;
 
+      final token = await const FlutterSecureStorage().read(key: 'access_token');
       final response = await _dio.get(
         '/missions',
         queryParameters: params.isNotEmpty ? params : null,
+        options: Options(
+          headers: {
+            if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
+          },
+        ),
       );
       if (response.statusCode == 200 && response.data != null) {
         return response.data as List<dynamic>;

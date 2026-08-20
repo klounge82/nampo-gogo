@@ -130,7 +130,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 child: Text(
                                   L10nMappers.mapUserTier(
                                     l10n,
-                                    user?.currentPoints ?? 0,
+                                    user?.lifetimeEarnedPoints ?? 0,
                                   ),
                                   style: const TextStyle(
                                     fontSize: 11,
@@ -237,7 +237,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     icon: Icons.monetization_on,
                     iconColor: AppColors.primary,
                     value: isLoggedIn ? '${user?.currentPoints ?? 0} P' : '0 P',
-                    label: l10n.profilePointsLabel,
+                    label: '보유 포인트',
                     onTap: () {
                       if (isLoggedIn) {
                         Navigator.of(context).push(
@@ -251,6 +251,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         );
                       }
                     },
+                  ),
+                  Container(width: 1.0, height: 40.0, color: AppColors.border),
+                  _buildAssetColumn(
+                    icon: Icons.stars,
+                    iconColor: Colors.amber,
+                    value: isLoggedIn ? '${user?.lifetimeEarnedPoints ?? 0} P' : '0 P',
+                    label: '누적 획득',
+                    onTap: null,
                   ),
                   Container(width: 1.0, height: 40.0, color: AppColors.border),
                   _buildAssetColumn(
@@ -676,7 +684,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required Color iconColor,
     required String value,
     required String label,
-    required VoidCallback onTap,
+    VoidCallback? onTap,
   }) {
     return Expanded(
       child: InkWell(

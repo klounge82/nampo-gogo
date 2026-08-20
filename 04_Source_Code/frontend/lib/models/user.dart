@@ -5,6 +5,7 @@ class User {
   final String role;
   final String status;
   final int currentPoints;
+  final int lifetimeEarnedPoints;
   final String? profileImageUrl;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -22,6 +23,7 @@ class User {
     required this.role,
     required this.status,
     this.currentPoints = 0,
+    this.lifetimeEarnedPoints = 0,
     this.profileImageUrl,
     required this.createdAt,
     required this.updatedAt,
@@ -60,6 +62,7 @@ class User {
       role: json['role'] as String? ?? 'guest',
       status: json['status'] as String? ?? 'active',
       currentPoints: json['current_points'] as int? ?? 0,
+      lifetimeEarnedPoints: json['lifetime_earned_points'] as int? ?? 0,
       profileImageUrl: json['profile_image_url'] as String?,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
@@ -87,6 +90,7 @@ class User {
       'role': role,
       'status': status,
       'current_points': currentPoints,
+      'lifetime_earned_points': lifetimeEarnedPoints,
       'profile_image_url': profileImageUrl,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
@@ -120,6 +124,7 @@ class User {
     String? role,
     String? status,
     int? currentPoints,
+    int? lifetimeEarnedPoints,
     String? profileImageUrl,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -137,6 +142,7 @@ class User {
       role: role ?? this.role,
       status: status ?? this.status,
       currentPoints: currentPoints ?? this.currentPoints,
+      lifetimeEarnedPoints: lifetimeEarnedPoints ?? this.lifetimeEarnedPoints,
       profileImageUrl: profileImageUrl ?? this.profileImageUrl,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

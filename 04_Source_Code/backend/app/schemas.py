@@ -184,6 +184,7 @@ class UserOut(UserBase):
     role: str
     status: str
     current_points: int = 0
+    lifetime_earned_points: int = 0
     language_code: str = "ko"
     created_at: datetime
     updated_at: datetime
@@ -286,6 +287,7 @@ class MissionCreate(MissionBase):
 class MissionOut(MissionBase):
     id: str
     created_at: datetime
+    is_completed: bool = False
 
     class Config:
         from_attributes = True

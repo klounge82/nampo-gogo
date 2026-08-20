@@ -50,7 +50,10 @@ class _MissionScreenState extends State<MissionScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final isLoggedIn = context.watch<AuthProvider>().isLoggedIn;
+    final authProvider = context.watch<AuthProvider>();
+    final isLoggedIn = authProvider.isLoggedIn;
+    final user = authProvider.currentUser;
+    final currentPoints = user?.currentPoints ?? 0;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -110,7 +113,7 @@ class _MissionScreenState extends State<MissionScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            isLoggedIn ? '2,300 P' : '0 P',
+                            isLoggedIn ? '$currentPoints P' : '0 P',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 28.0,
@@ -132,7 +135,7 @@ class _MissionScreenState extends State<MissionScreen> {
                         children: [
                           Text(
                             isLoggedIn
-                                ? l10n.completedMissionsCountFormat(2)
+                                ? l10n.completedMissionsCountFormat(_missions.where((m) => m.isCompleted).length)
                                 : l10n.completedMissionsCountFormat(0),
                             style: const TextStyle(
                               color: Colors.white,
@@ -140,7 +143,9 @@ class _MissionScreenState extends State<MissionScreen> {
                             ),
                           ),
                           Text(
-                            isLoggedIn ? l10n.missionTopGrade : l10n.guestModeNotice,
+                            isLoggedIn
+                                ? L10nMappers.mapUserTier(l10n, user?.lifetimeEarnedPoints ?? 0)
+                                : l10n.guestModeNotice,
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 12.0,

@@ -58,6 +58,25 @@ class PointRepository {
     }
   }
 
+  // Get user points map containing both current and lifetime earned points
+  Future<Map<String, int>> getUserPointsData({String? userId}) async {
+    try {
+      final res = await _pointService.fetchUserPoints(userId: userId);
+      final currentPoints = res['current_points'] as int? ?? 0;
+      final lifetimePoints = res['lifetime_earned_points'] as int? ?? 0;
+      _mockBalance = currentPoints;
+      return {
+        'current_points': currentPoints,
+        'lifetime_earned_points': lifetimePoints,
+      };
+    } catch (e) {
+      return {
+        'current_points': _mockBalance,
+        'lifetime_earned_points': 0,
+      };
+    }
+  }
+
   // Get point history
   Future<List<PointHistory>> getPointHistory({String? userId}) async {
     try {
