@@ -329,9 +329,39 @@ def reconcile_qa_signup_bonus_policy():
     finally:
         db.close()
 
+def reconcile_duplicate_correction_offset():
+    db = SessionLocal()
+    try:
+        dup_row = db.query(models.PointHistory).filter(
+            models.PointHistory.id == "b0979e69-eed2-44bf-8fa1-f408cab0001d"
+        ).first()
+        if dup_row:
+            existing_offset = db.query(models.PointHistory).filter(
+                models.PointHistory.user_id == "2abb6e52-d447-4338-8beb-e638890a5ecc",
+                models.PointHistory.points == 700
+            ).first()
+            if not existing_offset:
+                offset_row = models.PointHistory(
+                    id=str(uuid.uuid4()),
+                    user_id="2abb6e52-d447-4338-8beb-e638890a5ecc",
+                    points=700,
+                    activity="중복 정책 보정 상쇄 조정 (+700P)",
+                    transaction_type="CORRECTION",
+                    source_type="SYSTEM",
+                    correction_of_history_id="b0979e69-eed2-44bf-8fa1-f408cab0001d"
+                )
+                db.add(offset_row)
+                db.commit()
+                print(f"[VC53-W OFFSET]: Inserted 1 append-only offset row (+700P) for duplicate row {dup_row.id}.")
+    except Exception as e:
+        print(f"[VC53-W OFFSET ERROR]: {e}")
+    finally:
+        db.close()
+
 @app.on_event("startup")
 def on_startup():
     reconcile_qa_signup_bonus_policy()
+    reconcile_duplicate_correction_offset()
     if APP_ENV != "production":
         seed_stores()
         seed_missions()
