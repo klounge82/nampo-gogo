@@ -1465,30 +1465,38 @@ def verify_mission(
 # --- POINT / REWARD MVP APIs ---
 
 @app.get("/users/points", tags=["Points"])
-def get_user_points(user_id: Optional[str] = None, db: Session = Depends(get_db)):
-    if not user_id:
-        user = db.query(models.User).first()
-    else:
-        user = db.query(models.User).filter(models.User.id == user_id).first()
-    
-    if not user:
+def get_user_points(
+    user_id: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: Optional[models.User] = Depends(get_current_user_optional)
+):
+    target_user = None
+    if current_user:
+        target_user = current_user
+    elif user_id:
+        target_user = db.query(models.User).filter(models.User.id == user_id).first()
+
+    if not target_user:
         raise HTTPException(status_code=404, detail="해당 사용자를 찾을 수 없습니다.")
-        
+
     return {
-        "user_id": user.id,
-        "current_points": user.current_points,
-        "lifetime_earned_points": user.lifetime_earned_points
+        "user_id": target_user.id,
+        "current_points": target_user.current_points,
+        "lifetime_earned_points": target_user.lifetime_earned_points
     }
 
 @app.get("/users/points/history", response_model=List[schemas.PointHistoryOut], tags=["Points"])
-def get_point_history(user_id: Optional[str] = None, db: Session = Depends(get_db)):
-    if not user_id:
-        user = db.query(models.User).first()
-        if not user:
-            return []
-        target_user_id = user.id
-    else:
+def get_point_history(
+    user_id: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: Optional[models.User] = Depends(get_current_user_optional)
+):
+    if current_user:
+        target_user_id = current_user.id
+    elif user_id:
         target_user_id = user_id
+    else:
+        raise HTTPException(status_code=401, detail="인증되지 않은 요청입니다.")
 
     return db.query(models.PointHistory).filter(
         models.PointHistory.user_id == target_user_id

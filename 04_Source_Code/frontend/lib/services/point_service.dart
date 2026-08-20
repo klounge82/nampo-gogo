@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../config/api_config.dart';
 
 class PointService {
@@ -17,9 +18,15 @@ class PointService {
   // GET /users/points
   Future<Map<String, dynamic>> fetchUserPoints({String? userId}) async {
     try {
+      final token = await const FlutterSecureStorage().read(key: 'access_token');
       final response = await _dio.get(
         '/users/points',
         queryParameters: userId != null ? {'user_id': userId} : null,
+        options: Options(
+          headers: {
+            if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
+          },
+        ),
       );
       if (response.statusCode == 200 && response.data != null) {
         return response.data as Map<String, dynamic>;
@@ -33,9 +40,15 @@ class PointService {
   // GET /users/points/history
   Future<List<dynamic>> fetchPointHistory({String? userId}) async {
     try {
+      final token = await const FlutterSecureStorage().read(key: 'access_token');
       final response = await _dio.get(
         '/users/points/history',
         queryParameters: userId != null ? {'user_id': userId} : null,
+        options: Options(
+          headers: {
+            if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
+          },
+        ),
       );
       if (response.statusCode == 200 && response.data != null) {
         return response.data as List<dynamic>;
