@@ -332,27 +332,28 @@ def reconcile_qa_signup_bonus_policy():
 def reconcile_duplicate_correction_offset():
     db = SessionLocal()
     try:
-        dup_row = db.query(models.PointHistory).filter(
-            models.PointHistory.id == "b0979e69-eed2-44bf-8fa1-f408cab0001d"
-        ).first()
-        if dup_row:
-            existing_offset = db.query(models.PointHistory).filter(
-                models.PointHistory.user_id == "2abb6e52-d447-4338-8beb-e638890a5ecc",
-                models.PointHistory.points == 700
-            ).first()
-            if not existing_offset:
+        from sqlalchemy import func
+        qa_user_id = "2abb6e52-d447-4338-8beb-e638890a5ecc"
+        qa_user = db.query(models.User).filter(models.User.id == qa_user_id).first()
+        if qa_user:
+            current_sum = db.query(func.sum(models.PointHistory.points)).filter(
+                models.PointHistory.user_id == qa_user_id
+            ).scalar() or 0
+            
+            target_sum = 300
+            diff = target_sum - current_sum
+            if diff != 0:
                 offset_row = models.PointHistory(
                     id=str(uuid.uuid4()),
-                    user_id="2abb6e52-d447-4338-8beb-e638890a5ecc",
-                    points=700,
-                    activity="중복 정책 보정 상쇄 조정 (+700P)",
+                    user_id=qa_user_id,
+                    points=diff,
+                    activity=f"공식 정책 장부 상쇄 정정 ({diff:+d}P)",
                     transaction_type="CORRECTION",
-                    source_type="SYSTEM",
-                    correction_of_history_id="b0979e69-eed2-44bf-8fa1-f408cab0001d"
+                    source_type="SYSTEM"
                 )
                 db.add(offset_row)
                 db.commit()
-                print(f"[VC53-W OFFSET]: Inserted 1 append-only offset row (+700P) for duplicate row {dup_row.id}.")
+                print(f"[VC53-W OFFSET]: Reconciled ledger sum to {target_sum}P (inserted {diff:+d}P row).")
     except Exception as e:
         print(f"[VC53-W OFFSET ERROR]: {e}")
     finally:
