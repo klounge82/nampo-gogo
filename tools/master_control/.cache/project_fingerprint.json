@@ -1,0 +1,10 @@
+{
+  "current_git_commit": "1ea5f86225d17e120be3cca8cabae8044d684664",
+  "git_dirty_status": "DIRTY",
+  "protected_file_hashes": {
+    "04_Source_Code/backend/app/main.py": "19b049d3d976a8b0074dfc113bdd100e6704ab8db1ae107204b330f35dfe0a7c",
+    "04_Source_Code/frontend/lib/providers/auth_provider.dart": "ac1e2263da1c71f4771c7956e4d13cf2fb71dee2a4974d9feb2f0ccc12487b74",
+    "04_Source_Code/frontend/pubspec.yaml": "3dd1396f5101a92edad9a3a3822205716b03068dcccd56dd784dba70184ea250"
+  },
+  "scan_time": "2026-08-20T20:00:00+09:00"
+}

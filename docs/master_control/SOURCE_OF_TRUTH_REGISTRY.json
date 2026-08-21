@@ -1,0 +1,60 @@
+[
+  {
+    "truth_id": "SOT-AUTHENTICATED-USER",
+    "data_name": "AUTHENTICATED_USER",
+    "authoritative_source": "Validated JWT identity from GET /auth/me",
+    "derived_sources": [
+      "AuthProvider.currentUser"
+    ],
+    "cache": "FlutterSecureStorage access_token",
+    "forbidden_as_source": [
+      "db.query(models.User).first()",
+      "Hardcoded mock user"
+    ],
+    "validation_method": "FastAPI Depends(get_current_user)",
+    "related_incidents": [
+      "INC-POINT-WRONG-USER-001"
+    ],
+    "last_confirmed": "2026-08-20T18:20:35+09:00",
+    "drift_status": "NO_DRIFT"
+  },
+  {
+    "truth_id": "SOT-CURRENT-POINTS",
+    "data_name": "CURRENT_POINTS",
+    "authoritative_source": "Production users.current_points column",
+    "derived_sources": [
+      "AuthProvider.currentUser.currentPoints"
+    ],
+    "cache": "None in Release mode",
+    "forbidden_as_source": [
+      "PointRepository._mockBalance",
+      "Default fallback 300P"
+    ],
+    "validation_method": "GET /auth/me or GET /users/points with Bearer token",
+    "related_incidents": [
+      "INC-POINT-300-1000-001",
+      "INC-POINT-WRONG-USER-001"
+    ],
+    "last_confirmed": "2026-08-20T18:20:35+09:00",
+    "drift_status": "NO_DRIFT"
+  },
+  {
+    "truth_id": "SOT-LIFETIME-POINTS",
+    "data_name": "LIFETIME_POINTS",
+    "authoritative_source": "Production users.lifetime_earned_points column",
+    "derived_sources": [
+      "AuthProvider.currentUser.lifetimeEarnedPoints"
+    ],
+    "cache": "None in Release mode",
+    "forbidden_as_source": [
+      "Local fixture nampo_gogo_test.db (700P)",
+      "Signup bonus +1000P"
+    ],
+    "validation_method": "GET /auth/me with Bearer token",
+    "related_incidents": [
+      "INC-LOCAL-FIXTURE-AS-PROD-001"
+    ],
+    "last_confirmed": "2026-08-20T18:20:35+09:00",
+    "drift_status": "NO_DRIFT"
+  }
+]

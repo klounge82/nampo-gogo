@@ -157,6 +157,8 @@ class Store(Base):
     homepage_url = Column(String(255), nullable=True)
     review_verification_type = Column(String(50), nullable=True, default="BUSINESS_QR") # 'BUSINESS_QR', 'ATTRACTION_LOCATION', 'OPEN_REVIEW'
     review_location_radius_m = Column(Integer, nullable=True, default=300)
+    geometry_type = Column(String(50), nullable=True, default="POINT_RADIUS") # 'POINT_RADIUS', 'LINE_BUFFER', 'POLYGON_AREA'
+    geometry_data = Column(Text, nullable=True)
     manual_visit_allowed = Column(Boolean, nullable=True, default=True)
     is_attraction = Column(Boolean, nullable=True, default=False)
     tier = Column(String(50), nullable=True, default="OFFICIAL") # 'TEST', 'VERIFIED_BETA', 'OFFICIAL'

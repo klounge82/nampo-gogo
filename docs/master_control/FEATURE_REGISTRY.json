@@ -1,0 +1,86 @@
+[
+  {
+    "feature_id": "FEAT-AUTH",
+    "name": "AUTH",
+    "purpose": "JWT authentication, login, signup, token validation",
+    "implementation_status": "CONFIRMED"
+  },
+  {
+    "feature_id": "FEAT-USER",
+    "name": "USER",
+    "purpose": "User profile, role assignment (CUSTOMER/BUSINESS/ADMIN)",
+    "implementation_status": "CONFIRMED"
+  },
+  {
+    "feature_id": "FEAT-POINT",
+    "name": "POINT",
+    "purpose": "Point Economy V2, balance, lifetime earned points, transaction ledger",
+    "implementation_status": "CONFIRMED"
+  },
+  {
+    "feature_id": "FEAT-MISSION",
+    "name": "MISSION",
+    "purpose": "Mission discovery, GPS/Photo/QR verification, completion tracking",
+    "implementation_status": "CONFIRMED"
+  },
+  {
+    "feature_id": "FEAT-REVIEW",
+    "name": "REVIEW",
+    "purpose": "Store & attraction visit reviews, rating, verification gate",
+    "implementation_status": "CONFIRMED"
+  },
+  {
+    "feature_id": "FEAT-COUPON",
+    "name": "COUPON",
+    "purpose": "Point-based coupon issuance & store redemption",
+    "implementation_status": "PARTIAL"
+  },
+  {
+    "feature_id": "FEAT-BUSINESS",
+    "name": "BUSINESS",
+    "purpose": "Business owner dashboard, store registration, QR validation",
+    "implementation_status": "CONFIRMED"
+  },
+  {
+    "feature_id": "FEAT-QR",
+    "name": "QR",
+    "purpose": "Standard JSON QR code generation, scanning, verification",
+    "implementation_status": "CONFIRMED"
+  },
+  {
+    "feature_id": "FEAT-SPATIAL",
+    "name": "SPATIAL",
+    "purpose": "Spatial geometry boundaries (Point radius, Line buffer, Polygon)",
+    "implementation_status": "CONFIRMED"
+  },
+  {
+    "feature_id": "FEAT-MAP",
+    "name": "MAP",
+    "purpose": "Google Maps interactive attraction & store map rendering",
+    "implementation_status": "CONFIRMED"
+  },
+  {
+    "feature_id": "FEAT-RESERVATION",
+    "name": "RESERVATION",
+    "purpose": "Store reservation booking & QR check-in",
+    "implementation_status": "CONFIRMED"
+  },
+  {
+    "feature_id": "FEAT-ADMIN",
+    "name": "ADMIN",
+    "purpose": "Admin dashboard, store/user management, audit logs",
+    "implementation_status": "CONFIRMED"
+  },
+  {
+    "feature_id": "FEAT-LOCALIZATION",
+    "name": "LOCALIZATION",
+    "purpose": "Multi-language support (KO, EN, JA, ZH)",
+    "implementation_status": "CONFIRMED"
+  },
+  {
+    "feature_id": "FEAT-RELEASE",
+    "name": "RELEASE",
+    "purpose": "Android APK build, R8 keep rules, version code increment",
+    "implementation_status": "CONFIRMED"
+  }
+]

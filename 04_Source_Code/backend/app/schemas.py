@@ -246,6 +246,8 @@ class StoreBase(BaseModel):
     homepage_url: Optional[str] = None
     review_verification_type: Optional[str] = "BUSINESS_QR"
     review_location_radius_m: Optional[int] = 300
+    geometry_type: Optional[str] = "POINT_RADIUS"
+    geometry_data: Optional[str] = None
     manual_visit_allowed: Optional[bool] = True
     is_attraction: Optional[bool] = False
     tier: Optional[str] = "OFFICIAL"

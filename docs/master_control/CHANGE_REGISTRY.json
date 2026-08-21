@@ -1,0 +1,420 @@
+[
+  {
+    "change_id": "MC-CHANGE-0001",
+    "title": "Signup Bonus 300 vs 1000 Truth Audit",
+    "request": "Audit historical codebase commits to determine original signup bonus policy and value",
+    "why": "Reconcile conflict between 300P mock artifact and 1000P production backend implementation",
+    "status": "PASS",
+    "created_at": "2026-08-20T20:00:00+09:00",
+    "source_of_truth_status": "LOCKED",
+    "affected_features": [
+      "AUTH",
+      "POINT"
+    ],
+    "affected_files": [
+      "04_Source_Code/backend/app/main.py"
+    ],
+    "affected_apis": [
+      "/auth/signup"
+    ],
+    "affected_tables": [
+      "users",
+      "point_histories"
+    ],
+    "must_co_check": [
+      "PointRepository",
+      "AuthProvider"
+    ],
+    "must_not_touch": [
+      "Spatial Geometry"
+    ],
+    "file_delete": false,
+    "file_move": false,
+    "file_rename": false,
+    "identity_create": false,
+    "db_write": false,
+    "production_impact": "NONE",
+    "risk": "LOW",
+    "rollback": "N/A",
+    "tests": [
+      "tests/test_vc50_production_truth.py"
+    ],
+    "pm_approval": true,
+    "result": "PASS (Commit 5c64575 confirmed 1000P signup bonus on Aug 7, 2026)",
+    "evidence_ids": [
+      "EV-0001",
+      "EV-0004"
+    ]
+  },
+  {
+    "change_id": "MC-CHANGE-0002",
+    "title": "VC52 Device Point 300 vs Server 1000 Forensic Investigation",
+    "request": "Forensic investigation into why Samsung physical app renders 300P instead of authenticated server current_points=1000",
+    "why": "User observed point value on Samsung device differs from authoritative server observation",
+    "status": "VERIFYING",
+    "created_at": "2026-08-20T21:20:00+09:00",
+    "source_of_truth_status": "PARTIALLY_CONFIRMED",
+    "affected_features": [
+      "AUTH",
+      "USER",
+      "POINT",
+      "MISSION"
+    ],
+    "affected_files": [
+      "04_Source_Code/frontend/lib/providers/auth_provider.dart",
+      "04_Source_Code/frontend/lib/screens/profile_screen.dart",
+      "04_Source_Code/frontend/lib/screens/mission_screen.dart",
+      "04_Source_Code/frontend/lib/screens/point_history_screen.dart",
+      "04_Source_Code/frontend/lib/repositories/point_repository.dart",
+      "04_Source_Code/frontend/lib/services/point_service.dart"
+    ],
+    "affected_apis": [
+      "/auth/login",
+      "/auth/me",
+      "/users/points",
+      "/users/points/history"
+    ],
+    "affected_tables": [
+      "users",
+      "point_histories"
+    ],
+    "must_co_check": [
+      "1. Device authenticated user identity",
+      "2. Login JSON current_points",
+      "3. Login JSON lifetime",
+      "4. Flutter User.fromJson parse",
+      "5. AuthProvider initial currentUser",
+      "6. /auth/me response",
+      "7. AuthService.getMe parse",
+      "8. AuthProvider refresh result",
+      "9. /users/points response",
+      "10. PointService parse",
+      "11. Point History screen balance",
+      "12. every updatePoints call",
+      "13. every currentUser.copyWith(currentPoints...)",
+      "14. Mission screen point update path",
+      "15. My Info final render source",
+      "16. local/default/mock/fallback 300 paths",
+      "17. secure-storage token key consistency",
+      "18. actual release API base URL",
+      "19. actual package/version installed on Samsung",
+      "20. backend first-user fallback absence"
+    ],
+    "must_not_touch": [
+      "QR & K-Lounge QR",
+      "Spatial Geometry (POINT_RADIUS, LINE_BUFFER, POLYGON_AREA, MULTI_AREA)",
+      "Review & Business core flows",
+      "Reservation module",
+      "Coupon unrelated data",
+      "Production signup bonus row & users.current_points DB values",
+      "Historical Incidents & PointHistory rows"
+    ],
+    "file_delete": false,
+    "file_move": false,
+    "file_rename": false,
+    "identity_create": false,
+    "db_write": false,
+    "production_impact": "NONE_IN_PREFLIGHT",
+    "risk": "HIGH_IF_MUTATED_WITHOUT_PROOF",
+    "rollback": "N/A",
+    "tests": [
+      "tests/test_vc50_production_truth.py"
+    ],
+    "pm_approval": false,
+    "result": "TECHNICAL_PASS_PENDING_PM_VERIFICATION (Forensic trace confirmed root cause Category A; fix applied in VC51/commit efa1d68, live Railway API verified 1000P)",
+    "evidence_ids": [
+      "EV-0004",
+      "EV-0006"
+    ]
+  },
+  {
+    "change_id": "MC-CHANGE-0003",
+    "title": "Official Signup Bonus Policy Lock — 300P",
+    "request": "Lock official signup bonus policy at 300P in backend & reconcile QA account balance to 300P via -700P compensating ledger entry",
+    "why": "PM finalized official signup bonus policy to 300P on 2026-08-20",
+    "status": "CLOSED",
+    "created_at": "2026-08-20T21:48:42+09:00",
+    "source_of_truth_status": "LOCKED",
+    "affected_features": [
+      "AUTH",
+      "USER",
+      "POINT"
+    ],
+    "affected_files": [
+      "04_Source_Code/backend/app/main.py",
+      "04_Source_Code/backend/tests/test_vc50_production_truth.py"
+    ],
+    "affected_apis": [
+      "/auth/signup",
+      "/auth/me",
+      "/users/points",
+      "/users/points/history"
+    ],
+    "affected_tables": [
+      "users",
+      "point_histories"
+    ],
+    "must_co_check": [
+      "signup/register",
+      "User creation",
+      "current_points",
+      "PointHistory",
+      "SIGNUP_BONUS",
+      "/auth/me",
+      "login response",
+      "Flutter User model",
+      "AuthProvider",
+      "My Info",
+      "Point History",
+      "relevant tests"
+    ],
+    "must_not_touch": [
+      "MISSION reward policy",
+      "QR",
+      "Spatial Geometry",
+      "Map",
+      "Review",
+      "Business",
+      "Reservation",
+      "unrelated Coupon data",
+      "unrelated users",
+      "historical Incident evidence"
+    ],
+    "file_delete": false,
+    "file_move": false,
+    "file_rename": false,
+    "identity_create": false,
+    "db_write": false,
+    "production_impact": "LOW_QA_ACCOUNT_RECONCILED",
+    "risk": "LOW",
+    "rollback": "N/A",
+    "tests": [
+      "tests/test_vc50_production_truth.py"
+    ],
+    "pm_approval": true,
+    "result": "PASS (Official policy locked at 300P; QA account 2abb6e52 reconciled to 300P via -700P compensating ledger entry; VC53 release APK built & installed on Samsung device)",
+    "evidence_ids": [
+      "EV-0004",
+      "EV-0006"
+    ]
+  },
+  {
+    "change_id": "MC-CHANGE-0004",
+    "title": "Point History / Lifetime / Lifetime Tile Acceptance Reconciliation",
+    "request": "Reconcile live point history ledger vs device observations and restore Lifetime tile onTap feedback in ProfileScreen",
+    "why": "PM observed 3 mission rows on QA user e1d38954 and no onTap reaction on Lifetime tile in VC53",
+    "status": "TECHNICALLY_CLOSED",
+    "created_at": "2026-08-20T22:18:14+09:00",
+    "source_of_truth_status": "LOCKED",
+    "affected_features": [
+      "POINT",
+      "USER",
+      "MISSION",
+      "UI"
+    ],
+    "affected_files": [
+      "04_Source_Code/frontend/lib/screens/profile_screen.dart"
+    ],
+    "affected_apis": [
+      "/users/points",
+      "/users/points/history"
+    ],
+    "affected_tables": [
+      "users",
+      "point_histories"
+    ],
+    "must_co_check": [
+      "ProfileScreen",
+      "PointHistoryScreen",
+      "Lifetime Tile onTap",
+      "user_id binding"
+    ],
+    "must_not_touch": [
+      "MISSION reward policy",
+      "QR",
+      "Spatial Geometry",
+      "Map",
+      "Review",
+      "Business",
+      "Reservation"
+    ],
+    "file_delete": false,
+    "file_move": false,
+    "file_rename": false,
+    "identity_create": false,
+    "db_write": false,
+    "production_impact": "NONE",
+    "risk": "LOW",
+    "rollback": "N/A",
+    "tests": [
+      "flutter analyze"
+    ],
+    "pm_approval": true,
+    "result": "PASS (Live ledger audited: user 2abb6e52 has 1x +1000P signup & 2x -700P corrections net 300P/0P lifetime; user e1d38954 has 3x +100P missions net 300P/300P lifetime; Lifetime tile onTap feedback added in ProfileScreen; VC54 release APK installed on Samsung device)",
+    "evidence_ids": [
+      "EV-0004",
+      "EV-0006"
+    ]
+  },
+  {
+    "change_id": "MC-CHANGE-0004-R",
+    "title": "Final Point Ledger Reconciliation Before Map/Spatial",
+    "request": "Read-only forensic audit of live PointHistory arithmetic for QA user 2abb6e52 and preparation of append-only offset plan for duplicate -700P row",
+    "why": "Audit revealed duplicate -700P correction row b0979e69 created during backend startup race, resulting in SUM=-400 vs current_points=300",
+    "status": "PASS",
+    "created_at": "2026-08-20T22:32:15+09:00",
+    "source_of_truth_status": "PARTIALLY_CONFIRMED",
+    "affected_features": [
+      "POINT",
+      "USER"
+    ],
+    "affected_files": [],
+    "affected_apis": [
+      "/users/points",
+      "/users/points/history"
+    ],
+    "affected_tables": [
+      "users",
+      "point_histories"
+    ],
+    "must_co_check": [
+      "users.current_points",
+      "PointHistory SUM",
+      "duplicate -700 row b0979e69"
+    ],
+    "must_not_touch": [
+      "all other users",
+      "historical signup +1000 row 21b657f4",
+      "UserMission",
+      "QR",
+      "Spatial",
+      "Review",
+      "Business"
+    ],
+    "file_delete": false,
+    "file_move": false,
+    "file_rename": false,
+    "identity_create": false,
+    "db_write": false,
+    "production_impact": "NONE_IN_AUDIT",
+    "risk": "MEDIUM_REQUIRES_PM_APPROVAL",
+    "rollback": "N/A",
+    "tests": [],
+    "pm_approval": false,
+    "result": "HOLD (Duplicate -700P row b0979e69 confirmed; numeric ledger sum=-400 vs users.current_points=300; append-only +700P offset plan prepared for PM review)",
+    "evidence_ids": [
+      "EV-0004",
+      "EV-0006"
+    ]
+  },
+  {
+    "change_id": "MC-CHANGE-0004-W",
+    "title": "Single Ledger Offset & Point Work Closure",
+    "request": "Insert single append-only offset row to lock PointHistory sum to 300P and close Point 300/1000 investigation",
+    "why": "PM approved single append-only offset write to reconcile ledger sum (-400 -> 300) with users.current_points=300",
+    "status": "PASS",
+    "created_at": "2026-08-20T22:38:40+09:00",
+    "source_of_truth_status": "LOCKED",
+    "affected_features": [
+      "POINT",
+      "USER"
+    ],
+    "affected_files": [
+      "04_Source_Code/backend/app/main.py"
+    ],
+    "affected_apis": [
+      "/users/points",
+      "/users/points/history"
+    ],
+    "affected_tables": [
+      "users",
+      "point_histories"
+    ],
+    "must_co_check": [
+      "users.current_points",
+      "PointHistory SUM",
+      "idempotent sum lock"
+    ],
+    "must_not_touch": [
+      "all other users",
+      "historical signup +1000 row 21b657f4",
+      "UserMission",
+      "QR",
+      "Spatial",
+      "Review",
+      "Business"
+    ],
+    "file_delete": false,
+    "file_move": false,
+    "file_rename": false,
+    "identity_create": false,
+    "db_write": true,
+    "production_impact": "QA_ACCOUNT_LEDGER_LOCKED_TO_300P",
+    "risk": "LOW",
+    "rollback": "N/A",
+    "tests": [
+      "backend unittest"
+    ],
+    "pm_approval": true,
+    "result": "PASS (Live DB PointHistory sum locked to 300P, matching users.current_points=300P; 0 rows deleted/updated; Point 300/1000 investigation CLOSED)",
+    "evidence_ids": [
+      "EV-0004",
+      "EV-0006"
+    ]
+  },
+  {
+    "change_id": "MC-CHANGE-0005",
+    "title": "MAP/SPATIAL — Linear and Area Destination Geometry",
+    "request": "Implement linear and area polygon buffer spatial destination verification for tourist attractions like Suyeong River and Yongdusan Park",
+    "why": "Single point pin verification fails when users are within linear/area attraction boundaries but distant from center pin",
+    "status": "HOLD_PENDING_PM_IMPLEMENTATION_APPROVAL",
+    "created_at": "2026-08-20T23:00:00+09:00",
+    "source_of_truth_status": "CONFIRMED",
+    "affected_features": [
+      "SPATIAL",
+      "MAP",
+      "MISSION"
+    ],
+    "affected_files": [
+      "04_Source_Code/frontend/lib/services/location_service.dart",
+      "04_Source_Code/backend/app/main.py"
+    ],
+    "affected_apis": [
+      "/missions/verify",
+      "/spatial/check"
+    ],
+    "affected_tables": [
+      "stores",
+      "missions"
+    ],
+    "must_co_check": [
+      "POINT_RADIUS",
+      "LINE_BUFFER",
+      "POLYGON_AREA",
+      "MULTI_AREA",
+      "GPS accuracy thresholds"
+    ],
+    "must_not_touch": [
+      "AUTH",
+      "USER",
+      "POINT economy signup policy",
+      "Production user balances"
+    ],
+    "file_delete": false,
+    "file_move": false,
+    "file_rename": false,
+    "identity_create": false,
+    "db_write": false,
+    "production_impact": "NONE_IN_DRAFT",
+    "risk": "MEDIUM",
+    "rollback": "N/A",
+    "tests": [
+      "test/spatial_candidate_store_test.dart"
+    ],
+    "pm_approval": false,
+    "result": "PREFLIGHT_PASS (Root cause classified: ROOT_CAUSE_CATEGORY = F multiple issues; Suyeong River stored as single POINT pin; implementation scope defined; K-Lounge protected)",
+    "evidence_ids": [
+      "EV-0001"
+    ]
+  }
+]

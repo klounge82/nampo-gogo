@@ -1,0 +1,20 @@
+[
+  {
+    "execution_id": "EXEC-0001",
+    "change_id": "MC-CHANGE-0004-W",
+    "operation_type": "SINGLE_LEDGER_OFFSET",
+    "target_entity_type": "USER_POINT_HISTORY",
+    "target_entity_id_masked": "2abb6e52…5ecc",
+    "expected_insert": 1,
+    "actual_insert": 1,
+    "expected_update": 0,
+    "actual_update": 0,
+    "expected_delete": 0,
+    "actual_delete": 0,
+    "idempotency_key": "IDEM-MC04W-QA2ABB-OFFSET700",
+    "status": "TECHNICAL_PASS",
+    "created_at": "2026-08-20T22:40:00+09:00",
+    "executed_at": "2026-08-20T22:54:00+09:00",
+    "evidence": "Inserted 1 offset row (+700P); live DB SUM=300P matches current_points=300P"
+  }
+]

@@ -1,0 +1,283 @@
+[
+  {
+    "file_id": "FILE-0001",
+    "path": "04_Source_Code/backend/app/main.py",
+    "purpose": "FastAPI Core Router and Endpoints",
+    "related_features": [
+      "AUTH",
+      "USER",
+      "POINT",
+      "MISSION",
+      "REVIEW",
+      "STORE",
+      "ADMIN"
+    ],
+    "safety_class": "PROTECTED",
+    "safe_to_delete": false,
+    "safe_to_move": false,
+    "safe_to_rename": false,
+    "pm_approval_required": true,
+    "related_incidents": [
+      "INC-POINT-WRONG-USER-001",
+      "INC-RAILWAY-NOT-DEPLOYED-001",
+      "INC-POINT-300-1000-001"
+    ]
+  },
+  {
+    "file_id": "FILE-0002",
+    "path": "04_Source_Code/backend/app/models.py",
+    "purpose": "SQLAlchemy Database ORM Models Definition",
+    "related_features": [
+      "AUTH",
+      "USER",
+      "POINT",
+      "MISSION",
+      "REVIEW",
+      "STORE",
+      "COUPON"
+    ],
+    "safety_class": "PROTECTED",
+    "safe_to_delete": false,
+    "safe_to_move": false,
+    "safe_to_rename": false,
+    "pm_approval_required": true,
+    "related_incidents": [
+      "INC-POINT-300-1000-001"
+    ]
+  },
+  {
+    "file_id": "FILE-0003",
+    "path": "04_Source_Code/backend/app/schemas.py",
+    "purpose": "Pydantic DTO Serialization Schemas",
+    "related_features": [
+      "AUTH",
+      "USER",
+      "POINT",
+      "MISSION",
+      "REVIEW"
+    ],
+    "safety_class": "PROTECTED",
+    "safe_to_delete": false,
+    "safe_to_move": false,
+    "safe_to_rename": false,
+    "pm_approval_required": true,
+    "related_incidents": [
+      "INC-RAILWAY-NOT-DEPLOYED-001"
+    ]
+  },
+  {
+    "file_id": "FILE-0004",
+    "path": "04_Source_Code/backend/app/auth.py",
+    "purpose": "JWT Token Generation, Password Hashing, Dependency Injectors",
+    "related_features": [
+      "AUTH",
+      "USER"
+    ],
+    "safety_class": "PROTECTED",
+    "safe_to_delete": false,
+    "safe_to_move": false,
+    "safe_to_rename": false,
+    "pm_approval_required": true,
+    "related_incidents": [
+      "INC-POINT-WRONG-USER-001"
+    ]
+  },
+  {
+    "file_id": "FILE-0005",
+    "path": "04_Source_Code/frontend/pubspec.yaml",
+    "purpose": "Flutter Package Dependencies and Build Version Manifest",
+    "related_features": [
+      "RELEASE",
+      "LOCALIZATION"
+    ],
+    "safety_class": "PROTECTED",
+    "safe_to_delete": false,
+    "safe_to_move": false,
+    "safe_to_rename": false,
+    "pm_approval_required": true,
+    "related_incidents": []
+  },
+  {
+    "file_id": "FILE-0006",
+    "path": "04_Source_Code/frontend/lib/main.dart",
+    "purpose": "Flutter Application Entrypoint & Provider Initialization",
+    "related_features": [
+      "AUTH",
+      "USER",
+      "LOCALIZATION"
+    ],
+    "safety_class": "PROTECTED",
+    "safe_to_delete": false,
+    "safe_to_move": false,
+    "safe_to_rename": false,
+    "pm_approval_required": true,
+    "related_incidents": []
+  },
+  {
+    "file_id": "FILE-0007",
+    "path": "04_Source_Code/frontend/lib/providers/auth_provider.dart",
+    "purpose": "Flutter Global Authentication & User Balance State Provider",
+    "related_features": [
+      "AUTH",
+      "USER",
+      "POINT"
+    ],
+    "safety_class": "PROTECTED",
+    "safe_to_delete": false,
+    "safe_to_move": false,
+    "safe_to_rename": false,
+    "pm_approval_required": true,
+    "related_incidents": [
+      "INC-POINT-300-1000-001",
+      "INC-POINT-WRONG-USER-001"
+    ]
+  },
+  {
+    "file_id": "FILE-0008",
+    "path": "04_Source_Code/frontend/lib/repositories/point_repository.dart",
+    "purpose": "Frontend Point Repository Data Layer",
+    "related_features": [
+      "POINT"
+    ],
+    "safety_class": "PROTECTED",
+    "safe_to_delete": false,
+    "safe_to_move": false,
+    "safe_to_rename": false,
+    "pm_approval_required": true,
+    "related_incidents": [
+      "INC-POINT-MOCK-001",
+      "INC-POINT-WRONG-USER-001"
+    ]
+  },
+  {
+    "file_id": "FILE-0009",
+    "path": "04_Source_Code/frontend/lib/services/point_service.dart",
+    "purpose": "Point HTTP API Service Layer",
+    "related_features": [
+      "POINT",
+      "AUTH"
+    ],
+    "safety_class": "PROTECTED",
+    "safe_to_delete": false,
+    "safe_to_move": false,
+    "safe_to_rename": false,
+    "pm_approval_required": true,
+    "related_incidents": [
+      "INC-POINT-WRONG-USER-001"
+    ]
+  },
+  {
+    "file_id": "FILE-0010",
+    "path": "04_Source_Code/frontend/lib/screens/profile_screen.dart",
+    "purpose": "My Info Profile View",
+    "related_features": [
+      "USER",
+      "POINT"
+    ],
+    "safety_class": "PROTECTED",
+    "safe_to_delete": false,
+    "safe_to_move": false,
+    "safe_to_rename": false,
+    "pm_approval_required": true,
+    "related_incidents": [
+      "INC-POINT-300-1000-001"
+    ]
+  },
+  {
+    "file_id": "FILE-0011",
+    "path": "04_Source_Code/frontend/lib/screens/mission_screen.dart",
+    "purpose": "Mission Overview View & Balance Badge",
+    "related_features": [
+      "MISSION",
+      "POINT"
+    ],
+    "safety_class": "PROTECTED",
+    "safe_to_delete": false,
+    "safe_to_move": false,
+    "safe_to_rename": false,
+    "pm_approval_required": true,
+    "related_incidents": []
+  },
+  {
+    "file_id": "FILE-0012",
+    "path": "04_Source_Code/frontend/lib/screens/point_history_screen.dart",
+    "purpose": "Point History Timeline View",
+    "related_features": [
+      "POINT"
+    ],
+    "safety_class": "PROTECTED",
+    "safe_to_delete": false,
+    "safe_to_move": false,
+    "safe_to_rename": false,
+    "pm_approval_required": true,
+    "related_incidents": [
+      "INC-POINT-MOCK-001",
+      "INC-POINT-WRONG-USER-001"
+    ]
+  },
+  {
+    "file_id": "FILE-0013",
+    "path": "04_Source_Code/frontend/android/app/proguard-rules.pro",
+    "purpose": "Android Release R8 Minification Keep Rules",
+    "related_features": [
+      "RELEASE",
+      "AUTH"
+    ],
+    "safety_class": "PROTECTED",
+    "safe_to_delete": false,
+    "safe_to_move": false,
+    "safe_to_rename": false,
+    "pm_approval_required": true,
+    "related_incidents": [
+      "INC-R8-STARTUP-CRASH-001",
+      "INC-FILE-LOSS-001"
+    ]
+  },
+  {
+    "file_id": "FILE-0014",
+    "path": "04_Source_Code/frontend/android/app/src/main/AndroidManifest.xml",
+    "purpose": "Android App Manifest Declarations & Permissions",
+    "related_features": [
+      "RELEASE",
+      "MAP",
+      "QR"
+    ],
+    "safety_class": "PROTECTED",
+    "safe_to_delete": false,
+    "safe_to_move": false,
+    "safe_to_rename": false,
+    "pm_approval_required": true,
+    "related_incidents": []
+  },
+  {
+    "file_id": "FILE-0015",
+    "path": "04_Source_Code/backend/tests/test_vc50_production_truth.py",
+    "purpose": "Regression Test for Production Truth & Signup Bonus History",
+    "related_features": [
+      "POINT",
+      "AUTH"
+    ],
+    "safety_class": "PROTECTED",
+    "safe_to_delete": false,
+    "safe_to_move": false,
+    "safe_to_rename": false,
+    "pm_approval_required": true,
+    "related_incidents": [
+      "INC-POINT-WRONG-USER-001"
+    ]
+  },
+  {
+    "file_id": "FILE-0016",
+    "path": "docs/project_memory/NAMPO_PROJECT_CONSTITUTION.md",
+    "purpose": "Master Project Memory Constitution Document",
+    "related_features": [
+      "GOVERNANCE"
+    ],
+    "safety_class": "PROTECTED",
+    "safe_to_delete": false,
+    "safe_to_move": false,
+    "safe_to_rename": false,
+    "pm_approval_required": true,
+    "related_incidents": []
+  }
+]

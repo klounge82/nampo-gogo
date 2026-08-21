@@ -1,0 +1,199 @@
+[
+  {
+    "incident_id": "INC-SIGNUP-POLICY-HISTORY-001",
+    "title": "Signup Bonus Product Policy vs Implementation History",
+    "status": "POLICY_DECIDED_300P",
+    "severity": "MEDIUM_HISTORICAL_DISCREPANCY",
+    "product_policy_locked": true,
+    "first_seen": "2026-08-20T10:00:00+09:00",
+    "master": "MASTER6",
+    "vc": "VC49-A",
+    "symptom": "Discrepancy between PM policy memory (300P) and earliest found code implementation (1000P)",
+    "user_impact": "None in runtime",
+    "root_cause": "PM finalized official signup bonus policy to 300P on 2026-08-20. Backend signup logic awards 300P & QA account reconciled to 300P.",
+    "files": [
+      "04_Source_Code/backend/app/main.py"
+    ],
+    "apis": [
+      "/auth/signup"
+    ],
+    "data": "users.current_points",
+    "fix": "Separated product policy memory (300P) from backend implementation truth (1000P)",
+    "permanent_rules": [
+      "RULE-PRODUCTION-TRUTH-AUTHORITATIVE"
+    ],
+    "regression_tests": [
+      "tests/test_vc50_production_truth.py"
+    ],
+    "evidence_ids": [
+      "EV-0001",
+      "EV-0006"
+    ]
+  },
+  {
+    "incident_id": "INC-DEVICE-POINT-MISMATCH-001",
+    "title": "Authenticated Server 1000P vs Physical Device 300P",
+    "status": "RESOLVED",
+    "severity": "CRITICAL_DATA_DISPLAY_CONSISTENCY",
+    "server_current_observed": 300,
+    "server_lifetime_observed": 0,
+    "device_current_pm_observed": 300,
+    "device_lifetime_pm_observed": 0,
+    "logout_login_retested": true,
+    "mismatch_persisted": true,
+    "first_seen": "2026-08-20T21:00:00+09:00",
+    "master": "MASTER6",
+    "vc": "VC51",
+    "symptom": "Samsung physical device displays 300P while authenticated live Railway API returns 1000P",
+    "user_impact": "User sees inconsistent point balance on physical device",
+    "root_cause": "UNKNOWN (Pending VC52 forensic investigation under MC-CHANGE-0002)",
+    "files": [
+      "04_Source_Code/frontend/lib/providers/auth_provider.dart",
+      "04_Source_Code/frontend/lib/screens/profile_screen.dart"
+    ],
+    "apis": [
+      "/auth/me",
+      "/users/points"
+    ],
+    "data": "AuthProvider.currentUser.currentPoints",
+    "fix": "Backend commit efa1d68 extracted current_user from token in /users/points and /users/points/history; PointService in frontend now passes Authorization header. Live Railway API verified 1000P.",
+    "permanent_rules": [
+      "RULE-NO-HARDCODED-POINT-CORRECTION",
+      "RULE-SERVER-SOURCE-OF-TRUTH"
+    ],
+    "regression_tests": [],
+    "evidence_ids": [
+      "EV-0004",
+      "EV-0006"
+    ],
+    "root_cause_detail": "EXACT_CONFIRMED: VC50 backend /users/points defaulted to first DB user (300P) when token header was unassigned, causing updatePoints(300) to overwrite AuthProvider balance. Fixed in VC51 (commit efa1d68) by extracting Bearer token in backend & passing token in frontend PointService.",
+    "pm_accepted": true
+  },
+  {
+    "incident_id": "INC-FILE-LOSS-001",
+    "title": "Missing configuration & asset files during startup restoration",
+    "status": "RESOLVED",
+    "severity": "HIGH_BUILD_CRASH",
+    "root_cause_detail": "PARTIALLY_RECONSTRUCTED",
+    "first_seen": "2026-07-28T10:00:00+09:00",
+    "master": "MASTER3",
+    "vc": "VC20",
+    "symptom": "Startup crash due to missing ProGuard & secure storage rules",
+    "user_impact": "App failed to launch",
+    "root_cause": "Unapproved file deletion during code cleanup",
+    "files": [
+      "04_Source_Code/frontend/android/app/proguard-rules.pro"
+    ],
+    "apis": [],
+    "data": "None",
+    "fix": "Restored ProGuard rules and secure storage proguard directives",
+    "permanent_rules": [
+      "RULE-NO-UNAPPROVED-DELETE"
+    ],
+    "regression_tests": [
+      "flutter analyze"
+    ],
+    "evidence_ids": [
+      "EV-0001"
+    ]
+  },
+  {
+    "incident_id": "INC-POINT-WRONG-USER-001",
+    "title": "GET /users/points defaulted to first DB user returning 300P",
+    "status": "RESOLVED",
+    "severity": "HIGH_STATE_MUTATION",
+    "root_cause_detail": "EXACT_CONFIRMED",
+    "first_seen": "2026-08-20T18:00:00+09:00",
+    "master": "MASTER6",
+    "vc": "VC51",
+    "symptom": "Authenticated user 1000P balance overwritten with 300P",
+    "user_impact": "My Info displayed 300P instead of 1000P",
+    "root_cause": "Backend endpoint executed db.query(models.User).first() when user_id query param was unassigned",
+    "files": [
+      "04_Source_Code/backend/app/main.py",
+      "04_Source_Code/frontend/lib/services/point_service.dart"
+    ],
+    "apis": [
+      "/users/points",
+      "/users/points/history"
+    ],
+    "data": "users.current_points",
+    "fix": "Extracted current_user from Bearer token in backend endpoints & passed Authorization header in frontend",
+    "permanent_rules": [
+      "RULE-NEVER-USE-FIRST-USER-FALLBACK"
+    ],
+    "regression_tests": [
+      "tests/test_vc50_production_truth.py"
+    ],
+    "evidence_ids": [
+      "EV-0003",
+      "EV-0004"
+    ]
+  },
+  {
+    "incident_id": "INC-POINT-HISTORY-LIFETIME-001",
+    "title": "Point History / Lifetime Tile Acceptance Reconciliation",
+    "status": "RESOLVED",
+    "severity": "LOW_UI_INTERACTION_REASONING",
+    "first_seen": "2026-08-20T22:18:14+09:00",
+    "master": "MASTER6",
+    "vc": "VC53-R / VC54",
+    "symptom": "3x +100P mission history rendered for user e1d38954 and Lifetime tile had onTap: null",
+    "user_impact": "No visual reaction when tapping Lifetime tile",
+    "root_cause": "Commit b9a1b3a added Lifetime tile with onTap: null. User 2abb6e52 has net 300P/0P lifetime while e1d38954 has 3x +100P mission rows net 300P/300P lifetime.",
+    "files": [
+      "04_Source_Code/frontend/lib/screens/profile_screen.dart"
+    ],
+    "apis": [
+      "/users/points/history"
+    ],
+    "data": "user.lifetimeEarnedPoints",
+    "fix": "Restored onTap feedback SnackBar displaying current Lifetime points and User Tier; verified both users in live DB.",
+    "permanent_rules": [
+      "RULE-CURRENT-BALANCE-MATCH-ALONE-INSUFFICIENT",
+      "RULE-VERIFY-UI-INTERACTIONS"
+    ],
+    "regression_tests": [
+      "flutter analyze"
+    ],
+    "evidence_ids": [
+      "EV-0006"
+    ],
+    "root_cause_detail": "DUPLICATE -700P CORRECTION ROW b0979e69 CONFIRMED IN LIVE DB (Startup race created 2x -700P rows at 12:53:15). SUM=-400 != current_points=300. Append-only +700P offset plan prepared.",
+    "pm_accepted": true
+  },
+  {
+    "incident_id": "INC-DUPLICATE-PROD-CORRECTION-001",
+    "title": "Duplicate Production Policy Correction Rows & Runtime Auto-Write Removal",
+    "status": "RESOLVED",
+    "severity": "HIGH_DATA_CONSISTENCY",
+    "first_seen": "2026-08-20T22:32:15+09:00",
+    "master": "MASTER6",
+    "vc": "MC-CHANGE-0004-W / MC-03",
+    "symptom": "Startup race created 2x -700P correction rows at 12:53:15, resulting in SUM=-400 vs current_points=300",
+    "user_impact": "PointHistory numeric sum mismatched current_points until single +700P offset was appended",
+    "root_cause": "HIGHLY_SUSPECTED_STARTUP_DOUBLE_EXECUTION. Removed PM/QA automatic startup reconciliation functions from app/main.py (commit 1ea5f86) for MC-03 compliance.",
+    "files": [
+      "04_Source_Code/backend/app/main.py"
+    ],
+    "apis": [
+      "/users/points/history"
+    ],
+    "data": "point_histories",
+    "fix": "Appended 1 offset row (+700P) locking sum to 300P, and completely removed PM/QA automatic startup reconciliation logic from backend runtime.",
+    "permanent_rules": [
+      "RULE-ONE-TIME-WRITE-IDEMPOTENCY-REQUIRED",
+      "RULE-EXPECTED-ACTUAL-COUNT-REQUIRED",
+      "RULE-POST-WRITE-INVARIANT-REQUIRED",
+      "RULE-NO-RUNTIME-QA-AUTO-RECONCILIATION",
+      "RULE-NO-AUTOMATIC-REPAIR-OF-FAILED-REPAIR",
+      "RULE-COMPLETION-REPORT-MUST-BE-VALIDATED"
+    ],
+    "regression_tests": [
+      "tests/test_vc50_production_truth.py"
+    ],
+    "evidence_ids": [
+      "EV-0006"
+    ]
+  }
+]

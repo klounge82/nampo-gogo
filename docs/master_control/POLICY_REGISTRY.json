@@ -1,0 +1,23 @@
+[
+  {
+    "policy_id": "POLICY-POINT-SIGNUP-001",
+    "name": "Official Signup Bonus Policy",
+    "value": "300P",
+    "effective_date": "2026-08-20",
+    "decided_by": "PM",
+    "lifetime_included": false,
+    "ledger_required": true,
+    "policy_status": "LOCKED",
+    "must_co_check": [
+      "registration backend",
+      "initial current_points",
+      "PointHistory SIGNUP_BONUS",
+      "auth/login response",
+      "/auth/me",
+      "Flutter model/state",
+      "tests",
+      "existing-user migration/correction policy"
+    ],
+    "description": "Official signup bonus policy locked at 300P by PM on 2026-08-20. Current points +300, lifetime_earned_points +0."
+  }
+]

@@ -10,7 +10,10 @@ import '../providers/locale_provider.dart';
 import '../providers/auth_provider.dart';
 import '../l10n/app_localizations.dart';
 import '../utils/l10n_mappers.dart';
+import 'package:geolocator/geolocator.dart';
+import '../repositories/place_repository.dart';
 import '../services/location_service.dart';
+import '../widgets/mission_eligible_area_map.dart';
 import 'place_detail_screen.dart';
 import 'qr_scanner_screen.dart';
 
@@ -108,6 +111,34 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
         }
         return;
       }
+
+      // Pre-camera geofence check (UX optimization)
+      try {
+        if (mission.storeId.isNotEmpty) {
+          final place = await PlaceRepository().getPlaceDetail(mission.storeId);
+          final spatialRes = LocationService.evaluateSpatialPosition(
+            userLat: latitude!,
+            userLng: longitude!,
+            geometryType: place.geometryType,
+            geometryData: place.geometryData,
+            placeLat: place.latitude,
+            placeLng: place.longitude,
+            radiusM: place.reviewLocationRadiusM,
+          );
+
+          if (spatialRes['inside'] != true) {
+            final distM = spatialRes['distance_m'];
+            final radiusM = spatialRes['allowed_radius_m'];
+            final outsideByM = spatialRes['outside_by_m'];
+            if (!mounted) return;
+            _showErrorDialog(
+              '현장 사진 인증 범위 밖입니다',
+              '현재 지정된 사진 인증 구역/지점에서 약 ${distM}m 떨어져 있습니다.\n\n사진 인증 가능 범위는 ${radiusM}m 이내입니다.\n\n약 ${outsideByM}m 더 가까이 이동한 후 사진을 촬영해 주세요.',
+            );
+            return; // STOP! DO NOT OPEN CAMERA!
+          }
+        }
+      } catch (_) {}
 
       try {
         final picker = ImagePicker();
@@ -423,9 +454,10 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
 
   Widget _buildContent(BuildContext context, Mission mission) {
     final l10n = AppLocalizations.of(context)!;
+    final bottomInset = MediaQuery.of(context).padding.bottom;
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.all(20.0),
+      padding: EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 24.0 + bottomInset),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -573,34 +605,44 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
               ),
             ),
           ),
+          const SizedBox(height: 20.0),
+
+          MissionEligibleAreaMap(
+            storeId: mission.storeId,
+            authType: mission.authType,
+          ),
           const SizedBox(height: 28.0),
 
-          ElevatedButton(
-            onPressed: _isAuthenticating ? null : () => _triggerAuth(mission),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16.0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.0),
+          SafeArea(
+            top: false,
+            bottom: true,
+            child: ElevatedButton(
+              onPressed: _isAuthenticating ? null : () => _triggerAuth(mission),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
               ),
+              child: _isAuthenticating
+                  ? const SizedBox(
+                      width: 24.0,
+                      height: 24.0,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2.5,
+                      ),
+                    )
+                  : Text(
+                      _getActionButtonLabel(l10n, mission.authType),
+                      style: const TextStyle(
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
             ),
-            child: _isAuthenticating
-                ? const SizedBox(
-                    width: 24.0,
-                    height: 24.0,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2.5,
-                    ),
-                  )
-                : Text(
-                    _getActionButtonLabel(l10n, mission.authType),
-                    style: const TextStyle(
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
           ),
         ],
       ),

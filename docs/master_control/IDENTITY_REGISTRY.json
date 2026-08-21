@@ -1,0 +1,73 @@
+[
+  {
+    "entity_type": "USER",
+    "canonical_id": "2abb6e52-d447-4338-8beb-e638890a5ecc",
+    "display_name": "jazzbj",
+    "email": "jazzbj@naver.com",
+    "aliases": [
+      "usr_jazz_002"
+    ],
+    "environment": "PRODUCTION",
+    "source_of_truth": "Production DB users table",
+    "canonical_status": "CONFIRMED_LIVE_TRUTH",
+    "conflict_status": "RECONCILED",
+    "created_at": "2026-08-16T02:46:16.339759",
+    "related_ids": [
+      "ph_signup_001"
+    ],
+    "evidence_ids": [
+      "EV-0004"
+    ]
+  },
+  {
+    "entity_type": "USER",
+    "canonical_id": "e1d38954-ba8c-4c85-bc0e-39fec0886360",
+    "display_name": "First User",
+    "email": "first_user@nampogogo.local",
+    "aliases": [],
+    "environment": "PRODUCTION",
+    "source_of_truth": "Production DB users table",
+    "canonical_status": "CONFIRMED_FIRST_DB_USER",
+    "conflict_status": "NO_CONFLICT",
+    "created_at": "2026-07-20T00:00:00",
+    "related_ids": [],
+    "evidence_ids": [
+      "EV-0003"
+    ]
+  },
+  {
+    "entity_type": "USER",
+    "canonical_id": "sungsim89_UNVERIFIED_PM_RECOLLECTION",
+    "display_name": "sungsim89 (PM Recollection)",
+    "email": "sungsim89@unverified",
+    "aliases": [
+      "sum"
+    ],
+    "environment": "UNKNOWN",
+    "source_of_truth": "PM_RECOLLECTION_ONLY",
+    "canonical_status": "UNVERIFIED",
+    "conflict_status": "IDENTITY_NOT_FOUND_IN_GIT_OR_DB",
+    "created_at": "UNKNOWN",
+    "related_ids": [],
+    "evidence_ids": [
+      "EV-0006"
+    ]
+  },
+  {
+    "entity_type": "MISSION",
+    "canonical_id": "mission_gampo_001",
+    "display_name": "감포 GPS 인증 미션",
+    "aliases": [
+      "qa-mission-gampo-gps-002"
+    ],
+    "environment": "PRODUCTION",
+    "source_of_truth": "Production DB missions table",
+    "canonical_status": "CONFIRMED",
+    "conflict_status": "RECONCILED",
+    "created_at": "2026-08-01T00:00:00",
+    "related_ids": [],
+    "evidence_ids": [
+      "EV-0001"
+    ]
+  }
+]

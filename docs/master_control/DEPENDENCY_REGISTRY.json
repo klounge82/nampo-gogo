@@ -1,0 +1,161 @@
+[
+  {
+    "edge_id": "EDGE-01",
+    "from": "JWT Bearer Token Header",
+    "to": "FastAPI get_current_user",
+    "edge_status": "CONFIRMED",
+    "file": "04_Source_Code/backend/app/auth.py",
+    "symbol": "get_current_user",
+    "api": "/auth/me",
+    "why": "Extracts authenticated user_id from token payload",
+    "evidence": "EV-0003"
+  },
+  {
+    "edge_id": "EDGE-02",
+    "from": "FastAPI get_current_user",
+    "to": "get_user_points & get_point_history",
+    "edge_status": "CONFIRMED",
+    "file": "04_Source_Code/backend/app/main.py",
+    "symbol": "get_user_points",
+    "api": "/users/points",
+    "why": "Ensures authenticated user identity is used instead of defaulting to first DB user",
+    "evidence": "EV-0003"
+  },
+  {
+    "edge_id": "EDGE-03",
+    "from": "Mission Verification Logic",
+    "to": "UserMission Table Insert",
+    "edge_status": "CONFIRMED",
+    "file": "04_Source_Code/backend/app/main.py",
+    "symbol": "verify_mission",
+    "api": "/missions/{id}/verify",
+    "why": "Prevents duplicate mission completions",
+    "evidence": "EV-0001"
+  },
+  {
+    "edge_id": "EDGE-04",
+    "from": "UserMission Completion Event",
+    "to": "PointHistory Table Insert",
+    "edge_status": "CONFIRMED",
+    "file": "04_Source_Code/backend/app/main.py",
+    "symbol": "verify_mission",
+    "api": "/missions/{id}/verify",
+    "why": "Creates point earn transaction record",
+    "evidence": "EV-0001"
+  },
+  {
+    "edge_id": "EDGE-05",
+    "from": "PointHistory Table Insert",
+    "to": "users.current_points & users.lifetime_earned_points Update",
+    "edge_status": "CONFIRMED",
+    "file": "04_Source_Code/backend/app/main.py",
+    "symbol": "verify_mission",
+    "api": "/missions/{id}/verify",
+    "why": "Increments user current and lifetime earned points for qualifying activities",
+    "evidence": "EV-0002"
+  },
+  {
+    "edge_id": "EDGE-06",
+    "from": "PointService.fetchUserPoints",
+    "to": "PointRepository.getUserPointsData",
+    "edge_status": "CONFIRMED",
+    "file": "04_Source_Code/frontend/lib/repositories/point_repository.dart",
+    "symbol": "getUserPointsData",
+    "why": "Maps API JSON response to frontend DTO",
+    "evidence": "EV-0003"
+  },
+  {
+    "edge_id": "EDGE-07",
+    "from": "PointHistoryScreen",
+    "to": "AuthProvider.updatePoints",
+    "edge_status": "CONFIRMED",
+    "file": "04_Source_Code/frontend/lib/screens/point_history_screen.dart",
+    "symbol": "updatePoints",
+    "why": "Syncs refreshed point balance across Flutter UI components",
+    "evidence": "EV-0003"
+  },
+  {
+    "edge_id": "EDGE-08",
+    "from": "AuthProvider.currentUser",
+    "to": "ProfileScreen (My Info)",
+    "edge_status": "CONFIRMED",
+    "file": "04_Source_Code/frontend/lib/screens/profile_screen.dart",
+    "symbol": "currentPoints",
+    "why": "Renders current_points and lifetime_earned_points in profile card",
+    "evidence": "EV-0004"
+  },
+  {
+    "edge_id": "EDGE-09",
+    "from": "AuthProvider.currentUser",
+    "to": "MissionScreen Header Badge",
+    "edge_status": "CONFIRMED",
+    "file": "04_Source_Code/frontend/lib/screens/mission_screen.dart",
+    "symbol": "currentPoints",
+    "why": "Renders current_points in mission header balance badge",
+    "evidence": "EV-0004"
+  },
+  {
+    "edge_id": "EDGE-10",
+    "from": "Review Verification Gate",
+    "to": "PointHistory Table Insert",
+    "edge_status": "EXPECTED",
+    "file": "04_Source_Code/backend/app/main.py",
+    "symbol": "create_review",
+    "api": "/reviews",
+    "why": "Awards review reward points upon verified review submission",
+    "evidence": "EV-0001"
+  },
+  {
+    "edge_id": "EDGE-11",
+    "from": "Visit QR Verification Gate",
+    "to": "PointHistory Table Insert",
+    "edge_status": "EXPECTED",
+    "file": "04_Source_Code/backend/app/main.py",
+    "symbol": "verify_visit_qr",
+    "api": "/qr/visit/verify",
+    "why": "Awards visit reward points upon valid QR scan",
+    "evidence": "EV-0001"
+  },
+  {
+    "edge_id": "EDGE-12",
+    "from": "Coupon Redemption Flow",
+    "to": "users.current_points Decrement",
+    "edge_status": "EXPECTED",
+    "file": "04_Source_Code/backend/app/main.py",
+    "symbol": "redeem_coupon",
+    "api": "/coupons/redeem",
+    "why": "Deducts current points while preserving lifetime earned points",
+    "evidence": "EV-0002"
+  },
+  {
+    "edge_id": "EDGE-13",
+    "from": "Spatial Geometry Service",
+    "to": "GPS Verification Gate",
+    "edge_status": "CONFIRMED",
+    "file": "04_Source_Code/frontend/lib/utils/spatial_validator.dart",
+    "symbol": "isPointWithinBoundary",
+    "why": "Validates user GPS coordinates against canonical polygon/buffer boundaries",
+    "evidence": "EV-0001"
+  },
+  {
+    "edge_id": "EDGE-14",
+    "from": "FlutterSecureStorage",
+    "to": "Dio Authorization Header",
+    "edge_status": "CONFIRMED",
+    "file": "04_Source_Code/frontend/lib/services/point_service.dart",
+    "symbol": "read(access_token)",
+    "why": "Attaches Bearer JWT token to all authenticated point HTTP requests",
+    "evidence": "EV-0003"
+  },
+  {
+    "edge_id": "EDGE-15",
+    "from": "FastAPI OAuth2PasswordRequestForm",
+    "to": "users & user_auth Tables Query",
+    "edge_status": "CONFIRMED",
+    "file": "04_Source_Code/backend/app/main.py",
+    "symbol": "login",
+    "api": "/auth/login",
+    "why": "Authenticates user credentials and issues access_token DTO",
+    "evidence": "EV-0001"
+  }
+]

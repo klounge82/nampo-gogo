@@ -1337,17 +1337,18 @@ def verify_mission(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="매장 위치 정보를 확인할 수 없어 방문 인증을 진행할 수 없습니다."
             )
-        dist_m = int(round(haversine_distance_m(req.latitude, req.longitude, store.latitude, store.longitude)))
-        allowed_radius = int(store.review_location_radius_m or 50.0)
-        outside_by_m = max(0, dist_m - allowed_radius)
+        spatial_res = evaluate_spatial_position(req.latitude, req.longitude, store)
+        dist_m = spatial_res["distance_m"]
+        allowed_radius = spatial_res["allowed_radius_m"]
+        outside_by_m = spatial_res["outside_by_m"]
 
-        if dist_m > allowed_radius:
+        if not spatial_res["inside"]:
             err_code = "PHOTO_GPS_OUTSIDE_RADIUS" if auth_type_upper == "PHOTO_GPS" else "GPS_OUTSIDE_RADIUS"
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail={
                     "code": err_code,
-                    "message": f"현재 위치에서는 인증을 완료할 수 없습니다. (반경 {allowed_radius}m 이내 스캔/촬영 필요)",
+                    "message": f"현재 위치에서는 인증을 완료할 수 없습니다. (반경/구간 {allowed_radius}m 이내 인증 필요)",
                     "distance_m": dist_m,
                     "allowed_radius_m": allowed_radius,
                     "outside_by_m": outside_by_m,
@@ -2437,6 +2438,110 @@ def haversine_distance_m(lat1: float, lon1: float, lat2: float, lon2: float) -> 
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
     return R * c
 
+def distance_point_to_segment_m(plat: float, plng: float, lat1: float, lng1: float, lat2: float, lng2: float) -> float:
+    lat_rad = math.radians((lat1 + lat2) / 2.0)
+    kx = 111320.0 * math.cos(lat_rad)
+    ky = 110574.0
+
+    vx = (lng2 - lng1) * kx
+    vy = (lat2 - lat1) * ky
+    wx = (plng - lng1) * kx
+    wy = (plat - lat1) * ky
+
+    v_len_sq = vx * vx + vy * vy
+    if v_len_sq == 0:
+        return haversine_distance_m(plat, plng, lat1, lng1)
+
+    t = (wx * vx + wy * vy) / v_len_sq
+    t = max(0.0, min(1.0, t))
+
+    proj_lat = lat1 + t * (lat2 - lat1)
+    proj_lng = lng1 + t * (lng2 - lng1)
+
+    return haversine_distance_m(plat, plng, proj_lat, proj_lng)
+
+def distance_point_to_polyline_m(plat: float, plng: float, points: list) -> float:
+    if not points:
+        return float('inf')
+    if len(points) == 1:
+        return haversine_distance_m(plat, plng, points[0]['lat'], points[0]['lng'])
+
+    min_dist = float('inf')
+    for i in range(len(points) - 1):
+        p1 = points[i]
+        p2 = points[i + 1]
+        dist = distance_point_to_segment_m(plat, plng, p1['lat'], p1['lng'], p2['lat'], p2['lng'])
+        if dist < min_dist:
+            min_dist = dist
+    return min_dist
+
+def point_in_polygon(plat: float, plng: float, points: list) -> bool:
+    if len(points) < 3:
+        return False
+    inside = False
+    j = len(points) - 1
+    for i in range(len(points)):
+        pi = points[i]
+        pj = points[j]
+        if ((pi['lat'] > plat) != (pj['lat'] > plat)) and \
+           (plng < (pj['lng'] - pi['lng']) * (plat - pi['lat']) / (pj['lat'] - pi['lat'] + 1e-12) + pi['lng']):
+            inside = not inside
+        j = i
+    return inside
+
+def evaluate_spatial_position(user_lat: float, user_lng: float, store) -> dict:
+    geom_type = (getattr(store, 'geometry_type', None) or 'POINT_RADIUS').upper()
+    geom_raw = getattr(store, 'geometry_data', None)
+    geom_json = None
+    if geom_raw and isinstance(geom_raw, str):
+        try:
+            geom_json = json.loads(geom_raw)
+        except Exception:
+            pass
+
+    if geom_type == 'LINE_BUFFER' and geom_json and 'points' in geom_json:
+        pts = geom_json.get('points', [])
+        buffer_m = float(geom_json.get('buffer_m', store.review_location_radius_m or 50.0))
+        min_dist = distance_point_to_polyline_m(user_lat, user_lng, pts)
+        inside = (min_dist <= buffer_m)
+        outside_by_m = max(0, int(round(min_dist - buffer_m)))
+        return {
+            'inside': inside,
+            'distance_m': int(round(min_dist)),
+            'allowed_radius_m': int(round(buffer_m)),
+            'outside_by_m': outside_by_m,
+            'geometry_type': 'LINE_BUFFER'
+        }
+
+    elif geom_type == 'POLYGON_AREA' and geom_json and 'points' in geom_json:
+        pts = geom_json.get('points', [])
+        is_inside = point_in_polygon(user_lat, user_lng, pts)
+        min_dist = 0.0 if is_inside else distance_point_to_polyline_m(user_lat, user_lng, pts)
+        buffer_m = 0.0
+        outside_by_m = max(0, int(round(min_dist)))
+        return {
+            'inside': is_inside,
+            'distance_m': int(round(min_dist)),
+            'allowed_radius_m': 0,
+            'outside_by_m': outside_by_m,
+            'geometry_type': 'POLYGON_AREA'
+        }
+
+    else:
+        center_lat = store.latitude or user_lat
+        center_lng = store.longitude or user_lng
+        center_dist = haversine_distance_m(user_lat, user_lng, center_lat, center_lng)
+        allowed_radius = float(store.review_location_radius_m or 50.0)
+        inside = (center_dist <= allowed_radius)
+        outside_by_m = max(0, int(round(center_dist - allowed_radius)))
+        return {
+            'inside': inside,
+            'distance_m': int(round(center_dist)),
+            'allowed_radius_m': int(round(allowed_radius)),
+            'outside_by_m': outside_by_m,
+            'geometry_type': 'POINT_RADIUS'
+        }
+
 @app.get("/stores/{store_id}/verification-options", response_model=schemas.VerificationOptionsOut, tags=["VisitVerifications"])
 def get_store_verification_options(store_id: str, db: Session = Depends(get_db)):
     store = db.query(models.Store).filter(models.Store.id == store_id).first()
@@ -2599,10 +2704,9 @@ def verify_attraction_location(store_id: str, req: schemas.LocationVerifyRequest
     if req.accuracy is not None and req.accuracy > config.MAX_ALLOWED_LOCATION_ACCURACY_METERS:
         raise HTTPException(status_code=400, detail="위치 정확도가 너무 낮아 방문을 확인할 수 없습니다. 잠시 후 다시 시도해 주세요.")
 
-    dist_m = haversine_distance_m(req.latitude, req.longitude, store.latitude, store.longitude)
-    allowed_radius = store.review_location_radius_m or config.DEFAULT_VERIFICATION_RADIUS_METERS
+    spatial_res = evaluate_spatial_position(req.latitude, req.longitude, store)
 
-    if dist_m > allowed_radius:
+    if not spatial_res["inside"]:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="현재 위치에서는 이 관광지 방문을 확인할 수 없습니다."

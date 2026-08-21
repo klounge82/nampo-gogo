@@ -29,6 +29,8 @@ class Place {
   final String? entranceImageUrl;
   final String? interiorImagesJson;
   final String? productImagesJson;
+  final String? geometryType;
+  final String? geometryData;
 
   const Place({
     required this.id,
@@ -56,6 +58,8 @@ class Place {
     this.entranceImageUrl,
     this.interiorImagesJson,
     this.productImagesJson,
+    this.geometryType = 'POINT_RADIUS',
+    this.geometryData,
   });
 
   factory Place.fromJson(Map<String, dynamic> json) {
@@ -134,6 +138,8 @@ class Place {
       entranceImageUrl: json['entrance_image_url'] as String?,
       interiorImagesJson: json['interior_images_json'] as String?,
       productImagesJson: json['product_images_json'] as String?,
+      geometryType: json['geometry_type'] as String? ?? 'POINT_RADIUS',
+      geometryData: json['geometry_data'] as String?,
     );
   }
 
