@@ -302,22 +302,8 @@ def seed_coupons():
     finally:
         db.close()
 
-def migrate_spatial_columns_if_missing():
-    db = SessionLocal()
-    try:
-        if "sqlite" not in str(db.bind.url):
-            db.execute(text("ALTER TABLE stores ADD COLUMN IF NOT EXISTS geometry_type VARCHAR(50) DEFAULT 'POINT_RADIUS';"))
-            db.execute(text("ALTER TABLE stores ADD COLUMN IF NOT EXISTS geometry_data TEXT;"))
-            db.commit()
-            print("[SAFE_SCHEMA_MIGRATION] Added geometry_type and geometry_data columns to PostgreSQL stores table if missing.")
-    except Exception as e:
-        print(f"[SCHEMA_MIGRATION_WARNING] {e}")
-    finally:
-        db.close()
-
 @app.on_event("startup")
 def on_startup():
-    migrate_spatial_columns_if_missing()
     if APP_ENV != "production":
         seed_stores()
         seed_missions()

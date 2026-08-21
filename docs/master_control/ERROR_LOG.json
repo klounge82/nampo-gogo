@@ -169,8 +169,18 @@
     "category": "PRODUCTION_SCHEMA_DRIFT",
     "summary": "Production /stores API HTTP 500 caused by missing geometry columns on PostgreSQL stores table",
     "severity": "CRITICAL",
-    "status": "OPEN",
+    "status": "RESOLVED",
     "reported_at": "2026-08-22T01:11:00+09:00",
-    "fix": "Pending Phase A guarded DDL (ALTER TABLE stores ADD COLUMN IF NOT EXISTS geometry_type VARCHAR(50); ALTER TABLE stores ADD COLUMN IF NOT EXISTS geometry_data TEXT;)."
+    "fix": "Deployed guarded DDL migrate_spatial_columns_if_missing() on startup. Live PostgreSQL stores table updated with geometry_type and geometry_data columns. GET /stores API restored to 200 OK. 0 business row mutations.",
+    "resolved_at": "2026-08-22T01:26:12+09:00"
+  },
+  {
+    "error_id": "ERR-20260822-MINOR-001",
+    "category": "REPORT_FORMATTING",
+    "summary": "VC56 완료보고에서 다국어 개수 표기와 locale 표현이 혼동됨 (5개 국어 vs 4개 모듈)",
+    "severity": "MINOR",
+    "status": "LOGGED",
+    "reported_at": "2026-08-22T01:28:00+09:00",
+    "blocks_current_work": false
   }
 ]
