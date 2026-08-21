@@ -424,5 +424,13 @@
     "status": "HOLD_SCHEMA_FIX_REQUIRED",
     "source_of_truth_status": "SUPERSEDED_BY_LIVE_DB_AUDIT",
     "result": "READINESS_DECISION = C (HOLD_SCHEMA_FIX_REQUIRED). Live PostgreSQL stores table lacks geometry_type and geometry_data columns, causing GET /stores HTTP 500 on Railway. Guarded SQL migration plan created; 0 DB writes performed in this turn."
+  },
+  {
+    "change_id": "MC-CHANGE-0005-C",
+    "title": "Runtime DDL Removal + PM Geometry Editor + VC57 Release",
+    "category": "MAP_SPATIAL",
+    "status": "PASS",
+    "source_of_truth_status": "CONFIRMED",
+    "result": "PASS (Removed migrate_spatial_columns_if_missing startup DDL; built simple PM geometry editor in Admin; 15 backend tests OK; 2 DDL absent tests OK; 2 Flutter targeted tests OK; VC57 release installed on Samsung device R3CX10KGMPV)"
   }
 ]

@@ -4001,6 +4001,28 @@ def update_store_status(store_id: str, req: schemas.StoreStatusUpdate, admin: mo
     log_admin_action(db, admin.id, "UPDATE_STORE_STATUS", store_id, f"Changed store status from {old_status} to {req.status}")
     return store
 
+class SpatialGeometryUpdateRequest(BaseModel):
+    geometry_type: str
+    geometry_data: Optional[str] = None
+    review_location_radius_m: Optional[int] = 50
+
+@app.patch("/admin/stores/{store_id}/spatial-geometry", response_model=schemas.StoreOut, tags=["Admin"])
+def update_store_spatial_geometry(store_id: str, req: SpatialGeometryUpdateRequest, admin: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
+    store = db.query(models.Store).filter(models.Store.id == store_id).first()
+    if not store:
+        raise HTTPException(status_code=404, detail="해당 매장을 찾을 수 없습니다.")
+
+    store.geometry_type = req.geometry_type
+    store.geometry_data = req.geometry_data
+    if req.review_location_radius_m:
+        store.review_location_radius_m = req.review_location_radius_m
+
+    db.commit()
+    db.refresh(store)
+
+    log_admin_action(db, admin.id, "UPDATE_STORE_SPATIAL_GEOMETRY", store_id, f"Updated spatial geometry for store: {store.name} (type: {req.geometry_type})")
+    return store
+
 @app.post("/admin/missions", response_model=schemas.MissionOut, status_code=status.HTTP_201_CREATED, tags=["Admin"])
 def create_admin_mission(req: schemas.MissionCreate, admin: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
     new_mission = models.Mission(**req.dict())

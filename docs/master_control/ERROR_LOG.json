@@ -182,5 +182,23 @@
     "status": "LOGGED",
     "reported_at": "2026-08-22T01:28:00+09:00",
     "blocks_current_work": false
+  },
+  {
+    "error_id": "ERR-20260822-SPATIAL-SAVE-001",
+    "category": "ADMIN_SPATIAL_SAFETY",
+    "summary": "관리자 공간범위 저장 시 Production DB 영향 안내 불명확 및 Production 적용 단계 미분리",
+    "severity": "MAJOR",
+    "status": "LOGGED",
+    "reported_at": "2026-08-22T01:37:00+09:00",
+    "blocks_current_work": true
+  },
+  {
+    "error_id": "ERR-20260822-TIMELINE-DATE-001",
+    "category": "MASTER_CONTROL_TIMELINE",
+    "summary": "관제실 대시보드의 오늘/어제 날짜 고정 및 2026-08-22 최신 Timeline 이벤트 동시 갱신 누락",
+    "severity": "MAJOR",
+    "status": "LOGGED",
+    "reported_at": "2026-08-22T01:37:00+09:00",
+    "blocks_current_work": false
   }
 ]

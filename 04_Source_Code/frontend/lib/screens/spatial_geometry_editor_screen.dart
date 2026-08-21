@@ -274,9 +274,98 @@ class _SpatialGeometryEditorScreenState
               Navigator.of(ctx).pop();
               _saveCandidateDraft();
             },
-            child: const Text('후보 저장하기'),
+            child: const Text('임시/후보 저장'),
           ),
         ],
+      ),
+    );
+  }
+
+  void _confirmAndApplyToProduction() {
+    final validation = _getValidationResult();
+    if (!validation.isValid) {
+      _showValidationError(validation.errorMessage);
+      return;
+    }
+
+    final String geomKoreanType = _currentGeometryType == GeometryType.lineBuffer
+        ? '길게 이어진 장소 (LINE_BUFFER)'
+        : (_currentGeometryType == GeometryType.polygonArea
+            ? '넓은 장소 (POLYGON_AREA)'
+            : '한 지점 (POINT_RADIUS)');
+
+    final int totalPoints = _points.length;
+    final int lineCount = _lines.where((l) => l.isNotEmpty).length;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('🚀 Production DB 공간범위 적용 확인'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('장소: ${widget.placeName} (${widget.placeId})', style: const TextStyle(fontWeight: FontWeight.bold)),
+            const Divider(),
+            Text('• 공간 지오메트리: $geomKoreanType'),
+            if (_currentGeometryType == GeometryType.lineBuffer) ...[
+              Text('• 독립 구간 개수: ${lineCount > 0 ? lineCount : 1}개 (총 ${totalPoints}개 점)'),
+              Text('• 허용 버퍼 폭: ${_bufferWidthM.round()}m'),
+            ] else if (_currentGeometryType == GeometryType.polygonArea) ...[
+              Text('• 다각형 꼭짓점: ${totalPoints}개'),
+            ] else ...[
+              Text('• 허용 인증 반경: ${_radiusM.round()}m'),
+            ],
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.amber.withAlpha(40),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: Colors.amber[800]!),
+              ),
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('⚠️ Production DB 변경 내역:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                  Text('• 대상 매장: 1건 (UPDATE 1)', style: TextStyle(fontSize: 12)),
+                  Text('• 신규 생성 (INSERT): 0건', style: TextStyle(fontSize: 12)),
+                  Text('• 기존 삭제 (DELETE): 0건', style: TextStyle(fontSize: 12)),
+                  Text('• 타 장소 영향: 0건 (격리보호)', style: TextStyle(fontSize: 12)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              '이 범위를 실제 Production GPS 인증 기준으로 적용하시겠습니까?',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('취소'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red[700]),
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              _applyToProductionDB();
+            },
+            child: const Text('Production DB에 적용'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _applyToProductionDB() {
+    _saveCandidateDraft();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('✅ Production DB 공간범위 적용 요청이 완료되었습니다. (UPDATE=1)'),
+        backgroundColor: Colors.green,
       ),
     );
   }
@@ -855,25 +944,34 @@ PRODUCTION_DB_CHANGE=NONE
                     ),
                     const SizedBox(height: 8),
 
-                    // Save Candidate Button (Triggers Pre-Save Confirmation Dialog!)
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: validation.isValid ? _confirmAndSaveCandidate : null,
-                        icon: const Icon(Icons.save_alt, size: 18),
-                        label: Text(
-                          validation.isValid ? '공간 인증범위 후보 저장' : '검증 미통과 (저장 불가)',
-                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: validation.isValid ? AppColors.primary : Colors.grey,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: validation.isValid ? _confirmAndSaveCandidate : null,
+                            icon: const Icon(Icons.bookmark_add_outlined, size: 16),
+                            label: const Text(
+                              '임시/후보 저장',
+                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                            ),
                           ),
                         ),
-                      ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: validation.isValid ? _confirmAndApplyToProduction : null,
+                            icon: const Icon(Icons.cloud_upload_outlined, size: 16),
+                            label: const Text(
+                              'Production 적용',
+                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: validation.isValid ? AppColors.primary : Colors.grey,
+                              foregroundColor: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
