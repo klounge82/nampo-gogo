@@ -9,6 +9,9 @@ class AppLocalizationsJa extends AppLocalizations {
   AppLocalizationsJa([String locale = 'ja']) : super(locale);
 
   @override
+  String get verificationAreaNotice => '認証可能エリア/区間';
+
+  @override
   String get accountDelete => '退会';
 
   @override

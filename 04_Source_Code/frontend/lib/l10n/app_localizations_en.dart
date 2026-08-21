@@ -9,6 +9,9 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get verificationAreaNotice => 'Verification Area/Zone';
+
+  @override
   String get accountDelete => 'Delete Account';
 
   @override

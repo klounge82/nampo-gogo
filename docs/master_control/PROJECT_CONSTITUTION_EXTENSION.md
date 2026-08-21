@@ -68,3 +68,10 @@ MASTER CONTROL은 독립된 Control Plane이며, Production 백엔드/앱 런타
 - **HISTORY-02**: 모든 날짜와 시각은 Git Commit, 빌드/설치 로그, PM 관측 기록 등 명확한 증거(Evidence)에 기반한다. Git commit 시각은 코드 저장 시각일 뿐 오류 관측 시각과 동일시하지 않는다.
 - **HISTORY-03**: 오류 해결 및 교정 기록을 과거 데이터에서 지우지 않고 `SUPERSEDED` 또는 `RESOLVED` 상태로 보존한다.
 - **HISTORY-04**: 개발 일지는 날짜별 그룹핑 및 시각 순서로 투명하게 조회 가능하도록 제공한다.
+
+### CONSTITUTION-DEVENV-MEM-001 (MEMORY GOVERNANCE & PREFLIGHT)
+- **WARNING Threshold**: language_server >= 3GB
+- **RESTART_RECOMMENDED Threshold**: language_server >= 5GB
+- **DO_NOT_START_LARGE_AGENT_TASK Threshold**: System RAM >= 85%
+- Before launching large agent tasks, execute MEMORY_PREFLIGHT (check system RAM, language_server RSS, workspace root scope).
+- Build artifacts (`04_Source_Code/frontend/build/**`), `.dart_tool/**`, `.gradle/**`, `__pycache__/**` MUST be excluded from watcher/indexing via `.vscode/settings.json`.

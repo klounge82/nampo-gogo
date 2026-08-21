@@ -1,0 +1,38 @@
+{
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/*/**": true,
+    "**/04_Source_Code/frontend/build/**": true,
+    "**/04_Source_Code/frontend/.dart_tool/**": true,
+    "**/04_Source_Code/frontend/android/.gradle/**": true,
+    "**/04_Source_Code/backend/__pycache__/**": true,
+    "**/.pytest_cache/**": true,
+    "**/tools/master_control/.cache/**": true,
+    "**/*.zip": true,
+    "**/*.apk": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/04_Source_Code/frontend/build": true,
+    "**/04_Source_Code/frontend/.dart_tool": true,
+    "**/04_Source_Code/frontend/android/.gradle": true,
+    "**/04_Source_Code/backend/__pycache__": true,
+    "**/.pytest_cache": true,
+    "**/tools/master_control/.cache": true,
+    "**/*.zip": true,
+    "**/*.apk": true
+  },
+  "dart.analysisExcludedFolders": [
+    "04_Source_Code/frontend/build",
+    "04_Source_Code/frontend/.dart_tool",
+    "04_Source_Code/frontend/android/.gradle"
+  ],
+  "python.analysis.exclude": [
+    "**/__pycache__",
+    "**/.pytest_cache",
+    "**/venv",
+    "**/.venv",
+    "04_Source_Code/frontend/build"
+  ]
+}

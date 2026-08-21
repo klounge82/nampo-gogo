@@ -9,6 +9,9 @@ class AppLocalizationsKo extends AppLocalizations {
   AppLocalizationsKo([String locale = 'ko']) : super(locale);
 
   @override
+  String get verificationAreaNotice => '인증 가능 구간/영역';
+
+  @override
   String get accountDelete => '회원탈퇴';
 
   @override

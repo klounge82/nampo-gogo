@@ -1,5 +1,6 @@
 {
   "@@locale": "ko",
+  "verificationAreaNotice": "인증 가능 구간/영역",
   "accountDelete": "회원탈퇴",
   "activityTitle": "내 활동 내역",
   "adminDashboardTitle": "관리자 대시보드",

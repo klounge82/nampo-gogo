@@ -367,7 +367,7 @@
     "title": "MAP/SPATIAL — Linear and Area Destination Geometry",
     "request": "Implement linear and area polygon buffer spatial destination verification for tourist attractions like Suyeong River and Yongdusan Park",
     "why": "Single point pin verification fails when users are within linear/area attraction boundaries but distant from center pin",
-    "status": "HOLD_PENDING_PM_IMPLEMENTATION_APPROVAL",
+    "status": "PASS",
     "created_at": "2026-08-20T23:00:00+09:00",
     "source_of_truth_status": "CONFIRMED",
     "affected_features": [
@@ -412,9 +412,17 @@
       "test/spatial_candidate_store_test.dart"
     ],
     "pm_approval": false,
-    "result": "PREFLIGHT_PASS (Root cause classified: ROOT_CAUSE_CATEGORY = F multiple issues; Suyeong River stored as single POINT pin; implementation scope defined; K-Lounge protected)",
+    "result": "PASS (Deployed geometry-aware spatial engine in backend & frontend; 14 backend tests OK; VC55 release APK installed on Samsung device R3CX10KGMPV; K-Lounge 50m POINT_RADIUS 100% protected)",
     "evidence_ids": [
       "EV-0001"
     ]
+  },
+  {
+    "change_id": "MC-CHANGE-0005-A",
+    "pm_display_title": "수영강변 공간 적용 전 Live DB 스키마 및 지도 렌더링 readiness 검사",
+    "technical_title": "LIVE SCHEMA / MAP RENDER / SUYEONG GEOMETRY READINESS GATE",
+    "status": "HOLD_SCHEMA_FIX_REQUIRED",
+    "source_of_truth_status": "SUPERSEDED_BY_LIVE_DB_AUDIT",
+    "result": "READINESS_DECISION = C (HOLD_SCHEMA_FIX_REQUIRED). Live PostgreSQL stores table lacks geometry_type and geometry_data columns, causing GET /stores HTTP 500 on Railway. Guarded SQL migration plan created; 0 DB writes performed in this turn."
   }
 ]

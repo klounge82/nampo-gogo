@@ -9,6 +9,9 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
+  String get verificationAreaNotice => '可认证区域/区间';
+
+  @override
   String get accountDelete => '注销账号';
 
   @override
@@ -926,6 +929,9 @@ class AppLocalizationsZh extends AppLocalizations {
 /// The translations for Chinese, using the Han script (`zh_Hans`).
 class AppLocalizationsZhHans extends AppLocalizationsZh {
   AppLocalizationsZhHans() : super('zh_Hans');
+
+  @override
+  String get verificationAreaNotice => '可认证区域/区间';
 
   @override
   String get accountDelete => '注销账号';

@@ -100,24 +100,26 @@ class LocationService {
     if (type == 'LINE_BUFFER' && geometryData != null && geometryData.isNotEmpty) {
       try {
         final data = json.decode(geometryData);
-        if (data is Map && data.containsKey('points') && data['points'] is List) {
-          final ptsList = (data['points'] as List);
-          if (ptsList.isNotEmpty) {
-            double minDist = double.infinity;
-            final bufM = (data['buffer_m'] != null) ? (data['buffer_m'] as num).toDouble() : allowedRadius.toDouble();
+        if (data is Map) {
+          final bufM = (data['buffer_m'] != null) ? (data['buffer_m'] as num).toDouble() : allowedRadius.toDouble();
+          double minDist = double.infinity;
 
-            for (int i = 0; i < ptsList.length - 1; i++) {
-              final p1 = ptsList[i];
-              final p2 = ptsList[i + 1];
-              final lat1 = (p1['lat'] as num).toDouble();
-              final lng1 = (p1['lng'] as num).toDouble();
-              final lat2 = (p2['lat'] as num).toDouble();
-              final lng2 = (p2['lng'] as num).toDouble();
-
-              final d = _distancePointToSegmentM(userLat, userLng, lat1, lng1, lat2, lng2);
-              if (d < minDist) minDist = d;
+          if (data.containsKey('lines') && data['lines'] is List) {
+            final linesList = (data['lines'] as List);
+            for (final line in linesList) {
+              if (line is List && line.isNotEmpty) {
+                final d = _minDistanceToPolyline(userLat, userLng, line);
+                if (d < minDist) minDist = d;
+              }
             }
+          } else if (data.containsKey('points') && data['points'] is List) {
+            final ptsList = (data['points'] as List);
+            if (ptsList.isNotEmpty) {
+              minDist = _minDistanceToPolyline(userLat, userLng, ptsList);
+            }
+          }
 
+          if (minDist != double.infinity) {
             final inside = minDist <= bufM;
             final outsideByM = inside ? 0 : (minDist - bufM).round();
             return {
@@ -146,6 +148,26 @@ class LocationService {
       'outside_by_m': outsideByM,
       'geometry_type': 'POINT_RADIUS',
     };
+  }
+
+  static double _minDistanceToPolyline(double userLat, double userLng, List ptsList) {
+    if (ptsList.isEmpty) return double.infinity;
+    if (ptsList.length == 1) {
+      final p = ptsList[0];
+      return Geolocator.distanceBetween(userLat, userLng, (p['lat'] as num).toDouble(), (p['lng'] as num).toDouble());
+    }
+    double minDist = double.infinity;
+    for (int i = 0; i < ptsList.length - 1; i++) {
+      final p1 = ptsList[i];
+      final p2 = ptsList[i + 1];
+      final lat1 = (p1['lat'] as num).toDouble();
+      final lng1 = (p1['lng'] as num).toDouble();
+      final lat2 = (p2['lat'] as num).toDouble();
+      final lng2 = (p2['lng'] as num).toDouble();
+      final d = _distancePointToSegmentM(userLat, userLng, lat1, lng1, lat2, lng2);
+      if (d < minDist) minDist = d;
+    }
+    return minDist;
   }
 
   static double _distancePointToSegmentM(double plat, double plng, double lat1, double lng1, double lat2, double lng2) {

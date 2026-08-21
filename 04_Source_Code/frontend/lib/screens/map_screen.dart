@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
+import 'dart:convert';
 import '../constants/colors.dart';
 import '../models/place.dart';
 import '../repositories/map_repository.dart';
@@ -28,6 +29,8 @@ class _MapScreenState extends State<MapScreen> {
   Position? _currentPosition;
   List<Place> _places = [];
   Set<Marker> _markers = {};
+  Set<Polyline> _polylines = {};
+  Set<Polygon> _polygons = {};
 
   // Selected place for bottom info card
   Place? _selectedPlace;
@@ -86,6 +89,8 @@ class _MapScreenState extends State<MapScreen> {
 
   void _buildMarkers() {
     final Set<Marker> localMarkers = {};
+    final Set<Polyline> localPolylines = {};
+    final Set<Polygon> localPolygons = {};
 
     for (final place in _places) {
       if (place.latitude == null || place.longitude == null) continue;
@@ -104,6 +109,74 @@ class _MapScreenState extends State<MapScreen> {
         markerHue = BitmapDescriptor.hueViolet;
       }
 
+      // Check if place is LINE_BUFFER or POLYGON_AREA
+      final geomType = (place.geometryType ?? 'POINT_RADIUS').toUpperCase();
+      final geomData = place.geometryData;
+      bool isNonPoint = geomType == 'LINE_BUFFER' || geomType == 'POLYGON_AREA';
+
+      if (geomType == 'LINE_BUFFER' && geomData != null && geomData.isNotEmpty) {
+        try {
+          final data = json.decode(geomData);
+          if (data is Map) {
+            if (data.containsKey('lines') && data['lines'] is List) {
+              final linesList = (data['lines'] as List);
+              int lineIdx = 0;
+              for (final line in linesList) {
+                if (line is List && line.isNotEmpty) {
+                  final List<LatLng> pts = [];
+                  for (final p in line) {
+                    pts.add(LatLng((p['lat'] as num).toDouble(), (p['lng'] as num).toDouble()));
+                  }
+                  localPolylines.add(
+                    Polyline(
+                      polylineId: PolylineId('${place.id}_line_$lineIdx'),
+                      points: pts,
+                      color: AppColors.primary,
+                      width: 5,
+                    ),
+                  );
+                  lineIdx++;
+                }
+              }
+            } else if (data.containsKey('points') && data['points'] is List) {
+              final ptsList = (data['points'] as List);
+              final List<LatLng> pts = [];
+              for (final p in ptsList) {
+                pts.add(LatLng((p['lat'] as num).toDouble(), (p['lng'] as num).toDouble()));
+              }
+              localPolylines.add(
+                Polyline(
+                  polylineId: PolylineId('${place.id}_line_0'),
+                  points: pts,
+                  color: AppColors.primary,
+                  width: 5,
+                ),
+              );
+            }
+          }
+        } catch (_) {}
+      } else if (geomType == 'POLYGON_AREA' && geomData != null && geomData.isNotEmpty) {
+        try {
+          final data = json.decode(geomData);
+          if (data is Map && data.containsKey('points') && data['points'] is List) {
+            final ptsList = (data['points'] as List);
+            final List<LatLng> pts = [];
+            for (final p in ptsList) {
+              pts.add(LatLng((p['lat'] as num).toDouble(), (p['lng'] as num).toDouble()));
+            }
+            localPolygons.add(
+              Polygon(
+                polygonId: PolygonId('${place.id}_poly'),
+                points: pts,
+                strokeColor: AppColors.primary,
+                strokeWidth: 3,
+                fillColor: AppColors.primary.withValues(alpha: 0.2),
+              ),
+            );
+          }
+        } catch (_) {}
+      }
+
       localMarkers.add(
         Marker(
           markerId: MarkerId(place.id),
@@ -115,8 +188,10 @@ class _MapScreenState extends State<MapScreen> {
             });
           },
           infoWindow: InfoWindow(
-            title: place.name,
-            snippet: '${place.category} · ★ ${place.rating.toStringAsFixed(1)}',
+            title: isNonPoint ? '${place.name} (대표위치)' : place.name,
+            snippet: isNonPoint
+                ? '인증 가능 구간/영역 · ★ ${place.rating.toStringAsFixed(1)}'
+                : '${place.category} · ★ ${place.rating.toStringAsFixed(1)}',
           ),
         ),
       );
@@ -124,6 +199,8 @@ class _MapScreenState extends State<MapScreen> {
 
     setState(() {
       _markers = localMarkers;
+      _polylines = localPolylines;
+      _polygons = localPolygons;
     });
   }
 
@@ -180,6 +257,8 @@ class _MapScreenState extends State<MapScreen> {
             GoogleMap(
               initialCameraPosition: _initialCamera,
               markers: _markers,
+              polylines: _polylines,
+              polygons: _polygons,
               myLocationEnabled:
                   _currentPosition != null && !_currentPosition!.isMocked,
               myLocationButtonEnabled: false,

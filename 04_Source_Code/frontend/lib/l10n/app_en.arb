@@ -1,5 +1,6 @@
 {
   "@@locale": "en",
+  "verificationAreaNotice": "Verification Area/Zone",
   "accountDelete": "Delete Account",
   "activityTitle": "Activity Log",
   "adminDashboardTitle": "Admin Dashboard",

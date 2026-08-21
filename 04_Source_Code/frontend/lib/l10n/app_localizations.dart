@@ -103,6 +103,12 @@ abstract class AppLocalizations {
     Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans'),
   ];
 
+  /// No description provided for @verificationAreaNotice.
+  ///
+  /// In ko, this message translates to:
+  /// **'인증 가능 구간/영역'**
+  String get verificationAreaNotice;
+
   /// No description provided for @accountDelete.
   ///
   /// In ko, this message translates to:

@@ -135,7 +135,7 @@
     "short_summary_ko": "수영강변처럼 넓거나 긴 관광지가 단일 도착 핀 기준으로 계산되어 실제 관광지 범위 안에서도 인증 실패하는 현상",
     "symptom": "사용자가 넓거나 긴 관광지 영역 내에 위치하더라도 중심점과의 거리가 멀면 GPS 미션 인증이 거절됨",
     "source": "PROJECT_MEMORY_RECORD",
-    "status": "OPEN",
+    "status": "FIX_APPLIED_PENDING_PM_VERIFICATION",
     "related_change_id": "MC-CHANGE-0005",
     "related_incident_id": null,
     "related_files": [
@@ -146,8 +146,31 @@
     "batch_group": null,
     "minor_batch_ready": false,
     "root_cause": "선형/면적 관광지 지오메트리 버퍼 미구현 (단일 핀 반경 기준만 사용)",
-    "fix": "MC-CHANGE-0005 선형 및 면적 다각형 GPS 인증 버퍼 알고리즘 도입 예정",
+    "fix": "Deployed geometry-aware spatial engine in backend & frontend (LocationService.evaluateSpatialPosition & evaluate_spatial_position in app/main.py) for VC55.",
     "verification": "MC-CHANGE-0005 Preflight 및 테스트 예정",
     "closed_date": null
+  },
+  {
+    "error_id": "ERR-20260822-DEVENV-001",
+    "category": "DEVELOPMENT_ENVIRONMENT",
+    "summary": "Antigravity language_server.exe excessive memory growth (reached 7.4GB in idle state)",
+    "severity": "MAJOR",
+    "status": "RESOLVED_WORKSPACE_CONFIG_UPDATED",
+    "reported_at": "2026-08-22T00:48:00+09:00",
+    "fix": "Created .vscode/settings.json with files.watcherExclude, search.exclude, dart.analysisExcludedFolders, python.analysis.exclude excluding build/ (1.13GB/10,673 files) and cache directories; established Memory Preflight rule.",
+    "operating_thresholds": {
+      "warning_threshold": "3GB",
+      "restart_recommended_threshold": "5GB",
+      "system_ram_block_threshold": "85%"
+    }
+  },
+  {
+    "error_id": "ERR-20260822-PROD-SCHEMA-001",
+    "category": "PRODUCTION_SCHEMA_DRIFT",
+    "summary": "Production /stores API HTTP 500 caused by missing geometry columns on PostgreSQL stores table",
+    "severity": "CRITICAL",
+    "status": "OPEN",
+    "reported_at": "2026-08-22T01:11:00+09:00",
+    "fix": "Pending Phase A guarded DDL (ALTER TABLE stores ADD COLUMN IF NOT EXISTS geometry_type VARCHAR(50); ALTER TABLE stores ADD COLUMN IF NOT EXISTS geometry_data TEXT;)."
   }
 ]

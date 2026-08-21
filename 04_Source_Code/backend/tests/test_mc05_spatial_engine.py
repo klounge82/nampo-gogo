@@ -65,6 +65,28 @@ class TestMC05SpatialEngine(unittest.TestCase):
         res3 = evaluate_spatial_position(35.1750, 129.1350, store)
         self.assertFalse(res3["inside"])
 
+    def test_multi_line_disconnected_buffer(self):
+        # Bank A: (35.1650, 129.1235) -> (35.1680, 129.1250)
+        # Bank B: (35.1655, 129.1225) -> (35.1685, 129.1240) (disconnected, parallel across river)
+        lines = [
+            [{"lat": 35.1650, "lng": 129.1235}, {"lat": 35.1680, "lng": 129.1250}],
+            [{"lat": 35.1655, "lng": 129.1225}, {"lat": 35.1685, "lng": 129.1240}]
+        ]
+        geom_json = json.dumps({"lines": lines, "buffer_m": 50})
+        store = MockStore(geometry_type="LINE_BUFFER", geometry_data=geom_json)
+
+        # 1. User near Bank A
+        res_a = evaluate_spatial_position(35.1650, 129.1235, store)
+        self.assertTrue(res_a["inside"])
+
+        # 2. User near Bank B
+        res_b = evaluate_spatial_position(35.1655, 129.1225, store)
+        self.assertTrue(res_b["inside"])
+
+        # 3. User far from both banks (e.g. 500m away)
+        res_far = evaluate_spatial_position(35.1800, 129.1400, store)
+        self.assertFalse(res_far["inside"])
+
     def test_polygon_area_containment(self):
         # Square polygon
         pts = [

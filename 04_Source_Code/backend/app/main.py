@@ -302,8 +302,22 @@ def seed_coupons():
     finally:
         db.close()
 
+def migrate_spatial_columns_if_missing():
+    db = SessionLocal()
+    try:
+        if "sqlite" not in str(db.bind.url):
+            db.execute(text("ALTER TABLE stores ADD COLUMN IF NOT EXISTS geometry_type VARCHAR(50) DEFAULT 'POINT_RADIUS';"))
+            db.execute(text("ALTER TABLE stores ADD COLUMN IF NOT EXISTS geometry_data TEXT;"))
+            db.commit()
+            print("[SAFE_SCHEMA_MIGRATION] Added geometry_type and geometry_data columns to PostgreSQL stores table if missing.")
+    except Exception as e:
+        print(f"[SCHEMA_MIGRATION_WARNING] {e}")
+    finally:
+        db.close()
+
 @app.on_event("startup")
 def on_startup():
+    migrate_spatial_columns_if_missing()
     if APP_ENV != "production":
         seed_stores()
         seed_missions()
@@ -2499,19 +2513,29 @@ def evaluate_spatial_position(user_lat: float, user_lng: float, store) -> dict:
         except Exception:
             pass
 
-    if geom_type == 'LINE_BUFFER' and geom_json and 'points' in geom_json:
-        pts = geom_json.get('points', [])
+    if geom_type == 'LINE_BUFFER' and geom_json:
         buffer_m = float(geom_json.get('buffer_m', store.review_location_radius_m or 50.0))
-        min_dist = distance_point_to_polyline_m(user_lat, user_lng, pts)
-        inside = (min_dist <= buffer_m)
-        outside_by_m = max(0, int(round(min_dist - buffer_m)))
-        return {
-            'inside': inside,
-            'distance_m': int(round(min_dist)),
-            'allowed_radius_m': int(round(buffer_m)),
-            'outside_by_m': outside_by_m,
-            'geometry_type': 'LINE_BUFFER'
-        }
+        min_dist = float('inf')
+
+        if 'lines' in geom_json and isinstance(geom_json['lines'], list) and geom_json['lines']:
+            for line_pts in geom_json['lines']:
+                if isinstance(line_pts, list) and line_pts:
+                    d = distance_point_to_polyline_m(user_lat, user_lng, line_pts)
+                    if d < min_dist:
+                        min_dist = d
+        elif 'points' in geom_json and isinstance(geom_json['points'], list) and geom_json['points']:
+            min_dist = distance_point_to_polyline_m(user_lat, user_lng, geom_json['points'])
+
+        if min_dist != float('inf'):
+            inside = (min_dist <= buffer_m)
+            outside_by_m = max(0, int(round(min_dist - buffer_m)))
+            return {
+                'inside': inside,
+                'distance_m': int(round(min_dist)),
+                'allowed_radius_m': int(round(buffer_m)),
+                'outside_by_m': outside_by_m,
+                'geometry_type': 'LINE_BUFFER'
+            }
 
     elif geom_type == 'POLYGON_AREA' and geom_json and 'points' in geom_json:
         pts = geom_json.get('points', [])

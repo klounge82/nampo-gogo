@@ -1,5 +1,6 @@
 {
   "@@locale": "ja",
+  "verificationAreaNotice": "認証可能エリア/区間",
   "accountDelete": "退会",
   "activityTitle": "アクティビティ履歴",
   "adminDashboardTitle": "管理者ダッシュボード",

@@ -1,5 +1,6 @@
 {
   "@@locale": "zh",
+  "verificationAreaNotice": "可认证区域/区间",
   "accountDelete": "注销账号",
   "activityTitle": "活动记录",
   "adminDashboardTitle": "系统管理后台",
