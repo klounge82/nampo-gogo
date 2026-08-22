@@ -8,33 +8,20 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from app.database import Base
 
-from sqlalchemy.pool import StaticPool
-
-SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
-)
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-def override_get_db():
-    try:
-        db = TestingSessionLocal()
-        yield db
-    finally:
-        db.close()
-
-app.dependency_overrides[get_db] = override_get_db
+from tests.test_db_session import TestingSessionLocal, init_test_db
 
 class TestVerifyMission500Forensic(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        Base.metadata.create_all(bind=engine)
-        cls.client = TestClient(app)
-
     def setUp(self):
+        init_test_db()
+        self.client = TestClient(app)
         self.db = TestingSessionLocal()
+        # Clean existing test objects
+        self.db.query(models.UserMission).delete()
+        self.db.query(models.PointHistory).delete()
+        self.db.query(models.Mission).delete()
+        self.db.query(models.Store).delete()
+        self.db.query(models.User).delete()
+        self.db.commit()
         # Create test user
         self.user = models.User(
             id="test_user_forensic_001",
