@@ -1404,7 +1404,7 @@ def verify_mission(
                 detail="유효하지 않은 QR 코드입니다."
             )
 
-    # 5. Save completed record and award points (Transaction)
+    # 5. Save completed record and award points (Atomic Transaction)
     try:
         new_record = models.UserMission(
             user_id=target_user_id,
@@ -1428,8 +1428,15 @@ def verify_mission(
         db.add(new_history)
         
         db.commit()
-        
-        # Insert activity logs
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"인증 처리 저장 중 DB 오류 발생: {str(e)}"
+        )
+
+    # 6. Insert activity logs safely (non-blocking for mission completion)
+    try:
         create_activity_log(
             db=db,
             user_id=target_user_id,
@@ -1450,12 +1457,8 @@ def verify_mission(
             icon="paid",
             color="amber"
         )
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"인증 처리 저장 중 DB 오류 발생: {str(e)}"
-        )
+    except Exception as log_err:
+        print(f"[MISSION_VERIFY] Non-fatal activity log creation warning: {log_err}")
 
     return {
         "success": True,
@@ -6415,6 +6418,10 @@ def create_activity_log(
         db.add(new_log)
         db.commit()
     except Exception as e:
+        try:
+            db.rollback()
+        except Exception:
+            pass
         print(f"Error creating activity log: {e}")
 
 @app.get("/activity", response_model=List[schemas.ActivityLogOut], tags=["Activities"])
