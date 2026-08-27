@@ -4076,9 +4076,11 @@ def reset_qa_user_baseline(user_id: str, admin: models.User = Depends(get_admin_
     if not target_user:
         raise HTTPException(status_code=404, detail="해당 사용자를 찾을 수 없습니다.")
 
-    # Safety Guard: Only allowed for designated QA/test accounts
-    if not (getattr(target_user, "is_test_data", False) or "TEST" in (target_user.roles or []) or "ADMIN" in (target_user.roles or []) or target_user.role == "admin"):
-        raise HTTPException(status_code=400, detail="일반 고객 계정의 포인트 이력은 리셋할 수 없습니다.")
+    # Safety Guard: Only allowed for QA/test accounts or designated PM field QA account (jazzbj@naver.com)
+    is_qa_test = getattr(target_user, "is_test_data", False) or "TEST" in (target_user.roles or [])
+    is_designated_pm_qa = target_user.email == "jazzbj@naver.com" or target_user.id == "2abb6e52-d447-4338-8beb-e638890a5ecc"
+    if not (is_qa_test or is_designated_pm_qa):
+        raise HTTPException(status_code=400, detail="일반 회원 및 임의 관리자 계정의 포인트 이력은 리셋할 수 없습니다. 지정 QA 계정만 가능합니다.")
 
     # 1. Reset completed user missions for target user only
     deleted_missions = db.query(models.UserMission).filter(models.UserMission.user_id == user_id).delete()
