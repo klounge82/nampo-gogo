@@ -3180,8 +3180,12 @@ def user_to_user_out(user_model: Optional[models.User]) -> Optional[schemas.User
         role=user_model.role or "member",
         roles=role_strings,
         status=getattr(user_model, "status", "active") or "active",
+        current_points=getattr(user_model, "current_points", 0) or 0,
+        lifetime_earned_points=getattr(user_model, "lifetime_earned_points", 0) or 0,
+        language_code=getattr(user_model, "language_code", "ko") or "ko",
         created_at=user_model.created_at,
-        updated_at=user_model.updated_at
+        updated_at=user_model.updated_at,
+        last_login_at=getattr(user_model, "last_login_at", None)
     )
 
 def attach_ownership_flags(
@@ -3950,7 +3954,8 @@ def get_admin_users(search: Optional[str] = None, skip: int = 0, limit: int = 20
     query = db.query(models.User)
     if search:
         query = query.filter(models.User.email.contains(search) | models.User.nickname.contains(search))
-    return query.order_by(models.User.created_at.desc()).offset(skip).limit(limit).all()
+    users = query.order_by(models.User.created_at.desc()).offset(skip).limit(limit).all()
+    return [user_to_user_out(u) for u in users if u]
 
 @app.patch("/admin/users/{user_id}/status", response_model=schemas.UserOut, tags=["Admin"])
 def update_user_status(user_id: str, req: schemas.UserStatusUpdate, admin: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
