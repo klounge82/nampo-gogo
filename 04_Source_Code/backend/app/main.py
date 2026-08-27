@@ -102,14 +102,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login", auto_error=False)
 
 def get_current_user(token: Optional[str] = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> models.User:
     if not token:
-        # Prevent token-less bypass in production for strict session safety
-        if APP_ENV == "production":
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="인증 토큰이 필요합니다.")
-        
-        first_user = db.query(models.User).filter(models.User.status == "active").first()
-        if not first_user:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="인증 토큰이 필요합니다.")
-        return first_user
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="인증 토큰이 필요합니다.")
 
     payload = auth.decode_token(token)
     user_id = payload.get("sub")
@@ -1277,7 +1270,7 @@ def verify_mission(
     mission_id: str,
     req: VerifyRequest,
     db: Session = Depends(get_db),
-    current_user: Optional[models.User] = Depends(get_current_user_optional)
+    current_user: models.User = Depends(get_current_user)
 ):
     import base64
     import re
@@ -1287,15 +1280,12 @@ def verify_mission(
     if not mission:
         raise HTTPException(status_code=404, detail="해당 미션을 찾을 수 없습니다.")
 
-    # 2. Resolve authenticated target user via JWT Bearer token or req.user_id
+    # 2. Resolve authenticated target user via JWT Bearer token (ONE IDENTITY LAW)
     user_obj = current_user
-    if not user_obj and req.user_id:
-        user_obj = db.query(models.User).filter(models.User.id == req.user_id).first()
-
-    if not user_obj:
+    if req.user_id and req.user_id != current_user.id and getattr(current_user, "role", "").upper() != "ADMIN":
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="미션 인증을 진행하려면 로그인이 필요합니다."
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="다른 사용자의 명의로 미션을 인증할 수 없습니다."
         )
 
     target_user_id = user_obj.id
@@ -1472,16 +1462,14 @@ def verify_mission(
 def get_user_points(
     user_id: Optional[str] = None,
     db: Session = Depends(get_db),
-    current_user: Optional[models.User] = Depends(get_current_user_optional)
+    current_user: models.User = Depends(get_current_user)
 ):
-    target_user = None
-    if current_user:
-        target_user = current_user
-    elif user_id:
-        target_user = db.query(models.User).filter(models.User.id == user_id).first()
-
-    if not target_user:
-        raise HTTPException(status_code=404, detail="해당 사용자를 찾을 수 없습니다.")
+    if user_id and user_id != current_user.id and getattr(current_user, "role", "").upper() != "ADMIN":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="다른 사용자의 포인트를 조회할 권한이 없습니다.")
+    
+    target_user = current_user
+    if user_id and getattr(current_user, "role", "").upper() == "ADMIN":
+        target_user = db.query(models.User).filter(models.User.id == user_id).first() or current_user
 
     return {
         "user_id": target_user.id,
@@ -1493,31 +1481,34 @@ def get_user_points(
 def get_point_history(
     user_id: Optional[str] = None,
     db: Session = Depends(get_db),
-    current_user: Optional[models.User] = Depends(get_current_user_optional)
+    current_user: models.User = Depends(get_current_user)
 ):
-    if current_user:
-        target_user_id = current_user.id
-    elif user_id:
+    if user_id and user_id != current_user.id and getattr(current_user, "role", "").upper() != "ADMIN":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="다른 사용자의 포인트 내역을 조회할 권한이 없습니다.")
+
+    target_user_id = current_user.id
+    if user_id and getattr(current_user, "role", "").upper() == "ADMIN":
         target_user_id = user_id
-    else:
-        raise HTTPException(status_code=401, detail="인증되지 않은 요청입니다.")
 
     return db.query(models.PointHistory).filter(
         models.PointHistory.user_id == target_user_id
     ).order_by(models.PointHistory.created_at.desc()).all()
 
 @app.post("/users/points/earn", tags=["Points"])
-def earn_points(req: schemas.PointEarnSpend, db: Session = Depends(get_db)):
-    target_user_id = req.user_id
-    if not target_user_id:
-        user = db.query(models.User).first()
-        if not user:
-            raise HTTPException(status_code=404, detail="사용자가 존재하지 않습니다.")
-        target_user_id = user.id
-    else:
-        user = db.query(models.User).filter(models.User.id == target_user_id).first()
-        if not user:
-            raise HTTPException(status_code=404, detail="해당 사용자를 찾을 수 없습니다.")
+def earn_points(
+    req: schemas.PointEarnSpend,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    target_user_id = current_user.id
+    if req.user_id and req.user_id != current_user.id and getattr(current_user, "role", "").upper() not in ["ADMIN", "BUSINESS"]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="다른 사용자의 포인트를 변동시킬 권한이 없습니다.")
+    if req.user_id and (getattr(current_user, "role", "").upper() in ["ADMIN", "BUSINESS"]):
+        target_user_id = req.user_id
+
+    user = db.query(models.User).filter(models.User.id == target_user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="해당 사용자를 찾을 수 없습니다.")
 
     try:
         user.current_points += req.points
@@ -1550,17 +1541,20 @@ def earn_points(req: schemas.PointEarnSpend, db: Session = Depends(get_db)):
     }
 
 @app.post("/users/points/spend", tags=["Points"])
-def spend_points(req: schemas.PointEarnSpend, db: Session = Depends(get_db)):
-    target_user_id = req.user_id
-    if not target_user_id:
-        user = db.query(models.User).first()
-        if not user:
-            raise HTTPException(status_code=404, detail="사용자가 존재하지 않습니다.")
-        target_user_id = user.id
-    else:
-        user = db.query(models.User).filter(models.User.id == target_user_id).first()
-        if not user:
-            raise HTTPException(status_code=404, detail="해당 사용자를 찾을 수 없습니다.")
+def spend_points(
+    req: schemas.PointEarnSpend,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    target_user_id = current_user.id
+    if req.user_id and req.user_id != current_user.id and getattr(current_user, "role", "").upper() not in ["ADMIN", "BUSINESS"]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="다른 사용자의 포인트를 변동시킬 권한이 없습니다.")
+    if req.user_id and (getattr(current_user, "role", "").upper() in ["ADMIN", "BUSINESS"]):
+        target_user_id = req.user_id
+
+    user = db.query(models.User).filter(models.User.id == target_user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="해당 사용자를 찾을 수 없습니다.")
 
     if user.current_points < req.points:
         raise HTTPException(
@@ -1613,17 +1607,11 @@ def exchange_coupon(coupon_id: str, req: ExchangeRequest, db: Session = Depends(
     if not coupon:
         raise HTTPException(status_code=404, detail="해당 쿠폰 상품을 찾을 수 없습니다.")
 
-    target_user_id = req.user_id
-    if not target_user_id:
-        user = db.query(models.User).first()
-        if not user:
-            raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다.")
-        target_user_id = user.id
-    else:
-        user = db.query(models.User).filter(models.User.id == target_user_id).first()
-        if not user:
-            raise HTTPException(status_code=404, detail="해당 사용자를 찾을 수 없습니다.")
+    target_user_id = current_user.id
+    if req.user_id and req.user_id != current_user.id and getattr(current_user, "role", "").upper() != "ADMIN":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="다른 사용자의 명의로 쿠폰을 교환할 수 없습니다.")
 
+    user = current_user
     if user.current_points < coupon.cost_points:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -1692,13 +1680,17 @@ def exchange_coupon(coupon_id: str, req: ExchangeRequest, db: Session = Depends(
     }
 
 @app.get("/users/coupons", response_model=List[schemas.UserCouponOut], tags=["Coupons"])
-def get_user_coupons(user_id: Optional[str] = None, status: Optional[str] = None, db: Session = Depends(get_db)):
-    if not user_id:
-        user = db.query(models.User).first()
-        if not user:
-            return []
-        target_user_id = user.id
-    else:
+def get_user_coupons(
+    user_id: Optional[str] = None,
+    status: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    if user_id and user_id != current_user.id and getattr(current_user, "role", "").upper() != "ADMIN":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="다른 사용자의 쿠폰 목록을 조회할 권한이 없습니다.")
+
+    target_user_id = current_user.id
+    if user_id and getattr(current_user, "role", "").upper() == "ADMIN":
         target_user_id = user_id
 
     query = db.query(models.UserCoupon).filter(models.UserCoupon.user_id == target_user_id)
@@ -1708,10 +1700,18 @@ def get_user_coupons(user_id: Optional[str] = None, status: Optional[str] = None
     return query.order_by(models.UserCoupon.created_at.desc()).all()
 
 @app.post("/users/coupons/{user_coupon_id}/use", tags=["Coupons"])
-def use_user_coupon(user_coupon_id: str, req: ExchangeRequest, db: Session = Depends(get_db)):
+def use_user_coupon(
+    user_coupon_id: str,
+    req: ExchangeRequest,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
     user_coupon = db.query(models.UserCoupon).filter(models.UserCoupon.id == user_coupon_id).first()
     if not user_coupon:
         raise HTTPException(status_code=404, detail="보유한 쿠폰을 찾을 수 없습니다.")
+
+    if user_coupon.user_id != current_user.id and getattr(current_user, "role", "").upper() != "ADMIN":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="다른 사용자의 쿠폰을 사용할 수 없습니다.")
 
     if user_coupon.status != "unused":
         raise HTTPException(
@@ -3966,6 +3966,27 @@ def update_user_status(user_id: str, req: schemas.UserStatusUpdate, admin: model
     log_admin_action(db, admin.id, "UPDATE_USER_STATUS", user_id, f"Changed status from {old_status} to {req.status}")
     return user
 
+@app.delete("/admin/users/{user_id}", tags=["Admin"])
+def delete_admin_user(user_id: str, admin: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
+    if user_id == admin.id:
+        raise HTTPException(status_code=400, detail="현재 로그인한 관리자 계정 자신은 삭제할 수 없습니다.")
+    
+    target_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not target_user:
+        raise HTTPException(status_code=404, detail="해당 사용자를 찾을 수 없습니다.")
+    
+    # Block deleting primary/last admin
+    if "ADMIN" in (target_user.roles or []) or getattr(target_user, "role", "").upper() == "ADMIN":
+        admin_count = db.query(models.User).filter(models.User.role == "admin").count()
+        if admin_count <= 1:
+            raise HTTPException(status_code=400, detail="시스템의 마지막 관리자 계정은 삭제할 수 없습니다.")
+
+    db.delete(target_user)
+    db.commit()
+    
+    log_admin_action(db, admin.id, "DELETE_USER", user_id, f"Deleted user {target_user.email}")
+    return {"message": "사용자 계정이 성공적으로 삭제되었습니다.", "deleted_user_id": user_id}
+
 @app.post("/admin/stores", response_model=schemas.StoreOut, status_code=status.HTTP_201_CREATED, tags=["Admin"])
 def create_admin_store(req: schemas.StoreCreate, admin: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
     new_store = models.Store(**req.dict())
@@ -4041,14 +4062,70 @@ def update_mission_status(mission_id: str, req: schemas.MissionStatusUpdate, adm
     mission = db.query(models.Mission).filter(models.Mission.id == mission_id).first()
     if not mission:
         raise HTTPException(status_code=404, detail="해당 미션을 찾을 수 없습니다.")
-    
-    old_status = mission.status
+
     mission.status = req.status
     db.commit()
     db.refresh(mission)
-    
-    log_admin_action(db, admin.id, "UPDATE_MISSION_STATUS", mission_id, f"Changed mission status from {old_status} to {req.status}")
+
+    log_admin_action(db, admin.id, "UPDATE_MISSION_STATUS", mission_id, f"Changed mission status to {req.status}")
     return mission
+
+@app.post("/admin/qa/reset-baseline/{user_id}", tags=["Admin"])
+def reset_qa_user_baseline(user_id: str, admin: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
+    target_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not target_user:
+        raise HTTPException(status_code=404, detail="해당 사용자를 찾을 수 없습니다.")
+
+    # Safety Guard: Only allowed for designated QA/test accounts
+    if not (getattr(target_user, "is_test_data", False) or "TEST" in (target_user.roles or []) or "ADMIN" in (target_user.roles or []) or target_user.role == "admin"):
+        raise HTTPException(status_code=400, detail="일반 고객 계정의 포인트 이력은 리셋할 수 없습니다.")
+
+    # 1. Reset completed user missions for target user only
+    deleted_missions = db.query(models.UserMission).filter(models.UserMission.user_id == user_id).delete()
+
+    # 2. Delete test mission reward point transactions for target user
+    deleted_histories = db.query(models.PointHistory).filter(
+        models.PointHistory.user_id == user_id,
+        models.PointHistory.transaction_type == "MISSION_REWARD"
+    ).delete()
+
+    # 3. Ensure canonical 300P signup bonus baseline
+    signup_history = db.query(models.PointHistory).filter(
+        models.PointHistory.user_id == user_id,
+        models.PointHistory.transaction_type == "SIGNUP_BONUS"
+    ).first()
+
+    if signup_history:
+        signup_history.points = 300
+        signup_history.activity = "가입 축하 포인트 (300P)"
+    else:
+        new_signup = models.PointHistory(
+            id=f"ph_signup_{uuid.uuid4().hex[:8]}",
+            user_id=user_id,
+            points=300,
+            activity="가입 축하 포인트 (300P)",
+            transaction_type="SIGNUP_BONUS",
+            source_type="AUTH"
+        )
+        db.add(new_signup)
+
+    # 4. Set current_points and lifetime_earned_points to 300
+    target_user.current_points = 300
+    target_user.lifetime_earned_points = 300
+
+    db.commit()
+    db.refresh(target_user)
+
+    log_admin_action(db, admin.id, "RESET_QA_BASELINE", user_id, f"Reset QA user baseline: {deleted_missions} missions deleted, {deleted_histories} history rows deleted, balance=300P")
+
+    return {
+        "message": "QA 계정 포인트 및 미션 이력이 300P 기준선으로 성공적으로 리셋되었습니다.",
+        "user_id": user_id,
+        "available_points": target_user.current_points,
+        "lifetime_earned_points": target_user.lifetime_earned_points,
+        "deleted_missions_count": deleted_missions,
+        "deleted_histories_count": deleted_histories
+    }
 
 @app.post("/admin/coupons", response_model=schemas.CouponOut, status_code=status.HTTP_201_CREATED, tags=["Admin"])
 def create_admin_coupon(req: schemas.CouponCreate, admin: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
@@ -4205,7 +4282,7 @@ def deploy_beta_data_endpoint(db: Session = Depends(get_db)):
     missions = [
         {
             "id": "4b9c1d2e-3f4a-5b6c-7d8e-9f0a1b2c3d4e", "store_id": "31b96920-2eb3-4f93-ab51-546fd8d933d1",
-            "title": "K-Lounge QR 방문 인증", "title_en": "K-Lounge QR Visit Verification", "title_ja": "K-Lounge QR訪問認証", "title_zh": "K-Lounge QR到店打卡",
+            "title": "[QA TEST] K-Lounge 방문 사진 인증", "title_en": "[QA TEST] K-Lounge Photo Visit Mission", "title_ja": "[QA TEST] K-Lounge 訪問写真認証", "title_zh": "[QA TEST] K-Lounge 到店照片验证", "description_en": "Visit K-Lounge and take a photo of the entrance to verify. (Earn 100P)", "description_ja": "K-Lounge店舗を訪問し、入口の写真を撮影して認証してください。(100P獲得)", "description_zh": "前往K-Lounge门店拍摄入口照片完成验证。(获得100P)", "title_en": "K-Lounge QR Visit Verification", "title_ja": "K-Lounge QR訪問認証", "title_zh": "K-Lounge QR到店打卡",
             "description": "K-Lounge 매장에 방문하여 매장에 비치된 QR 코드를 스캔하고 방문 인증을 완료하세요.",
             "description_en": "Visit K-Lounge, scan the official QR code at the counter, and complete your visit verification.",
             "description_ja": "K-Lounge店舗を訪問し、店頭のQRコードをスキャンして訪問認証を完了してください。",
@@ -4225,7 +4302,7 @@ def deploy_beta_data_endpoint(db: Session = Depends(get_db)):
         },
         {
             "id": "6d1e3f4a-5b6c-7d8e-9f0a-1b2c3d4e5f6a", "store_id": "jagalchi-market-002",
-            "title": "자갈치시장 수산물 탐방 인증", "title_en": "Jagalchi Seafood Market Tour", "title_ja": "チャガルチ市場海鮮探訪認証", "title_zh": "札嘎其海鲜市场游览打卡",
+            "title": "[QA TEST] 자갈치시장 QR 방문 인증", "title_en": "[QA TEST] Jagalchi Market QR Visit Mission", "title_ja": "[QA TEST] チャガルチ市場 QR訪問認証", "title_zh": "[QA TEST] 札嘎其市场 二维码扫码验证", "description_en": "Scan the signpost QR code inside Jagalchi Market to verify. (Earn 100P)", "description_ja": "チャガルチ市場内で案内板のQRコードをスキャンして認証してください。(100P獲得)", "description_zh": "在札嘎其市场内扫描指示牌上的二维码完成验证。(获得100P)", "title_en": "Jagalchi Seafood Market Tour", "title_ja": "チャガルチ市場海鮮探訪認証", "title_zh": "札嘎其海鲜市场游览打卡",
             "description": "자갈치시장 건물 및 해안 산책로 근처(반경 150m 이내)에서 GPS 인증을 완료하세요.",
             "description_en": "Verify your GPS location within 150m of Jagalchi Market and coastal boardwalk.",
             "description_ja": "チャガルチ市場建物および海岸遊歩道付近（半径150m以内）でGPS認証を完了してください。",
