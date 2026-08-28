@@ -4,7 +4,7 @@ import hashlib
 from typing import Optional, List
 from fastapi import FastAPI, Depends, HTTPException, status, Header, Query
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 import json
@@ -4090,11 +4090,14 @@ def reset_qa_user_baseline(user_id: str, admin: models.User = Depends(get_admin_
     # 1. Reset completed user missions for target user only
     deleted_missions = db.query(models.UserMission).filter(models.UserMission.user_id == user_id).delete()
 
-    # 2. Delete test mission reward point transactions for target user
+    # 2. Delete all non-signup point transactions for target user (NULL-safe)
     deleted_histories = db.query(models.PointHistory).filter(
         models.PointHistory.user_id == user_id,
-        models.PointHistory.transaction_type == "MISSION_REWARD"
-    ).delete()
+        or_(
+            models.PointHistory.transaction_type.is_(None),
+            models.PointHistory.transaction_type != "SIGNUP_BONUS"
+        )
+    ).delete(synchronize_session=False)
 
     # 3. Ensure canonical 300P signup bonus baseline
     signup_history = db.query(models.PointHistory).filter(

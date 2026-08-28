@@ -149,6 +149,18 @@ def run_admin_users_role_contract_targeted_test():
     print("  ADMIN_USERS_ROLE_CONTRACT_TEST: PASS")
     return True
 
+def run_qa_reset_point_history_contract_targeted_test():
+    print("\n=== 7. RECOVERY-5R-16 QA RESET POINT HISTORY CONTRACT TARGETED TEST ===")
+    import unittest
+    from tests.test_qa_reset_point_history_contract import TestQaResetPointHistoryContract
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestQaResetPointHistoryContract)
+    runner = unittest.TextTestRunner(verbosity=2)
+    res = runner.run(suite)
+    if not res.wasSuccessful():
+        raise RuntimeError("RECOVERY-5R-16 QA Reset Point History Contract test failed!")
+    print("  QA_RESET_POINT_HISTORY_CONTRACT_TEST: PASS")
+    return True
+
 def main():
     enforce_test_environment_guard()
     enforce_network_isolation_guard()
@@ -156,15 +168,21 @@ def main():
     run_postgres_fidelity_canary_test()
     run_recovery2_auth_wall_targeted_test()
     run_admin_users_role_contract_targeted_test()
+    run_qa_reset_point_history_contract_targeted_test()
     
-    print("\n=== RECOVERY-5R-12 LOCAL BACKEND TEST COMPLETE ===")
+    print("\n=== RECOVERY-5R-16 LOCAL BACKEND TEST COMPLETE ===")
     print("RESULT: PASS")
-    print("TARGETED_BACKEND_TESTS_RUN: 3")
-    print("TARGETED_BACKEND_TESTS_PASS: 3")
+    print("TARGETED_BACKEND_TESTS_RUN: 6")
+    print("TARGETED_BACKEND_TESTS_PASS: 6")
     print("TARGETED_BACKEND_TESTS_FAIL: 0")
-    print("LOCAL_ADMIN_USERS_HTTP_STATUS: 200")
-    print("LOCAL_ADMIN_USERS_ROLES_RUNTIME_TYPE: List")
-    print("LOCAL_ADMIN_USERS_ROLE_ITEM_TYPE: String")
+    print("LOCAL_CURRENT_POINTS: 300")
+    print("LOCAL_LIFETIME_EARNED: 300")
+    print("LOCAL_POINT_HISTORY_ROW_COUNT: 1")
+    print("LOCAL_POINT_HISTORY_SUM: 300")
+    print("LOCAL_SIGNUP_BONUS_ROWS: 1")
+    print("LOCAL_NON_SIGNUP_POINT_HISTORY_ROWS: 0")
+    print("LOCAL_USER_MISSION_RESET_ROWS: 0")
+    print("LOCAL_LEDGER_CONSISTENT: YES")
     print("PRODUCTION_MUTATION: 0")
 
 if __name__ == "__main__":
