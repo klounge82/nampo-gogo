@@ -4,6 +4,7 @@
   "accountDelete": "Delete Account",
   "activityTitle": "Activity Log",
   "adminDashboardTitle": "Admin Dashboard",
+  "switchToCustomerMode": "Switch to Customer Mode",
   "aiCategoryCafe": "Cozy Cafes",
   "aiCategoryCulture": "Local Culture",
   "aiCategoryMarket": "Market/Shopping",
@@ -105,7 +106,7 @@
   "mapViewWithoutPermission": "View map without permission",
   "missionAllList": "All Missions",
   "missionAuthActionGps": "GPS Verify",
-  "missionAuthActionPhoto": "Photo Verify",
+  "missionAuthActionPhoto": "Take Photo",
   "missionAuthActionQr": "Scan QR",
   "missionCompletedCount": "Completed Missions",
   "missionDetailTitle": "Mission Details",
@@ -301,5 +302,75 @@
   "recommendFeedbackDismissMsg": "Marked as not interested.",
   "loginRequiredFeedbackMsg": "Please log in to submit feedback.",
   "tooltipLike": "Like",
-  "tooltipNotInterested": "Not interested"
+  "tooltipNotInterested": "Not interested",
+  "missionEligibleRadius100m": "{radius}m Radius",
+  "missionEligibleAreaApproved": "Eligible Area",
+  "missionOutsideNotice": "Your location is outside the eligible area.",
+  "distanceToBoundaryFormat": "About {distance}m to the nearest eligible boundary.",
+  "myLocationCheckButton": "Check My Location",
+  "missionAuthMethodHeader": "Verification Method",
+  "missionRewardInfoHeader": "Mission Reward",
+  "missionStartAuthButton": "Start Verification",
+  "missionCompletedBadge": "Completed",
+  "missionTagGeneral": "General Mission",
+  "missionTagPhoto": "Photo Verification",
+  "missionTagGps": "GPS Verification",
+  "missionTagQr": "QR Verification",
+  "homeSectionRecommendedPlaces": "Recommended Places",
+  "homeSectionPopularMissions": "Popular Missions",
+  "homeExploreMoreButton": "View All",
+  "searchBarPlaceholder": "Search places, missions, keywords",
+  "placeDetailLocationInfo": "Location & Address",
+  "placeDetailDirectionsButton": "Directions",
+  "placeDetailNoCoordinatesNotice": "Location coordinates in preparation",
+  "placeDetailReviewCountFormat": "{count} Reviews",
+  "missionEligibleAreaMapTitle": "Eligible Mission Area Map",
+  "missionDistrictTypeNotice": "Verification is available within the designated district.",
+  "signupCustomerSubtitle": "Travel recommendations · Reservations · Reviews · Points",
+  "signupBusinessSubtitle": "Store registration · Reservations · Recommendations · Customer management",
+  "categoryGeneral": "General",
+  "badgeTest": "Test",
+  "authTypePhotoGps": "Photo + GPS Verification",
+  "spatialMapTitleSuyeong": "Suyeong River Eligible Trail Map",
+  "spatialMapTitleDefault": "Mission Eligible Area Map",
+  "spatialMapApprovedTrail": "Approved Walking Trail",
+  "spatialMapCandidateTrail": "Candidate Trail (Pending PM Approval)",
+  "spatialMapCandidateNotice": "This place has candidate areas. Range confirmed after PM approval.",
+  "spatialMapInsideNotice": "Current location is INSIDE the eligible area.",
+  "spatialMapOutsideNotice": "Current location is OUTSIDE the eligible area.",
+  "spatialMapCanVerifyImmediately": "Mission verification available immediately.",
+  "sessionExpiredMessage": "Login session has expired. Please log in again.",
+  "verificationPhotoOutsideRadiusTitle": "You are outside the photo verification area",
+  "verificationPhotoOutsideRadiusBody": "You are about {distance}m away from the photo point.\n\nAllowed radius is within {radius}m.\n\nPlease move about {outsideBy}m closer and take the photo.",
+  "@verificationPhotoOutsideRadiusBody": {
+    "placeholders": {
+      "distance": {},
+      "radius": {},
+      "outsideBy": {}
+    }
+  },
+  "verificationQrOutsideRadiusTitle": "QR code recognized successfully",
+  "verificationQrOutsideRadiusBody": "However, your current location is outside the verification area.\n\nCurrent distance: ~{distance}m\nAllowed radius: within {radius}m\n\nPlease move ~{outsideBy}m closer and try again.",
+  "@verificationQrOutsideRadiusBody": {
+    "placeholders": {
+      "distance": {},
+      "radius": {},
+      "outsideBy": {}
+    }
+  },
+  "verificationGpsOutsideRadiusTitle": "You are outside the location verification area",
+  "verificationGpsOutsideRadiusBody": "You are about {distance}m away from the mission location.\n\nAllowed radius is within {radius}m.\n\nPlease move about {outsideBy}m closer and try again.",
+  "@verificationGpsOutsideRadiusBody": {
+    "placeholders": {
+      "distance": {},
+      "radius": {},
+      "outsideBy": {}
+    }
+  },
+  "verificationLocationServiceDisabledTitle": "Please enable location services",
+  "verificationLocationServiceDisabledBody": "Location services are turned off on your device, so the distance to the mission location cannot be determined. Please enable location services and try again.",
+  "verificationLocationPermissionDeniedTitle": "Location permission required",
+  "verificationLocationPermissionDeniedBody": "This mission requires your current location. Please allow the app to access your location and try again.",
+  "verificationLocationUnavailableTitle": "Unable to determine current location",
+  "verificationLocationUnavailableBody": "Failed to obtain GPS location information. Please try again shortly or check the status of location services."
 }

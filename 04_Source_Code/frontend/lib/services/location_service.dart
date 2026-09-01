@@ -84,7 +84,7 @@ class LocationService {
     );
   }
 
-  /// Geometry-Aware Spatial Evaluator for Frontend
+  /// Evaluates Point-in-Polygon (PIP) containment using the Jordan Curve Ray-Casting algorithm.
   static Map<String, dynamic> evaluateSpatialPosition({
     required double userLat,
     required double userLng,
@@ -97,11 +97,15 @@ class LocationService {
     final type = (geometryType ?? 'POINT_RADIUS').toUpperCase();
     final allowedRadius = (radiusM != null && radiusM > 0) ? radiusM : 50;
 
-    if (type == 'LINE_BUFFER' && geometryData != null && geometryData.isNotEmpty) {
+    if (type == 'LINE_BUFFER' &&
+        geometryData != null &&
+        geometryData.isNotEmpty) {
       try {
         final data = json.decode(geometryData);
         if (data is Map) {
-          final bufM = (data['buffer_m'] != null) ? (data['buffer_m'] as num).toDouble() : allowedRadius.toDouble();
+          final bufM = (data['buffer_m'] != null)
+              ? (data['buffer_m'] as num).toDouble()
+              : allowedRadius.toDouble();
           double minDist = double.infinity;
 
           if (data.containsKey('lines') && data['lines'] is List) {
@@ -137,7 +141,12 @@ class LocationService {
     // Default POINT_RADIUS legacy fallback
     final targetLat = placeLat ?? userLat;
     final targetLng = placeLng ?? userLng;
-    final dist = Geolocator.distanceBetween(userLat, userLng, targetLat, targetLng);
+    final dist = Geolocator.distanceBetween(
+      userLat,
+      userLng,
+      targetLat,
+      targetLng,
+    );
     final inside = dist <= allowedRadius;
     final outsideByM = inside ? 0 : (dist - allowedRadius).round();
 
@@ -150,27 +159,68 @@ class LocationService {
     };
   }
 
-  static double _minDistanceToPolyline(double userLat, double userLng, List ptsList) {
-    if (ptsList.isEmpty) return double.infinity;
-    if (ptsList.length == 1) {
-      final p = ptsList[0];
-      return Geolocator.distanceBetween(userLat, userLng, (p['lat'] as num).toDouble(), (p['lng'] as num).toDouble());
+  static Map<String, double>? _parsePoint(dynamic p) {
+    if (p is List && p.length >= 2) {
+      return {'lat': (p[0] as num).toDouble(), 'lng': (p[1] as num).toDouble()};
     }
+    if (p is Map) {
+      final lat = (p['lat'] ?? p['latitude']) as num?;
+      final lng = (p['lng'] ?? p['longitude']) as num?;
+      if (lat != null && lng != null) {
+        return {'lat': lat.toDouble(), 'lng': lng.toDouble()};
+      }
+    }
+    return null;
+  }
+
+  static double _minDistanceToPolyline(
+    double userLat,
+    double userLng,
+    List ptsList,
+  ) {
+    if (ptsList.isEmpty) return double.infinity;
+
+    final parsedPts = <Map<String, double>>[];
+    for (final p in ptsList) {
+      final pt = _parsePoint(p);
+      if (pt != null) parsedPts.add(pt);
+    }
+
+    if (parsedPts.isEmpty) return double.infinity;
+    if (parsedPts.length == 1) {
+      return Geolocator.distanceBetween(
+        userLat,
+        userLng,
+        parsedPts[0]['lat']!,
+        parsedPts[0]['lng']!,
+      );
+    }
+
     double minDist = double.infinity;
-    for (int i = 0; i < ptsList.length - 1; i++) {
-      final p1 = ptsList[i];
-      final p2 = ptsList[i + 1];
-      final lat1 = (p1['lat'] as num).toDouble();
-      final lng1 = (p1['lng'] as num).toDouble();
-      final lat2 = (p2['lat'] as num).toDouble();
-      final lng2 = (p2['lng'] as num).toDouble();
-      final d = _distancePointToSegmentM(userLat, userLng, lat1, lng1, lat2, lng2);
+    for (int i = 0; i < parsedPts.length - 1; i++) {
+      final p1 = parsedPts[i];
+      final p2 = parsedPts[i + 1];
+      final d = _distancePointToSegmentM(
+        userLat,
+        userLng,
+        p1['lat']!,
+        p1['lng']!,
+        p2['lat']!,
+        p2['lng']!,
+      );
       if (d < minDist) minDist = d;
     }
     return minDist;
   }
 
-  static double _distancePointToSegmentM(double plat, double plng, double lat1, double lng1, double lat2, double lng2) {
+  static double _distancePointToSegmentM(
+    double plat,
+    double plng,
+    double lat1,
+    double lng1,
+    double lat2,
+    double lng2,
+  ) {
     final latRad = (lat1 + lat2) / 2.0 * (3.141592653589793 / 180.0);
     final kx = 111320.0 * math.cos(latRad);
     final ky = 110574.0;

@@ -127,6 +127,12 @@ abstract class AppLocalizations {
   /// **'관리자 대시보드'**
   String get adminDashboardTitle;
 
+  /// No description provided for @switchToCustomerMode.
+  ///
+  /// In ko, this message translates to:
+  /// **'고객모드로 전환'**
+  String get switchToCustomerMode;
+
   /// No description provided for @aiCategoryCafe.
   ///
   /// In ko, this message translates to:
@@ -376,7 +382,7 @@ abstract class AppLocalizations {
   /// No description provided for @authTypePhoto.
   ///
   /// In ko, this message translates to:
-  /// **'사진 인증'**
+  /// **'현장사진 인증'**
   String get authTypePhoto;
 
   /// No description provided for @authTypeQr.
@@ -736,7 +742,7 @@ abstract class AppLocalizations {
   /// No description provided for @missionAuthActionPhoto.
   ///
   /// In ko, this message translates to:
-  /// **'사진 인증'**
+  /// **'현장 사진 촬영'**
   String get missionAuthActionPhoto;
 
   /// No description provided for @missionAuthActionQr.
@@ -754,7 +760,7 @@ abstract class AppLocalizations {
   /// No description provided for @missionDetailTitle.
   ///
   /// In ko, this message translates to:
-  /// **'미션 상세'**
+  /// **'미션 상세정보'**
   String get missionDetailTitle;
 
   /// No description provided for @missionEmpty.
@@ -1914,6 +1920,312 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'관심 없음'**
   String get tooltipNotInterested;
+
+  /// No description provided for @missionEligibleRadius100m.
+  ///
+  /// In ko, this message translates to:
+  /// **'반경 {radius}m'**
+  String missionEligibleRadius100m(Object radius);
+
+  /// No description provided for @missionEligibleAreaApproved.
+  ///
+  /// In ko, this message translates to:
+  /// **'인증 가능 범위'**
+  String get missionEligibleAreaApproved;
+
+  /// No description provided for @missionOutsideNotice.
+  ///
+  /// In ko, this message translates to:
+  /// **'현재 위치는 인증 가능 구역 밖입니다.'**
+  String get missionOutsideNotice;
+
+  /// No description provided for @distanceToBoundaryFormat.
+  ///
+  /// In ko, this message translates to:
+  /// **'가장 가까운 인증 가능 경계까지 약 {distance}m 남았습니다.'**
+  String distanceToBoundaryFormat(Object distance);
+
+  /// No description provided for @myLocationCheckButton.
+  ///
+  /// In ko, this message translates to:
+  /// **'내 위치 기준 확인'**
+  String get myLocationCheckButton;
+
+  /// No description provided for @missionAuthMethodHeader.
+  ///
+  /// In ko, this message translates to:
+  /// **'인증 방식 안내'**
+  String get missionAuthMethodHeader;
+
+  /// No description provided for @missionRewardInfoHeader.
+  ///
+  /// In ko, this message translates to:
+  /// **'미션 보상 정보'**
+  String get missionRewardInfoHeader;
+
+  /// No description provided for @missionStartAuthButton.
+  ///
+  /// In ko, this message translates to:
+  /// **'미션 인증 시작하기'**
+  String get missionStartAuthButton;
+
+  /// No description provided for @missionCompletedBadge.
+  ///
+  /// In ko, this message translates to:
+  /// **'인증 완료'**
+  String get missionCompletedBadge;
+
+  /// No description provided for @missionTagGeneral.
+  ///
+  /// In ko, this message translates to:
+  /// **'일반 미션'**
+  String get missionTagGeneral;
+
+  /// No description provided for @missionTagPhoto.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진 인증'**
+  String get missionTagPhoto;
+
+  /// No description provided for @missionTagGps.
+  ///
+  /// In ko, this message translates to:
+  /// **'위치 인증'**
+  String get missionTagGps;
+
+  /// No description provided for @missionTagQr.
+  ///
+  /// In ko, this message translates to:
+  /// **'QR 인증'**
+  String get missionTagQr;
+
+  /// No description provided for @homeSectionRecommendedPlaces.
+  ///
+  /// In ko, this message translates to:
+  /// **'추천 인기 장소'**
+  String get homeSectionRecommendedPlaces;
+
+  /// No description provided for @homeSectionPopularMissions.
+  ///
+  /// In ko, this message translates to:
+  /// **'인기 도전 미션'**
+  String get homeSectionPopularMissions;
+
+  /// No description provided for @homeExploreMoreButton.
+  ///
+  /// In ko, this message translates to:
+  /// **'전체보기'**
+  String get homeExploreMoreButton;
+
+  /// No description provided for @searchBarPlaceholder.
+  ///
+  /// In ko, this message translates to:
+  /// **'장소, 미션, 키워드 검색'**
+  String get searchBarPlaceholder;
+
+  /// No description provided for @placeDetailLocationInfo.
+  ///
+  /// In ko, this message translates to:
+  /// **'위치 및 주소 정보'**
+  String get placeDetailLocationInfo;
+
+  /// No description provided for @placeDetailDirectionsButton.
+  ///
+  /// In ko, this message translates to:
+  /// **'길찾기'**
+  String get placeDetailDirectionsButton;
+
+  /// No description provided for @placeDetailNoCoordinatesNotice.
+  ///
+  /// In ko, this message translates to:
+  /// **'위치 좌표 정보 준비 중'**
+  String get placeDetailNoCoordinatesNotice;
+
+  /// No description provided for @placeDetailReviewCountFormat.
+  ///
+  /// In ko, this message translates to:
+  /// **'리뷰 {count}개'**
+  String placeDetailReviewCountFormat(Object count);
+
+  /// No description provided for @missionEligibleAreaMapTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'미션 인증 가능 구역 Map'**
+  String get missionEligibleAreaMapTitle;
+
+  /// No description provided for @missionDistrictTypeNotice.
+  ///
+  /// In ko, this message translates to:
+  /// **'상권 구역 내에서 인증할 수 있는 미션입니다.'**
+  String get missionDistrictTypeNotice;
+
+  /// No description provided for @signupCustomerSubtitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'여행지 추천 · 예약 · 리뷰 · 포인트 이용'**
+  String get signupCustomerSubtitle;
+
+  /// No description provided for @signupBusinessSubtitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'매장 등록 · 예약 · 추천 · 고객 관리'**
+  String get signupBusinessSubtitle;
+
+  /// No description provided for @categoryGeneral.
+  ///
+  /// In ko, this message translates to:
+  /// **'일반'**
+  String get categoryGeneral;
+
+  /// No description provided for @badgeTest.
+  ///
+  /// In ko, this message translates to:
+  /// **'테스트용'**
+  String get badgeTest;
+
+  /// No description provided for @authTypePhotoGps.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진 + GPS 인증'**
+  String get authTypePhotoGps;
+
+  /// No description provided for @spatialMapTitleSuyeong.
+  ///
+  /// In ko, this message translates to:
+  /// **'수영강변 인증 가능 산책 구역 Map'**
+  String get spatialMapTitleSuyeong;
+
+  /// No description provided for @spatialMapTitleDefault.
+  ///
+  /// In ko, this message translates to:
+  /// **'미션 인증 가능 구역 Map'**
+  String get spatialMapTitleDefault;
+
+  /// No description provided for @spatialMapApprovedTrail.
+  ///
+  /// In ko, this message translates to:
+  /// **'산책로 정식구역'**
+  String get spatialMapApprovedTrail;
+
+  /// No description provided for @spatialMapCandidateTrail.
+  ///
+  /// In ko, this message translates to:
+  /// **'후보 산책로 (PM승인대기)'**
+  String get spatialMapCandidateTrail;
+
+  /// No description provided for @spatialMapCandidateNotice.
+  ///
+  /// In ko, this message translates to:
+  /// **'본 장소는 복수 후보 영역입니다. PM 승인 후 최종 인증 범위가 확정됩니다.'**
+  String get spatialMapCandidateNotice;
+
+  /// No description provided for @spatialMapInsideNotice.
+  ///
+  /// In ko, this message translates to:
+  /// **'현재 위치는 인증 가능 구역 안입니다.'**
+  String get spatialMapInsideNotice;
+
+  /// No description provided for @spatialMapOutsideNotice.
+  ///
+  /// In ko, this message translates to:
+  /// **'현재 위치는 인증 가능 구역 밖입니다.'**
+  String get spatialMapOutsideNotice;
+
+  /// No description provided for @spatialMapCanVerifyImmediately.
+  ///
+  /// In ko, this message translates to:
+  /// **'즉시 미션 인증이 가능합니다.'**
+  String get spatialMapCanVerifyImmediately;
+
+  /// No description provided for @sessionExpiredMessage.
+  ///
+  /// In ko, this message translates to:
+  /// **'로그인 세션이 만료되었습니다. 다시 로그인해 주세요.'**
+  String get sessionExpiredMessage;
+
+  /// No description provided for @verificationPhotoOutsideRadiusTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'현장 사진 인증 범위 밖입니다'**
+  String get verificationPhotoOutsideRadiusTitle;
+
+  /// No description provided for @verificationPhotoOutsideRadiusBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'현재 지정된 사진 인증 지점에서 약 {distance}m 떨어져 있습니다.\n\n사진 인증 가능 범위는 {radius}m 이내입니다.\n\n약 {outsideBy}m 더 가까이 이동한 후 사진을 촬영해 주세요.'**
+  String verificationPhotoOutsideRadiusBody(
+    Object distance,
+    Object radius,
+    Object outsideBy,
+  );
+
+  /// No description provided for @verificationQrOutsideRadiusTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'QR은 정상적으로 인식되었습니다'**
+  String get verificationQrOutsideRadiusTitle;
+
+  /// No description provided for @verificationQrOutsideRadiusBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'하지만 현재 위치가 인증 범위를 벗어났습니다.\n\n현재 거리: 약 {distance}m\n인증 가능 범위: {radius}m 이내\n\n약 {outsideBy}m 더 가까이 이동한 후 다시 시도해 주세요.'**
+  String verificationQrOutsideRadiusBody(
+    Object distance,
+    Object radius,
+    Object outsideBy,
+  );
+
+  /// No description provided for @verificationGpsOutsideRadiusTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'위치 인증 범위 밖입니다'**
+  String get verificationGpsOutsideRadiusTitle;
+
+  /// No description provided for @verificationGpsOutsideRadiusBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'현재 미션 장소에서 약 {distance}m 떨어져 있습니다.\n\n인증 가능 범위는 {radius}m 이내입니다.\n\n약 {outsideBy}m 더 가까이 이동한 후 다시 시도해 주세요.'**
+  String verificationGpsOutsideRadiusBody(
+    Object distance,
+    Object radius,
+    Object outsideBy,
+  );
+
+  /// No description provided for @verificationLocationServiceDisabledTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'위치 서비스를 켜주세요'**
+  String get verificationLocationServiceDisabledTitle;
+
+  /// No description provided for @verificationLocationServiceDisabledBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'현재 휴대폰의 위치 서비스가 꺼져 있어 미션 장소와의 거리를 확인할 수 없습니다. 위치 서비스를 켠 후 다시 시도해 주세요.'**
+  String get verificationLocationServiceDisabledBody;
+
+  /// No description provided for @verificationLocationPermissionDeniedTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'위치 권한이 필요합니다'**
+  String get verificationLocationPermissionDeniedTitle;
+
+  /// No description provided for @verificationLocationPermissionDeniedBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'이 미션은 현재 위치 확인이 필요합니다. 앱의 위치 권한을 허용한 후 다시 시도해 주세요.'**
+  String get verificationLocationPermissionDeniedBody;
+
+  /// No description provided for @verificationLocationUnavailableTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'현재 위치를 확인할 수 없습니다'**
+  String get verificationLocationUnavailableTitle;
+
+  /// No description provided for @verificationLocationUnavailableBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'GPS 위치 정보를 가져오지 못했습니다. 잠시 후 다시 시도하거나 위치 서비스 상태를 확인해 주세요.'**
+  String get verificationLocationUnavailableBody;
 }
 
 class _AppLocalizationsDelegate

@@ -6,13 +6,24 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 _db_url_env = os.getenv("DATABASE_URL")
 _test_mode = os.getenv("TEST_MODE", "false").lower() == "true"
 
+_app_env = os.getenv("APP_ENV", "development")
+
 if _db_url_env:
     db_url = _db_url_env
 else:
     db_url = "sqlite:///./nampo_gogo_test.db"
 
 if "CHANGE_ME" in db_url:
-    password = os.getenv("POSTGRES_PASSWORD", "Hwang123!!")
+    password = os.getenv("POSTGRES_PASSWORD")
+    if not password:
+        if _app_env == "production":
+            raise RuntimeError(
+                "DATABASE_CONFIG_ERROR: POSTGRES_PASSWORD must be configured when DATABASE_URL contains CHANGE_ME placeholder"
+            )
+        else:
+            raise ValueError(
+                "DATABASE_CONFIG_ERROR: POSTGRES_PASSWORD must be configured when DATABASE_URL contains CHANGE_ME placeholder"
+            )
     db_url = db_url.replace("CHANGE_ME", password)
 
 connect_args = {"check_same_thread": False} if "sqlite" in db_url else {}

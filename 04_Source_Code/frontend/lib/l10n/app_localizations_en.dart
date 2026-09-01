@@ -21,6 +21,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminDashboardTitle => 'Admin Dashboard';
 
   @override
+  String get switchToCustomerMode => 'Switch to Customer Mode';
+
+  @override
   String get aiCategoryCafe => 'Cozy Cafes';
 
   @override
@@ -329,7 +332,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get missionAuthActionGps => 'GPS Verify';
 
   @override
-  String get missionAuthActionPhoto => 'Photo Verify';
+  String get missionAuthActionPhoto => 'Take Photo';
 
   @override
   String get missionAuthActionQr => 'Scan QR';
@@ -951,4 +954,195 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tooltipNotInterested => 'Not interested';
+
+  @override
+  String missionEligibleRadius100m(Object radius) {
+    return '${radius}m Radius';
+  }
+
+  @override
+  String get missionEligibleAreaApproved => 'Eligible Area';
+
+  @override
+  String get missionOutsideNotice =>
+      'Your location is outside the eligible area.';
+
+  @override
+  String distanceToBoundaryFormat(Object distance) {
+    return 'About ${distance}m to the nearest eligible boundary.';
+  }
+
+  @override
+  String get myLocationCheckButton => 'Check My Location';
+
+  @override
+  String get missionAuthMethodHeader => 'Verification Method';
+
+  @override
+  String get missionRewardInfoHeader => 'Mission Reward';
+
+  @override
+  String get missionStartAuthButton => 'Start Verification';
+
+  @override
+  String get missionCompletedBadge => 'Completed';
+
+  @override
+  String get missionTagGeneral => 'General Mission';
+
+  @override
+  String get missionTagPhoto => 'Photo Verification';
+
+  @override
+  String get missionTagGps => 'GPS Verification';
+
+  @override
+  String get missionTagQr => 'QR Verification';
+
+  @override
+  String get homeSectionRecommendedPlaces => 'Recommended Places';
+
+  @override
+  String get homeSectionPopularMissions => 'Popular Missions';
+
+  @override
+  String get homeExploreMoreButton => 'View All';
+
+  @override
+  String get searchBarPlaceholder => 'Search places, missions, keywords';
+
+  @override
+  String get placeDetailLocationInfo => 'Location & Address';
+
+  @override
+  String get placeDetailDirectionsButton => 'Directions';
+
+  @override
+  String get placeDetailNoCoordinatesNotice =>
+      'Location coordinates in preparation';
+
+  @override
+  String placeDetailReviewCountFormat(Object count) {
+    return '$count Reviews';
+  }
+
+  @override
+  String get missionEligibleAreaMapTitle => 'Eligible Mission Area Map';
+
+  @override
+  String get missionDistrictTypeNotice =>
+      'Verification is available within the designated district.';
+
+  @override
+  String get signupCustomerSubtitle =>
+      'Travel recommendations · Reservations · Reviews · Points';
+
+  @override
+  String get signupBusinessSubtitle =>
+      'Store registration · Reservations · Recommendations · Customer management';
+
+  @override
+  String get categoryGeneral => 'General';
+
+  @override
+  String get badgeTest => 'Test';
+
+  @override
+  String get authTypePhotoGps => 'Photo + GPS Verification';
+
+  @override
+  String get spatialMapTitleSuyeong => 'Suyeong River Eligible Trail Map';
+
+  @override
+  String get spatialMapTitleDefault => 'Mission Eligible Area Map';
+
+  @override
+  String get spatialMapApprovedTrail => 'Approved Walking Trail';
+
+  @override
+  String get spatialMapCandidateTrail =>
+      'Candidate Trail (Pending PM Approval)';
+
+  @override
+  String get spatialMapCandidateNotice =>
+      'This place has candidate areas. Range confirmed after PM approval.';
+
+  @override
+  String get spatialMapInsideNotice =>
+      'Current location is INSIDE the eligible area.';
+
+  @override
+  String get spatialMapOutsideNotice =>
+      'Current location is OUTSIDE the eligible area.';
+
+  @override
+  String get spatialMapCanVerifyImmediately =>
+      'Mission verification available immediately.';
+
+  @override
+  String get sessionExpiredMessage =>
+      'Login session has expired. Please log in again.';
+
+  @override
+  String get verificationPhotoOutsideRadiusTitle =>
+      'You are outside the photo verification area';
+
+  @override
+  String verificationPhotoOutsideRadiusBody(
+    Object distance,
+    Object radius,
+    Object outsideBy,
+  ) {
+    return 'You are about ${distance}m away from the photo point.\n\nAllowed radius is within ${radius}m.\n\nPlease move about ${outsideBy}m closer and take the photo.';
+  }
+
+  @override
+  String get verificationQrOutsideRadiusTitle =>
+      'QR code recognized successfully';
+
+  @override
+  String verificationQrOutsideRadiusBody(
+    Object distance,
+    Object radius,
+    Object outsideBy,
+  ) {
+    return 'However, your current location is outside the verification area.\n\nCurrent distance: ~${distance}m\nAllowed radius: within ${radius}m\n\nPlease move ~${outsideBy}m closer and try again.';
+  }
+
+  @override
+  String get verificationGpsOutsideRadiusTitle =>
+      'You are outside the location verification area';
+
+  @override
+  String verificationGpsOutsideRadiusBody(
+    Object distance,
+    Object radius,
+    Object outsideBy,
+  ) {
+    return 'You are about ${distance}m away from the mission location.\n\nAllowed radius is within ${radius}m.\n\nPlease move about ${outsideBy}m closer and try again.';
+  }
+
+  @override
+  String get verificationLocationServiceDisabledTitle =>
+      'Please enable location services';
+
+  @override
+  String get verificationLocationServiceDisabledBody =>
+      'Location services are turned off on your device, so the distance to the mission location cannot be determined. Please enable location services and try again.';
+
+  @override
+  String get verificationLocationPermissionDeniedTitle =>
+      'Location permission required';
+
+  @override
+  String get verificationLocationPermissionDeniedBody =>
+      'This mission requires your current location. Please allow the app to access your location and try again.';
+
+  @override
+  String get verificationLocationUnavailableTitle =>
+      'Unable to determine current location';
+
+  @override
+  String get verificationLocationUnavailableBody =>
+      'Failed to obtain GPS location information. Please try again shortly or check the status of location services.';
 }

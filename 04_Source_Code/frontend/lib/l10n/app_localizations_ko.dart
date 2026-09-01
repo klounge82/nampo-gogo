@@ -21,6 +21,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get adminDashboardTitle => '관리자 대시보드';
 
   @override
+  String get switchToCustomerMode => '고객모드로 전환';
+
+  @override
   String get aiCategoryCafe => '감성 카페';
 
   @override
@@ -146,7 +149,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get authTypeManual => '방문 인증';
 
   @override
-  String get authTypePhoto => '사진 인증';
+  String get authTypePhoto => '현장사진 인증';
 
   @override
   String get authTypeQr => 'QR 인증';
@@ -326,7 +329,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get missionAuthActionGps => 'GPS 인증';
 
   @override
-  String get missionAuthActionPhoto => '사진 인증';
+  String get missionAuthActionPhoto => '현장 사진 촬영';
 
   @override
   String get missionAuthActionQr => 'QR 스캔';
@@ -335,7 +338,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get missionCompletedCount => '완료한 미션';
 
   @override
-  String get missionDetailTitle => '미션 상세';
+  String get missionDetailTitle => '미션 상세정보';
 
   @override
   String get missionEmpty => '진행 가능한 미션이 없습니다.';
@@ -936,4 +939,179 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get tooltipNotInterested => '관심 없음';
+
+  @override
+  String missionEligibleRadius100m(Object radius) {
+    return '반경 ${radius}m';
+  }
+
+  @override
+  String get missionEligibleAreaApproved => '인증 가능 범위';
+
+  @override
+  String get missionOutsideNotice => '현재 위치는 인증 가능 구역 밖입니다.';
+
+  @override
+  String distanceToBoundaryFormat(Object distance) {
+    return '가장 가까운 인증 가능 경계까지 약 ${distance}m 남았습니다.';
+  }
+
+  @override
+  String get myLocationCheckButton => '내 위치 기준 확인';
+
+  @override
+  String get missionAuthMethodHeader => '인증 방식 안내';
+
+  @override
+  String get missionRewardInfoHeader => '미션 보상 정보';
+
+  @override
+  String get missionStartAuthButton => '미션 인증 시작하기';
+
+  @override
+  String get missionCompletedBadge => '인증 완료';
+
+  @override
+  String get missionTagGeneral => '일반 미션';
+
+  @override
+  String get missionTagPhoto => '사진 인증';
+
+  @override
+  String get missionTagGps => '위치 인증';
+
+  @override
+  String get missionTagQr => 'QR 인증';
+
+  @override
+  String get homeSectionRecommendedPlaces => '추천 인기 장소';
+
+  @override
+  String get homeSectionPopularMissions => '인기 도전 미션';
+
+  @override
+  String get homeExploreMoreButton => '전체보기';
+
+  @override
+  String get searchBarPlaceholder => '장소, 미션, 키워드 검색';
+
+  @override
+  String get placeDetailLocationInfo => '위치 및 주소 정보';
+
+  @override
+  String get placeDetailDirectionsButton => '길찾기';
+
+  @override
+  String get placeDetailNoCoordinatesNotice => '위치 좌표 정보 준비 중';
+
+  @override
+  String placeDetailReviewCountFormat(Object count) {
+    return '리뷰 $count개';
+  }
+
+  @override
+  String get missionEligibleAreaMapTitle => '미션 인증 가능 구역 Map';
+
+  @override
+  String get missionDistrictTypeNotice => '상권 구역 내에서 인증할 수 있는 미션입니다.';
+
+  @override
+  String get signupCustomerSubtitle => '여행지 추천 · 예약 · 리뷰 · 포인트 이용';
+
+  @override
+  String get signupBusinessSubtitle => '매장 등록 · 예약 · 추천 · 고객 관리';
+
+  @override
+  String get categoryGeneral => '일반';
+
+  @override
+  String get badgeTest => '테스트용';
+
+  @override
+  String get authTypePhotoGps => '사진 + GPS 인증';
+
+  @override
+  String get spatialMapTitleSuyeong => '수영강변 인증 가능 산책 구역 Map';
+
+  @override
+  String get spatialMapTitleDefault => '미션 인증 가능 구역 Map';
+
+  @override
+  String get spatialMapApprovedTrail => '산책로 정식구역';
+
+  @override
+  String get spatialMapCandidateTrail => '후보 산책로 (PM승인대기)';
+
+  @override
+  String get spatialMapCandidateNotice =>
+      '본 장소는 복수 후보 영역입니다. PM 승인 후 최종 인증 범위가 확정됩니다.';
+
+  @override
+  String get spatialMapInsideNotice => '현재 위치는 인증 가능 구역 안입니다.';
+
+  @override
+  String get spatialMapOutsideNotice => '현재 위치는 인증 가능 구역 밖입니다.';
+
+  @override
+  String get spatialMapCanVerifyImmediately => '즉시 미션 인증이 가능합니다.';
+
+  @override
+  String get sessionExpiredMessage => '로그인 세션이 만료되었습니다. 다시 로그인해 주세요.';
+
+  @override
+  String get verificationPhotoOutsideRadiusTitle => '현장 사진 인증 범위 밖입니다';
+
+  @override
+  String verificationPhotoOutsideRadiusBody(
+    Object distance,
+    Object radius,
+    Object outsideBy,
+  ) {
+    return '현재 지정된 사진 인증 지점에서 약 ${distance}m 떨어져 있습니다.\n\n사진 인증 가능 범위는 ${radius}m 이내입니다.\n\n약 ${outsideBy}m 더 가까이 이동한 후 사진을 촬영해 주세요.';
+  }
+
+  @override
+  String get verificationQrOutsideRadiusTitle => 'QR은 정상적으로 인식되었습니다';
+
+  @override
+  String verificationQrOutsideRadiusBody(
+    Object distance,
+    Object radius,
+    Object outsideBy,
+  ) {
+    return '하지만 현재 위치가 인증 범위를 벗어났습니다.\n\n현재 거리: 약 ${distance}m\n인증 가능 범위: ${radius}m 이내\n\n약 ${outsideBy}m 더 가까이 이동한 후 다시 시도해 주세요.';
+  }
+
+  @override
+  String get verificationGpsOutsideRadiusTitle => '위치 인증 범위 밖입니다';
+
+  @override
+  String verificationGpsOutsideRadiusBody(
+    Object distance,
+    Object radius,
+    Object outsideBy,
+  ) {
+    return '현재 미션 장소에서 약 ${distance}m 떨어져 있습니다.\n\n인증 가능 범위는 ${radius}m 이내입니다.\n\n약 ${outsideBy}m 더 가까이 이동한 후 다시 시도해 주세요.';
+  }
+
+  @override
+  String get verificationLocationServiceDisabledTitle => '위치 서비스를 켜주세요';
+
+  @override
+  String get verificationLocationServiceDisabledBody =>
+      '현재 휴대폰의 위치 서비스가 꺼져 있어 미션 장소와의 거리를 확인할 수 없습니다. 위치 서비스를 켠 후 다시 시도해 주세요.';
+
+  @override
+  String get verificationLocationPermissionDeniedTitle => '위치 권한이 필요합니다';
+
+  @override
+  String get verificationLocationPermissionDeniedBody =>
+      '이 미션은 현재 위치 확인이 필요합니다. 앱의 위치 권한을 허용한 후 다시 시도해 주세요.';
+
+  @override
+  String get verificationLocationUnavailableTitle => '현재 위치를 확인할 수 없습니다';
+
+  @override
+  String get verificationLocationUnavailableBody =>
+      'GPS 위치 정보를 가져오지 못했습니다. 잠시 후 다시 시도하거나 위치 서비스 상태를 확인해 주세요.';
 }

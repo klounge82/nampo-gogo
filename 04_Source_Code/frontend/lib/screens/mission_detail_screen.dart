@@ -102,12 +102,23 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
       } catch (locErr) {
         if (!mounted) return;
         final errStr = locErr.toString();
-        if (errStr.contains('LocationServicesDisabledException') || errStr.contains('위치 서비스')) {
-          _showErrorDialog('위치 서비스를 켜주세요', '현재 휴대폰의 위치 서비스가 꺼져 있어 미션 장소와의 거리를 확인할 수 없습니다. 위치 서비스를 켠 후 다시 시도해 주세요.');
-        } else if (errStr.contains('PermissionDeniedException') || errStr.contains('위치 권한')) {
-          _showErrorDialog('위치 권한이 필요합니다', '이 미션은 현재 위치 확인이 필요합니다. 앱의 위치 권한을 허용한 후 다시 시도해 주세요.');
+        if (errStr.contains('LocationServicesDisabledException') ||
+            errStr.contains('위치 서비스')) {
+          _showErrorDialog(
+            '위치 서비스를 켜주세요',
+            '현재 휴대폰의 위치 서비스가 꺼져 있어 미션 장소와의 거리를 확인할 수 없습니다. 위치 서비스를 켠 후 다시 시도해 주세요.',
+          );
+        } else if (errStr.contains('PermissionDeniedException') ||
+            errStr.contains('위치 권한')) {
+          _showErrorDialog(
+            '위치 권한이 필요합니다',
+            '이 미션은 현재 위치 확인이 필요합니다. 앱의 위치 권한을 허용한 후 다시 시도해 주세요.',
+          );
         } else {
-          _showErrorDialog('현재 위치를 확인할 수 없습니다', 'GPS 위치 정보를 가져오지 못했습니다. 잠시 후 다시 시도하거나 위치 서비스 상태를 확인해 주세요.');
+          _showErrorDialog(
+            '현재 위치를 확인할 수 없습니다',
+            'GPS 위치 정보를 가져오지 못했습니다. 잠시 후 다시 시도하거나 위치 서비스 상태를 확인해 주세요.',
+          );
         }
         return;
       }
@@ -184,7 +195,10 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
         longitude = pos.longitude;
       } catch (locErr) {
         if (!mounted) return;
-        _showErrorDialog('위치 오류', 'GPS 위치 정보를 가져올 수 없습니다. 위치 권한 및 GPS를 확인해주세요.');
+        _showErrorDialog(
+          '위치 오류',
+          'GPS 위치 정보를 가져올 수 없습니다. 위치 권한 및 GPS를 확인해주세요.',
+        );
         return;
       }
     }
@@ -210,7 +224,10 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
         if (!mounted) return;
         _showSuccessDialog(context, res['points_awarded'] as int);
       } else {
-        _showErrorDialog('인증 실패', _mapErrorMessage(res['message'] as String? ?? '서버 검증 오류'));
+        _showErrorDialog(
+          '인증 실패',
+          _mapErrorMessage(res['message'] as String? ?? '서버 검증 오류'),
+        );
       }
     } catch (e) {
       if (!mounted) return;
@@ -253,7 +270,10 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
         if (!mounted) return;
         _showSuccessDialog(context, res['points_awarded'] as int);
       } else {
-        _showErrorDialog('인증 실패', _mapErrorMessage(res['message'] as String? ?? '검증 오류'));
+        _showErrorDialog(
+          '인증 실패',
+          _mapErrorMessage(res['message'] as String? ?? '검증 오류'),
+        );
       }
     } catch (e) {
       if (!mounted) return;
@@ -264,8 +284,9 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
   }
 
   void _handleVerificationError(dynamic error) {
-    String title = '인증 실패';
-    String body = '미션 인증 처리 중 오류가 발생했습니다.';
+    final l10n = AppLocalizations.of(context);
+    String title = l10n?.dialogErrorTitle ?? '인증 실패';
+    String body = l10n?.dialogErrorTitle ?? '미션 인증 처리 중 오류가 발생했습니다.';
 
     if (error is DioException && error.response?.data != null) {
       final data = error.response!.data;
@@ -274,7 +295,9 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
         detailMap = Map<String, dynamic>.from(data['detail'] as Map);
       }
 
-      if (detailMap != null && (detailMap['code'] == 'GPS_OUTSIDE_RADIUS' || detailMap['code'] == 'PHOTO_GPS_OUTSIDE_RADIUS')) {
+      if (detailMap != null &&
+          (detailMap['code'] == 'GPS_OUTSIDE_RADIUS' ||
+              detailMap['code'] == 'PHOTO_GPS_OUTSIDE_RADIUS')) {
         final dist = detailMap['distance_m'] as int? ?? 0;
         final radius = detailMap['allowed_radius_m'] as int? ?? 0;
         final outsideBy = detailMap['outside_by_m'] as int? ?? 0;
@@ -282,14 +305,25 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
         final isPhotoGps = detailMap['code'] == 'PHOTO_GPS_OUTSIDE_RADIUS';
 
         if (isPhotoGps) {
-          title = '현장 사진 인증 범위 밖입니다';
-          body = '현재 지정된 사진 인증 지점에서 약 ${dist}m 떨어져 있습니다.\n\n사진 인증 가능 범위는 ${radius}m 이내입니다.\n\n약 ${outsideBy}m 더 가까이 이동한 후 사진을 촬영해 주세요.';
+          title =
+              l10n?.verificationPhotoOutsideRadiusTitle ?? '현장 사진 인증 범위 밖입니다';
+          body =
+              l10n?.verificationPhotoOutsideRadiusBody(
+                dist,
+                radius,
+                outsideBy,
+              ) ??
+              '현재 지정된 사진 인증 지점에서 약 ${dist}m 떨어져 있습니다.\n\n사진 인증 가능 범위는 ${radius}m 이내입니다.\n\n약 ${outsideBy}m 더 가까이 이동한 후 사진을 촬영해 주세요.';
         } else if (isQrValid) {
-          title = 'QR은 정상적으로 인식되었습니다';
-          body = '하지만 현재 위치가 인증 범위를 벗어났습니다.\n\n현재 거리: 약 ${dist}m\n인증 가능 범위: ${radius}m 이내\n\n약 ${outsideBy}m 더 가까이 이동한 후 다시 시도해 주세요.';
+          title = l10n?.verificationQrOutsideRadiusTitle ?? 'QR은 정상적으로 인식되었습니다';
+          body =
+              l10n?.verificationQrOutsideRadiusBody(dist, radius, outsideBy) ??
+              '하지만 현재 위치가 인증 범위를 벗어났습니다.\n\n현재 거리: 약 ${dist}m\n인증 가능 범위: ${radius}m 이내\n\n약 ${outsideBy}m 더 가까이 이동한 후 다시 시도해 주세요.';
         } else {
-          title = '위치 인증 범위 밖입니다';
-          body = '현재 미션 장소에서 약 ${dist}m 떨어져 있습니다.\n\n인증 가능 범위는 ${radius}m 이내입니다.\n\n약 ${outsideBy}m 더 가까이 이동한 후 다시 시도해 주세요.';
+          title = l10n?.verificationGpsOutsideRadiusTitle ?? '위치 인증 범위 밖입니다';
+          body =
+              l10n?.verificationGpsOutsideRadiusBody(dist, radius, outsideBy) ??
+              '현재 미션 장소에서 약 ${dist}m 떨어져 있습니다.\n\n인증 가능 범위는 ${radius}m 이내입니다.\n\n약 ${outsideBy}m 더 가까이 이동한 후 다시 시도해 주세요.';
         }
         _showErrorDialog(title, body);
         return;
@@ -297,15 +331,24 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
     }
 
     final errStr = error.toString();
-    if (errStr.contains('LocationServicesDisabledException') || errStr.contains('위치 서비스가 꺼져')) {
-      title = '위치 서비스를 켜주세요';
-      body = '현재 휴대폰의 위치 서비스가 꺼져 있어 미션 장소와의 거리를 확인할 수 없습니다. 위치 서비스를 켠 후 다시 시도해 주세요.';
-    } else if (errStr.contains('PermissionDeniedException') || errStr.contains('위치 권한')) {
-      title = '위치 권한이 필요합니다';
-      body = '이 미션은 현재 위치 확인이 필요합니다. 앱의 위치 권한을 허용한 후 다시 시도해 주세요.';
-    } else if (errStr.contains('LocationUnavailableException') || errStr.contains('GPS 위치 정보')) {
-      title = '현재 위치를 확인할 수 없습니다';
-      body = 'GPS 위치 정보를 가져오지 못했습니다. 잠시 후 다시 시도하거나 위치 서비스 상태를 확인해 주세요.';
+    if (errStr.contains('LocationServicesDisabledException') ||
+        errStr.contains('위치 서비스가 꺼져')) {
+      title = l10n?.verificationLocationServiceDisabledTitle ?? '위치 서비스를 켜주세요';
+      body =
+          l10n?.verificationLocationServiceDisabledBody ??
+          '현재 휴대폰의 위치 서비스가 꺼져 있어 미션 장소와의 거리를 확인할 수 없습니다. 위치 서비스를 켠 후 다시 시도해 주세요.';
+    } else if (errStr.contains('PermissionDeniedException') ||
+        errStr.contains('위치 권한')) {
+      title = l10n?.verificationLocationPermissionDeniedTitle ?? '위치 권한이 필요합니다';
+      body =
+          l10n?.verificationLocationPermissionDeniedBody ??
+          '이 미션은 현재 위치 확인이 필요합니다. 앱의 위치 권한을 허용한 후 다시 시도해 주세요.';
+    } else if (errStr.contains('LocationUnavailableException') ||
+        errStr.contains('GPS 위치 정보')) {
+      title = l10n?.verificationLocationUnavailableTitle ?? '현재 위치를 확인할 수 없습니다';
+      body =
+          l10n?.verificationLocationUnavailableBody ??
+          'GPS 위치 정보를 가져오지 못했습니다. 잠시 후 다시 시도하거나 위치 서비스 상태를 확인해 주세요.';
     } else {
       body = _extractErrorMessage(error);
     }
@@ -316,7 +359,9 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
   String _extractErrorMessage(dynamic error) {
     if (error is DioException && error.response?.data != null) {
       final data = error.response!.data;
-      if (data is Map && data.containsKey('detail') && data['detail'] is String) {
+      if (data is Map &&
+          data.containsKey('detail') &&
+          data['detail'] is String) {
         return _mapErrorMessage(data['detail'] as String);
       } else if (data is String && data.isNotEmpty) {
         return _mapErrorMessage(data);
@@ -334,10 +379,19 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
         .replaceAll('[bad response]', '')
         .trim();
 
-    if (clean.contains('403') || clean.contains('유효하지 않거나') || clean.contains('만료된') || clean.contains('폐기된') || clean.contains('INVALID')) {
+    if (clean.contains('403') ||
+        clean.contains('유효하지 않거나') ||
+        clean.contains('만료된') ||
+        clean.contains('폐기된') ||
+        clean.contains('INVALID')) {
       return '유효하지 않은 QR 코드입니다.';
-    } else if (clean.contains('반경') || clean.contains('거리') || clean.contains('위치') || clean.contains('GPS')) {
-      if (clean.length > 5 && !clean.contains('{') && !clean.contains('Instance of')) {
+    } else if (clean.contains('반경') ||
+        clean.contains('거리') ||
+        clean.contains('위치') ||
+        clean.contains('GPS')) {
+      if (clean.length > 5 &&
+          !clean.contains('{') &&
+          !clean.contains('Instance of')) {
         return clean;
       }
       return '현재 위치에서는 이 미션을 수행할 수 없습니다. 장소와의 거리를 확인한 후 다시 시도해 주세요.';
@@ -347,7 +401,9 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
       return 'QR 스캔을 위해 카메라 권한이 필요합니다.';
     } else if (clean.contains('위치 서비스') || clean.contains('location')) {
       return '위치 서비스를 켜주세요.';
-    } else if (clean.contains('네트워크') || clean.contains('Connection') || clean.contains('SocketException')) {
+    } else if (clean.contains('네트워크') ||
+        clean.contains('Connection') ||
+        clean.contains('SocketException')) {
       return '네트워크 연결을 확인해 주세요.';
     } else if (clean.contains('400')) {
       return '현재 위치에서는 이 미션을 수행할 수 없습니다. 장소와의 거리를 확인한 후 다시 시도해 주세요.';
@@ -357,6 +413,8 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
 
   void _showErrorDialog(String title, String message) {
     final l10n = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context);
+    final langCode = locale.languageCode;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -378,8 +436,11 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        title: const Text('🎉 미션 완료!', style: TextStyle(fontWeight: FontWeight.bold)),
-        content: Text('축하합니다! 미션을 완수하여 $points P가 지급되었습니다.'),
+        title: Text(
+          '🎉 ${l10n.missionCompletedBadge}!',
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        content: Text('${l10n.missionCompletedCount}: $points P'),
         actions: [
           ElevatedButton(
             onPressed: () {
@@ -400,11 +461,13 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context);
+    final langCode = locale.languageCode;
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(
-          _mission?.title ?? l10n.missionDetailTitle,
+          _mission?.localizedTitle(langCode) ?? l10n.missionDetailTitle,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: AppColors.surface,
@@ -454,6 +517,8 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
 
   Widget _buildContent(BuildContext context, Mission mission) {
     final l10n = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context);
+    final langCode = locale.languageCode;
     final bottomInset = MediaQuery.of(context).padding.bottom;
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -477,7 +542,7 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
                 ),
                 const SizedBox(height: 14.0),
                 Text(
-                  mission.title,
+                  mission.localizedTitle(langCode),
                   style: const TextStyle(
                     fontSize: 20.0,
                     fontWeight: FontWeight.bold,
@@ -527,7 +592,7 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
                 ),
                 const SizedBox(height: 8.0),
                 Text(
-                  mission.description,
+                  mission.localizedDescription(langCode),
                   style: const TextStyle(
                     fontSize: 13.0,
                     color: AppColors.textSecondary,
@@ -670,7 +735,7 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
   String _getActionButtonLabel(AppLocalizations l10n, String authType) {
     final type = authType.toUpperCase();
     if (type.contains('PHOTO_GPS')) {
-      return '📸📍 현장사진 인증 시작하기';
+      return '📸📍 ${l10n.missionStartAuthButton}';
     } else if (type.contains('QR')) {
       return '🔍 ${l10n.missionAuthActionQr}';
     } else if (type.contains('GPS') || type.contains('LOCATION')) {

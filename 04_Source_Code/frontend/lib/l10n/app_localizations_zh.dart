@@ -21,6 +21,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get adminDashboardTitle => '系统管理后台';
 
   @override
+  String get switchToCustomerMode => '고객모드로 전환';
+
+  @override
   String get aiCategoryCafe => '特色咖啡馆';
 
   @override
@@ -144,7 +147,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get authTypeManual => '到访认证';
 
   @override
-  String get authTypePhoto => '照片认证';
+  String get authTypePhoto => '图片验证';
 
   @override
   String get authTypeQr => 'QR认证';
@@ -324,7 +327,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get missionAuthActionGps => 'GPS验证';
 
   @override
-  String get missionAuthActionPhoto => '照片验证';
+  String get missionAuthActionPhoto => '拍摄照片';
 
   @override
   String get missionAuthActionQr => '扫描二维码';
@@ -333,7 +336,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get missionCompletedCount => '已完成任务';
 
   @override
-  String get missionDetailTitle => '任务详情';
+  String get missionDetailTitle => '任务详细信息';
 
   @override
   String get missionEmpty => '暂无可用任务。';
@@ -924,6 +927,180 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get tooltipNotInterested => '不感兴趣';
+
+  @override
+  String missionEligibleRadius100m(Object radius) {
+    return '半径$radius米';
+  }
+
+  @override
+  String get missionEligibleAreaApproved => '可验证区域';
+
+  @override
+  String get missionOutsideNotice => '当前位置在可验证区域外。';
+
+  @override
+  String distanceToBoundaryFormat(Object distance) {
+    return '距离最近的可验证区域边界约$distance米。';
+  }
+
+  @override
+  String get myLocationCheckButton => '查看我的位置';
+
+  @override
+  String get missionAuthMethodHeader => '验证方式说明';
+
+  @override
+  String get missionRewardInfoHeader => '任务奖励信息';
+
+  @override
+  String get missionStartAuthButton => '开始任务验证';
+
+  @override
+  String get missionCompletedBadge => '验证完成';
+
+  @override
+  String get missionTagGeneral => '普通任务';
+
+  @override
+  String get missionTagPhoto => '照片验证';
+
+  @override
+  String get missionTagGps => '位置验证';
+
+  @override
+  String get missionTagQr => '二维码验证';
+
+  @override
+  String get homeSectionRecommendedPlaces => '推荐热门景点';
+
+  @override
+  String get homeSectionPopularMissions => '热门挑战任务';
+
+  @override
+  String get homeExploreMoreButton => '查看全部';
+
+  @override
+  String get searchBarPlaceholder => '搜索景点、任务、关键词';
+
+  @override
+  String get placeDetailLocationInfo => '位置与地址信息';
+
+  @override
+  String get placeDetailDirectionsButton => '路线导航';
+
+  @override
+  String get placeDetailNoCoordinatesNotice => '位置坐标信息准备中';
+
+  @override
+  String placeDetailReviewCountFormat(Object count) {
+    return '$count条评价';
+  }
+
+  @override
+  String get missionEligibleAreaMapTitle => '任务可验证区域地图';
+
+  @override
+  String get missionDistrictTypeNotice => '此任务可在指定区域内完成验证。';
+
+  @override
+  String get signupCustomerSubtitle => '旅行推荐 · 预约 · 评价 · 积分';
+
+  @override
+  String get signupBusinessSubtitle => '店铺注册 · 预约 · 推荐 · 客户管理';
+
+  @override
+  String get categoryGeneral => '常规';
+
+  @override
+  String get badgeTest => '测试用';
+
+  @override
+  String get authTypePhotoGps => '图片 + GPS 验证';
+
+  @override
+  String get spatialMapTitleSuyeong => '水营江边可认证散步区域 Map';
+
+  @override
+  String get spatialMapTitleDefault => '任务可认证区域 Map';
+
+  @override
+  String get spatialMapApprovedTrail => '散步路正式区域';
+
+  @override
+  String get spatialMapCandidateTrail => '候选散步路 (PM待批准)';
+
+  @override
+  String get spatialMapCandidateNotice => '该场所为候选区域。PM批准后确定最终认证范围。';
+
+  @override
+  String get spatialMapInsideNotice => '当前位置在可认证区域内。';
+
+  @override
+  String get spatialMapOutsideNotice => '当前位置在可认证区域外。';
+
+  @override
+  String get spatialMapCanVerifyImmediately => '可立即进行任务认证。';
+
+  @override
+  String get sessionExpiredMessage => '登录会话已过期，请重新登录。';
+
+  @override
+  String get verificationPhotoOutsideRadiusTitle => '超出拍照验证范围';
+
+  @override
+  String verificationPhotoOutsideRadiusBody(
+    Object distance,
+    Object radius,
+    Object outsideBy,
+  ) {
+    return '当前距离拍照认证地点约$distance米。\n\n允许认证范围为$radius米以内。\n\n请再靠近约$outsideBy米后进行拍照。';
+  }
+
+  @override
+  String get verificationQrOutsideRadiusTitle => 'QR码识别成功';
+
+  @override
+  String verificationQrOutsideRadiusBody(
+    Object distance,
+    Object radius,
+    Object outsideBy,
+  ) {
+    return '但当前位置超出了认证范围。\n\n当前距离：约$distance米\n认证范围：$radius米以内\n\n请靠近约$outsideBy米后重试。';
+  }
+
+  @override
+  String get verificationGpsOutsideRadiusTitle => '超出位置认证范围';
+
+  @override
+  String verificationGpsOutsideRadiusBody(
+    Object distance,
+    Object radius,
+    Object outsideBy,
+  ) {
+    return '当前距离任务地点约$distance米。\n\n允许认证范围为$radius米以内。\n\n请再靠近约$outsideBy米后重试。';
+  }
+
+  @override
+  String get verificationLocationServiceDisabledTitle => '请开启定位服务';
+
+  @override
+  String get verificationLocationServiceDisabledBody =>
+      '当前手机的定位服务已关闭，因此无法确认与任务地点的距离。请开启定位服务后重试。';
+
+  @override
+  String get verificationLocationPermissionDeniedTitle => '需要定位权限';
+
+  @override
+  String get verificationLocationPermissionDeniedBody =>
+      '此任务需要确认当前位置。请允许应用的定位权限后重试。';
+
+  @override
+  String get verificationLocationUnavailableTitle => '无法确定当前位置';
+
+  @override
+  String get verificationLocationUnavailableBody =>
+      '无法获取GPS位置信息。请稍后重试或检查定位服务状态。';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -941,6 +1118,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get adminDashboardTitle => '系统管理后台';
+
+  @override
+  String get switchToCustomerMode => '切换到用户模式';
 
   @override
   String get aiCategoryCafe => '特色咖啡馆';
@@ -1066,7 +1246,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get authTypeManual => '到访认证';
 
   @override
-  String get authTypePhoto => '照片认证';
+  String get authTypePhoto => '图片验证';
 
   @override
   String get authTypeQr => 'QR认证';
@@ -1246,7 +1426,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get missionAuthActionGps => 'GPS验证';
 
   @override
-  String get missionAuthActionPhoto => '照片验证';
+  String get missionAuthActionPhoto => '拍摄照片';
 
   @override
   String get missionAuthActionQr => '扫描二维码';
@@ -1255,7 +1435,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get missionCompletedCount => '已完成任务';
 
   @override
-  String get missionDetailTitle => '任务详情';
+  String get missionDetailTitle => '任务详细信息';
 
   @override
   String get missionEmpty => '暂无可用任务。';
@@ -1846,4 +2026,178 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get tooltipNotInterested => '不感兴趣';
+
+  @override
+  String missionEligibleRadius100m(Object radius) {
+    return '半径$radius米';
+  }
+
+  @override
+  String get missionEligibleAreaApproved => '可验证区域';
+
+  @override
+  String get missionOutsideNotice => '当前位置在可验证区域外。';
+
+  @override
+  String distanceToBoundaryFormat(Object distance) {
+    return '距离最近的可验证区域边界约$distance米。';
+  }
+
+  @override
+  String get myLocationCheckButton => '查看我的位置';
+
+  @override
+  String get missionAuthMethodHeader => '验证方式说明';
+
+  @override
+  String get missionRewardInfoHeader => '任务奖励信息';
+
+  @override
+  String get missionStartAuthButton => '开始任务验证';
+
+  @override
+  String get missionCompletedBadge => '验证完成';
+
+  @override
+  String get missionTagGeneral => '普通任务';
+
+  @override
+  String get missionTagPhoto => '照片验证';
+
+  @override
+  String get missionTagGps => '位置验证';
+
+  @override
+  String get missionTagQr => '二维码验证';
+
+  @override
+  String get homeSectionRecommendedPlaces => '推荐热门景点';
+
+  @override
+  String get homeSectionPopularMissions => '热门挑战任务';
+
+  @override
+  String get homeExploreMoreButton => '查看全部';
+
+  @override
+  String get searchBarPlaceholder => '搜索景点、任务、关键词';
+
+  @override
+  String get placeDetailLocationInfo => '位置与地址信息';
+
+  @override
+  String get placeDetailDirectionsButton => '路线导航';
+
+  @override
+  String get placeDetailNoCoordinatesNotice => '位置坐标信息准备中';
+
+  @override
+  String placeDetailReviewCountFormat(Object count) {
+    return '$count条评价';
+  }
+
+  @override
+  String get missionEligibleAreaMapTitle => '任务可验证区域地图';
+
+  @override
+  String get missionDistrictTypeNotice => '此任务可在指定区域内完成验证。';
+
+  @override
+  String get signupCustomerSubtitle => '旅行推荐 · 预约 · 评价 · 积分';
+
+  @override
+  String get signupBusinessSubtitle => '店铺注册 · 预约 · 推荐 · 客户管理';
+
+  @override
+  String get categoryGeneral => '常规';
+
+  @override
+  String get badgeTest => '测试用';
+
+  @override
+  String get authTypePhotoGps => '图片 + GPS 验证';
+
+  @override
+  String get spatialMapTitleSuyeong => '水营江边可认证散步区域 Map';
+
+  @override
+  String get spatialMapTitleDefault => '任务可认证区域 Map';
+
+  @override
+  String get spatialMapApprovedTrail => '散步路正式区域';
+
+  @override
+  String get spatialMapCandidateTrail => '候选散步路 (PM待批准)';
+
+  @override
+  String get spatialMapCandidateNotice => '该场所为候选区域。PM批准后确定最终认证范围。';
+
+  @override
+  String get spatialMapInsideNotice => '当前位置在可认证区域内。';
+
+  @override
+  String get spatialMapOutsideNotice => '当前位置在可认证区域外。';
+
+  @override
+  String get spatialMapCanVerifyImmediately => '可立即进行任务认证。';
+
+  @override
+  String get sessionExpiredMessage => '登录会话已过期，请重新登录。';
+
+  @override
+  String get verificationPhotoOutsideRadiusTitle => '超出拍照验证范围';
+
+  @override
+  String verificationPhotoOutsideRadiusBody(
+    Object distance,
+    Object radius,
+    Object outsideBy,
+  ) {
+    return '当前距离拍照认证地点约$distance米。\n\n允许认证范围为$radius米以内。\n\n请再靠近约$outsideBy米后进行拍照。';
+  }
+
+  @override
+  String get verificationQrOutsideRadiusTitle => 'QR码识别成功';
+
+  @override
+  String verificationQrOutsideRadiusBody(
+    Object distance,
+    Object radius,
+    Object outsideBy,
+  ) {
+    return '但当前位置超出了认证范围。\n\n当前距离：约$distance米\n认证范围：$radius米以内\n\n请靠近约$outsideBy米后重试。';
+  }
+
+  @override
+  String get verificationGpsOutsideRadiusTitle => '超出位置认证范围';
+
+  @override
+  String verificationGpsOutsideRadiusBody(
+    Object distance,
+    Object radius,
+    Object outsideBy,
+  ) {
+    return '当前距离任务地点约$distance米。\n\n允许认证范围为$radius米以内。\n\n请再靠近约$outsideBy米后重试。';
+  }
+
+  @override
+  String get verificationLocationServiceDisabledTitle => '请开启定位服务';
+
+  @override
+  String get verificationLocationServiceDisabledBody =>
+      '当前手机的定位服务已关闭，因此无法确认与任务地点的距离。请开启定位服务后重试。';
+
+  @override
+  String get verificationLocationPermissionDeniedTitle => '需要定位权限';
+
+  @override
+  String get verificationLocationPermissionDeniedBody =>
+      '此任务需要确认当前位置。请允许应用的定位权限后重试。';
+
+  @override
+  String get verificationLocationUnavailableTitle => '无法确定当前位置';
+
+  @override
+  String get verificationLocationUnavailableBody =>
+      '无法获取GPS位置信息。请稍后重试或检查定位服务状态。';
 }

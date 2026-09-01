@@ -87,10 +87,17 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         response.headers["X-Request-ID"] = request_id
         
         path = request.url.path
-        if "profile-image" not in path and "login" not in path:
-            print(f"[ACCESS_LOG] [ID:{request_id}] {request.method} {path} - Status: {response.status_code} - Time: {process_time:.2f}ms")
-        else:
-            print(f"[ACCESS_LOG] [ID:{request_id}] {request.method} {path} (Sensitive API) - Status: {response.status_code} - Time: {process_time:.2f}ms")
+        is_sensitive = "profile-image" in path or "login" in path
+        log_payload = {
+            "event": "access_log",
+            "request_id": request_id,
+            "method": request.method,
+            "path": path,
+            "status_code": response.status_code,
+            "duration_ms": round(process_time, 2),
+            "is_sensitive": is_sensitive
+        }
+        print(json.dumps(log_payload, ensure_ascii=False))
             
         return response
 
@@ -617,6 +624,18 @@ def signup_business(
             detail="이미 가입된 계정입니다. 로그인 후 사업자회원 신청을 진행해 주세요."
         )
 
+    reg_num = (user_in.business_registration_number or "").strip()
+    if reg_num:
+        existing_reg = db.query(models.BusinessApplication).filter(
+            models.BusinessApplication.business_registration_number == reg_num,
+            models.BusinessApplication.status.in_(["PENDING", "APPROVED"])
+        ).first()
+        if existing_reg:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="이미 등록되었거나 심사 중인 사업자등록번호입니다."
+            )
+
     try:
         new_user = models.User(
             email=user_in.email,
@@ -640,7 +659,7 @@ def signup_business(
         app_record = models.BusinessApplication(
             user_id=new_user.id,
             business_name=user_in.business_name,
-            business_registration_number=user_in.business_registration_number,
+            business_registration_number=reg_num,
             representative_name=user_in.representative_name,
             phone=user_in.phone,
             requested_store_id=user_in.requested_store_id,
@@ -778,7 +797,7 @@ def apply_business_account(
     current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    # Check for existing PENDING application
+    # Check for existing PENDING application by same user
     existing_pending = db.query(models.BusinessApplication).filter(
         models.BusinessApplication.user_id == current_user.id,
         models.BusinessApplication.status == "PENDING"
@@ -790,10 +809,22 @@ def apply_business_account(
             detail="이미 승인 대기 중인 사업자 신청건이 있습니다."
         )
 
+    reg_num = (req.business_registration_number or "").strip()
+    if reg_num:
+        existing_reg = db.query(models.BusinessApplication).filter(
+            models.BusinessApplication.business_registration_number == reg_num,
+            models.BusinessApplication.status.in_(["PENDING", "APPROVED"])
+        ).first()
+        if existing_reg:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="이미 등록되었거나 심사 중인 사업자등록번호입니다."
+            )
+
     app_record = models.BusinessApplication(
         user_id=current_user.id,
         business_name=req.business_name,
-        business_registration_number=req.business_registration_number,
+        business_registration_number=reg_num,
         representative_name=req.representative_name,
         phone=req.phone,
         requested_store_id=req.requested_store_id,
@@ -1394,17 +1425,32 @@ def verify_mission(
                 detail="유효하지 않은 QR 코드입니다."
             )
 
-    # 5. Save completed record and award points (Atomic Transaction)
+    # 5. Save completed record and award points (Atomic Transaction with User Row Lock)
     try:
+        user_locked = db.query(models.User).filter(models.User.id == target_user_id).with_for_update().first()
+        if not user_locked:
+            raise HTTPException(status_code=404, detail="사용자 정보를 찾을 수 없습니다.")
+
+        # Post-lock duplicate recheck inside the serialized transaction boundary
+        post_lock_existing = db.query(models.UserMission).filter(
+            models.UserMission.user_id == target_user_id,
+            models.UserMission.mission_id == mission_id
+        ).first()
+        if post_lock_existing:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="이미 완료한 미션입니다."
+            )
+
         new_record = models.UserMission(
             user_id=target_user_id,
             mission_id=mission_id
         )
         db.add(new_record)
 
-        # Award points to user
-        user_obj.current_points += mission.points
-        user_obj.lifetime_earned_points += mission.points
+        # Award points to locked user
+        user_locked.current_points += mission.points
+        user_locked.lifetime_earned_points += mission.points
 
         # Add point history
         new_history = models.PointHistory(
@@ -1418,6 +1464,9 @@ def verify_mission(
         db.add(new_history)
         
         db.commit()
+    except HTTPException:
+        db.rollback()
+        raise
     except Exception as e:
         db.rollback()
         raise HTTPException(
@@ -1602,7 +1651,12 @@ def get_coupons(db: Session = Depends(get_db)):
     return db.query(models.Coupon).all()
 
 @app.post("/coupons/{coupon_id}/exchange", tags=["Coupons"])
-def exchange_coupon(coupon_id: str, req: ExchangeRequest, db: Session = Depends(get_db)):
+def exchange_coupon(
+    coupon_id: str,
+    req: ExchangeRequest,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
     coupon = db.query(models.Coupon).filter(models.Coupon.id == coupon_id).first()
     if not coupon:
         raise HTTPException(status_code=404, detail="해당 쿠폰 상품을 찾을 수 없습니다.")
@@ -1720,8 +1774,21 @@ def use_user_coupon(
         )
 
     try:
-        user_coupon.status = "used"
-        user_coupon.used_at = datetime.utcnow()
+        # Atomic conditional status transition to prevent double-redemption race conditions
+        updated_count = db.query(models.UserCoupon).filter(
+            models.UserCoupon.id == user_coupon_id,
+            models.UserCoupon.status == "unused"
+        ).update({
+            models.UserCoupon.status: "used",
+            models.UserCoupon.used_at: datetime.utcnow()
+        }, synchronize_session="fetch")
+
+        if updated_count == 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="이미 사용되었거나 상태가 변경된 쿠폰입니다."
+            )
+
         db.commit()
 
         # Get coupon details for text
@@ -1737,6 +1804,9 @@ def use_user_coupon(
             icon="redeem",
             color="orange"
         )
+    except HTTPException:
+        db.rollback()
+        raise
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"쿠폰 사용 처리 중 오류 발생: {str(e)}")
@@ -1807,6 +1877,7 @@ def update_business_reservation_settings(
 ):
     payload = auth.decode_token(token)
     user_id = payload.get("sub")
+    check_business_store_access(db, user_id, store_id)
     settings = get_or_create_reservation_settings(db, store_id)
     if req.maximum_advance_days is not None:
         if req.maximum_advance_days < 1 or req.maximum_advance_days > 365:
@@ -2538,6 +2609,38 @@ def evaluate_spatial_position(user_lat: float, user_lng: float, store) -> dict:
             'allowed_radius_m': 0,
             'outside_by_m': outside_by_m,
             'geometry_type': 'POLYGON_AREA'
+        }
+
+    elif geom_type in ['MULTIPOLYGON', 'MULTIPOLYGON_AREA'] and geom_json:
+        polygons = geom_json.get('polygons', [])
+        if isinstance(polygons, list) and polygons:
+            valid_polys = [p for p in polygons if isinstance(p, list) and len(p) >= 3]
+        else:
+            valid_polys = []
+
+        if not valid_polys:
+            return {
+                'inside': False,
+                'distance_m': 0,
+                'allowed_radius_m': 0,
+                'outside_by_m': 0,
+                'geometry_type': 'MULTIPOLYGON'
+            }
+
+        is_inside = any(point_in_polygon(user_lat, user_lng, p) for p in valid_polys)
+        if is_inside:
+            min_dist = 0.0
+        else:
+            dists = [distance_point_to_polyline_m(user_lat, user_lng, p) for p in valid_polys if p]
+            min_dist = min(dists) if dists else 0.0
+
+        outside_by_m = max(0, int(round(min_dist)))
+        return {
+            'inside': is_inside,
+            'distance_m': int(round(min_dist)),
+            'allowed_radius_m': 0,
+            'outside_by_m': outside_by_m,
+            'geometry_type': 'MULTIPOLYGON'
         }
 
     else:
@@ -3664,13 +3767,25 @@ async def translate_review(
 
 # --- ADMIN MVP APIs ---
 
-def get_owner_or_admin_user(current_user: models.User = Depends(get_current_user)) -> models.User:
-    if current_user.role not in ["owner", "admin"]:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="이용 권한이 없습니다. 사업자(Owner) 또는 관리자(Admin) 계정만 접근할 수 있습니다."
-        )
-    return current_user
+def get_owner_or_admin_user(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+) -> models.User:
+    if current_user.status == "blocked":
+        raise HTTPException(status_code=403, detail="정지된 계정입니다.")
+
+    roles = get_user_roles(db, current_user.id)
+    user_roles_upper = {r.upper() for r in roles}
+    if getattr(current_user, "role", None):
+        user_roles_upper.add(current_user.role.upper())
+
+    if any(r in user_roles_upper for r in ["OWNER", "ADMIN"]):
+        return current_user
+
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="이용 권한이 없습니다. 사업자(Owner) 또는 관리자(Admin) 계정만 접근할 수 있습니다."
+    )
 
 def get_admin_user(
     current_user: models.User = Depends(get_current_user), 
@@ -4162,7 +4277,7 @@ def update_coupon_status(coupon_id: str, req: schemas.CouponStatusUpdate, admin:
     return coupon
 
 @app.post("/admin/deploy-beta-data", tags=["Admin"])
-def deploy_beta_data_endpoint(db: Session = Depends(get_db)):
+def deploy_beta_data_endpoint(admin: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
     """
     Major-05B Production Beta Data Package Atomic Deployment Endpoint
     """
@@ -4423,7 +4538,7 @@ def deploy_beta_data_endpoint(db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"DEPLOY ERROR: {str(e)}")
 
 @app.get("/admin/audit-klounge-qr-credentials", tags=["Admin"])
-def audit_klounge_qr_credentials(db: Session = Depends(get_db)):
+def audit_klounge_qr_credentials(admin: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
     """
     READ-ONLY Audit of all StoreQrCredential rows for K-Lounge
     """
@@ -4454,7 +4569,7 @@ def audit_klounge_qr_credentials(db: Session = Depends(get_db)):
     }
 
 @app.post("/admin/revoke-duplicate-klounge-qr", tags=["Admin"])
-def revoke_duplicate_klounge_qr(db: Session = Depends(get_db)):
+def revoke_duplicate_klounge_qr(admin: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
     """
     Major-05B DEDUP HOTFIX-01: Safely revoke duplicate active QR credential for K-Lounge
     - KEEP ACTIVE: ceb4f88c-cb81-4665-94f3-d834a051ede8
@@ -4503,7 +4618,7 @@ def revoke_duplicate_klounge_qr(db: Session = Depends(get_db)):
     }
 
 @app.post("/admin/issue-store-qr", tags=["Admin"])
-def issue_store_qr(store_id: str, db: Session = Depends(get_db)):
+def issue_store_qr(store_id: str, admin: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
     """
     Major-05B DEDUP HOTFIX-01: Idempotent QR Issuance Guard
     - Checks if an ACTIVE, unexpired, unrevoked StoreQrCredential ALREADY exists for store_id

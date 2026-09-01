@@ -21,6 +21,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get adminDashboardTitle => '管理者ダッシュボード';
 
   @override
+  String get switchToCustomerMode => '顧客モードに切り替え';
+
+  @override
   String get aiCategoryCafe => 'おしゃれカフェ';
 
   @override
@@ -325,7 +328,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get missionAuthActionGps => 'GPS認証';
 
   @override
-  String get missionAuthActionPhoto => '写真認証';
+  String get missionAuthActionPhoto => '現地写真撮影';
 
   @override
   String get missionAuthActionQr => 'QRスキャン';
@@ -334,7 +337,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get missionCompletedCount => '完了したミッション';
 
   @override
-  String get missionDetailTitle => 'ミッション詳細';
+  String get missionDetailTitle => 'ミッション詳細情報';
 
   @override
   String get missionEmpty => '利用可能なミッションがありません。';
@@ -930,4 +933,178 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get tooltipNotInterested => '関心なし';
+
+  @override
+  String missionEligibleRadius100m(Object radius) {
+    return '半径${radius}m';
+  }
+
+  @override
+  String get missionEligibleAreaApproved => '認証可能エリア';
+
+  @override
+  String get missionOutsideNotice => '現在地は認証可能エリア外です。';
+
+  @override
+  String distanceToBoundaryFormat(Object distance) {
+    return '最も近い認証可能エリアの境界まで約${distance}mです。';
+  }
+
+  @override
+  String get myLocationCheckButton => '現在地基準で確認';
+
+  @override
+  String get missionAuthMethodHeader => '認証方法案内';
+
+  @override
+  String get missionRewardInfoHeader => 'ミッション報酬情報';
+
+  @override
+  String get missionStartAuthButton => 'ミッション認証を開始';
+
+  @override
+  String get missionCompletedBadge => '認証完了';
+
+  @override
+  String get missionTagGeneral => '一般ミッション';
+
+  @override
+  String get missionTagPhoto => '写真認証';
+
+  @override
+  String get missionTagGps => '位置認証';
+
+  @override
+  String get missionTagQr => 'QR認証';
+
+  @override
+  String get homeSectionRecommendedPlaces => 'おすすめスポット';
+
+  @override
+  String get homeSectionPopularMissions => '人気挑戦ミッション';
+
+  @override
+  String get homeExploreMoreButton => 'すべて見る';
+
+  @override
+  String get searchBarPlaceholder => 'スポット、ミッション、キーワード検索';
+
+  @override
+  String get placeDetailLocationInfo => '位置・住所情報';
+
+  @override
+  String get placeDetailDirectionsButton => 'ルート案内';
+
+  @override
+  String get placeDetailNoCoordinatesNotice => '位置座標情報を準備中';
+
+  @override
+  String placeDetailReviewCountFormat(Object count) {
+    return 'レビュー $count件';
+  }
+
+  @override
+  String get missionEligibleAreaMapTitle => 'ミッション認証可能エリアマップ';
+
+  @override
+  String get missionDistrictTypeNotice => '指定エリア内で認証できるミッションです。';
+
+  @override
+  String get signupCustomerSubtitle => '旅行先のおすすめ · 予約 · レビュー · ポイント';
+
+  @override
+  String get signupBusinessSubtitle => '店舗登録 · 予約 · おすすめ · 顧客管理';
+
+  @override
+  String get categoryGeneral => '一般';
+
+  @override
+  String get badgeTest => 'テスト用';
+
+  @override
+  String get authTypePhotoGps => '写真 + GPS 認証';
+
+  @override
+  String get spatialMapTitleSuyeong => '水営江辺認証可能散策区域 Map';
+
+  @override
+  String get spatialMapTitleDefault => 'ミッション認証可能区域 Map';
+
+  @override
+  String get spatialMapApprovedTrail => '散策路正式区域';
+
+  @override
+  String get spatialMapCandidateTrail => '候補散策路 (PM承認待ち)';
+
+  @override
+  String get spatialMapCandidateNotice => 'この場所は候補区域です。PM承認後に最終認証範囲が確定します。';
+
+  @override
+  String get spatialMapInsideNotice => '現在位置は認証可能区域内です。';
+
+  @override
+  String get spatialMapOutsideNotice => '現在位置は認証可能区域外です。';
+
+  @override
+  String get spatialMapCanVerifyImmediately => '即時ミッション認証が可能です。';
+
+  @override
+  String get sessionExpiredMessage => 'ログインセッションの有効期限が切れました。再度ログインしてください。';
+
+  @override
+  String get verificationPhotoOutsideRadiusTitle => '写真認証エリアの外にいます';
+
+  @override
+  String verificationPhotoOutsideRadiusBody(
+    Object distance,
+    Object radius,
+    Object outsideBy,
+  ) {
+    return '現在の写真認証地点から約${distance}m離れています。\n\n認証可能範囲は${radius}m以内です。\n\nあと約${outsideBy}m近づいてから撮影してください。';
+  }
+
+  @override
+  String get verificationQrOutsideRadiusTitle => 'QRコードは正常に認識されました';
+
+  @override
+  String verificationQrOutsideRadiusBody(
+    Object distance,
+    Object radius,
+    Object outsideBy,
+  ) {
+    return 'ただし、現在地が認証範囲から外れています。\n\n現在距離: 約${distance}m\n認証可能範囲: ${radius}m以内\n\nあと約${outsideBy}m近づいてから再試行してください。';
+  }
+
+  @override
+  String get verificationGpsOutsideRadiusTitle => '位置認証エリアの外にいます';
+
+  @override
+  String verificationGpsOutsideRadiusBody(
+    Object distance,
+    Object radius,
+    Object outsideBy,
+  ) {
+    return '現在のミッション地点から約${distance}m離れています。\n\n認証可能範囲は${radius}m以内です。\n\nあと約${outsideBy}m近づいてから再試行してください。';
+  }
+
+  @override
+  String get verificationLocationServiceDisabledTitle => '位置情報サービスをオンにしてください';
+
+  @override
+  String get verificationLocationServiceDisabledBody =>
+      '現在、端末の位置情報サービスがオフになっているため、ミッション地点までの距離を確認できません。位置情報サービスをオンにしてから再試行してください。';
+
+  @override
+  String get verificationLocationPermissionDeniedTitle => '位置情報の権限が必要です';
+
+  @override
+  String get verificationLocationPermissionDeniedBody =>
+      'このミッションには現在地の確認が必要です。アプリの位置情報権限を許可してから再試行してください。';
+
+  @override
+  String get verificationLocationUnavailableTitle => '現在地を確認できません';
+
+  @override
+  String get verificationLocationUnavailableBody =>
+      'GPS位置情報を取得できませんでした。しばらくしてから再試行するか、位置情報サービスの状態を確認してください。';
 }
