@@ -47,12 +47,30 @@ class _AdminAppShellState extends State<AdminAppShell> {
 
               if (isMobile) {
                 return PopScope(
-                  canPop: _selectedIndex == 0,
-                  onPopInvokedWithResult: (didPop, result) {
-                    if (!didPop && _selectedIndex != 0) {
+                  canPop: false,
+                  onPopInvokedWithResult: (didPop, result) async {
+                    if (didPop) return;
+                    if (_selectedIndex != 0) {
                       setState(() {
                         _selectedIndex = 0;
                       });
+                    } else {
+                      final modeProvider = Provider.of<AppModeProvider>(
+                        context,
+                        listen: false,
+                      );
+                      await modeProvider.switchMode(
+                        AppMode.customer,
+                        auth.currentUser,
+                      );
+                      if (context.mounted) {
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(
+                            builder: (_) => const RootNavigationSelector(),
+                          ),
+                          (route) => false,
+                        );
+                      }
                     }
                   },
                   child: Scaffold(

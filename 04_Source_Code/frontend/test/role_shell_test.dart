@@ -1,10 +1,27 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
+import 'package:frontend/main.dart';
 import 'package:frontend/models/user.dart';
 import 'package:frontend/models/mission.dart';
+import 'package:frontend/providers/auth_provider.dart';
 import 'package:frontend/providers/app_mode_provider.dart';
+import 'package:frontend/providers/locale_provider.dart';
+import 'package:frontend/providers/notification_provider.dart';
+import 'package:frontend/providers/profile_provider.dart';
+import 'package:frontend/providers/search_provider.dart';
+import 'package:frontend/providers/favorite_provider.dart';
+import 'package:frontend/providers/activity_provider.dart';
+import 'package:frontend/providers/personalization_provider.dart';
+import 'package:frontend/providers/analytics_provider.dart';
 import 'package:frontend/registries/module_registry.dart';
 import 'package:frontend/registries/dashboard_widget_registry.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:frontend/l10n/app_localizations.dart';
+import 'package:frontend/repositories/auth_repository.dart';
+import 'package:frontend/screens/admin/admin_app_shell.dart';
+import 'package:frontend/screens/main_navigation_screen.dart';
 import 'package:frontend/utils/l10n_mappers.dart';
 
 void main() {
@@ -13,11 +30,11 @@ void main() {
   setUp(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-      const MethodChannel('plugins.it_nomads.com/flutter_secure_storage'),
-      (MethodCall methodCall) async {
-        return null;
-      },
-    );
+          const MethodChannel('plugins.it_nomads.com/flutter_secure_storage'),
+          (MethodCall methodCall) async {
+            return null;
+          },
+        );
   });
 
   group('Role Shell & AppMode Foundation Tests', () {
@@ -140,223 +157,486 @@ void main() {
       expect(todayRes.title, equals('오늘 예약'));
     });
 
-    test('AppModeProvider supports Admin <-> Customer roundtrip mode switching', () async {
-      final adminUser = User(
-        id: 'usr_admin_999',
-        email: 'admin@example.com',
-        nickname: '총관리자',
-        role: 'admin',
-        status: 'active',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-        roles: ['CUSTOMER', 'ADMIN'],
-        availableAppModes: ['CUSTOMER', 'ADMIN'],
-      );
+    test(
+      'AppModeProvider supports Admin <-> Customer roundtrip mode switching',
+      () async {
+        final adminUser = User(
+          id: 'usr_admin_999',
+          email: 'admin@example.com',
+          nickname: '총관리자',
+          role: 'admin',
+          status: 'active',
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+          roles: ['CUSTOMER', 'ADMIN'],
+          availableAppModes: ['CUSTOMER', 'ADMIN'],
+        );
 
-      final provider = AppModeProvider();
-      expect(provider.activeMode, equals(AppMode.customer));
+        final provider = AppModeProvider();
+        expect(provider.activeMode, equals(AppMode.customer));
 
-      // 1. Customer -> Admin switch
-      final toAdminSuccess = await provider.switchMode(AppMode.admin, adminUser);
-      expect(toAdminSuccess, isTrue);
-      expect(provider.activeMode, equals(AppMode.admin));
-      expect(provider.isAdminMode, isTrue);
+        // 1. Customer -> Admin switch
+        final toAdminSuccess = await provider.switchMode(
+          AppMode.admin,
+          adminUser,
+        );
+        expect(toAdminSuccess, isTrue);
+        expect(provider.activeMode, equals(AppMode.admin));
+        expect(provider.isAdminMode, isTrue);
 
-      // 2. Admin -> Customer switch
-      final toCustomerSuccess = await provider.switchMode(AppMode.customer, adminUser);
-      expect(toCustomerSuccess, isTrue);
-      expect(provider.activeMode, equals(AppMode.customer));
-      expect(provider.isCustomerMode, isTrue);
+        // 2. Admin -> Customer switch
+        final toCustomerSuccess = await provider.switchMode(
+          AppMode.customer,
+          adminUser,
+        );
+        expect(toCustomerSuccess, isTrue);
+        expect(provider.activeMode, equals(AppMode.customer));
+        expect(provider.isCustomerMode, isTrue);
 
-      // 3. Repeated roundtrip switch (Customer -> Admin -> Customer)
-      await provider.switchMode(AppMode.admin, adminUser);
-      expect(provider.isAdminMode, isTrue);
+        // 3. Repeated roundtrip switch (Customer -> Admin -> Customer)
+        await provider.switchMode(AppMode.admin, adminUser);
+        expect(provider.isAdminMode, isTrue);
 
-      await provider.switchMode(AppMode.customer, adminUser);
-      expect(provider.isCustomerMode, isTrue);
-    });
+        await provider.switchMode(AppMode.customer, adminUser);
+        expect(provider.isCustomerMode, isTrue);
+      },
+    );
 
-    test('L10nMappers.mapSwitchToCustomerMode returns localized labels for KO, EN, JA, ZH', () {
-      expect(L10nMappers.mapSwitchToCustomerMode('ko'), equals('고객모드로 전환'));
-      expect(L10nMappers.mapSwitchToCustomerMode('en'), equals('Switch to Customer Mode'));
-      expect(L10nMappers.mapSwitchToCustomerMode('ja'), equals('顧客モードに切り替え'));
-      expect(L10nMappers.mapSwitchToCustomerMode('zh'), equals('切换到用户模式'));
-      expect(L10nMappers.mapSwitchToCustomerMode('zh_Hans'), equals('切换到用户模式'));
-    });
+    test(
+      'L10nMappers.mapSwitchToCustomerMode returns localized labels for KO, EN, JA, ZH',
+      () {
+        expect(L10nMappers.mapSwitchToCustomerMode('ko'), equals('고객모드로 전환'));
+        expect(
+          L10nMappers.mapSwitchToCustomerMode('en'),
+          equals('Switch to Customer Mode'),
+        );
+        expect(L10nMappers.mapSwitchToCustomerMode('ja'), equals('顧客モードに切り替え'));
+        expect(L10nMappers.mapSwitchToCustomerMode('zh'), equals('切换到用户模式'));
+        expect(
+          L10nMappers.mapSwitchToCustomerMode('zh_Hans'),
+          equals('切换到用户模式'),
+        );
+      },
+    );
 
-    test('User delete safety invariant blocks self deletion for active admin', () {
-      final currentAdminId = 'usr_admin_001';
-      final targetUserId = 'usr_admin_001';
-      final isSelfDelete = currentAdminId == targetUserId;
-      expect(isSelfDelete, isTrue);
-    });
+    test(
+      'User delete safety invariant blocks self deletion for active admin',
+      () {
+        final currentAdminId = 'usr_admin_001';
+        final targetUserId = 'usr_admin_001';
+        final isSelfDelete = currentAdminId == targetUserId;
+        expect(isSelfDelete, isTrue);
+      },
+    );
 
-    test('Point Accounting Invariants POINT-INV-001 to 003: spending never decreases lifetime_earned', () {
-      int availablePoints = 300;
-      int lifetimeEarned = 300;
+    test(
+      'Point Accounting Invariants POINT-INV-001 to 003: spending never decreases lifetime_earned',
+      () {
+        int availablePoints = 300;
+        int lifetimeEarned = 300;
 
-      // 1. Mission reward +100
-      availablePoints += 100;
-      lifetimeEarned += 100;
-      expect(availablePoints, equals(400));
-      expect(lifetimeEarned, equals(400));
+        // 1. Mission reward +100
+        availablePoints += 100;
+        lifetimeEarned += 100;
+        expect(availablePoints, equals(400));
+        expect(lifetimeEarned, equals(400));
 
-      // 2. Spending 150P
-      availablePoints -= 150;
-      expect(availablePoints, equals(250));
-      expect(lifetimeEarned, equals(400)); // Unchanged!
-    });
+        // 2. Spending 150P
+        availablePoints -= 150;
+        expect(availablePoints, equals(250));
+        expect(lifetimeEarned, equals(400)); // Unchanged!
+      },
+    );
 
-    test('Home Today Mission filters out completed missions and retains active QA missions', () {
-      final m1 = Mission(id: 'qa-01', storeId: 'st-01', title: 'Suyeong Photo QA', description: '', points: 100, authType: 'PHOTO', isCompleted: false, createdAt: DateTime.now());
-      final m2 = Mission(id: 'qa-02', storeId: 'st-02', title: 'Completed QA', description: '', points: 100, authType: 'GPS', isCompleted: true, createdAt: DateTime.now());
+    test(
+      'Home Today Mission filters out completed missions and retains active QA missions',
+      () {
+        final m1 = Mission(
+          id: 'qa-01',
+          storeId: 'st-01',
+          title: 'Suyeong Photo QA',
+          description: '',
+          points: 100,
+          authType: 'PHOTO',
+          isCompleted: false,
+          createdAt: DateTime.now(),
+        );
+        final m2 = Mission(
+          id: 'qa-02',
+          storeId: 'st-02',
+          title: 'Completed QA',
+          description: '',
+          points: 100,
+          authType: 'GPS',
+          isCompleted: true,
+          createdAt: DateTime.now(),
+        );
 
-      final missions = [m1, m2];
-      final activeHomeMissions = missions.where((m) => !m.isCompleted).toList();
+        final missions = [m1, m2];
+        final activeHomeMissions = missions
+            .where((m) => !m.isCompleted)
+            .toList();
 
-      expect(activeHomeMissions.length, equals(1));
-      expect(activeHomeMissions.first.id, equals('qa-01'));
-    });
+        expect(activeHomeMissions.length, equals(1));
+        expect(activeHomeMissions.first.id, equals('qa-01'));
+      },
+    );
 
-    test('Mission reward atomicity and idempotency invariant checks completed status before re-reward', () {
-      final completedMissions = <String>{'qa-01'};
-      final targetMissionId = 'qa-01';
-      final isAlreadyCompleted = completedMissions.contains(targetMissionId);
+    test(
+      'Mission reward atomicity and idempotency invariant checks completed status before re-reward',
+      () {
+        final completedMissions = <String>{'qa-01'};
+        final targetMissionId = 'qa-01';
+        final isAlreadyCompleted = completedMissions.contains(targetMissionId);
 
-      expect(isAlreadyCompleted, isTrue); // Prevents duplicate reward execution
-    });
+        expect(
+          isAlreadyCompleted,
+          isTrue,
+        ); // Prevents duplicate reward execution
+      },
+    );
 
-    test('Admin QA Reset button visibility invariant: visible ONLY for test accounts and designated PM QA account, hidden for arbitrary admins and customers', () {
-      final testUser = {'id': 'qa_01', 'email': 'qa@gogo.com', 'is_test_data': true, 'role': 'member'};
-      final designatedPmUser = {'id': '2abb6e52-d447-4338-8beb-e638890a5ecc', 'email': 'jazzbj@naver.com', 'is_test_data': false, 'role': 'admin'};
-      final arbitraryAdminUser = {'id': 'adm_other', 'email': 'other_admin@gogo.com', 'is_test_data': false, 'role': 'admin'};
-      final normalUser = {'id': 'usr_01', 'email': 'customer@gogo.com', 'is_test_data': false, 'role': 'member'};
+    test(
+      'Admin QA Reset button visibility invariant: visible ONLY for test accounts and designated PM QA account, hidden for arbitrary admins and customers',
+      () {
+        final testUser = {
+          'id': 'qa_01',
+          'email': 'qa@gogo.com',
+          'is_test_data': true,
+          'role': 'member',
+        };
+        final designatedPmUser = {
+          'id': '2abb6e52-d447-4338-8beb-e638890a5ecc',
+          'email': 'jazzbj@naver.com',
+          'is_test_data': false,
+          'role': 'admin',
+        };
+        final arbitraryAdminUser = {
+          'id': 'adm_other',
+          'email': 'other_admin@gogo.com',
+          'is_test_data': false,
+          'role': 'admin',
+        };
+        final normalUser = {
+          'id': 'usr_01',
+          'email': 'customer@gogo.com',
+          'is_test_data': false,
+          'role': 'member',
+        };
 
-      bool canReset(Map<String, dynamic> u) {
-        final isTestData = u['is_test_data'] == true || (u['roles'] as List?)?.contains('TEST') == true;
-        final isDesignatedPm = u['email'] == 'jazzbj@naver.com' || u['id'] == '2abb6e52-d447-4338-8beb-e638890a5ecc';
-        return isTestData || isDesignatedPm;
-      }
+        bool canReset(Map<String, dynamic> u) {
+          final isTestData =
+              u['is_test_data'] == true ||
+              (u['roles'] as List?)?.contains('TEST') == true;
+          final isDesignatedPm =
+              u['email'] == 'jazzbj@naver.com' ||
+              u['id'] == '2abb6e52-d447-4338-8beb-e638890a5ecc';
+          return isTestData || isDesignatedPm;
+        }
 
-      expect(canReset(testUser), isTrue);
-      expect(canReset(designatedPmUser), isTrue);
-      expect(canReset(arbitraryAdminUser), isFalse);
-      expect(canReset(normalUser), isFalse);
-    });
+        expect(canReset(testUser), isTrue);
+        expect(canReset(designatedPmUser), isTrue);
+        expect(canReset(arbitraryAdminUser), isFalse);
+        expect(canReset(normalUser), isFalse);
+      },
+    );
 
-    test('Admin self-delete UI actionability invariant: self account hides delete button', () {
-      final currentAdminId = 'adm_01';
-      final selfUser = {'id': 'adm_01', 'email': 'admin@gogo.com'};
-      final otherUser = {'id': 'usr_02', 'email': 'other@gogo.com'};
+    test(
+      'Admin self-delete UI actionability invariant: self account hides delete button',
+      () {
+        final currentAdminId = 'adm_01';
+        final selfUser = {'id': 'adm_01', 'email': 'admin@gogo.com'};
+        final otherUser = {'id': 'usr_02', 'email': 'other@gogo.com'};
 
-      final isSelfDeleteButtonVisible = selfUser['id'] != currentAdminId;
-      final isOtherDeleteButtonVisible = otherUser['id'] != currentAdminId;
+        final isSelfDeleteButtonVisible = selfUser['id'] != currentAdminId;
+        final isOtherDeleteButtonVisible = otherUser['id'] != currentAdminId;
 
-      expect(isSelfDeleteButtonVisible, isFalse);
-      expect(isOtherDeleteButtonVisible, isTrue);
-    });
+        expect(isSelfDeleteButtonVisible, isFalse);
+        expect(isOtherDeleteButtonVisible, isTrue);
+      },
+    );
 
-    test('Admin mobile Drawer Member Management index mapping is 2 and onTap handler changes selectedIndex', () {
-      int selectedIndex = 0;
-      final isMobile = true;
-      final active = true;
-      final targetIndex = 2; // Member Management
+    test(
+      'Admin mobile Drawer Member Management index mapping is 2 and onTap handler changes selectedIndex',
+      () {
+        int selectedIndex = 0;
+        final isMobile = true;
+        final active = true;
+        final targetIndex = 2; // Member Management
 
-      if (active) {
-        selectedIndex = targetIndex;
-      }
+        if (active) {
+          selectedIndex = targetIndex;
+        }
 
-      expect(selectedIndex, equals(2));
-      expect(isMobile, isTrue);
-    });
+        expect(selectedIndex, equals(2));
+        expect(isMobile, isTrue);
+      },
+    );
 
-    test('Production Admin Member Mock Fallback Elimination: network failure in Production returns empty list with error string, no mock substitution', () {
-      final isProduction = true;
-      final enableMockData = !isProduction; // ProductionConfig.enableMockData evaluates to false in production
+    test(
+      'Production Admin Member Mock Fallback Elimination: network failure in Production returns empty list with error string, no mock substitution',
+      () {
+        final isProduction = true;
+        final enableMockData =
+            !isProduction; // ProductionConfig.enableMockData evaluates to false in production
 
-      List<User> users = [];
-      String? errorMessage;
+        List<User> users = [];
+        String? errorMessage;
 
-      // Simulate API exception
-      if (enableMockData) {
-        users = [
-          User(
-            id: 'usr_admin_001',
-            email: 'jazzbj@naver.com',
-            nickname: '총관리자',
-            role: 'admin',
-            status: 'ACTIVE',
-            createdAt: DateTime.now(),
-            updatedAt: DateTime.now(),
+        // Simulate API exception
+        if (enableMockData) {
+          users = [
+            User(
+              id: 'usr_admin_001',
+              email: 'jazzbj@naver.com',
+              nickname: '총관리자',
+              role: 'admin',
+              status: 'ACTIVE',
+              createdAt: DateTime.now(),
+              updatedAt: DateTime.now(),
+            ),
+          ];
+        } else {
+          users = [];
+          errorMessage = '회원 목록을 불러오지 못했습니다. 다시 시도해 주세요.';
+        }
+
+        expect(enableMockData, isFalse);
+        expect(users, isEmpty);
+        expect(errorMessage, equals('회원 목록을 불러오지 못했습니다. 다시 시도해 주세요.'));
+      },
+    );
+
+    test(
+      'Safe Localized Error Message Invariant: reset and load failure strings for KO, EN, JA, ZH',
+      () {
+        final safeResetErrorKo = '초기화에 실패했습니다. 다시 시도해 주세요.';
+        final safeResetErrorEn = 'Reset failed. Please try again.';
+        final safeResetErrorJa = '初期化に失敗しました。もう一度お試しください。';
+        final safeResetErrorZh = '重置失败，请重试。';
+
+        expect(safeResetErrorKo, contains('다시 시도'));
+        expect(safeResetErrorEn, contains('try again'));
+        expect(safeResetErrorJa, contains('お試しください'));
+        expect(safeResetErrorZh, contains('重试'));
+      },
+    );
+
+    test(
+      'User Deserialization Map Normalization: handles Map<dynamic, dynamic> and _Map<Object?, Object?> from Dio without TypeError',
+      () {
+        final rawDioMap = <dynamic, dynamic>{
+          'id': 'usr_production_pm_001',
+          'email': 'jazzbj@naver.com',
+          'nickname': '총관리자(PM)',
+          'role': 'admin',
+          'roles': ['CUSTOMER', 'ADMIN'],
+          'status': 'ACTIVE',
+          'current_points': 300,
+          'created_at': '2026-08-01T09:00:00Z',
+          'updated_at': '2026-08-01T09:00:00Z',
+        };
+
+        final normalized = Map<String, dynamic>.from(rawDioMap as Map);
+        final user = User.fromJson(normalized);
+
+        expect(user.id, equals('usr_production_pm_001'));
+        expect(user.email, equals('jazzbj@naver.com'));
+        expect(user.nickname, equals('총관리자(PM)'));
+        expect(user.currentPoints, equals(300));
+        expect(user.roles, contains('ADMIN'));
+      },
+    );
+
+    test(
+      'User.fromJson Consolidated Contract: parses double points, string roles, and unparseable dates without TypeError or fabricated DateTime.now',
+      () {
+        final floatPointsJson = <String, dynamic>{
+          'id': 'usr_test_002',
+          'email': 'qa@nampogogo.com',
+          'nickname': 'QA테스터',
+          'role': 'member',
+          'roles': 'CUSTOMER, TEST',
+          'status': 'ACTIVE',
+          'current_points': 300.0,
+          'lifetime_earned_points': 500.0,
+          'created_at': '2026-08-01T09:00:00.123456Z',
+          'updated_at': null,
+        };
+
+        final user = User.fromJson(floatPointsJson);
+
+        expect(user.id, equals('usr_test_002'));
+        expect(user.currentPoints, equals(300));
+        expect(user.lifetimeEarnedPoints, equals(500));
+        expect(user.roles, containsAll(['CUSTOMER', 'TEST']));
+        expect(
+          user.createdAt,
+          equals(DateTime.parse('2026-08-01T09:00:00.123456Z')),
+        );
+        expect(user.updatedAt, equals(DateTime(1970, 1, 1)));
+      },
+    );
+
+    test(
+      'Admin App Shell PopScope invariant: mobile back on root triggers customer mode switch without app termination',
+      () {
+        final isMobile = true;
+        int selectedIndex = 0;
+        bool switchedToCustomer = false;
+
+        // Simulate PopScope onPopInvoked logic
+        void handlePop(bool didPop) {
+          if (didPop) return;
+          if (selectedIndex != 0) {
+            selectedIndex = 0;
+          } else {
+            switchedToCustomer = true;
+          }
+        }
+
+        // 1. When on sub-tab (selectedIndex = 1), back resets to root (selectedIndex = 0)
+        selectedIndex = 1;
+        handlePop(false);
+        expect(selectedIndex, equals(0));
+        expect(switchedToCustomer, isFalse);
+
+        // 2. When on root (selectedIndex = 0), back triggers customer mode switch
+        handlePop(false);
+        expect(switchedToCustomer, isTrue);
+        expect(isMobile, isTrue);
+      },
+    );
+
+    testWidgets(
+      'AdminAppShell PopScope integration: handlePopRoute switches to customer mode',
+      (WidgetTester tester) async {
+        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.devicePixelRatio = 3.0;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        final adminUser = User(
+          id: 'adm_001',
+          email: 'admin@nampo.test',
+          nickname: 'AdminUser',
+          role: 'admin',
+          roles: const ['CUSTOMER', 'ADMIN'],
+          availableAppModes: const ['CUSTOMER', 'ADMIN'],
+          status: 'active',
+          currentPoints: 0,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+
+        final fakeAuthRepo = FakeAuthRepository(adminUser);
+        final authProvider = AuthProvider(authRepository: fakeAuthRepo);
+        await authProvider.login(
+          email: 'admin@nampo.test',
+          password: 'password123',
+        );
+
+        final modeProvider = AppModeProvider();
+        await modeProvider.switchMode(AppMode.admin, adminUser);
+        expect(modeProvider.activeMode, equals(AppMode.admin));
+
+        await tester.pumpWidget(
+          MultiProvider(
+            providers: [
+              ChangeNotifierProvider<AuthProvider>.value(value: authProvider),
+              ChangeNotifierProvider<NotificationProvider>(
+                create: (_) => NotificationProvider(),
+              ),
+              ChangeNotifierProvider<ProfileProvider>(
+                create: (_) => ProfileProvider(),
+              ),
+              ChangeNotifierProvider<SearchProvider>(
+                create: (_) => SearchProvider(),
+              ),
+              ChangeNotifierProvider<FavoriteProvider>(
+                create: (_) => FavoriteProvider(),
+              ),
+              ChangeNotifierProvider<ActivityProvider>(
+                create: (_) => ActivityProvider(),
+              ),
+              ChangeNotifierProvider<PersonalizationProvider>(
+                create: (_) => PersonalizationProvider(),
+              ),
+              ChangeNotifierProvider<AnalyticsProvider>(
+                create: (_) => AnalyticsProvider(),
+              ),
+              ChangeNotifierProvider<LocaleProvider>(
+                create: (_) => LocaleProvider(),
+              ),
+              ChangeNotifierProvider<AppModeProvider>.value(
+                value: modeProvider,
+              ),
+            ],
+            child: const MaterialApp(
+              locale: Locale('ko'),
+              localizationsDelegates: [
+                AppLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: RootNavigationSelector(),
+            ),
           ),
-        ];
-      } else {
-        users = [];
-        errorMessage = '회원 목록을 불러오지 못했습니다. 다시 시도해 주세요.';
-      }
+        );
+        await tester.pumpAndSettle();
 
-      expect(enableMockData, isFalse);
-      expect(users, isEmpty);
-      expect(errorMessage, equals('회원 목록을 불러오지 못했습니다. 다시 시도해 주세요.'));
-    });
+        await tester.pump();
 
-    test('Safe Localized Error Message Invariant: reset and load failure strings for KO, EN, JA, ZH', () {
-      final safeResetErrorKo = '초기화에 실패했습니다. 다시 시도해 주세요.';
-      final safeResetErrorEn = 'Reset failed. Please try again.';
-      final safeResetErrorJa = '初期化に失敗しました。もう一度お試しください。';
-      final safeResetErrorZh = '重置失败，请重试。';
+        final adminFinder = find.byType(AdminAppShell);
+        expect(adminFinder, findsOneWidget);
 
-      expect(safeResetErrorKo, contains('다시 시도'));
-      expect(safeResetErrorEn, contains('try again'));
-      expect(safeResetErrorJa, contains('お試しください'));
-      expect(safeResetErrorZh, contains('重试'));
-    });
+        final popScopeFinder = find.descendant(
+          of: adminFinder,
+          matching: find.byWidgetPredicate(
+            (widget) => widget is PopScope<Object?>,
+          ),
+        );
+        expect(popScopeFinder, findsOneWidget);
 
-    test('User Deserialization Map Normalization: handles Map<dynamic, dynamic> and _Map<Object?, Object?> from Dio without TypeError', () {
-      final rawDioMap = <dynamic, dynamic>{
-        'id': 'usr_production_pm_001',
-        'email': 'jazzbj@naver.com',
-        'nickname': '총관리자(PM)',
-        'role': 'admin',
-        'roles': ['CUSTOMER', 'ADMIN'],
-        'status': 'ACTIVE',
-        'current_points': 300,
-        'created_at': '2026-08-01T09:00:00Z',
-        'updated_at': '2026-08-01T09:00:00Z',
-      };
+        final popScopeWidget = tester.widget<PopScope<Object?>>(popScopeFinder);
+        expect(popScopeWidget.canPop, isFalse);
 
-      final normalized = Map<String, dynamic>.from(rawDioMap as Map);
-      final user = User.fromJson(normalized);
+        final adminContext = tester.element(adminFinder);
+        final route = ModalRoute.of(adminContext);
+        expect(route, isNotNull);
+        expect(route!.popDisposition, equals(RoutePopDisposition.doNotPop));
 
-      expect(user.id, equals('usr_production_pm_001'));
-      expect(user.email, equals('jazzbj@naver.com'));
-      expect(user.nickname, equals('총관리자(PM)'));
-      expect(user.currentPoints, equals(300));
-      expect(user.roles, contains('ADMIN'));
-    });
+        final maybePopResult = await Navigator.of(adminContext).maybePop();
+        expect(maybePopResult, isTrue);
 
-    test('User.fromJson Consolidated Contract: parses double points, string roles, and unparseable dates without TypeError or fabricated DateTime.now', () {
-      final floatPointsJson = <String, dynamic>{
-        'id': 'usr_test_002',
-        'email': 'qa@nampogogo.com',
-        'nickname': 'QA테스터',
-        'role': 'member',
-        'roles': 'CUSTOMER, TEST',
-        'status': 'ACTIVE',
-        'current_points': 300.0,
-        'lifetime_earned_points': 500.0,
-        'created_at': '2026-08-01T09:00:00.123456Z',
-        'updated_at': null,
-      };
+        await tester.pumpAndSettle();
 
-      final user = User.fromJson(floatPointsJson);
-
-      expect(user.id, equals('usr_test_002'));
-      expect(user.currentPoints, equals(300));
-      expect(user.lifetimeEarnedPoints, equals(500));
-      expect(user.roles, containsAll(['CUSTOMER', 'TEST']));
-      expect(user.createdAt, equals(DateTime.parse('2026-08-01T09:00:00.123456Z')));
-      expect(user.updatedAt, equals(DateTime(1970, 1, 1)));
-    });
+        expect(modeProvider.activeMode, equals(AppMode.customer));
+        expect(find.byType(AdminAppShell), findsNothing);
+        expect(find.byType(RootNavigationSelector), findsOneWidget);
+        expect(find.byType(MainNavigationScreen), findsOneWidget);
+      },
+    );
   });
+}
+
+class FakeAuthRepository extends AuthRepository {
+  final User _user;
+
+  FakeAuthRepository(this._user);
+
+  @override
+  Future<Map<String, dynamic>> login({
+    required String email,
+    required String password,
+    String? guestId,
+  }) async {
+    return {
+      'access_token': 'fake_access_token',
+      'refresh_token': 'fake_refresh_token',
+      'user': _user,
+    };
+  }
 }

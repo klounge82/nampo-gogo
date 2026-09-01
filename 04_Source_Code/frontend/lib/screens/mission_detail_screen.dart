@@ -82,7 +82,7 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
     }
 
     // Server-enforced verification for GPS & PHOTO missions
-    _performServerVerification(mission);
+    await _performServerVerification(mission);
   }
 
   Future<void> _performServerVerification(Mission mission) async {
@@ -94,7 +94,8 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
     double? latitude;
     double? longitude;
 
-    if (isPhotoGps) {
+    if (isPhoto || isPhotoGps) {
+      final l10n = AppLocalizations.of(context);
       try {
         final pos = await LocationService().getCurrentLocation();
         latitude = pos.latitude;
@@ -105,19 +106,22 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
         if (errStr.contains('LocationServicesDisabledException') ||
             errStr.contains('위치 서비스')) {
           _showErrorDialog(
-            '위치 서비스를 켜주세요',
-            '현재 휴대폰의 위치 서비스가 꺼져 있어 미션 장소와의 거리를 확인할 수 없습니다. 위치 서비스를 켠 후 다시 시도해 주세요.',
+            l10n?.verificationLocationServiceDisabledTitle ?? '위치 서비스를 켜주세요',
+            l10n?.verificationLocationServiceDisabledBody ??
+                '현재 휴대폰의 위치 서비스가 꺼져 있어 미션 장소와의 거리를 확인할 수 없습니다. 위치 서비스를 켠 후 다시 시도해 주세요.',
           );
         } else if (errStr.contains('PermissionDeniedException') ||
             errStr.contains('위치 권한')) {
           _showErrorDialog(
-            '위치 권한이 필요합니다',
-            '이 미션은 현재 위치 확인이 필요합니다. 앱의 위치 권한을 허용한 후 다시 시도해 주세요.',
+            l10n?.verificationLocationPermissionDeniedTitle ?? '위치 권한이 필요합니다',
+            l10n?.verificationLocationPermissionDeniedBody ??
+                '이 미션은 현재 위치 확인이 필요합니다. 앱의 위치 권한을 허용한 후 다시 시도해 주세요.',
           );
         } else {
           _showErrorDialog(
-            '현재 위치를 확인할 수 없습니다',
-            'GPS 위치 정보를 가져오지 못했습니다. 잠시 후 다시 시도하거나 위치 서비스 상태를 확인해 주세요.',
+            l10n?.verificationLocationUnavailableTitle ?? '현재 위치를 확인할 수 없습니다',
+            l10n?.verificationLocationUnavailableBody ??
+                'GPS 위치 정보를 가져오지 못했습니다. 잠시 후 다시 시도하거나 위치 서비스 상태를 확인해 주세요.',
           );
         }
         return;
@@ -143,33 +147,21 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
             final outsideByM = spatialRes['outside_by_m'];
             if (!mounted) return;
             _showErrorDialog(
-              '현장 사진 인증 범위 밖입니다',
-              '현재 지정된 사진 인증 구역/지점에서 약 ${distM}m 떨어져 있습니다.\n\n사진 인증 가능 범위는 ${radiusM}m 이내입니다.\n\n약 ${outsideByM}m 더 가까이 이동한 후 사진을 촬영해 주세요.',
+              l10n?.verificationPhotoOutsideRadiusTitle ?? '현장 사진 인증 범위 밖입니다',
+              l10n?.verificationPhotoOutsideRadiusBody(
+                    distM is int ? distM : (distM as num).toInt(),
+                    radiusM is int ? radiusM : (radiusM as num).toInt(),
+                    outsideByM is int
+                        ? outsideByM
+                        : (outsideByM as num).toInt(),
+                  ) ??
+                  '현재 지정된 사진 인증 구역/지점에서 약 ${distM}m 떨어져 있습니다.\n\n사진 인증 가능 범위는 ${radiusM}m 이내입니다.\n\n약 ${outsideByM}m 더 가까이 이동한 후 사진을 촬영해 주세요.',
             );
             return; // STOP! DO NOT OPEN CAMERA!
           }
         }
       } catch (_) {}
 
-      try {
-        final picker = ImagePicker();
-        final pickedFile = await picker.pickImage(
-          source: ImageSource.camera,
-          maxWidth: 1024,
-          maxHeight: 1024,
-          imageQuality: 80,
-        );
-        if (pickedFile == null) {
-          return;
-        }
-        final bytes = await pickedFile.readAsBytes();
-        imageBase64 = base64Encode(bytes);
-      } catch (camErr) {
-        if (!mounted) return;
-        _showErrorDialog('카메라 오류', '사진을 촬영할 수 없습니다. 카메라 권한을 확인해주세요.');
-        return;
-      }
-    } else if (isPhoto) {
       try {
         final picker = ImagePicker();
         final pickedFile = await picker.pickImage(
