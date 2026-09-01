@@ -140,26 +140,67 @@ def get_current_user_optional(token: Optional[str] = Depends(oauth2_scheme), db:
     except Exception:
         return None
 
+def get_user_role_names(user: Optional[models.User]) -> List[str]:
+    if not user:
+        return []
+    roles = []
+    direct_role = getattr(user, "role", None)
+    if direct_role:
+        roles.append(str(direct_role).upper())
+    for r in (getattr(user, "roles", []) or []):
+        r_val = getattr(r, "role", str(r))
+        if r_val:
+            roles.append(str(r_val).upper())
+    return roles
+
 ENABLE_QA_LOCAL_TEST = os.environ.get("ENABLE_QA_LOCAL_TEST", "true").lower() == "true"
 
 def is_authorized_qa_tester(user: Optional[models.User]) -> bool:
-    if not ENABLE_QA_LOCAL_TEST:
-        return False
     if not user:
         return False
-    if user.email and user.email.strip().lower() == "jazzbj@naver.com":
-        return True
-    if getattr(user, "role", "").upper() == "ADMIN":
+    user_roles = get_user_role_names(user)
+    if "ADMIN" in user_roles or "TEST" in user_roles:
         return True
     return False
 
-def apply_store_qa_filter(query, user: Optional[models.User] = None):
-    if is_authorized_qa_tester(user):
+def apply_scope_filter(query, model_class, user: Optional[models.User] = None, requested_scope: Optional[str] = None):
+    """
+    Canonical data scope and lifecycle filter.
+    Rules:
+    - Normal Customer (or unauthenticated): data_scope == 'REAL', lifecycle_status == 'ACTIVE'
+    - Authorized QA user requesting QA: data_scope == 'QA', lifecycle_status == 'ACTIVE'
+    - Admin with explicit requested_scope:
+        - 'ALL': returns all data_scopes and lifecycle_statuses
+        - 'QA': data_scope == 'QA'
+        - 'REAL': data_scope == 'REAL'
+    """
+    user_roles = get_user_role_names(user)
+    is_admin = "ADMIN" in user_roles
+    is_qa = is_admin or ("TEST" in user_roles)
+
+    if is_admin and requested_scope and requested_scope.upper() == "ALL":
         return query
-    return query.filter(
-        (models.Store.is_test_data != True) | (models.Store.is_test_data.is_(None)),
-        (models.Store.tier != "TEST") | (models.Store.tier.is_(None))
-    )
+
+    target_scope = "REAL"
+    if requested_scope:
+        req = requested_scope.upper()
+        if req == "QA":
+            if not is_qa:
+                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="QA 데이터에 접근할 권한이 없습니다.")
+            target_scope = "QA"
+        elif req == "REAL":
+            target_scope = "REAL"
+
+    # Filter by canonical data_scope and lifecycle_status
+    if hasattr(model_class, "data_scope"):
+        query = query.filter(model_class.data_scope == target_scope)
+    if hasattr(model_class, "lifecycle_status") and not is_admin:
+        query = query.filter(model_class.lifecycle_status == "ACTIVE")
+
+    return query
+
+def apply_store_qa_filter(query, user: Optional[models.User] = None, requested_scope: Optional[str] = None):
+    return apply_scope_filter(query, models.Store, user=user, requested_scope=requested_scope)
 
 # Seeding logic for stores
 def seed_stores():
@@ -1191,10 +1232,10 @@ def localize_mission_obj(mission: models.Mission, loc: str):
 # --- PLACE / STORE MVP APIs ---
 
 @app.get("/stores", response_model=List[schemas.StoreOut], tags=["Stores"])
-def get_stores(category: Optional[str] = None, locale: Optional[str] = Query(None), accept_language: Optional[str] = Header(None), current_user: Optional[models.User] = Depends(get_current_user_optional), db: Session = Depends(get_db)):
+def get_stores(category: Optional[str] = None, data_scope: Optional[str] = Query(None), locale: Optional[str] = Query(None), accept_language: Optional[str] = Header(None), current_user: Optional[models.User] = Depends(get_current_user_optional), db: Session = Depends(get_db)):
     target_loc = resolve_locale(accept_language=accept_language, locale=locale)
     query = db.query(models.Store).filter(models.Store.status != "DRAFT")
-    query = apply_store_qa_filter(query, current_user)
+    query = apply_store_qa_filter(query, current_user, requested_scope=data_scope)
     if category:
         query = query.filter(models.Store.category == category)
     stores = query.all()
@@ -1203,36 +1244,44 @@ def get_stores(category: Optional[str] = None, locale: Optional[str] = Query(Non
     return stores
 
 @app.get("/stores/categories", response_model=List[str], tags=["Stores"])
-def get_categories(current_user: Optional[models.User] = Depends(get_current_user_optional), db: Session = Depends(get_db)):
+def get_categories(data_scope: Optional[str] = Query(None), current_user: Optional[models.User] = Depends(get_current_user_optional), db: Session = Depends(get_db)):
     query = db.query(models.Store.category).filter(models.Store.status != "DRAFT")
-    query = apply_store_qa_filter(query, current_user)
+    query = apply_store_qa_filter(query, current_user, requested_scope=data_scope)
     categories = query.distinct().all()
     return [cat[0] for cat in categories]
 
 @app.get("/stores/search", response_model=List[schemas.StoreOut], tags=["Stores"])
-def search_stores(q: str, locale: Optional[str] = Query(None), accept_language: Optional[str] = Header(None), current_user: Optional[models.User] = Depends(get_current_user_optional), db: Session = Depends(get_db)):
+def search_stores(q: str, data_scope: Optional[str] = Query(None), locale: Optional[str] = Query(None), accept_language: Optional[str] = Header(None), current_user: Optional[models.User] = Depends(get_current_user_optional), db: Session = Depends(get_db)):
     target_loc = resolve_locale(accept_language=accept_language, locale=locale)
     query = db.query(models.Store).filter(
         models.Store.status != "DRAFT",
         (models.Store.name.contains(q)) | (models.Store.description.contains(q)) | (models.Store.name_en.contains(q)) | (models.Store.name_ja.contains(q)) | (models.Store.name_zh.contains(q))
     )
-    query = apply_store_qa_filter(query, current_user)
+    query = apply_store_qa_filter(query, current_user, requested_scope=data_scope)
     stores = query.all()
     for s in stores:
         localize_store_obj(s, target_loc)
     return stores
 
 @app.get("/stores/{store_id}", response_model=schemas.StoreOut, tags=["Stores"])
-def get_store(store_id: str, locale: Optional[str] = Query(None), accept_language: Optional[str] = Header(None), db: Session = Depends(get_db)):
+def get_store(store_id: str, data_scope: Optional[str] = Query(None), locale: Optional[str] = Query(None), accept_language: Optional[str] = Header(None), current_user: Optional[models.User] = Depends(get_current_user_optional), db: Session = Depends(get_db)):
     target_loc = resolve_locale(accept_language=accept_language, locale=locale)
-    store = db.query(models.Store).filter(models.Store.id == store_id).first()
+    query = db.query(models.Store).filter(models.Store.id == store_id)
+    query = apply_scope_filter(query, models.Store, user=current_user, requested_scope=data_scope)
+    store = query.first()
     if not store:
         raise HTTPException(status_code=404, detail="해당 장소를 찾을 수 없습니다.")
     return localize_store_obj(store, target_loc)
 
 @app.get("/stores/{store_id}/products", response_model=List[schemas.ProductOut], tags=["Stores"])
-def get_store_products(store_id: str, locale: Optional[str] = Query(None), accept_language: Optional[str] = Header(None), db: Session = Depends(get_db)):
+def get_store_products(store_id: str, locale: Optional[str] = Query(None), accept_language: Optional[str] = Header(None), current_user: Optional[models.User] = Depends(get_current_user_optional), db: Session = Depends(get_db)):
     target_loc = resolve_locale(accept_language=accept_language, locale=locale)
+    # Ensure parent store is accessible under current scope
+    store_query = db.query(models.Store).filter(models.Store.id == store_id)
+    store_query = apply_scope_filter(store_query, models.Store, user=current_user)
+    if not store_query.first():
+        raise HTTPException(status_code=404, detail="해당 장소를 찾을 수 없습니다.")
+
     products = db.query(models.Product).filter(
         models.Product.store_id == store_id,
         models.Product.status == "ACTIVE"
@@ -1253,6 +1302,7 @@ def get_missions(
 ):
     target_loc = resolve_locale(accept_language=accept_language, locale=locale)
     query = db.query(models.Mission)
+    query = apply_scope_filter(query, models.Mission, user=current_user)
     if store_id:
         query = query.filter(models.Mission.store_id == store_id)
     missions = query.all()
@@ -1272,17 +1322,27 @@ def get_missions(
     return result
 
 @app.get("/missions/{mission_id}", response_model=schemas.MissionOut, tags=["Missions"])
-def get_mission(mission_id: str, locale: Optional[str] = Query(None), accept_language: Optional[str] = Header(None), db: Session = Depends(get_db)):
+def get_mission(mission_id: str, locale: Optional[str] = Query(None), accept_language: Optional[str] = Header(None), current_user: Optional[models.User] = Depends(get_current_user_optional), db: Session = Depends(get_db)):
     target_loc = resolve_locale(accept_language=accept_language, locale=locale)
-    mission = db.query(models.Mission).filter(models.Mission.id == mission_id).first()
+    query = db.query(models.Mission).filter(models.Mission.id == mission_id)
+    query = apply_scope_filter(query, models.Mission, user=current_user)
+    mission = query.first()
     if not mission:
         raise HTTPException(status_code=404, detail="해당 미션을 찾을 수 없습니다.")
     return localize_mission_obj(mission, target_loc)
 
 @app.get("/stores/{store_id}/missions", response_model=List[schemas.MissionOut], tags=["Missions"])
-def get_store_missions(store_id: str, locale: Optional[str] = Query(None), accept_language: Optional[str] = Header(None), db: Session = Depends(get_db)):
+def get_store_missions(store_id: str, locale: Optional[str] = Query(None), accept_language: Optional[str] = Header(None), current_user: Optional[models.User] = Depends(get_current_user_optional), db: Session = Depends(get_db)):
     target_loc = resolve_locale(accept_language=accept_language, locale=locale)
-    missions = db.query(models.Mission).filter(models.Mission.store_id == store_id).all()
+    # Ensure parent store is accessible under current scope
+    store_query = db.query(models.Store).filter(models.Store.id == store_id)
+    store_query = apply_scope_filter(store_query, models.Store, user=current_user)
+    if not store_query.first():
+        raise HTTPException(status_code=404, detail="해당 장소를 찾을 수 없습니다.")
+
+    query = db.query(models.Mission).filter(models.Mission.store_id == store_id)
+    query = apply_scope_filter(query, models.Mission, user=current_user)
+    missions = query.all()
     for m in missions:
         localize_mission_obj(m, target_loc)
     return missions
@@ -4169,12 +4229,28 @@ def update_store_spatial_geometry(store_id: str, req: SpatialGeometryUpdateReque
 
 @app.post("/admin/missions", response_model=schemas.MissionOut, status_code=status.HTTP_201_CREATED, tags=["Admin"])
 def create_admin_mission(req: schemas.MissionCreate, admin: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
-    new_mission = models.Mission(**req.dict())
+    # Cross-scope relationship guard
+    store = db.query(models.Store).filter(models.Store.id == req.store_id).first()
+    if not store:
+        raise HTTPException(status_code=404, detail="연결할 매장/장소를 찾을 수 없습니다.")
+
+    mission_scope = (req.data_scope or store.data_scope or "REAL").upper()
+    store_scope = (store.data_scope or "REAL").upper()
+
+    if mission_scope != store_scope:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"미션의 데이터 스코프({mission_scope})는 연결된 장소의 스코프({store_scope})와 일치해야 합니다."
+        )
+
+    mission_data = req.dict()
+    mission_data["data_scope"] = store_scope
+    new_mission = models.Mission(**mission_data)
     db.add(new_mission)
     db.commit()
     db.refresh(new_mission)
     
-    log_admin_action(db, admin.id, "CREATE_MISSION", new_mission.id, f"Created mission: {new_mission.title}")
+    log_admin_action(db, admin.id, "CREATE_MISSION", new_mission.id, f"Created mission: {new_mission.title} (scope: {new_mission.data_scope})")
     return new_mission
 
 @app.patch("/admin/missions/{mission_id}/status", response_model=schemas.MissionOut, tags=["Admin"])

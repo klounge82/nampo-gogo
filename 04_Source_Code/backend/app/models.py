@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, String, DateTime, ForeignKey, Float, Integer, Text, func, Boolean, UniqueConstraint
+from sqlalchemy import Column, String, DateTime, ForeignKey, Float, Integer, Text, func, Boolean, UniqueConstraint, CheckConstraint, Index
 from sqlalchemy.orm import relationship
 from .database import Base
 
@@ -163,6 +163,8 @@ class Store(Base):
     is_attraction = Column(Boolean, nullable=True, default=False)
     tier = Column(String(50), nullable=True, default="OFFICIAL") # 'TEST', 'VERIFIED_BETA', 'OFFICIAL'
     is_test_data = Column(Boolean, nullable=True, default=False)
+    data_scope = Column(String(10), nullable=False, default="REAL", server_default="REAL", index=True) # 'REAL', 'QA'
+    lifecycle_status = Column(String(20), nullable=False, default="ACTIVE", server_default="ACTIVE", index=True) # 'ACTIVE', 'HIDDEN', 'ARCHIVED'
     entrance_image_url = Column(String(500), nullable=True)
     interior_images_json = Column(Text, nullable=True)
     product_images_json = Column(Text, nullable=True)
@@ -186,6 +188,12 @@ class Store(Base):
     memberships = relationship("BusinessMembership", back_populates="store", cascade="all, delete-orphan")
     # One-to-many relationship with Product
     products = relationship("Product", back_populates="store", cascade="all, delete-orphan")
+
+    __table_args__ = (
+        CheckConstraint("data_scope IN ('REAL', 'QA')", name="check_store_data_scope"),
+        CheckConstraint("lifecycle_status IN ('ACTIVE', 'HIDDEN', 'ARCHIVED')", name="check_store_lifecycle_status"),
+        Index("idx_stores_scope_lifecycle", "data_scope", "lifecycle_status"),
+    )
 
 class Product(Base):
     __tablename__ = "products"
@@ -262,12 +270,20 @@ class Mission(Base):
     points = Column(Integer, nullable=False, default=100)
     auth_type = Column(String(50), nullable=False) # 'GPS', 'QR', 'PHOTO'
     status = Column(String(50), nullable=False, default="active") # 'active', 'inactive'
+    data_scope = Column(String(10), nullable=False, default="REAL", server_default="REAL", index=True) # 'REAL', 'QA'
+    lifecycle_status = Column(String(20), nullable=False, default="ACTIVE", server_default="ACTIVE", index=True) # 'ACTIVE', 'HIDDEN', 'ARCHIVED'
     created_at = Column(DateTime, nullable=False, server_default=func.now())
 
     # Relationship to Store
     store = relationship("Store", back_populates="missions")
     # One-to-many relationship with UserMission
     user_records = relationship("UserMission", back_populates="mission", cascade="all, delete-orphan")
+
+    __table_args__ = (
+        CheckConstraint("data_scope IN ('REAL', 'QA')", name="check_mission_data_scope"),
+        CheckConstraint("lifecycle_status IN ('ACTIVE', 'HIDDEN', 'ARCHIVED')", name="check_mission_lifecycle_status"),
+        Index("idx_missions_scope_lifecycle", "data_scope", "lifecycle_status"),
+    )
 
 class UserMission(Base):
     __tablename__ = "user_missions"

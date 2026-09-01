@@ -252,6 +252,8 @@ class StoreBase(BaseModel):
     is_attraction: Optional[bool] = False
     tier: Optional[str] = "OFFICIAL"
     is_test_data: Optional[bool] = False
+    data_scope: Optional[str] = "REAL" # 'REAL', 'QA'
+    lifecycle_status: Optional[str] = "ACTIVE" # 'ACTIVE', 'HIDDEN', 'ARCHIVED'
     entrance_image_url: Optional[str] = None
     interior_images_json: Optional[str] = None
     product_images_json: Optional[str] = None
@@ -282,6 +284,8 @@ class MissionBase(BaseModel):
     points: int
     auth_type: str  # 'GPS', 'QR', 'PHOTO'
     status: Optional[str] = "active"
+    data_scope: Optional[str] = "REAL" # 'REAL', 'QA'
+    lifecycle_status: Optional[str] = "ACTIVE" # 'ACTIVE', 'HIDDEN', 'ARCHIVED'
 
 class MissionCreate(MissionBase):
     pass
