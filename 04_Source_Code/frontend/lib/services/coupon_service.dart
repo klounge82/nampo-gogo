@@ -1,18 +1,23 @@
 import 'package:dio/dio.dart';
 import '../config/api_config.dart';
+import 'auth_interceptor.dart';
 
 class CouponService {
-  Dio get _dio => Dio(
-    BaseOptions(
-      baseUrl: ApiConfig.baseUrl,
-      connectTimeout: ApiConfig.connectTimeout,
-      receiveTimeout: ApiConfig.receiveTimeout,
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-    ),
-  );
+  Dio get _dio {
+    final dio = Dio(
+      BaseOptions(
+        baseUrl: ApiConfig.baseUrl,
+        connectTimeout: ApiConfig.connectTimeout,
+        receiveTimeout: ApiConfig.receiveTimeout,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      ),
+    );
+    dio.interceptors.add(AuthInterceptor(dio));
+    return dio;
+  }
 
   // GET /coupons
   Future<List<dynamic>> fetchCoupons() async {

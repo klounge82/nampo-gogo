@@ -47,7 +47,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               TextButton(
                 onPressed: () {
                   Navigator.pop(ctx);
-                  context.read<ProfileProvider>().withdrawAccount(context);
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                  }
                 },
                 child: Text(l10n.confirmOk),
               ),

@@ -9,6 +9,7 @@ import 'admin_mission_manage_screen.dart';
 import 'admin_reservation_manage_screen.dart';
 import 'admin_review_manage_screen.dart';
 import 'admin_audit_log_screen.dart';
+import 'admin/admin_business_approval_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -118,24 +119,35 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
                     // Menu items
                     _buildMenuCard(
-                      title: '회원 계정 관리',
-                      subtitle: '가입 유저 상태 조회 및 이용 제한 정지 처리',
-                      icon: Icons.people_outline,
-                      color: Colors.blue,
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const AdminUserManageScreen(),
-                        ),
-                      ),
-                    ),
-                    _buildMenuCard(
-                      title: '협약 매장 관리',
-                      subtitle: '남포동 매장 추가, 정보 수정 및 비활성화',
-                      icon: Icons.storefront_outlined,
+                      title: '장소·사업자 관리',
+                      subtitle: '관광지/매장 정보, 위치·인증범위 및 공간 에디터 관리',
+                      icon: Icons.place_outlined,
                       color: Colors.orange,
                       onTap: () => Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (_) => const AdminStoreManageScreen(),
+                        ),
+                      ),
+                    ),
+                    _buildMenuCard(
+                      title: '사업자·제휴점 및 QR 관리',
+                      subtitle: '제휴점 신청 승인, 위치, auth_type 및 QR 관리 영역',
+                      icon: Icons.storefront_outlined,
+                      color: Colors.indigo,
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const AdminBusinessApprovalScreen(),
+                        ),
+                      ),
+                    ),
+                    _buildMenuCard(
+                      title: '승인 대기열',
+                      subtitle: '신규 사업자 신청 및 매장 위치/인증방식 승인 대기',
+                      icon: Icons.rule_folder_outlined,
+                      color: Colors.amber.shade800,
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const AdminBusinessApprovalScreen(initialStatusFilter: 'SUBMITTED'),
                         ),
                       ),
                     ),
@@ -147,6 +159,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       onTap: () => Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (_) => const AdminMissionManageScreen(),
+                        ),
+                      ),
+                    ),
+                    _buildMenuCard(
+                      title: '회원 계정 관리',
+                      subtitle: '가입 유저 상태 조회 및 이용 제한 정지 처리',
+                      icon: Icons.people_outline,
+                      color: Colors.blue,
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const AdminUserManageScreen(),
                         ),
                       ),
                     ),

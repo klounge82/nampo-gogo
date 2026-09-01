@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import '../models/mission.dart';
 import '../services/mission_service.dart';
 import '../data/mock_data.dart';
+import '../config/production_config.dart';
 
 class MissionRepository {
   final MissionService _missionService;
@@ -43,25 +44,26 @@ class MissionRepository {
 
   Mission _localizeMission(Mission m, String? locale) {
     final loc = locale?.toLowerCase() ?? 'ko';
-    if (loc == 'ko') return m;
 
     String title = m.title;
     String description = m.description;
     String reward = m.reward;
 
     final titleUpper = m.title.toUpperCase();
-    final isMis1 = m.id == 'mis_01' ||
-        m.id == 'msn_001' ||
-        m.id == '1' ||
+    final idLower = m.id.toLowerCase();
+
+    final isMis1 = idLower == 'mis_01' ||
+        idLower == 'msn_001' ||
+        idLower == '1' ||
         m.title.contains('BIFF') ||
         m.title.contains('호떡') ||
         titleUpper.contains('HOTTEOK') ||
         titleUpper.contains('糖饼') ||
         titleUpper.contains('ホットク');
 
-    final isMis2 = m.id == 'mis_02' ||
-        m.id == 'msn_002' ||
-        m.id == '2' ||
+    final isMis2 = idLower == 'mis_02' ||
+        idLower == 'msn_002' ||
+        idLower == '2' ||
         m.title.contains('용두산') ||
         m.title.contains('타워') ||
         titleUpper.contains('YONGDUSAN') ||
@@ -71,9 +73,9 @@ class MissionRepository {
         m.title.contains('釜山塔') ||
         m.title.contains('龍頭山');
 
-    final isMis3 = m.id == 'mis_03' ||
-        m.id == 'msn_003' ||
-        m.id == '3' ||
+    final isMis3 = idLower == 'mis_03' ||
+        idLower == 'msn_003' ||
+        idLower == '3' ||
         m.title.contains('자갈치') ||
         m.title.contains('시장') ||
         titleUpper.contains('JAGALCHI') ||
@@ -81,48 +83,111 @@ class MissionRepository {
         m.title.contains('札嘎其') ||
         m.title.contains('チャガルチ');
 
+    final isMisSuyeong = m.title.contains('수영강') ||
+        m.description.contains('수영강') ||
+        idLower.contains('suyeong') ||
+        idLower.contains('photo-004') ||
+        idLower.contains('photo-gps-005');
+
+    final isMisGwangalli = m.title.contains('광안리') ||
+        m.description.contains('광안리') ||
+        idLower.contains('gwangalli');
+
+    final isMisGampo = m.title.contains('감포') ||
+        m.description.contains('감포') ||
+        idLower.contains('gampo');
+
+    String? tZh = m.titleZh;
+    String? dZh = m.descriptionZh;
+    String? tEn = m.titleEn;
+    String? dEn = m.descriptionEn;
+    String? tJa = m.titleJa;
+    String? dJa = m.descriptionJa;
+
     if (loc.contains('zh')) {
       if (isMis1) {
         title = 'BIFF广场糖饼认证！';
         description = '购买BIFF广场坚果糖饼并拍照认证打卡。';
         reward = '坚果糖饼9折优惠券';
       } else if (isMis2) {
-        title = '龙头山公园釜山塔登顶';
-        description = '到达龙头山公园釜山塔附近并进行GPS位置认证。';
-        reward = '展望台门票立减1,000韩元';
+        title = '[QA] 龙头山公园 GPS 访问任务';
+        description = '在龙头山公园 100m 范围内验证 GPS 位置。';
+        reward = '100P';
       } else if (isMis3) {
-        title = '打卡札嘎其市场美食店';
+        title = '[QA] 札嘎其市场 QR 访问任务';
         description = '在札嘎其市场合作店铺用餐并扫描商家二维码认证。';
         reward = '合作店铺免费饮料券';
+      } else if (isMisSuyeong) {
+        title = '[QA] 水营江边 现场照片 任务';
+        description = '在水营江边散步路拍照上传验证。';
+        reward = '100P';
+      } else if (isMisGwangalli) {
+        title = '[QA] 广安里海水浴场 GPS 访问任务';
+        description = '在广安里海水浴场 100m 范围内验证 GPS 位置。';
+        reward = '100P';
+      } else if (isMisGampo) {
+        title = '[QA] 甘浦路 GPS 测试点';
+        description = '在甘浦路 100m 范围内验证 GPS 位置。';
+        reward = '100P';
       }
+      tZh = title;
+      dZh = description;
     } else if (loc.contains('en')) {
       if (isMis1) {
         title = 'BIFF Square Ssiat Hotteok Verification!';
         description = 'Buy Ssiat Hotteok at BIFF Square and upload a photo to verify.';
         reward = '10% Off Hotteok Coupon';
       } else if (isMis2) {
-        title = 'Yongdusan Park Busan Tower Conquest';
-        description = 'Reach Yongdusan Park Busan Tower and verify your GPS location.';
-        reward = '1,000 KRW Observatory Discount';
+        title = '[QA] Yongdusan Park GPS Visit Mission';
+        description = 'Verify your GPS location within 100m of Yongdusan Park.';
+        reward = '100P';
       } else if (isMis3) {
-        title = 'Visit Jagalchi Market Gourmet Place';
+        title = '[QA] Jagalchi Market QR Visit Mission';
         description = 'Dine at Jagalchi Market partner shop and scan the merchant QR code.';
         reward = 'Free Beverage Coupon';
+      } else if (isMisSuyeong) {
+        title = '[QA] Suyeong River Trail Photo Mission';
+        description = 'Take and upload a photo on the Suyeong River walking trail.';
+        reward = '100P';
+      } else if (isMisGwangalli) {
+        title = '[QA] Gwangalli Beach GPS Visit Mission';
+        description = 'Verify your GPS location within 100m of Gwangalli Beach.';
+        reward = '100P';
+      } else if (isMisGampo) {
+        title = '[QA] Gampo-ro GPS Test Point';
+        description = 'Verify your GPS location within 100m of Gampo-ro.';
+        reward = '100P';
       }
+      tEn = title;
+      dEn = description;
     } else if (loc.contains('ja')) {
       if (isMis1) {
         title = 'BIFF広場ホットク認証！';
         description = 'BIFF広場でシアホットクを購入し写真を撮影して認証してください。';
         reward = 'ホットク10%割引クーポン';
       } else if (isMis2) {
-        title = '龍頭山公園釜山タワー制覇';
-        description = '龍頭山公園釜山タワー付近に到着しGPS位置を認証してください。';
-        reward = '展望台入場1,000ウォン割引券';
+        title = '[QA] 龍頭山公園 GPS 訪問ミッション';
+        description = '龍頭山公園の 100m 以内で GPS 位置を検証します。';
+        reward = '100P';
       } else if (isMis3) {
-        title = 'チャガルチ市場グルメ訪問';
-        description = 'チャガルチ市場の提携店舗で食事をしてQRコード를 スキャンしてください。';
+        title = '[QA] チャガルチ市場 QR 訪問ミッション';
+        description = 'チャガルチ市場の提携店舗で食事をしてQRコードをスキャンしてください。';
         reward = '提携店舗無料ドリンク券';
+      } else if (isMisSuyeong) {
+        title = '[QA] 水営江辺 現場写真 ミッション';
+        description = '水営江辺の散策路で写真を撮影してアップロードしてください。';
+        reward = '100P';
+      } else if (isMisGwangalli) {
+        title = '[QA] 広安里海水浴場 GPS 訪問ミッション';
+        description = '広安里海水浴場の 100m 以内で GPS 位置を検証します。';
+        reward = '100P';
+      } else if (isMisGampo) {
+        title = '[QA] 甘浦路 GPS テストポイント';
+        description = '甘浦路の 100m 以内で GPS 位置を検証します。';
+        reward = '100P';
       }
+      tJa = title;
+      dJa = description;
     }
 
     return Mission(
@@ -130,6 +195,12 @@ class MissionRepository {
       storeId: m.storeId,
       title: title,
       description: description,
+      titleEn: tEn ?? m.titleEn,
+      titleJa: tJa ?? m.titleJa,
+      titleZh: tZh ?? m.titleZh,
+      descriptionEn: dEn ?? m.descriptionEn,
+      descriptionJa: dJa ?? m.descriptionJa,
+      descriptionZh: dZh ?? m.descriptionZh,
       reward: reward,
       points: m.points,
       authType: m.authType,
@@ -147,6 +218,9 @@ class MissionRepository {
           .map((json) => _localizeMission(Mission.fromJson(json as Map<String, dynamic>), locale))
           .toList();
     } catch (e) {
+      if (!ProductionConfig.enableMockData) {
+        rethrow;
+      }
       if (kDebugMode) {
         print(
           'MissionRepository: Failed to load missions from API. Falling back to Mock. Error: $e',
@@ -169,6 +243,9 @@ class MissionRepository {
       final json = await _missionService.fetchMissionDetail(id, locale: locale);
       return _localizeMission(Mission.fromJson(json), locale);
     } catch (e) {
+      if (!ProductionConfig.enableMockData) {
+        rethrow;
+      }
       if (kDebugMode) {
         print(
           'MissionRepository: Detail fetch failed. Falling back. Error: $e',
@@ -192,6 +269,9 @@ class MissionRepository {
           .map((json) => Mission.fromJson(json as Map<String, dynamic>))
           .toList();
     } catch (e) {
+      if (!ProductionConfig.enableMockData) {
+        rethrow;
+      }
       if (kDebugMode) {
         print(
           'MissionRepository: Store missions fetch failed. Falling back. Error: $e',

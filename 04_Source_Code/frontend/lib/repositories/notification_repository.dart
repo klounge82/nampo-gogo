@@ -2,20 +2,25 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import '../models/notification_model.dart';
 import '../config/api_config.dart';
+import '../services/auth_interceptor.dart';
 
 class NotificationRepository {
   final Dio _dio;
 
   NotificationRepository({Dio? dio})
-    : _dio =
-          dio ??
-          Dio(
-            BaseOptions(
-              baseUrl: ApiConfig.baseUrl,
-              connectTimeout: const Duration(seconds: 5),
-              receiveTimeout: const Duration(seconds: 3),
-            ),
-          );
+    : _dio = dio ?? _createDio();
+
+  static Dio _createDio() {
+    final dio = Dio(
+      BaseOptions(
+        baseUrl: ApiConfig.baseUrl,
+        connectTimeout: const Duration(seconds: 5),
+        receiveTimeout: const Duration(seconds: 3),
+      ),
+    );
+    dio.interceptors.add(AuthInterceptor(dio));
+    return dio;
+  }
 
   Future<void> registerToken({
     required String deviceId,

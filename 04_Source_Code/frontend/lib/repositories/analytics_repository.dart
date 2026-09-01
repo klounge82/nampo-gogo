@@ -1,19 +1,24 @@
 import 'package:dio/dio.dart';
 import '../config/api_config.dart';
+import '../services/auth_interceptor.dart';
 
 class AnalyticsRepository {
   final Dio _dio;
 
   AnalyticsRepository({Dio? dio})
-    : _dio =
-          dio ??
-          Dio(
-            BaseOptions(
-              baseUrl: ApiConfig.baseUrl,
-              connectTimeout: ApiConfig.connectTimeout,
-              receiveTimeout: ApiConfig.receiveTimeout,
-            ),
-          );
+    : _dio = dio ?? _createDio();
+
+  static Dio _createDio() {
+    final dio = Dio(
+      BaseOptions(
+        baseUrl: ApiConfig.baseUrl,
+        connectTimeout: ApiConfig.connectTimeout,
+        receiveTimeout: ApiConfig.receiveTimeout,
+      ),
+    );
+    dio.interceptors.add(AuthInterceptor(dio));
+    return dio;
+  }
 
   // GET /analytics/dashboard
   Future<Map<String, dynamic>> fetchDashboardSummary({

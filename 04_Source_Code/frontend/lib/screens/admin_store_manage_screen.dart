@@ -312,13 +312,7 @@ class _AdminStoreManageScreenState extends State<AdminStoreManageScreen> {
     if (name.contains('수영강') || id.contains('suyeong')) {
       pType = PlaceType.linear;
       gType = GeometryType.lineBuffer;
-      initialPts = const [
-        LatLng(35.1665, 129.1215),
-        LatLng(35.1650, 129.1230),
-        LatLng(35.1635, 129.1245),
-        LatLng(35.1620, 129.1258),
-        LatLng(35.1600, 129.1270),
-      ];
+      initialPts = const [];
     } else if (name.contains('자갈치') || id.contains('jagalchi') || name.contains('국제시장')) {
       pType = PlaceType.district;
       gType = GeometryType.polygonArea;
@@ -348,19 +342,21 @@ class _AdminStoreManageScreenState extends State<AdminStoreManageScreen> {
           geometryType: saved?.geometryType ?? gType,
           referencePosition: refPos,
           initialPoints: saved?.points ?? initialPts,
+          initialLines: saved?.lines ?? const [],
           initialBufferM: saved?.bufferWidthM ?? 75.0,
           initialRadiusM: saved?.radiusM ??
               (place.reviewLocationRadiusM > 0
                   ? place.reviewLocationRadiusM.toDouble()
                   : 100.0),
           initialApprovalStatus: saved?.approvalStatus ?? SpatialApprovalStatus.candidate,
-          onCandidateSaved: (points, bufferM, radiusM, status, pTypeRes, gTypeRes, refPosRes) {
+          onCandidateSaved: (points, lines, bufferM, radiusM, status, pTypeRes, gTypeRes, refPosRes) {
             SpatialCandidateStore().saveCandidate(
               placeId: place.id,
               placeType: pTypeRes,
               geometryType: gTypeRes,
               referencePosition: refPosRes,
               points: points,
+              lines: lines,
               bufferWidthM: bufferM,
               radiusM: radiusM,
               approvalStatus: status,

@@ -8,6 +8,7 @@ class SpatialCandidateRecord {
   final GeometryType geometryType;
   final LatLng? referencePosition;
   final List<LatLng> points;
+  final List<List<LatLng>> lines;
   final double bufferWidthM;
   final double radiusM;
   final SpatialApprovalStatus approvalStatus;
@@ -19,6 +20,7 @@ class SpatialCandidateRecord {
     required this.geometryType,
     this.referencePosition,
     this.points = const [],
+    this.lines = const [],
     this.bufferWidthM = 75.0,
     this.radiusM = 100.0,
     this.approvalStatus = SpatialApprovalStatus.candidate,
@@ -31,6 +33,7 @@ class SpatialCandidateRecord {
     LatLng? referencePosition,
     bool updateReferencePositionToNull = false,
     List<LatLng>? points,
+    List<List<LatLng>>? lines,
     double? bufferWidthM,
     double? radiusM,
     SpatialApprovalStatus? approvalStatus,
@@ -43,10 +46,85 @@ class SpatialCandidateRecord {
           ? null
           : (referencePosition ?? this.referencePosition),
       points: points ?? List.from(this.points),
+      lines: lines ?? this.lines.map((l) => List<LatLng>.from(l)).toList(),
       bufferWidthM: bufferWidthM ?? this.bufferWidthM,
       radiusM: radiusM ?? this.radiusM,
       approvalStatus: approvalStatus ?? this.approvalStatus,
       updatedAt: DateTime.now(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'placeId': placeId,
+      'placeType': placeType.name,
+      'geometryType': geometryType.name,
+      'referencePosition': referencePosition != null
+          ? {'lat': referencePosition!.latitude, 'lng': referencePosition!.longitude}
+          : null,
+      'points': points.map((p) => {'lat': p.latitude, 'lng': p.longitude}).toList(),
+      'lines': lines.map((l) => l.map((p) => {'lat': p.latitude, 'lng': p.longitude}).toList()).toList(),
+      'bufferWidthM': bufferWidthM,
+      'radiusM': radiusM,
+      'approvalStatus': approvalStatus.name,
+      'updatedAt': updatedAt.toIso8601String(),
+    };
+  }
+
+  factory SpatialCandidateRecord.fromJson(Map<String, dynamic> json) {
+    List<LatLng> parsePointList(dynamic raw) {
+      if (raw is! List) return [];
+      return raw.map((item) {
+        if (item is Map) {
+          final lat = (item['lat'] as num?)?.toDouble() ?? 0.0;
+          final lng = (item['lng'] as num?)?.toDouble() ?? 0.0;
+          return LatLng(lat, lng);
+        }
+        return const LatLng(0, 0);
+      }).toList();
+    }
+
+    List<List<LatLng>> parseLineList(dynamic raw) {
+      if (raw is! List) return [];
+      return raw.map((lineRaw) => parsePointList(lineRaw)).toList();
+    }
+
+    LatLng? refPos;
+    if (json['referencePosition'] is Map) {
+      final refMap = json['referencePosition'] as Map;
+      refPos = LatLng(
+        (refMap['lat'] as num?)?.toDouble() ?? 0.0,
+        (refMap['lng'] as num?)?.toDouble() ?? 0.0,
+      );
+    }
+
+    final parsedPoints = parsePointList(json['points']);
+    final parsedLines = parseLineList(json['lines']);
+
+    PlaceType pType = PlaceType.values.firstWhere(
+      (e) => e.name == json['placeType'],
+      orElse: () => PlaceType.point,
+    );
+    GeometryType gType = GeometryType.values.firstWhere(
+      (e) => e.name == json['geometryType'],
+      orElse: () => GeometryType.pointRadius,
+    );
+    SpatialApprovalStatus status = SpatialApprovalStatus.values.firstWhere(
+      (e) => e.name == json['approvalStatus'],
+      orElse: () => SpatialApprovalStatus.candidate,
+    );
+
+    return SpatialCandidateRecord(
+      placeId: json['placeId'] ?? '',
+      placeType: pType,
+      geometryType: gType,
+      referencePosition: refPos,
+      points: parsedPoints,
+      lines: parsedLines,
+      bufferWidthM: (json['bufferWidthM'] as num?)?.toDouble() ?? 75.0,
+      radiusM: (json['radiusM'] as num?)?.toDouble() ?? 100.0,
+      approvalStatus: status,
+      updatedAt: DateTime.tryParse(json['updatedAt'] ?? '') ?? DateTime.now(),
     );
   }
 }
@@ -65,6 +143,7 @@ class SpatialCandidateStore {
     required GeometryType geometryType,
     LatLng? referencePosition,
     required List<LatLng> points,
+    List<List<LatLng>> lines = const [],
     required double bufferWidthM,
     required double radiusM,
     SpatialApprovalStatus approvalStatus = SpatialApprovalStatus.candidate,
@@ -75,6 +154,7 @@ class SpatialCandidateStore {
       geometryType: geometryType,
       referencePosition: referencePosition,
       points: List.from(points),
+      lines: lines.map((l) => List<LatLng>.from(l)).toList(),
       bufferWidthM: bufferWidthM,
       radiusM: radiusM,
       approvalStatus: approvalStatus,

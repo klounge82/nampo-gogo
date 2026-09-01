@@ -1,12 +1,19 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import '../config/api_config.dart';
+import '../services/auth_interceptor.dart';
 
 class ActivityRepository {
   final Dio _dio;
 
   ActivityRepository({Dio? dio})
-    : _dio = dio ?? Dio(BaseOptions(baseUrl: ApiConfig.baseUrl));
+    : _dio = dio ?? _createDio();
+
+  static Dio _createDio() {
+    final dio = Dio(BaseOptions(baseUrl: ApiConfig.baseUrl));
+    dio.interceptors.add(AuthInterceptor(dio));
+    return dio;
+  }
 
   // GET /activity
   Future<List<dynamic>> getActivities({

@@ -1,3 +1,5 @@
+import '../utils/l10n_mappers.dart';
+
 class Place {
   final String id;
   final String name;
@@ -169,5 +171,17 @@ class Place {
       'review_location_radius_m': reviewLocationRadiusM,
       'manual_visit_allowed': manualVisitAllowed,
     };
+  }
+
+  String localizedName(String localeCode) {
+    return L10nMappers.mapPlaceName(this, localeCode);
+  }
+
+  String localizedAddress(String localeCode) {
+    return L10nMappers.mapPlaceAddress(this, localeCode);
+  }
+
+  String localizedDescription(String localeCode) {
+    return L10nMappers.mapPlaceDescription(this, localeCode);
   }
 }

@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/foundation.dart';
 import '../config/api_config.dart';
+import '../services/auth_interceptor.dart';
 
 class SearchRepository {
   final Dio _dio;
@@ -10,7 +11,13 @@ class SearchRepository {
   static const String _recentSearchKey = 'nampo_gogo_recent_searches_json';
 
   SearchRepository({Dio? dio})
-    : _dio = dio ?? Dio(BaseOptions(baseUrl: ApiConfig.baseUrl));
+    : _dio = dio ?? _createDio();
+
+  static Dio _createDio() {
+    final dio = Dio(BaseOptions(baseUrl: ApiConfig.baseUrl));
+    dio.interceptors.add(AuthInterceptor(dio));
+    return dio;
+  }
 
   // GET /search
   Future<Map<String, dynamic>> search({

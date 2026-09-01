@@ -5,14 +5,21 @@ import 'package:flutter/foundation.dart';
 import '../models/user.dart';
 import '../services/auth_service.dart';
 import '../config/api_config.dart';
+import '../services/auth_interceptor.dart';
 
 class ProfileRepository {
   final Dio _dio;
   final AuthService _authService;
 
   ProfileRepository({Dio? dio, AuthService? authService})
-    : _dio = dio ?? Dio(BaseOptions(baseUrl: ApiConfig.baseUrl)),
+    : _dio = dio ?? _createDio(),
       _authService = authService ?? AuthService();
+
+  static Dio _createDio() {
+    final dio = Dio(BaseOptions(baseUrl: ApiConfig.baseUrl));
+    dio.interceptors.add(AuthInterceptor(dio));
+    return dio;
+  }
 
   Future<Options> _getHeaders() async {
     final token = await _authService.getAccessToken();

@@ -2,6 +2,15 @@ import '../l10n/app_localizations.dart';
 import '../models/place.dart';
 
 class L10nMappers {
+  /// Maps switch to customer mode label across languages
+  static String mapSwitchToCustomerMode(String localeCode) {
+    final loc = localeCode.toLowerCase();
+    if (loc.contains('zh')) return '切换到用户模式';
+    if (loc.startsWith('en')) return 'Switch to Customer Mode';
+    if (loc.startsWith('ja')) return '顧客モードに切り替え';
+    return '고객모드로 전환';
+  }
+
   /// Maps mission auth type (GPS, QR, PHOTO, MANUAL) to localized string
   static String mapMissionAuthType(AppLocalizations l10n, String authType) {
     switch (authType.toUpperCase()) {
@@ -15,7 +24,7 @@ class L10nMappers {
       case 'PHOTO':
       case 'PHOTO_VERIFICATION':
       case 'PHOTO_GPS':
-        return l10n.authTypePhoto;
+      return l10n.authTypePhotoGps;
       default:
         return l10n.authTypeManual;
     }
@@ -26,19 +35,21 @@ class L10nMappers {
     final catUpper = category.toUpperCase();
     if (category == '전체' || catUpper == 'ALL' || catUpper == 'ALL_CATEGORIES') {
       return l10n.categoryAll;
+    } else if (category == '일반' || catUpper == 'GENERAL') {
+      return l10n.categoryGeneral;
     } else if (catUpper.contains('PHOTO') || category.contains('사진')) {
       return l10n.authTypePhoto;
     } else if (catUpper.contains('GPS') || catUpper.contains('LOCATION') || category.contains('위치')) {
       return l10n.authTypeGps;
     } else if (catUpper.contains('QR')) {
       return l10n.authTypeQr;
-    } else if (category.contains('맛집') || category.contains('식사') || category.contains('카페') || catUpper == 'FOOD') {
+    } else if (category.contains('먹거리') || category.contains('맛집') || category.contains('식사') || category.contains('카페') || category.contains('음식점') || catUpper == 'FOOD' || catUpper == 'RESTAURANT') {
       return l10n.categoryFood;
-    } else if (category.contains('관광') || category.contains('볼거리') || catUpper == 'ATTRACTION') {
+    } else if (category.contains('볼거리') || category.contains('관광') || category.contains('명소') || catUpper == 'SIGHTS' || catUpper == 'ATTRACTION' || catUpper == 'SIGHTSEEING' || catUpper == 'TOURISM') {
       return l10n.categoryAttraction;
-    } else if (category.contains('체험') || category.contains('문화') || catUpper == 'EXPERIENCE') {
+    } else if (category.contains('체험') || category.contains('문화') || catUpper == 'EXPERIENCE' || catUpper == 'CULTURE') {
       return l10n.categoryExperience;
-    } else if (category.contains('쇼핑') || category.contains('시장') || catUpper == 'SHOPPING') {
+    } else if (category.contains('쇼핑') || category.contains('시장') || catUpper == 'SHOPPING' || catUpper == 'MARKET') {
       return l10n.categoryShopping;
     }
     return category;
@@ -287,6 +298,9 @@ class L10nMappers {
       if (nameKo.contains('영도대교')) return '影岛大桥 开合表演';
       if (nameKo.contains('광복로')) return '光复路时尚街';
       if (nameKo.contains('깡통') || nameKo.contains('부평')) return '罐头夜市';
+      if (nameKo.contains('광안리') || nameKo.contains('Gwangalli')) return '广安里海水浴场';
+      if (nameKo.contains('감포') || nameKo.contains('Gampo')) return '甘浦路';
+      if (nameKo.contains('수영강') || nameKo.contains('Suyeong')) return '水营江边散步路';
     } else if (loc.startsWith('en')) {
       if (nameKo.contains('K-Lounge') || nameKo.contains('케이라운지')) return 'K-Lounge';
       if (nameKo.contains('용두산') || nameKo.contains('부산타워')) return 'Yongdusan Park Busan Tower';
@@ -297,6 +311,9 @@ class L10nMappers {
       if (nameKo.contains('영도대교')) return 'Yeongdodaegyo Drawbridge';
       if (nameKo.contains('광복로')) return 'Gwangbok-ro Fashion Street';
       if (nameKo.contains('깡통') || nameKo.contains('부평')) return 'Bupyeong Kkangtong Night Market';
+      if (nameKo.contains('광안리') || nameKo.contains('Gwangalli')) return 'Gwangalli Beach';
+      if (nameKo.contains('감포') || nameKo.contains('Gampo')) return 'Gampo-ro';
+      if (nameKo.contains('수영강') || nameKo.contains('Suyeong')) return 'Suyeong River Trail';
     } else if (loc.startsWith('ja')) {
       if (nameKo.contains('K-Lounge') || nameKo.contains('케이라운지')) return 'K-Lounge';
       if (nameKo.contains('용두산') || nameKo.contains('부산타워')) return '龍頭山公園 釜山タワー';
@@ -307,6 +324,9 @@ class L10nMappers {
       if (nameKo.contains('영도대교')) return '影島大橋 跳ね橋';
       if (nameKo.contains('광복로')) return '光復路ファッション街';
       if (nameKo.contains('깡통') || nameKo.contains('부평')) return '富平カントン夜市場';
+      if (nameKo.contains('광안리') || nameKo.contains('Gwangalli')) return '広安里海水浴場';
+      if (nameKo.contains('감포') || nameKo.contains('Gampo')) return '甘浦路';
+      if (nameKo.contains('수영강') || nameKo.contains('Suyeong')) return '水営江辺散策路';
     }
     return place.name;
   }

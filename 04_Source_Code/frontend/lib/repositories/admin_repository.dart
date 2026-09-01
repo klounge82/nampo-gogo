@@ -3,6 +3,7 @@ import '../services/admin_service.dart';
 import '../models/user.dart';
 import '../models/place.dart';
 import '../models/review.dart';
+import '../config/production_config.dart';
 
 class AdminAuditLogModel {
   final String id;
@@ -34,35 +35,35 @@ class AdminAuditLogModel {
           ? DateTime.parse(json['created_at'] as String)
           : DateTime.now(),
       admin: json['admin'] != null
-          ? User.fromJson(json['admin'] as Map<String, dynamic>)
+          ? User.fromJson(Map<String, dynamic>.from(json['admin'] as Map))
           : null,
     );
   }
 }
 
 class AdminRepository {
-  final AdminService _adminService;
+  final AdminService _adminService = AdminService();
 
   static final List<User> _mockUsers = [
     User(
-      id: 'usr_mock_1',
-      email: 'member1@gogo.com',
-      nickname: '광안리서퍼',
-      role: 'member',
-      status: 'active',
-      currentPoints: 450,
-      createdAt: DateTime.now().subtract(const Duration(days: 4)),
-      updatedAt: DateTime.now().subtract(const Duration(days: 4)),
+      id: 'usr_admin_001',
+      email: 'admin@nampogogo.com',
+      nickname: '총관리자',
+      role: 'admin',
+      roles: ['CUSTOMER', 'ADMIN'],
+      status: 'ACTIVE',
+      createdAt: DateTime.now().subtract(const Duration(days: 30)),
+      updatedAt: DateTime.now().subtract(const Duration(days: 30)),
     ),
     User(
-      id: 'usr_mock_2',
-      email: 'member2@gogo.com',
-      nickname: '악성리뷰러',
-      role: 'member',
-      status: 'blocked',
-      currentPoints: 10,
-      createdAt: DateTime.now().subtract(const Duration(days: 12)),
-      updatedAt: DateTime.now().subtract(const Duration(days: 12)),
+      id: 'usr_owner_001',
+      email: 'owner1@nampogogo.com',
+      nickname: '용두산갈비 사장님',
+      role: 'owner',
+      roles: ['CUSTOMER', 'OWNER'],
+      status: 'ACTIVE',
+      createdAt: DateTime.now().subtract(const Duration(days: 15)),
+      updatedAt: DateTime.now().subtract(const Duration(days: 15)),
     ),
   ];
 
@@ -79,15 +80,11 @@ class AdminRepository {
         nickname: '총괄관리자',
         role: 'admin',
         status: 'active',
-        currentPoints: 0,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       ),
     ),
   ];
-
-  AdminRepository({AdminService? adminService})
-    : _adminService = adminService ?? AdminService();
 
   Future<Map<String, dynamic>> getStats({String? adminId}) async {
     try {
@@ -113,6 +110,7 @@ class AdminRepository {
     int limit = 20,
     String? adminId,
   }) async {
+    debugPrint('NAMPO_ADMIN_USERS_DIAG stage=REPOSITORY_ENTER');
     try {
       final list = await _adminService.fetchAdminUsers(
         search: search,
@@ -120,21 +118,37 @@ class AdminRepository {
         limit: limit,
         adminId: adminId,
       );
-      return list
-          .map((json) => User.fromJson(json as Map<String, dynamic>))
-          .toList();
-    } catch (e) {
-      if (kDebugMode) {
-        print('AdminRepository: Failed users fetch. Simulating offline: $e');
+      debugPrint('NAMPO_ADMIN_USERS_DIAG stage=REPOSITORY_INPUT runtimeType=${list.runtimeType} count=${list.length}');
+      final result = <User>[];
+      for (var i = 0; i < list.length; i++) {
+        final item = list[i];
+        debugPrint('NAMPO_ADMIN_USERS_DIAG stage=USER_PARSE_BEGIN index=$i rawType=${item.runtimeType}');
+        if (item is Map) {
+          final normalized = Map<String, dynamic>.from(item);
+          debugPrint('NAMPO_ADMIN_USERS_DIAG stage=MAP_NORMALIZED index=$i mapType=${normalized.runtimeType}');
+          final user = User.fromJson(normalized);
+          debugPrint('NAMPO_ADMIN_USERS_DIAG stage=USER_PARSE_PASS index=$i id=${user.id}');
+          result.add(user);
+        } else {
+          debugPrint('NAMPO_ADMIN_USERS_DIAG stage=USER_PARSE_ERROR index=$i itemIsNotMap rawType=${item.runtimeType}');
+          final user = User.fromJson(item as Map<String, dynamic>);
+          result.add(user);
+        }
       }
-      if (search != null && search.isNotEmpty) {
-        return _mockUsers
-            .where(
-              (u) => u.email.contains(search) || u.nickname.contains(search),
-            )
-            .toList();
+      return result;
+    } catch (e, st) {
+      debugPrint('NAMPO_ADMIN_USERS_DIAG stage=REPOSITORY_ERROR exceptionType=${e.runtimeType}\n$st');
+      if (ProductionConfig.enableMockData) {
+        if (search != null && search.isNotEmpty) {
+          return _mockUsers
+              .where(
+                (u) => u.email.contains(search) || u.nickname.contains(search),
+              )
+              .toList();
+        }
+        return _mockUsers;
       }
-      return _mockUsers;
+      rethrow;
     }
   }
 
@@ -245,6 +259,23 @@ class AdminRepository {
     return Place.fromJson(res);
   }
 
+  Future<Place> updateStoreSpatialGeometry(
+    String id, {
+    required String geometryType,
+    String? geometryData,
+    int? reviewLocationRadiusM,
+    String? adminId,
+  }) async {
+    final res = await _adminService.updateStoreSpatialGeometry(
+      id,
+      geometryType: geometryType,
+      geometryData: geometryData,
+      reviewLocationRadiusM: reviewLocationRadiusM,
+      adminId: adminId,
+    );
+    return Place.fromJson(res);
+  }
+
   Future<Map<String, dynamic>> createMission(
     Map<String, dynamic> data, {
     String? adminId,
@@ -305,5 +336,12 @@ class AdminRepository {
   Future<Review> hideReview(String id, bool isHidden, {String? adminId}) async {
     final res = await _adminService.hideReview(id, isHidden, adminId: adminId);
     return Review.fromJson(res);
+  }
+
+  Future<Map<String, dynamic>> resetQaUserBaseline(
+    String userId, {
+    String? adminId,
+  }) async {
+    return await _adminService.resetQaUserBaseline(userId, adminId: adminId);
   }
 }

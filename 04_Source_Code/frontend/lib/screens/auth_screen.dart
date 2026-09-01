@@ -7,6 +7,7 @@ import '../l10n/app_localizations.dart';
 import 'business_pending_shell.dart';
 import 'policy_viewer_screen.dart';
 import '../widgets/signup_celebration_dialog.dart';
+import '../main.dart';
 import 'auth_choice_screen.dart';
 import 'main_navigation_screen.dart';
 
@@ -84,7 +85,7 @@ class _AuthScreenState extends State<AuthScreen> {
           ),
         );
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+          MaterialPageRoute(builder: (_) => const RootNavigationSelector()),
           (route) => false,
         );
       } else {
@@ -128,7 +129,7 @@ class _AuthScreenState extends State<AuthScreen> {
               onStartTrip: () {
                 Navigator.of(context).pushAndRemoveUntil(
                   MaterialPageRoute(
-                    builder: (_) => const MainNavigationScreen(),
+                    builder: (_) => const RootNavigationSelector(),
                   ),
                   (route) => false,
                 );

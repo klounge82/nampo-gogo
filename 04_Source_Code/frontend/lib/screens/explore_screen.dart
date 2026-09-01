@@ -22,7 +22,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   List<Place> _places = [];
-  List<String> _categories = ['전체'];
+  List<String> _categories = const ['전체', '먹거리', '관광', '쇼핑', '체험'];
 
   String _selectedCategory = '전체';
   bool _isLoading = false;
@@ -46,19 +46,25 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
   Future<void> _loadInitialData() async {
     final localeCode = context.read<LocaleProvider>().currentLocaleCode;
-    setState(() => _isLoading = true);
-    try {
-      final categories = await _placeRepository.getCategories();
-      final places = await _placeRepository.getPlaces(locale: localeCode);
-
+    if (mounted) {
       setState(() {
-        _categories = ['전체', ...categories];
-        _places = places;
+        _isLoading = true;
+        _categories = const ['전체', '먹거리', '관광', '쇼핑', '체험'];
       });
+    }
+    try {
+      final places = await _placeRepository.getPlaces(locale: localeCode);
+      if (mounted) {
+        setState(() {
+          _places = places;
+        });
+      }
     } catch (_) {
-      // Handled silently by fallbacks
+      // Fallback handled inside repository
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -66,21 +72,27 @@ class _ExploreScreenState extends State<ExploreScreen> {
     final localeCode = context.read<LocaleProvider>().currentLocaleCode;
     if (_selectedCategory == category) return;
 
-    setState(() {
-      _selectedCategory = category;
-      _isLoading = true;
-      _searchController.clear(); // Clear search query when category changes
-    });
+    if (mounted) {
+      setState(() {
+        _selectedCategory = category;
+        _isLoading = true;
+        _searchController.clear();
+      });
+    }
 
     try {
       final filterCat = category == '전체' ? null : category;
       final places = await _placeRepository.getPlaces(category: filterCat, locale: localeCode);
-      setState(() {
-        _places = places;
-      });
+      if (mounted) {
+        setState(() {
+          _places = places;
+        });
+      }
     } catch (_) {
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -332,7 +344,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                       ),
                       const SizedBox(height: 6.0),
                       Text(
-                        place.name,
+                        L10nMappers.mapPlaceName(place, l10n.localeName),
                         style: const TextStyle(
                           fontSize: 14.0,
                           fontWeight: FontWeight.bold,
@@ -343,7 +355,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                       ),
                       const SizedBox(height: 4.0),
                       Text(
-                        place.address,
+                        L10nMappers.mapPlaceAddress(place, l10n.localeName),
                         style: const TextStyle(
                           fontSize: 11.0,
                           color: AppColors.textSecondary,

@@ -1,22 +1,27 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../config/api_config.dart';
+import 'auth_interceptor.dart';
 
 class PlaceService {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   // Helper to build Dio client
-  Dio get _dio => Dio(
-    BaseOptions(
-      baseUrl: ApiConfig.baseUrl,
-      connectTimeout: ApiConfig.connectTimeout,
-      receiveTimeout: ApiConfig.receiveTimeout,
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-    ),
-  );
+  Dio get _dio {
+    final dio = Dio(
+      BaseOptions(
+        baseUrl: ApiConfig.baseUrl,
+        connectTimeout: ApiConfig.connectTimeout,
+        receiveTimeout: ApiConfig.receiveTimeout,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      ),
+    );
+    dio.interceptors.add(AuthInterceptor(dio));
+    return dio;
+  }
 
   Future<Options?> _getAuthOptions() async {
     try {

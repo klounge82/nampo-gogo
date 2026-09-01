@@ -93,35 +93,35 @@ class _AdminBusinessApprovalScreenState
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '사업자 승인 관리',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: AdminTheme.textPrimary,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    Text(
+                      '사업자 승인 관리',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: AdminTheme.textPrimary,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    '제출된 사업자 회원 가입 및 사업장 승인 신청건을 검토합니다.',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: AdminTheme.textSecondary,
+                    SizedBox(height: 4),
+                    Text(
+                      '제출된 사업자 회원 가입 및 사업장 승인 신청건을 검토합니다.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AdminTheme.textSecondary,
+                      ),
+                      softWrap: true,
                     ),
-                  ),
-                ],
-              ),
-              ElevatedButton.icon(
-                onPressed: _fetchApplications,
-                icon: const Icon(Icons.refresh, size: 18),
-                label: const Text('목록 새로고침'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AdminTheme.cardBg,
-                  foregroundColor: AdminTheme.textPrimary,
+                  ],
                 ),
+              ),
+              const SizedBox(width: 8),
+              IconButton(
+                onPressed: _fetchApplications,
+                icon: const Icon(Icons.refresh, color: AdminTheme.primaryBlue),
+                tooltip: '목록 새로고침',
               ),
             ],
           ),

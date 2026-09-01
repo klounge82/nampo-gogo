@@ -118,6 +118,10 @@ class RootNavigationSelector extends StatelessWidget {
       return const BusinessPendingShell();
     }
 
+    if (modeProvider.isAdminMode) {
+      return const AdminAppShell();
+    }
+
     if (modeProvider.isBusinessMode) {
       return const BusinessAppShell();
     }

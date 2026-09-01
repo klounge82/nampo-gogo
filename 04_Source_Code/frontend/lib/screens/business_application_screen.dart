@@ -81,7 +81,7 @@ class _BusinessApplicationScreenState extends State<BusinessApplicationScreen> {
 
         // Refresh Auth User -> Triggers BusinessPendingShell in RootNavigationSelector
         final authProvider = Provider.of<AuthProvider>(context, listen: false);
-        await authProvider.autoLogin();
+        await authProvider.refreshUser();
 
         if (mounted && Navigator.of(context).canPop()) {
           Navigator.of(context).pop();

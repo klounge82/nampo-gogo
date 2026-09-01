@@ -4,11 +4,23 @@ import '../repositories/auth_repository.dart';
 import '../services/notification_service.dart';
 import '../repositories/notification_repository.dart';
 
+import '../services/auth_interceptor.dart';
+
 class AuthProvider extends ChangeNotifier {
   final AuthRepository _authRepository;
 
   AuthProvider({AuthRepository? authRepository})
-    : _authRepository = authRepository ?? AuthRepository();
+    : _authRepository = authRepository ?? AuthRepository() {
+    AuthInterceptor.onSessionExpired = handleSessionExpired;
+  }
+
+  void handleSessionExpired() {
+    _isLoggedIn = false;
+    _currentUser = null;
+    _accessToken = null;
+    _refreshToken = null;
+    notifyListeners();
+  }
 
   // Core Authentication States
   bool _isLoggedIn = false;

@@ -14,7 +14,7 @@ import 'coupon_list_screen.dart';
 import 'user_coupon_screen.dart';
 import 'my_reservations_screen.dart';
 import 'my_reviews_screen.dart';
-import 'admin_dashboard_screen.dart';
+import '../main.dart';
 import 'analytics_dashboard_screen.dart';
 import 'payment_history_screen.dart';
 import 'notification_settings_screen.dart';
@@ -258,7 +258,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     iconColor: Colors.amber,
                     value: isLoggedIn ? '${user?.lifetimeEarnedPoints ?? 0} P' : '0 P',
                     label: '누적 획득',
-                    onTap: null,
+                    onTap: () {
+                      if (isLoggedIn) {
+                        ScaffoldMessenger.of(context).clearSnackBars();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              '누적 획득: ${user?.lifetimeEarnedPoints ?? 0} P (등급: ${L10nMappers.mapUserTier(l10n, user?.lifetimeEarnedPoints ?? 0)})',
+                            ),
+                            behavior: SnackBarBehavior.floating,
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      } else {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const AuthScreen()),
+                        );
+                      }
+                    },
                   ),
                   Container(width: 1.0, height: 40.0, color: AppColors.border),
                   _buildAssetColumn(
@@ -302,32 +319,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                   _buildMenuCard([
-                    if (isLoggedIn && authProvider.currentUser?.role == 'admin')
+                    if (isLoggedIn && user?.isAdmin == true)
                       _buildMenuItem(
                         context,
                         icon: Icons.admin_panel_settings,
-                        title: '관리자 시스템 대시보드',
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const AdminDashboardScreen(),
-                            ),
-                          );
-                        },
-                      ),
-                    if (isLoggedIn &&
-                        (authProvider.currentUser?.role == 'owner' ||
-                            authProvider.currentUser?.role == 'admin'))
-                      _buildMenuItem(
-                        context,
-                        icon: Icons.analytics_outlined,
-                        title: '비즈니스 통계 대시보드',
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const AnalyticsDashboardScreen(),
-                            ),
-                          );
+                        title: '관리자 모드로 전환',
+                        onTap: () async {
+                          await Provider.of<AppModeProvider>(
+                            context,
+                            listen: false,
+                          ).switchMode(AppMode.admin, user);
+
+                          if (context.mounted) {
+                            Navigator.of(context).pushAndRemoveUntil(
+                              MaterialPageRoute(
+                                builder: (_) => const RootNavigationSelector(),
+                              ),
+                              (route) => false,
+                            );
+                          }
                         },
                       ),
                     _buildMenuItem(

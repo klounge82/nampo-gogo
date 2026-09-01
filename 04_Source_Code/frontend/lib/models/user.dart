@@ -36,9 +36,17 @@ class User {
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
-    final rolesList =
-        (json['roles'] as List<dynamic>?)?.map((e) => e.toString()).toList() ??
-        ['CUSTOMER'];
+    List<String> rolesList = const ['CUSTOMER'];
+    if (json['roles'] is List) {
+      rolesList = (json['roles'] as List).map((e) => e.toString()).toList();
+    } else if (json['roles'] is String && (json['roles'] as String).isNotEmpty) {
+      rolesList = (json['roles'] as String)
+          .split(',')
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
+          .toList();
+    }
+
     final capsList =
         (json['capabilities'] as List<dynamic>?)
             ?.map((e) => e.toString())
@@ -55,23 +63,29 @@ class User {
             .toList() ??
         [];
 
+    final createdAtRaw = json['created_at'];
+    final updatedAtRaw = json['updated_at'];
+    final lastLoginAtRaw = json['last_login_at'];
+
+    final epochBaseline = DateTime(1970, 1, 1);
+
     return User(
       id: json['id'] as String? ?? '',
       email: json['email'] as String? ?? '',
       nickname: json['nickname'] as String? ?? '게스트',
       role: json['role'] as String? ?? 'guest',
       status: json['status'] as String? ?? 'active',
-      currentPoints: json['current_points'] as int? ?? 0,
-      lifetimeEarnedPoints: json['lifetime_earned_points'] as int? ?? 0,
+      currentPoints: (json['current_points'] as num?)?.toInt() ?? 0,
+      lifetimeEarnedPoints: (json['lifetime_earned_points'] as num?)?.toInt() ?? 0,
       profileImageUrl: json['profile_image_url'] as String?,
-      createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
-          : DateTime.now(),
-      updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'] as String)
-          : DateTime.now(),
-      lastLoginAt: json['last_login_at'] != null
-          ? DateTime.parse(json['last_login_at'] as String)
+      createdAt: createdAtRaw != null
+          ? (DateTime.tryParse(createdAtRaw.toString()) ?? epochBaseline)
+          : epochBaseline,
+      updatedAt: updatedAtRaw != null
+          ? (DateTime.tryParse(updatedAtRaw.toString()) ?? epochBaseline)
+          : epochBaseline,
+      lastLoginAt: lastLoginAtRaw != null
+          ? DateTime.tryParse(lastLoginAtRaw.toString())
           : null,
       roles: rolesList,
       businessApplicationStatus:

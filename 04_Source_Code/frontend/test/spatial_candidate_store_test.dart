@@ -40,6 +40,84 @@ void main() {
     expect(restoredB, isNull);
   });
 
+  test('SpatialCandidateStore preserves 2 independent lines structure for multi-line LINE_BUFFER', () {
+    const placeId = 'qa-store-suyeong-river-photo-004';
+    final line1 = [
+      const LatLng(35.1665, 129.1215),
+      const LatLng(35.1650, 129.1230),
+      const LatLng(35.1635, 129.1245),
+      const LatLng(35.1620, 129.1258),
+    ];
+    final line2 = [
+      const LatLng(35.1600, 129.1270),
+      const LatLng(35.1590, 129.1280),
+      const LatLng(35.1580, 129.1290),
+    ];
+    final allPoints = [...line1, ...line2];
+
+    SpatialCandidateStore().saveCandidate(
+      placeId: placeId,
+      placeType: PlaceType.linear,
+      geometryType: GeometryType.lineBuffer,
+      referencePosition: const LatLng(35.1635, 129.1245),
+      points: allPoints,
+      lines: [line1, line2],
+      bufferWidthM: 50.0,
+      radiusM: 100.0,
+      approvalStatus: SpatialApprovalStatus.candidate,
+    );
+
+    final restored = SpatialCandidateStore().getCandidate(placeId);
+    expect(restored, isNotNull);
+    expect(restored!.lines.length, equals(2));
+    expect(restored.lines[0].length, equals(4));
+    expect(restored.lines[1].length, equals(3));
+    expect(restored.points.length, equals(7));
+    expect(restored.bufferWidthM, equals(50.0));
+  });
+
+  test('SpatialCandidateRecord JSON serialization roundtrip preserves 3+4 points per-line breakdown', () {
+    const placeId = 'qa-store-suyeong-river-photo-004';
+    final lineA = [
+      const LatLng(35.1665, 129.1215),
+      const LatLng(35.1650, 129.1230),
+      const LatLng(35.1635, 129.1245),
+    ]; // Line A: 3 points
+    final lineB = [
+      const LatLng(35.1620, 129.1258),
+      const LatLng(35.1600, 129.1270),
+      const LatLng(35.1590, 129.1280),
+      const LatLng(35.1580, 129.1290),
+    ]; // Line B: 4 points
+    final allPoints = [...lineA, ...lineB]; // Total: 7 points
+
+    final record = SpatialCandidateRecord(
+      placeId: placeId,
+      placeType: PlaceType.linear,
+      geometryType: GeometryType.lineBuffer,
+      referencePosition: const LatLng(35.1635, 129.1245),
+      points: allPoints,
+      lines: [lineA, lineB],
+      bufferWidthM: 50.0,
+      radiusM: 100.0,
+      approvalStatus: SpatialApprovalStatus.candidate,
+      updatedAt: DateTime.now(),
+    );
+
+    // Serialize to JSON
+    final jsonMap = record.toJson();
+    expect(jsonMap['lines'], isA<List>());
+    expect((jsonMap['lines'] as List).length, equals(2));
+
+    // Deserialize fresh from JSON (Simulate app restart & reload)
+    final deserialized = SpatialCandidateRecord.fromJson(jsonMap);
+    expect(deserialized.lines.length, equals(2));
+    expect(deserialized.lines[0].length, equals(3)); // LINE_1_POINT_COUNT = 3
+    expect(deserialized.lines[1].length, equals(4)); // LINE_2_POINT_COUNT = 4
+    expect(deserialized.points.length, equals(7));   // TOTAL_POINT_COUNT = 7
+    expect(deserialized.bufferWidthM, equals(50.0));
+  });
+
   test('Updating reference position preserves LINE_BUFFER and POLYGON_AREA points', () {
     const placeId = 'suyeong_river';
     final points = [

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../config/production_config.dart';
 import '../constants/colors.dart';
 import '../data/mock_data.dart';
 import '../models/place.dart';
@@ -40,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final currentLoc = context.watch<LocaleProvider>().currentLocaleCode;
+    final currentLoc = context.read<LocaleProvider>().currentLocaleCode;
     if (_lastLocaleCode != currentLoc) {
       _lastLocaleCode = currentLoc;
       _loadDynamicData();
@@ -207,69 +208,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                 ),
 
-                const SizedBox(height: 12.0),
-
-                // Server Status Badge
-                FutureBuilder<String>(
-                  future: SystemRepository().getSystemStatus(),
-                  builder: (context, snapshot) {
-                    final statusText = snapshot.data ?? l10n.apiChecking;
-                    final isOnline =
-                        snapshot.hasData && !statusText.contains('오프라인');
-
-                    return Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14.0,
-                        vertical: 10.0,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isOnline
-                            ? AppColors.success.withAlpha(20)
-                            : AppColors.error.withAlpha(20),
-                        borderRadius: BorderRadius.circular(12.0),
-                        border: Border.all(
-                          color: isOnline
-                              ? AppColors.success.withAlpha(40)
-                              : AppColors.error.withAlpha(40),
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                isOnline
-                                    ? l10n.apiConnected
-                                    : l10n.apiDisconnected,
-                                style: TextStyle(
-                                  fontSize: 13.0,
-                                  fontWeight: FontWeight.bold,
-                                  color: isOnline
-                                      ? AppColors.success
-                                      : AppColors.error,
-                                ),
-                              ),
-                            ],
-                          ),
-                          if (isOnline) ...[
-                            const SizedBox(height: 4.0),
-                            Text(
-                              l10n.apiRunning,
-                              style: const TextStyle(
-                                fontSize: 12.0,
-                                color: AppColors.textSecondary,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    );
-                  },
-                ),
-
                 const SizedBox(height: 16.0),
 
                 // Search Bar
@@ -335,9 +273,24 @@ class _HomeScreenState extends State<HomeScreen> {
                 Builder(
                   builder: (context) {
                     final localeCode = context.watch<LocaleProvider>().currentLocaleCode;
+                    final activeMissions = _missions.where((m) => !m.isCompleted).toList();
                     final displayMissions = _missions.isNotEmpty
-                        ? _missions
-                        : _missionRepository.getMockMissions(locale: localeCode);
+                        ? activeMissions
+                        : (ProductionConfig.enableMockData
+                            ? _missionRepository.getMockMissions(locale: localeCode)
+                            : <Mission>[]);
+
+                    if (displayMissions.isEmpty) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 24.0),
+                        child: Center(
+                          child: Text(
+                            l10n.missionEmpty,
+                            style: const TextStyle(color: AppColors.textSecondary),
+                          ),
+                        ),
+                      );
+                    }
 
                     return ListView.builder(
                       shrinkWrap: true,

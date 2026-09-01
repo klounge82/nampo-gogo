@@ -17,7 +17,7 @@ class _BusinessPendingShellState extends State<BusinessPendingShell> {
   Future<void> _refreshState() async {
     setState(() => _isRefreshing = true);
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    await authProvider.autoLogin();
+    await authProvider.refreshUser();
     if (mounted) setState(() => _isRefreshing = false);
   }
 
@@ -133,7 +133,7 @@ class _BusinessPendingShellState extends State<BusinessPendingShell> {
                             ),
                           ),
                           onPressed: () async {
-                            await authProvider.autoLogin();
+                            await authProvider.refreshUser();
                             final modeProvider = Provider.of<AppModeProvider>(
                               context,
                               listen: false,

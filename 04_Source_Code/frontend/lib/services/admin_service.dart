@@ -1,18 +1,28 @@
+import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../config/api_config.dart';
+import 'auth_interceptor.dart';
 
 class AdminService {
-  Dio get _dio => Dio(
-    BaseOptions(
-      baseUrl: ApiConfig.baseUrl,
-      connectTimeout: ApiConfig.connectTimeout,
-      receiveTimeout: ApiConfig.receiveTimeout,
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-    ),
-  );
+  static const FlutterSecureStorage _storage = FlutterSecureStorage();
+
+  Dio get _dio {
+    final dio = Dio(
+      BaseOptions(
+        baseUrl: ApiConfig.baseUrl,
+        connectTimeout: ApiConfig.connectTimeout,
+        receiveTimeout: ApiConfig.receiveTimeout,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      ),
+    );
+
+    dio.interceptors.add(AuthInterceptor(dio));
+    return dio;
+  }
 
   // GET /admin/stats
   Future<Map<String, dynamic>> fetchAdminStats({String? adminId}) async {
@@ -37,6 +47,7 @@ class AdminService {
     int limit = 20,
     String? adminId,
   }) async {
+    debugPrint('NAMPO_ADMIN_USERS_DIAG stage=HTTP_REQUEST method=GET path=/admin/users');
     try {
       final response = await _dio.get(
         '/admin/users',
@@ -48,10 +59,16 @@ class AdminService {
         },
       );
       if (response.statusCode == 200 && response.data != null) {
+        debugPrint('NAMPO_ADMIN_USERS_DIAG stage=HTTP_RESPONSE status=${response.statusCode} dataType=${response.data.runtimeType}');
         return response.data as List<dynamic>;
       }
+      debugPrint('NAMPO_ADMIN_USERS_DIAG stage=HTTP_ERROR status=${response.statusCode}');
       throw Exception('회원 목록 로드 실패');
+    } on DioException catch (e) {
+      debugPrint('NAMPO_ADMIN_USERS_DIAG stage=HTTP_ERROR exceptionType=${e.runtimeType} dioType=${e.type} status=${e.response?.statusCode} method=${e.requestOptions.method} path=${e.requestOptions.path}');
+      rethrow;
     } catch (e) {
+      debugPrint('NAMPO_ADMIN_USERS_DIAG stage=HTTP_ERROR exceptionType=${e.runtimeType}');
       rethrow;
     }
   }
@@ -134,6 +151,33 @@ class AdminService {
         return response.data as Map<String, dynamic>;
       }
       throw Exception('매장 상태 변경 실패');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // PATCH /admin/stores/{store_id}/spatial-geometry
+  Future<Map<String, dynamic>> updateStoreSpatialGeometry(
+    String storeId, {
+    required String geometryType,
+    String? geometryData,
+    int? reviewLocationRadiusM,
+    String? adminId,
+  }) async {
+    try {
+      final response = await _dio.patch(
+        '/admin/stores/$storeId/spatial-geometry',
+        data: {
+          'geometry_type': geometryType,
+          'geometry_data': geometryData,
+          if (reviewLocationRadiusM != null) 'review_location_radius_m': reviewLocationRadiusM,
+        },
+        queryParameters: {if (adminId != null) 'admin_id': adminId},
+      );
+      if (response.statusCode == 200 && response.data != null) {
+        return response.data as Map<String, dynamic>;
+      }
+      throw Exception('공간 지오메트리 DB 적용 실패');
     } catch (e) {
       rethrow;
     }
@@ -330,6 +374,25 @@ class AdminService {
         return response.data as List<dynamic>;
       }
       throw Exception('감사 로그 로드 실패');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // POST /admin/qa/reset-baseline/{user_id}
+  Future<Map<String, dynamic>> resetQaUserBaseline(
+    String userId, {
+    String? adminId,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '/admin/qa/reset-baseline/$userId',
+        queryParameters: {if (adminId != null) 'admin_id': adminId},
+      );
+      if (response.statusCode == 200 && response.data != null) {
+        return response.data as Map<String, dynamic>;
+      }
+      throw Exception('QA 테스트 기준선 초기화 실패');
     } catch (e) {
       rethrow;
     }

@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/app_mode_provider.dart';
+import '../../utils/l10n_mappers.dart';
+import '../../main.dart';
 import '../../themes/admin_theme.dart';
 import 'admin_dashboard_screen.dart';
 import 'admin_business_approval_screen.dart';
+import 'admin_member_manage_screen.dart';
+import '../admin_store_manage_screen.dart';
 
 class AdminAppShell extends StatefulWidget {
   const AdminAppShell({super.key});
@@ -15,6 +20,7 @@ class AdminAppShell extends StatefulWidget {
 class _AdminAppShellState extends State<AdminAppShell> {
   int _selectedIndex = 0;
   String _approvalFilter = 'ALL';
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
@@ -31,34 +37,133 @@ class _AdminAppShellState extends State<AdminAppShell> {
             return const AdminAccessDeniedScreen();
           }
 
-          return Scaffold(
-            backgroundColor: AdminTheme.darkBg,
-            body: Row(
-              children: [
-                // PC Sidebar Navigation
-                _buildSidebar(auth),
+          final switchText = L10nMappers.mapSwitchToCustomerMode(
+            Localizations.localeOf(context).languageCode,
+          );
 
-                // Main Content Body
-                Expanded(
-                  child: Column(
-                    children: [
-                      // Header Bar
-                      _buildHeader(auth),
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final isMobile = constraints.maxWidth < 768;
 
-                      // Screen View
-                      Expanded(child: _buildBody()),
-                    ],
+              if (isMobile) {
+                return PopScope(
+                  canPop: _selectedIndex == 0,
+                  onPopInvokedWithResult: (didPop, result) {
+                    if (!didPop && _selectedIndex != 0) {
+                      setState(() {
+                        _selectedIndex = 0;
+                      });
+                    }
+                  },
+                  child: Scaffold(
+                    key: _scaffoldKey,
+                    backgroundColor: AdminTheme.darkBg,
+                    appBar: AppBar(
+                      backgroundColor: AdminTheme.sidebarBg,
+                      elevation: 0.5,
+                      leading: _selectedIndex != 0
+                          ? IconButton(
+                              icon: const Icon(Icons.arrow_back, color: AdminTheme.textPrimary),
+                              onPressed: () {
+                                setState(() {
+                                  _selectedIndex = 0;
+                                });
+                              },
+                            )
+                          : null,
+                      title: const Text(
+                        '남포동 고고 총관리자',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: AdminTheme.textPrimary,
+                        ),
+                      ),
+                      actions: [
+                        OutlinedButton.icon(
+                          onPressed: () async {
+                            final modeProvider = Provider.of<AppModeProvider>(
+                              context,
+                              listen: false,
+                            );
+                            await modeProvider.switchMode(
+                              AppMode.customer,
+                              auth.currentUser,
+                            );
+                            if (context.mounted) {
+                              Navigator.of(context).pushAndRemoveUntil(
+                                MaterialPageRoute(
+                                  builder: (_) => const RootNavigationSelector(),
+                                ),
+                                (route) => false,
+                              );
+                            }
+                          },
+                          icon: const Icon(
+                            Icons.swap_horiz,
+                            size: 14,
+                            color: AdminTheme.primaryBlue,
+                          ),
+                          label: Text(
+                            switchText,
+                            style: const TextStyle(
+                              color: AdminTheme.primaryBlue,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: AdminTheme.primaryBlue),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                    ),
+                    drawer: Drawer(
+                      backgroundColor: AdminTheme.sidebarBg,
+                      child: _buildSidebar(auth, isMobile: true),
+                    ),
+                    body: _buildBody(),
                   ),
+                );
+              }
+
+              return Scaffold(
+                backgroundColor: AdminTheme.darkBg,
+                body: Row(
+                  children: [
+                    // PC Sidebar Navigation
+                    _buildSidebar(auth, isMobile: false),
+
+                    // Main Content Body
+                    Expanded(
+                      child: Column(
+                        children: [
+                          // Header Bar
+                          _buildHeader(auth),
+
+                          // Screen View
+                          Expanded(child: _buildBody()),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              );
+            },
           );
         },
       ),
     );
   }
 
-  Widget _buildSidebar(AuthProvider auth) {
+  Widget _buildSidebar(AuthProvider auth, {bool isMobile = false}) {
+    final switchText = L10nMappers.mapSwitchToCustomerMode(Localizations.localeOf(context).languageCode);
+
     return Container(
       width: 240,
       color: AdminTheme.sidebarBg,
@@ -112,57 +217,100 @@ class _AdminAppShellState extends State<AdminAppShell> {
           const SizedBox(height: 12),
 
           // Menu Items
-          _buildNavItem(0, Icons.dashboard, '대시보드', active: true),
-          _buildNavItem(1, Icons.verified_user, '사업자 승인', active: true),
-          _buildNavItem(2, Icons.people, '회원 관리', active: false),
-          _buildNavItem(3, Icons.store, '매장 관리', active: false),
-          _buildNavItem(4, Icons.rate_review, '리뷰·신고', active: false),
-          _buildNavItem(5, Icons.settings, '시스템 설정', active: false),
+          _buildNavItem(0, Icons.dashboard, '대시보드', active: true, isMobile: isMobile),
+          _buildNavItem(1, Icons.verified_user, '사업자 승인', active: true, isMobile: isMobile),
+          _buildNavItem(2, Icons.people, '회원 관리', active: true, isMobile: isMobile),
+          _buildNavItem(3, Icons.store, '매장 관리', active: true, isMobile: isMobile),
+          _buildNavItem(4, Icons.rate_review, '리뷰·신고', active: false, isMobile: isMobile),
+          _buildNavItem(5, Icons.settings, '시스템 설정', active: false, isMobile: isMobile),
 
           const Spacer(),
 
-          // Footer User Profile
+          // Footer User Profile & Switch to Customer Mode Button
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xFF0F172A),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  const CircleAvatar(
-                    backgroundColor: AdminTheme.primaryBlue,
-                    radius: 16,
-                    child: Icon(Icons.person, size: 18, color: Colors.white),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          auth.currentUser?.nickname ?? '관리자',
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            color: AdminTheme.textPrimary,
-                          ),
-                          overflow: TextOverflow.ellipsis,
+            child: Column(
+              children: [
+                InkWell(
+                  onTap: () async {
+                    final modeProvider = Provider.of<AppModeProvider>(context, listen: false);
+                    await modeProvider.switchMode(AppMode.customer, auth.currentUser);
+                    if (context.mounted) {
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                          builder: (_) => const RootNavigationSelector(),
                         ),
-                        const Text(
-                          '총관리자 (ADMIN)',
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: AdminTheme.textSecondary,
+                        (route) => false,
+                      );
+                    }
+                  },
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: AdminTheme.primaryBlue.withAlpha(40),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AdminTheme.primaryBlue.withAlpha(100)),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.swap_horiz, size: 16, color: AdminTheme.primaryBlue),
+                        const SizedBox(width: 6),
+                        Text(
+                          switchText,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: AdminTheme.primaryBlue,
                           ),
                         ),
                       ],
                     ),
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0F172A),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      const CircleAvatar(
+                        backgroundColor: AdminTheme.primaryBlue,
+                        radius: 16,
+                        child: Icon(Icons.person, size: 18, color: Colors.white),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              auth.currentUser?.nickname ?? '관리자',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: AdminTheme.textPrimary,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const Text(
+                              '총관리자 (ADMIN)',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: AdminTheme.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -175,6 +323,7 @@ class _AdminAppShellState extends State<AdminAppShell> {
     IconData icon,
     String title, {
     required bool active,
+    bool isMobile = false,
   }) {
     final isSelected = _selectedIndex == index;
     return ListTile(
@@ -199,6 +348,11 @@ class _AdminAppShellState extends State<AdminAppShell> {
           : const Icon(Icons.lock_outline, size: 14, color: Colors.grey),
       selected: isSelected,
       onTap: () {
+        if (isMobile) {
+          if (_scaffoldKey.currentState?.isDrawerOpen ?? false) {
+            _scaffoldKey.currentState?.closeDrawer();
+          }
+        }
         if (!active) {
           showDialog(
             context: context,
@@ -223,6 +377,8 @@ class _AdminAppShellState extends State<AdminAppShell> {
   }
 
   Widget _buildHeader(AuthProvider auth) {
+    final switchText = L10nMappers.mapSwitchToCustomerMode(Localizations.localeOf(context).languageCode);
+
     return Container(
       height: 64,
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -236,6 +392,37 @@ class _AdminAppShellState extends State<AdminAppShell> {
           ),
           Row(
             children: [
+              OutlinedButton.icon(
+                onPressed: () async {
+                  final modeProvider = Provider.of<AppModeProvider>(context, listen: false);
+                  await modeProvider.switchMode(AppMode.customer, auth.currentUser);
+                  if (context.mounted) {
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                        builder: (_) => const RootNavigationSelector(),
+                      ),
+                      (route) => false,
+                    );
+                  }
+                },
+                icon: const Icon(
+                  Icons.swap_horiz,
+                  size: 16,
+                  color: AdminTheme.primaryBlue,
+                ),
+                label: Text(
+                  switchText,
+                  style: const TextStyle(
+                    color: AdminTheme.primaryBlue,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: AdminTheme.primaryBlue),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                ),
+              ),
+              const SizedBox(width: 12),
               TextButton.icon(
                 onPressed: () async {
                   await auth.logout();
@@ -272,6 +459,10 @@ class _AdminAppShellState extends State<AdminAppShell> {
         return AdminBusinessApprovalScreen(
           initialStatusFilter: _approvalFilter,
         );
+      case 2:
+        return const AdminMemberManageScreen();
+      case 3:
+        return const AdminStoreManageScreen();
       default:
         return const Center(child: Text('준비 중인 기능입니다.'));
     }

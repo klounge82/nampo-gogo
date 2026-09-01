@@ -97,11 +97,12 @@ class PlaceRepository {
     );
   }
 
-  // Fetch all places, filter by category locally on fallback
-  Future<List<Place>> getPlaces({String? category, String? locale}) async {
+  // Fetch all places, apply canonical filter grouping locally and filter QA test data for Customer flows
+  Future<List<Place>> getPlaces({String? category, String? locale, bool includeTestData = false}) async {
+    List<Place> allPlaces;
     try {
-      final data = await _placeService.fetchPlaces(category: category, locale: locale);
-      return data
+      final data = await _placeService.fetchPlaces(locale: locale);
+      allPlaces = data
           .map((json) => Place.fromJson(json as Map<String, dynamic>))
           .toList();
     } catch (e) {
@@ -113,15 +114,45 @@ class PlaceRepository {
           'PlaceRepository: Failed to load places from API. Falling back to Mock. Error: $e',
         );
       }
-      // Fallback local Mock mapping
-      var list = MockData.recommendations
+      allPlaces = MockData.recommendations
           .map((rec) => _mapMockToPlace(rec, locale: locale))
           .toList();
-      if (category != null) {
-        list = list.where((place) => place.category == category).toList();
-      }
-      return list;
     }
+
+    // Exclude QA / TEST ONLY data from Customer discovery flows unless explicitly requested for QA/Admin flows
+    if (!includeTestData) {
+      allPlaces = allPlaces.where((place) => !place.isTestData && place.tier != 'TEST').toList();
+    }
+
+    if (category == null || category == '전체' || category.toUpperCase() == 'ALL') {
+      return allPlaces;
+    }
+
+    final catUpper = category.toUpperCase();
+    if (category == '관광' || catUpper == 'ATTRACTION' || category == '볼거리' || catUpper == 'SIGHTS') {
+      return allPlaces.where((place) {
+        final pCat = place.category.toUpperCase();
+        final name = place.name;
+        return pCat.contains('관광') || pCat.contains('볼거리') || pCat.contains('명소') || pCat == 'ATTRACTION' || pCat == 'SIGHTS' || name.contains('공원') || name.contains('타워') || name.contains('광장') || name.contains('시장') || name.contains('해수욕장') || name.contains('강');
+      }).toList();
+    } else if (category == '먹거리' || catUpper == 'FOOD' || category == '맛집') {
+      return allPlaces.where((place) {
+        final pCat = place.category.toUpperCase();
+        return pCat.contains('먹거리') || pCat.contains('맛집') || pCat.contains('식사') || pCat.contains('카페') || pCat == 'FOOD' || pCat == 'RESTAURANT';
+      }).toList();
+    } else if (category == '쇼핑' || catUpper == 'SHOPPING' || category == '시장') {
+      return allPlaces.where((place) {
+        final pCat = place.category.toUpperCase();
+        return pCat.contains('쇼핑') || pCat.contains('시장') || pCat == 'SHOPPING' || pCat == 'MARKET';
+      }).toList();
+    } else if (category == '체험' || catUpper == 'EXPERIENCE' || category == '문화') {
+      return allPlaces.where((place) {
+        final pCat = place.category.toUpperCase();
+        return pCat.contains('체험') || pCat.contains('문화') || pCat == 'EXPERIENCE' || pCat == 'CULTURE';
+      }).toList();
+    }
+
+    return allPlaces.where((place) => place.category == category).toList();
   }
 
   // Fetch unique categories
@@ -144,10 +175,11 @@ class PlaceRepository {
   }
 
   // Search places
-  Future<List<Place>> searchPlaces(String query, {String? locale}) async {
+  Future<List<Place>> searchPlaces(String query, {String? locale, bool includeTestData = false}) async {
+    List<Place> results;
     try {
       final data = await _placeService.searchPlaces(query, locale: locale);
-      return data
+      results = data
           .map((json) => Place.fromJson(json as Map<String, dynamic>))
           .toList();
     } catch (e) {
@@ -159,7 +191,7 @@ class PlaceRepository {
       }
       // Fallback local search filtering
       final cleanQuery = query.toLowerCase();
-      return MockData.recommendations
+      results = MockData.recommendations
           .map((rec) => _mapMockToPlace(rec, locale: locale))
           .where(
             (place) =>
@@ -168,6 +200,11 @@ class PlaceRepository {
           )
           .toList();
     }
+
+    if (!includeTestData) {
+      results = results.where((place) => !place.isTestData && place.tier != 'TEST').toList();
+    }
+    return results;
   }
 
   // Fetch detail by ID
@@ -176,6 +213,9 @@ class PlaceRepository {
       final json = await _placeService.fetchPlaceDetail(id, locale: locale);
       return Place.fromJson(json);
     } catch (e) {
+      if (!ProductionConfig.enableMockData) {
+        rethrow;
+      }
       if (kDebugMode) {
         print('PlaceRepository: Detail fetch failed. Falling back. Error: $e');
       }

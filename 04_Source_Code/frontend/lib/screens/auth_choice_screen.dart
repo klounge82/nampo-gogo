@@ -2,38 +2,61 @@ import 'package:flutter/material.dart';
 import '../constants/colors.dart';
 import '../widgets/language_selector_button.dart';
 import '../l10n/app_localizations.dart';
+import '../main.dart';
 import 'auth_screen.dart';
 import 'main_navigation_screen.dart';
 
 class AuthChoiceScreen extends StatelessWidget {
-  const AuthChoiceScreen({super.key});
+  final bool showSessionExpiredNotice;
+
+  const AuthChoiceScreen({super.key, this.showSessionExpiredNotice = false});
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final sessionExpiredNoticeText = l10n.sessionExpiredMessage;
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
           child: Column(
             children: [
+              if (showSessionExpiredNotice)
+                Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.shade100,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.amber.shade700),
+                  ),
+                  child: Text(
+                    sessionExpiredNoticeText,
+                    style: TextStyle(
+                      color: Colors.amber.shade900,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
               // Top Bar with Language Selector
               Align(
                 alignment: Alignment.topRight,
                 child: const LanguageSelectorButton(),
               ),
-              const Spacer(flex: 1),
+              const SizedBox(height: 24.0),
 
               // Brand Logo & Slogan Header
               Column(
                 children: [
-                  Image.asset(
-                    'assets/brand/official/nampo_gogo_app_icon_official.png',
+                  const SizedBox(
                     width: 110.0,
                     height: 110.0,
-                    fit: BoxFit.contain,
+                    child: Icon(Icons.location_on, size: 80.0, color: AppColors.primary),
                   ),
                   const SizedBox(height: 14.0),
                   const Text(
@@ -57,7 +80,7 @@ class AuthChoiceScreen extends StatelessWidget {
                 ],
               ),
 
-              const Spacer(flex: 1),
+              const SizedBox(height: 24.0),
 
               // Signup Action Cards
               Column(
@@ -67,7 +90,7 @@ class AuthChoiceScreen extends StatelessWidget {
                   _buildRoleChoiceCard(
                     context: context,
                     title: l10n.signupCustomer,
-                    subtitle: '여행지 추천 · 예약 · 리뷰 · 포인트 이용',
+                    subtitle: l10n.signupCustomerSubtitle,
                     icon: Icons.person_add_outlined,
                     primaryColor: AppColors.primary,
                     onTap: () {
@@ -88,7 +111,7 @@ class AuthChoiceScreen extends StatelessWidget {
                   _buildRoleChoiceCard(
                     context: context,
                     title: l10n.signupBusiness,
-                    subtitle: '매장 등록 · 예약 · 추천 · 고객 관리',
+                    subtitle: l10n.signupBusinessSubtitle,
                     icon: Icons.storefront_outlined,
                     primaryColor: AppColors.secondary,
                     onTap: () {
@@ -105,7 +128,7 @@ class AuthChoiceScreen extends StatelessWidget {
                 ],
               ),
 
-              const Spacer(flex: 1),
+              const SizedBox(height: 24.0),
 
               // Bottom Section: Login & Guest Mode Links
               Column(
@@ -145,7 +168,7 @@ class AuthChoiceScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => const MainNavigationScreen(),
+                          builder: (_) => const RootNavigationSelector(),
                         ),
                       );
                     },
