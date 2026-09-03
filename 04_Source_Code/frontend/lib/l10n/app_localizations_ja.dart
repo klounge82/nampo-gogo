@@ -1255,4 +1255,14 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get moreLoginPromptDesc => 'ログインしてすべての特典をご利用ください';
+
+  @override
+  String exploreMissionAvailableBadge(Object count) {
+    return 'ミッション$count件';
+  }
+
+  @override
+  String exploreMissionRewardBadge(Object points) {
+    return '+${points}P ミッション';
+  }
 }

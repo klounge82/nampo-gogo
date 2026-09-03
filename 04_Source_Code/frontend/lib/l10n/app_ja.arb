@@ -435,5 +435,17 @@
   "moreSwitchToBusiness": "事業者モードに切り替え",
   "moreSwitchToCustomerDesc": "南浦旅行者画面に切り替えます。",
   "moreSwitchToBusinessDesc": "店舗、予約、レビューを管理します。",
-  "moreLoginPromptDesc": "ログインしてすべての特典をご利用ください"
+  "moreLoginPromptDesc": "ログインしてすべての特典をご利用ください",
+  "exploreMissionAvailableBadge": "ミッション{count}件",
+  "@exploreMissionAvailableBadge": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "exploreMissionRewardBadge": "+{points}P ミッション",
+  "@exploreMissionRewardBadge": {
+    "placeholders": {
+      "points": {}
+    }
+  }
 }

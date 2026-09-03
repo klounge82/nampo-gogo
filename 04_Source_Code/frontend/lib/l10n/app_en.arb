@@ -435,5 +435,17 @@
   "moreSwitchToBusiness": "Switch to Business Mode",
   "moreSwitchToCustomerDesc": "Switch to Nampo traveler screen.",
   "moreSwitchToBusinessDesc": "Manage your store, reservations, and reviews.",
-  "moreLoginPromptDesc": "Sign in to enjoy full benefits"
+  "moreLoginPromptDesc": "Sign in to enjoy full benefits",
+  "exploreMissionAvailableBadge": "{count} Missions",
+  "@exploreMissionAvailableBadge": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "exploreMissionRewardBadge": "+{points}P Mission",
+  "@exploreMissionRewardBadge": {
+    "placeholders": {
+      "points": {}
+    }
+  }
 }

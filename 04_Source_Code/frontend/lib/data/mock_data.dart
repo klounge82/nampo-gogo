@@ -46,6 +46,7 @@ class MockData {
   static const List<Mission> missions = [
     Mission(
       id: 'mis_01',
+      storeId: 'rec_01',
       title: 'BIFF 광장 호떡 인증!',
       description: 'BIFF 광장 씨앗호떡을 구매하고 사진을 촬영하여 방문을 인증해 보세요.',
       reward: '씨앗호떡 10% 할인 쿠폰',
@@ -54,6 +55,7 @@ class MockData {
     ),
     Mission(
       id: 'mis_02',
+      storeId: 'rec_02',
       title: '용두산공원 부산타워 정복',
       description: '용두산공원 부산타워 전망대 근처에 도달한 후 GPS 위치를 인증해 보세요.',
       reward: '전망대 입장 1,000원 할인권',
@@ -62,6 +64,7 @@ class MockData {
     ),
     Mission(
       id: 'mis_03',
+      storeId: 'rec_03',
       title: '자갈치시장 맛집 방문하기',
       description: '자갈치시장 내 제휴 매장에서 식사하고 사장님 앱의 QR코드를 촬영해 인증받으세요.',
       reward: '제휴매장 음료 무료 쿠폰',

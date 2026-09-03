@@ -435,5 +435,17 @@
   "moreSwitchToBusiness": "切换到商家模式",
   "moreSwitchToCustomerDesc": "切换到南浦旅行者界面。",
   "moreSwitchToBusinessDesc": "管理您的店铺、预约与评价。",
-  "moreLoginPromptDesc": "登录以享受全部权益"
+  "moreLoginPromptDesc": "登录以享受全部权益",
+  "exploreMissionAvailableBadge": "{count}个任务",
+  "@exploreMissionAvailableBadge": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "exploreMissionRewardBadge": "+{points}P 任务",
+  "@exploreMissionRewardBadge": {
+    "placeholders": {
+      "points": {}
+    }
+  }
 }

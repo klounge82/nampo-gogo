@@ -435,5 +435,17 @@
   "moreSwitchToBusiness": "사업자 모드로 전환",
   "moreSwitchToCustomerDesc": "남포동 여행자 화면으로 전환합니다.",
   "moreSwitchToBusinessDesc": "내 매장, 예약, 리뷰를 관리합니다.",
-  "moreLoginPromptDesc": "로그인하고 모든 혜택을 누려보세요"
+  "moreLoginPromptDesc": "로그인하고 모든 혜택을 누려보세요",
+  "exploreMissionAvailableBadge": "미션 {count}개",
+  "@exploreMissionAvailableBadge": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "exploreMissionRewardBadge": "+{points}P 미션",
+  "@exploreMissionRewardBadge": {
+    "placeholders": {
+      "points": {}
+    }
+  }
 }

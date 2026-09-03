@@ -2508,6 +2508,18 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'로그인하고 모든 혜택을 누려보세요'**
   String get moreLoginPromptDesc;
+
+  /// No description provided for @exploreMissionAvailableBadge.
+  ///
+  /// In ko, this message translates to:
+  /// **'미션 {count}개'**
+  String exploreMissionAvailableBadge(Object count);
+
+  /// No description provided for @exploreMissionRewardBadge.
+  ///
+  /// In ko, this message translates to:
+  /// **'+{points}P 미션'**
+  String exploreMissionRewardBadge(Object points);
 }
 
 class _AppLocalizationsDelegate

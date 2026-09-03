@@ -1262,4 +1262,14 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get moreLoginPromptDesc => '로그인하고 모든 혜택을 누려보세요';
+
+  @override
+  String exploreMissionAvailableBadge(Object count) {
+    return '미션 $count개';
+  }
+
+  @override
+  String exploreMissionRewardBadge(Object points) {
+    return '+${points}P 미션';
+  }
 }

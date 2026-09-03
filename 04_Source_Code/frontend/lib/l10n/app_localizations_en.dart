@@ -1300,4 +1300,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get moreLoginPromptDesc => 'Sign in to enjoy full benefits';
+
+  @override
+  String exploreMissionAvailableBadge(Object count) {
+    return '$count Missions';
+  }
+
+  @override
+  String exploreMissionRewardBadge(Object points) {
+    return '+${points}P Mission';
+  }
 }

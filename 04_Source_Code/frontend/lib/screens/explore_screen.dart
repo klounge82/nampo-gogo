@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../constants/colors.dart';
 import '../models/place.dart';
+import '../models/mission.dart';
 import '../providers/locale_provider.dart';
 import '../repositories/place_repository.dart';
+import '../repositories/mission_repository.dart';
 import '../l10n/app_localizations.dart';
 import '../utils/l10n_mappers.dart';
 import 'place_detail_screen.dart';
-import 'main_navigation_screen.dart';
 import 'search_screen.dart';
 
 class ExploreScreen extends StatefulWidget {
@@ -19,9 +20,11 @@ class ExploreScreen extends StatefulWidget {
 
 class _ExploreScreenState extends State<ExploreScreen> {
   final PlaceRepository _placeRepository = PlaceRepository();
+  final MissionRepository _missionRepository = MissionRepository();
   final TextEditingController _searchController = TextEditingController();
 
   List<Place> _places = [];
+  Map<String, List<Mission>> _placeMissionsMap = {};
   List<String> _categories = const ['전체', '먹거리', '관광', '쇼핑', '체험'];
 
   String _selectedCategory = '전체';
@@ -53,14 +56,28 @@ class _ExploreScreenState extends State<ExploreScreen> {
       });
     }
     try {
-      final places = await _placeRepository.getPlaces(locale: localeCode);
+      final results = await Future.wait([
+        _placeRepository.getPlaces(locale: localeCode),
+        _missionRepository.getMissions(locale: localeCode),
+      ]);
+
+      final places = results[0] as List<Place>;
+      final missions = results[1] as List<Mission>;
+
+      final Map<String, List<Mission>> map = {};
+      for (final m in missions) {
+        if (m.storeId.isNotEmpty) {
+          map.putIfAbsent(m.storeId, () => []).add(m);
+        }
+      }
+
       if (mounted) {
         setState(() {
           _places = places;
+          _placeMissionsMap = map;
         });
       }
     } catch (_) {
-      // Fallback handled inside repository
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -139,54 +156,62 @@ class _ExploreScreenState extends State<ExploreScreen> {
                     decoration: InputDecoration(
                       hintText: l10n.searchHint,
                       hintStyle: const TextStyle(
-                        color: AppColors.textHint,
-                        fontSize: 13.0,
+                        color: AppColors.textSecondary,
+                        fontSize: 14.0,
                       ),
-                      prefixIcon: const Icon(Icons.search, color: AppColors.primary),
+                      prefixIcon: const Icon(
+                        Icons.search,
+                        color: AppColors.textSecondary,
+                        size: 20.0,
+                      ),
                       border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 12.0),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 12.0,
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(height: 12.0),
 
-                // Horizontal category chips scroll
+                // Horizontal Category Filter List
                 SizedBox(
                   height: 38.0,
-                  child: ListView.builder(
+                  child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: _categories.length,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(width: 8.0),
                     itemBuilder: (context, index) {
-                      final category = _categories[index];
-                      final isSelected = _selectedCategory == category;
+                      final cat = _categories[index];
+                      final isSelected = _selectedCategory == cat;
+                      final localizedLabel = L10nMappers.mapCategory(l10n, cat);
 
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: ChoiceChip(
-                          label: Text(L10nMappers.mapCategory(l10n, category)),
-                          selected: isSelected,
-                          onSelected: (_) => _onCategorySelected(category),
-                          selectedColor: AppColors.primary,
-                          backgroundColor: AppColors.background,
-                          labelStyle: TextStyle(
+                      return ChoiceChip(
+                        label: Text(
+                          localizedLabel,
+                          style: TextStyle(
+                            fontSize: 13.0,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.w500,
                             color: isSelected
                                 ? Colors.white
                                 : AppColors.textPrimary,
-                            fontWeight: isSelected
-                                ? FontWeight.bold
-                                : FontWeight.normal,
-                            fontSize: 12.0,
                           ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20.0),
-                            side: BorderSide(
-                              color: isSelected
-                                  ? Colors.transparent
-                                  : AppColors.border,
-                            ),
-                          ),
-                          showCheckmark: false,
                         ),
+                        selected: isSelected,
+                        selectedColor: AppColors.primary,
+                        backgroundColor: AppColors.surface,
+                        side: BorderSide(
+                          color: isSelected
+                              ? AppColors.primary
+                              : AppColors.border,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        onSelected: (_) => _onCategorySelected(cat),
                       );
                     },
                   ),
@@ -195,7 +220,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
             ),
           ),
 
-          // Place List Container
+          // Main Place List Section
           Expanded(
             child: _isLoading
                 ? const Center(
@@ -203,53 +228,45 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   )
                 : _places.isEmpty
                 ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.search_off,
-                          size: 48.0,
-                          color: AppColors.textHint,
-                        ),
-                        const SizedBox(height: 12.0),
-                        Text(
-                          l10n.emptySearch,
-                          style: const TextStyle(color: AppColors.textSecondary),
-                        ),
-                      ],
+                    child: Text(
+                      l10n.noReviewsYet,
+                      style: const TextStyle(color: AppColors.textSecondary),
                     ),
                   )
-                : ListView.builder(
-                    padding: const EdgeInsets.all(16.0),
-                    physics: const BouncingScrollPhysics(),
-                    itemCount: _places.length,
-                    itemBuilder: (context, index) {
-                      final place = _places[index];
-                      return _buildPlaceCard(context, place);
-                    },
+                : RefreshIndicator(
+                    onRefresh: _loadInitialData,
+                    color: AppColors.primary,
+                    child: ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(
+                        parent: BouncingScrollPhysics(),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 16.0,
+                      ),
+                      itemCount: _places.length,
+                      itemBuilder: (context, index) {
+                        final place = _places[index];
+                        final rawMissions = _placeMissionsMap[place.id] ?? [];
+                        final availableMissions = rawMissions.where((m) => !m.isCompleted).toList();
+                        return _buildPlaceItem(context, place, availableMissions, l10n);
+                      },
+                    ),
                   ),
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          MainNavigationScreen.selectTab(context, 2);
-        },
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.map),
-        label: Text(
-          l10n.mapViewNearby,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-      ),
     );
   }
 
-  Widget _buildPlaceCard(BuildContext context, Place place) {
-    final l10n = AppLocalizations.of(context)!;
+  Widget _buildPlaceItem(
+    BuildContext context,
+    Place place,
+    List<Mission> availableMissions,
+    AppLocalizations l10n,
+  ) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 12.0),
+      margin: const EdgeInsets.only(bottom: 14.0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
       elevation: 0.5,
       child: Container(
@@ -363,6 +380,48 @@ class _ExploreScreenState extends State<ExploreScreen> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
+                      if (availableMissions.isNotEmpty) ...[
+                        const SizedBox(height: 6.0),
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6.0,
+                                vertical: 2.0,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.secondary.withAlpha(30),
+                                borderRadius: BorderRadius.circular(4.0),
+                                border: Border.all(
+                                  color: AppColors.secondary.withAlpha(100),
+                                  width: 0.8,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.stars,
+                                    size: 11.0,
+                                    color: AppColors.secondary,
+                                  ),
+                                  const SizedBox(width: 3.0),
+                                  Text(
+                                    availableMissions.length == 1
+                                        ? l10n.exploreMissionRewardBadge(availableMissions.first.points.toString())
+                                        : l10n.exploreMissionAvailableBadge(availableMissions.length.toString()),
+                                    style: const TextStyle(
+                                      fontSize: 10.0,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.secondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -378,10 +437,13 @@ class _ExploreScreenState extends State<ExploreScreen> {
     switch (category) {
       case '먹거리':
         return Icons.restaurant;
+      case '관광':
       case '볼거리':
         return Icons.visibility;
-      case '맛집':
-        return Icons.local_dining;
+      case '쇼핑':
+        return Icons.shopping_bag;
+      case '체험':
+        return Icons.palette;
       default:
         return Icons.place;
     }

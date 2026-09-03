@@ -1248,6 +1248,16 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get moreLoginPromptDesc => '登录以享受全部权益';
+
+  @override
+  String exploreMissionAvailableBadge(Object count) {
+    return '$count个任务';
+  }
+
+  @override
+  String exploreMissionRewardBadge(Object points) {
+    return '+${points}P 任务';
+  }
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -2494,4 +2504,14 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get moreLoginPromptDesc => '登录以享受全部权益';
+
+  @override
+  String exploreMissionAvailableBadge(Object count) {
+    return '$count个任务';
+  }
+
+  @override
+  String exploreMissionRewardBadge(Object points) {
+    return '+${points}P 任务';
+  }
 }
