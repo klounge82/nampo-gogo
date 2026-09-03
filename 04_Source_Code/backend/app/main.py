@@ -11,7 +11,7 @@ import json
 
 from .database import engine, Base, SessionLocal, get_db
 from . import models, schemas, auth, config
-from .services.point_service import PointService
+from .services.point_service import PointService, GiftExpiredException
 from .translation import TranslationProviderAdapter
 
 import os
@@ -1581,9 +1581,11 @@ def get_user_points(
     if user_id and getattr(current_user, "role", "").upper() == "ADMIN":
         target_user = db.query(models.User).filter(models.User.id == user_id).first() or current_user
 
+    authoritative_points = PointService.get_authoritative_usable_points(db, target_user.id)
+
     return {
         "user_id": target_user.id,
-        "current_points": target_user.current_points,
+        "current_points": authoritative_points,
         "lifetime_earned_points": target_user.lifetime_earned_points
     }
 
@@ -1695,6 +1697,84 @@ def spend_points(
         "success": True,
         "current_points": user.current_points
     }
+
+# --- POINT GIFT APIs ---
+
+class GiftCreateRequest(BaseModel):
+    gross_points: int
+    idempotency_key: Optional[str] = None
+
+class GiftClaimRequest(BaseModel):
+    gift_token: str
+    idempotency_key: Optional[str] = None
+
+@app.post("/users/points/gift/create", tags=["Points"])
+def create_point_gift(
+    req: GiftCreateRequest,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    try:
+        res = PointService.create_gift(
+            db=db,
+            sender_id=current_user.id,
+            gross_points=req.gross_points,
+            idempotency_key=req.idempotency_key
+        )
+        db.commit()
+        return res
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/users/points/gift/claim", tags=["Points"])
+def claim_point_gift(
+    req: GiftClaimRequest,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    try:
+        res = PointService.claim_gift(
+            db=db,
+            recipient_id=current_user.id,
+            gift_token=req.gift_token,
+            idempotency_key=req.idempotency_key
+        )
+        db.commit()
+        return res
+    except GiftExpiredException:
+        db.commit()
+        raise
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/users/points/gift/{gift_id}/cancel", tags=["Points"])
+def cancel_point_gift(
+    gift_id: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    try:
+        res = PointService.cancel_gift(
+            db=db,
+            sender_id=current_user.id,
+            gift_id=gift_id
+        )
+        db.commit()
+        return res
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
 # --- COUPON / REWARD MVP APIs ---
 

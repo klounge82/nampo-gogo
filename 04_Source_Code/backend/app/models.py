@@ -19,6 +19,10 @@ class User(Base):
     updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
     last_login_at = Column(DateTime, nullable=True)
 
+    __table_args__ = (
+        CheckConstraint("current_points >= 0", name="chk_users_current_points_nonnegative"),
+    )
+
     # One-to-one relationship with UserAuth
     auth = relationship("UserAuth", back_populates="user", uselist=False, cascade="all, delete-orphan")
     # One-to-many relationship with UserMission
@@ -691,3 +695,109 @@ class PaymentRefund(Base):
 
     # Relationships
     payment = relationship("Payment", back_populates="refunds")
+
+
+# --- POINT ECONOMY STAGE 1 MODELS ---
+
+class PointOperation(Base):
+    __tablename__ = "point_operations"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    actor_user_id = Column(String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    operation_type = Column(String(50), nullable=False) # 'SPEND', 'EARN', 'COUPON_REDEEM', 'PAYMENT', 'REFUND', 'EXPIRATION', 'GIFT_CREATE', 'GIFT_ACCEPT', 'GIFT_CANCEL'
+    idempotency_key = Column(String(128), nullable=True)
+    request_fingerprint = Column(String(64), nullable=True)
+    status = Column(String(20), nullable=False, default="STARTED") # 'STARTED', 'COMPLETED', 'FAILED'
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+    completed_at = Column(DateTime, nullable=True)
+
+    # Relationships
+    actor_user = relationship("User", foreign_keys=[actor_user_id])
+    allocations = relationship("PointAllocation", back_populates="operation", cascade="all, delete-orphan")
+
+
+class PointLot(Base):
+    __tablename__ = "point_lots"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    source_history_id = Column(String(36), ForeignKey("point_histories.id", ondelete="SET NULL"), nullable=True)
+    operation_id = Column(String(36), ForeignKey("point_operations.id", ondelete="SET NULL"), nullable=True)
+    source_type = Column(String(50), nullable=False) # 'SIGNUP', 'MISSION', 'GIFT_RECEIVED', 'PROMOTION', 'REFUND', 'ADMIN', 'PAYMENT', 'LEGACY_MIGRATION'
+    original_points = Column(Integer, nullable=False)
+    remaining_points = Column(Integer, nullable=False)
+    reserved_points = Column(Integer, nullable=False, default=0)
+    expires_at = Column(DateTime, nullable=True)
+    is_transferable = Column(Boolean, nullable=False, default=False)
+    status = Column(String(20), nullable=False, default="ACTIVE") # 'ACTIVE', 'EXHAUSTED', 'EXPIRED', 'REVOKED'
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+
+    __table_args__ = (
+        CheckConstraint("original_points > 0", name="chk_point_lots_orig_positive"),
+        CheckConstraint("remaining_points >= 0", name="chk_point_lots_rem_nonnegative"),
+        CheckConstraint("reserved_points >= 0", name="chk_point_lots_res_nonnegative"),
+        CheckConstraint("reserved_points <= remaining_points", name="chk_point_lots_res_le_rem"),
+        Index("idx_point_lots_user_active_fefo", "user_id", "status", "is_transferable", "expires_at", "created_at", "id"),
+    )
+
+    # Relationships
+    user = relationship("User", backref="point_lots")
+    source_history = relationship("PointHistory")
+    operation = relationship("PointOperation")
+    allocations = relationship("PointAllocation", back_populates="lot", cascade="all, delete-orphan")
+
+
+class PointAllocation(Base):
+    __tablename__ = "point_allocations"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    lot_id = Column(String(36), ForeignKey("point_lots.id", ondelete="CASCADE"), nullable=False)
+    operation_id = Column(String(36), ForeignKey("point_operations.id", ondelete="CASCADE"), nullable=False)
+    points = Column(Integer, nullable=False)
+    allocation_type = Column(String(30), nullable=False) # 'CONSUMPTION', 'RESERVATION', 'RESERVATION_RELEASE'
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+
+    __table_args__ = (
+        CheckConstraint("points > 0", name="chk_point_alloc_points_positive"),
+        Index("idx_point_alloc_lot_op", "lot_id", "operation_id"),
+    )
+
+    # Relationships
+    lot = relationship("PointLot", back_populates="allocations")
+    operation = relationship("PointOperation", back_populates="allocations")
+
+
+class PointGift(Base):
+    __tablename__ = "point_gifts"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    sender_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    recipient_id = Column(String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    create_operation_id = Column(String(36), ForeignKey("point_operations.id", ondelete="RESTRICT"), nullable=False)
+    accept_operation_id = Column(String(36), ForeignKey("point_operations.id", ondelete="RESTRICT"), nullable=True)
+    gift_token_hash = Column(String(64), nullable=False, unique=True, index=True)
+    gross_points = Column(Integer, nullable=False)
+    fee_points = Column(Integer, nullable=False)
+    net_points = Column(Integer, nullable=False)
+    status = Column(String(20), nullable=False, default="PENDING") # 'PENDING', 'ACCEPTED', 'CANCELLED', 'EXPIRED'
+    expires_at = Column(DateTime, nullable=False)
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+    accepted_at = Column(DateTime, nullable=True)
+    cancelled_at = Column(DateTime, nullable=True)
+
+    __table_args__ = (
+        CheckConstraint("gross_points > 0", name="chk_gift_gross_positive"),
+        CheckConstraint("fee_points >= 0", name="chk_gift_fee_nonnegative"),
+        CheckConstraint("net_points > 0", name="chk_gift_net_positive"),
+        CheckConstraint("gross_points = fee_points + net_points", name="chk_gift_total_balance"),
+        CheckConstraint("recipient_id IS NULL OR recipient_id != sender_id", name="chk_gift_no_self_claim"),
+        Index("idx_point_gifts_sender_status", "sender_id", "status"),
+        Index("idx_point_gifts_recipient_status", "recipient_id", "status"),
+        Index("idx_point_gifts_expires_status", "expires_at", "status"),
+    )
+
+    # Relationships
+    sender = relationship("User", foreign_keys=[sender_id])
+    recipient = relationship("User", foreign_keys=[recipient_id])
+    create_operation = relationship("PointOperation", foreign_keys=[create_operation_id])
+    accept_operation = relationship("PointOperation", foreign_keys=[accept_operation_id])

@@ -150,7 +150,7 @@ class TestPointCoreSafetyStage0(unittest.TestCase):
         self.client.post("/users/points/spend", json={"points": 400, "activity": "사전 차감"}, headers=headers)
 
         # Try to exchange 500P coupon with 100P balance
-        res = self.client.post(f"/coupons/{self.coupon.id}/exchange", json={}, headers=headers)
+        res = self.client.post("/coupons/cpn_s0_001/exchange", json={}, headers=headers)
         self.assertEqual(res.status_code, 400)
         self.assertIn("보유 포인트가 부족합니다", res.json()["detail"])
 
@@ -163,7 +163,7 @@ class TestPointCoreSafetyStage0(unittest.TestCase):
 
     def test_T07_coupon_exchange_balance_and_coupon_state_atomic(self):
         headers = {"Authorization": f"Bearer {self.token}"}
-        res = self.client.post(f"/coupons/{self.coupon.id}/exchange", json={}, headers=headers)
+        res = self.client.post("/coupons/cpn_s0_001/exchange", json={}, headers=headers)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(res.json()["current_points"], 0)
 
@@ -189,6 +189,7 @@ class TestPointCoreSafetyStage0(unittest.TestCase):
             target_id="usr_stage0_test",
             amount=10000,
             payment_method="CARD",
+            idempotency_key="idemp_point_charge_001",
             status="pending"
         )
         db.add(payment)
@@ -197,8 +198,8 @@ class TestPointCoreSafetyStage0(unittest.TestCase):
 
         headers = {"Authorization": f"Bearer {self.token}"}
         res = self.client.post(
-            "/payments/complete",
-            json={"payment_id": "pay_point_charge_001", "provider_tx_id": "mock_tx_10000"},
+            "/payments/confirm",
+            json={"payment_id": "pay_point_charge_001", "mock_token": "mock_pg_token_test_10000"},
             headers=headers
         )
         self.assertEqual(res.status_code, 200)
@@ -223,6 +224,7 @@ class TestPointCoreSafetyStage0(unittest.TestCase):
             target_id="usr_stage0_test",
             amount=10000,
             payment_method="CARD",
+            idempotency_key="idemp_pay_to_refund_001",
             status="paid"
         )
         # Give initial points
