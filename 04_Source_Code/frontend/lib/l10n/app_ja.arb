@@ -409,5 +409,31 @@
   "pointGiftEmptyReceived": "受け取ったギフト履歴はありません。",
   "pointGiftInvalidAmount": "ギフトポイントは100P以上5,000P以下、10P単位である必要があります。",
   "pointGiftInsufficient": "ギフト可能なポイントが不足しています。",
-  "pointGiftEmptyToken": "ギフトコードを入力してください。"
+  "pointGiftEmptyToken": "ギフトコードを入力してください。",
+  "missionProgressCompletedTotal": "完了ミッション {completed} / {total}",
+  "@missionProgressCompletedTotal": {
+    "placeholders": {
+      "completed": {},
+      "total": {}
+    }
+  },
+  "missionTotalCountLabel": "合計 {count}件",
+  "@missionTotalCountLabel": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "moreAiCourseDesc": "AIカスタマイズ南浦旅行コース生成",
+  "moreSavedCoursesDesc": "保存されたAIおすすめコースを確認",
+  "moreMyActivitySection": "マイ活動＆特典",
+  "moreProfileDetailDesc": "アカウント情報と活動履歴の管理",
+  "morePointHistoryDesc": "ポイント獲得・利用・ギフト履歴",
+  "moreCouponListDesc": "利用可能な南浦店舗の割引クーポン",
+  "moreFavoritesTitle": "お気に入り",
+  "moreFavoritesDesc": "ブックマークした名所や店舗",
+  "moreSwitchToCustomer": "顧客モードに切り替え",
+  "moreSwitchToBusiness": "事業者モードに切り替え",
+  "moreSwitchToCustomerDesc": "南浦旅行者画面に切り替えます。",
+  "moreSwitchToBusinessDesc": "店舗、予約、レビューを管理します。",
+  "moreLoginPromptDesc": "ログインしてすべての特典をご利用ください"
 }

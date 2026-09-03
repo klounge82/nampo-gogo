@@ -409,5 +409,31 @@
   "pointGiftEmptyReceived": "No received gifts found.",
   "pointGiftInvalidAmount": "Gift amount must be between 100P and 5,000P in 10P increments.",
   "pointGiftInsufficient": "Insufficient giftable points.",
-  "pointGiftEmptyToken": "Please enter a gift code."
+  "pointGiftEmptyToken": "Please enter a gift code.",
+  "missionProgressCompletedTotal": "Completed {completed} / {total}",
+  "@missionProgressCompletedTotal": {
+    "placeholders": {
+      "completed": {},
+      "total": {}
+    }
+  },
+  "missionTotalCountLabel": "Total {count}",
+  "@missionTotalCountLabel": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "moreAiCourseDesc": "Generate personalized Nampo travel courses",
+  "moreSavedCoursesDesc": "View your saved AI travel courses",
+  "moreMyActivitySection": "My Activities & Benefits",
+  "moreProfileDetailDesc": "Manage your profile and travel history",
+  "morePointHistoryDesc": "Points earned, used, and gifted history",
+  "moreCouponListDesc": "Available discount coupons in Nampo",
+  "moreFavoritesTitle": "Favorites",
+  "moreFavoritesDesc": "Bookmarked attractions and spots",
+  "moreSwitchToCustomer": "Switch to Customer Mode",
+  "moreSwitchToBusiness": "Switch to Business Mode",
+  "moreSwitchToCustomerDesc": "Switch to Nampo traveler screen.",
+  "moreSwitchToBusinessDesc": "Manage your store, reservations, and reviews.",
+  "moreLoginPromptDesc": "Sign in to enjoy full benefits"
 }

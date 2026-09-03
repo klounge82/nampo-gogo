@@ -1250,4 +1250,54 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pointGiftEmptyToken => 'Please enter a gift code.';
+
+  @override
+  String missionProgressCompletedTotal(Object completed, Object total) {
+    return 'Completed $completed / $total';
+  }
+
+  @override
+  String missionTotalCountLabel(Object count) {
+    return 'Total $count';
+  }
+
+  @override
+  String get moreAiCourseDesc => 'Generate personalized Nampo travel courses';
+
+  @override
+  String get moreSavedCoursesDesc => 'View your saved AI travel courses';
+
+  @override
+  String get moreMyActivitySection => 'My Activities & Benefits';
+
+  @override
+  String get moreProfileDetailDesc => 'Manage your profile and travel history';
+
+  @override
+  String get morePointHistoryDesc => 'Points earned, used, and gifted history';
+
+  @override
+  String get moreCouponListDesc => 'Available discount coupons in Nampo';
+
+  @override
+  String get moreFavoritesTitle => 'Favorites';
+
+  @override
+  String get moreFavoritesDesc => 'Bookmarked attractions and spots';
+
+  @override
+  String get moreSwitchToCustomer => 'Switch to Customer Mode';
+
+  @override
+  String get moreSwitchToBusiness => 'Switch to Business Mode';
+
+  @override
+  String get moreSwitchToCustomerDesc => 'Switch to Nampo traveler screen.';
+
+  @override
+  String get moreSwitchToBusinessDesc =>
+      'Manage your store, reservations, and reviews.';
+
+  @override
+  String get moreLoginPromptDesc => 'Sign in to enjoy full benefits';
 }

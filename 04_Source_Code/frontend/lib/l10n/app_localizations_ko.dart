@@ -1213,4 +1213,53 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get pointGiftEmptyToken => '선물 코드를 입력해 주세요.';
+
+  @override
+  String missionProgressCompletedTotal(Object completed, Object total) {
+    return '완료 미션 $completed / $total';
+  }
+
+  @override
+  String missionTotalCountLabel(Object count) {
+    return '총 $count개';
+  }
+
+  @override
+  String get moreAiCourseDesc => 'AI 맞춤 남포동 여행 코스 생성';
+
+  @override
+  String get moreSavedCoursesDesc => '저장된 AI 추천 코스 확인';
+
+  @override
+  String get moreMyActivitySection => '나의 활동 및 혜택';
+
+  @override
+  String get moreProfileDetailDesc => '내 정보 및 활동 내역 상세 관리';
+
+  @override
+  String get morePointHistoryDesc => '포인트 적립, 사용 및 선물 내역';
+
+  @override
+  String get moreCouponListDesc => '사용 가능한 남포동 매장 할인 쿠폰';
+
+  @override
+  String get moreFavoritesTitle => '즐겨찾기';
+
+  @override
+  String get moreFavoritesDesc => '내가 찜한 남포동 명소 및 상점';
+
+  @override
+  String get moreSwitchToCustomer => '고객 모드로 전환';
+
+  @override
+  String get moreSwitchToBusiness => '사업자 모드로 전환';
+
+  @override
+  String get moreSwitchToCustomerDesc => '남포동 여행자 화면으로 전환합니다.';
+
+  @override
+  String get moreSwitchToBusinessDesc => '내 매장, 예약, 리뷰를 관리합니다.';
+
+  @override
+  String get moreLoginPromptDesc => '로그인하고 모든 혜택을 누려보세요';
 }

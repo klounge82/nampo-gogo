@@ -409,5 +409,31 @@
   "pointGiftEmptyReceived": "받은 선물 내역이 없습니다.",
   "pointGiftInvalidAmount": "선물 포인트는 100P 이상 5,000P 이하이며, 10P 단위여야 합니다.",
   "pointGiftInsufficient": "선물 가능한 포인트가 부족합니다.",
-  "pointGiftEmptyToken": "선물 코드를 입력해 주세요."
+  "pointGiftEmptyToken": "선물 코드를 입력해 주세요.",
+  "missionProgressCompletedTotal": "완료 미션 {completed} / {total}",
+  "@missionProgressCompletedTotal": {
+    "placeholders": {
+      "completed": {},
+      "total": {}
+    }
+  },
+  "missionTotalCountLabel": "총 {count}개",
+  "@missionTotalCountLabel": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "moreAiCourseDesc": "AI 맞춤 남포동 여행 코스 생성",
+  "moreSavedCoursesDesc": "저장된 AI 추천 코스 확인",
+  "moreMyActivitySection": "나의 활동 및 혜택",
+  "moreProfileDetailDesc": "내 정보 및 활동 내역 상세 관리",
+  "morePointHistoryDesc": "포인트 적립, 사용 및 선물 내역",
+  "moreCouponListDesc": "사용 가능한 남포동 매장 할인 쿠폰",
+  "moreFavoritesTitle": "즐겨찾기",
+  "moreFavoritesDesc": "내가 찜한 남포동 명소 및 상점",
+  "moreSwitchToCustomer": "고객 모드로 전환",
+  "moreSwitchToBusiness": "사업자 모드로 전환",
+  "moreSwitchToCustomerDesc": "남포동 여행자 화면으로 전환합니다.",
+  "moreSwitchToBusinessDesc": "내 매장, 예약, 리뷰를 관리합니다.",
+  "moreLoginPromptDesc": "로그인하고 모든 혜택을 누려보세요"
 }

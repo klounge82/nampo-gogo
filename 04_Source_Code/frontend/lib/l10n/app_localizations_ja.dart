@@ -1206,4 +1206,53 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get pointGiftEmptyToken => 'ギフトコードを入力してください。';
+
+  @override
+  String missionProgressCompletedTotal(Object completed, Object total) {
+    return '完了ミッション $completed / $total';
+  }
+
+  @override
+  String missionTotalCountLabel(Object count) {
+    return '合計 $count件';
+  }
+
+  @override
+  String get moreAiCourseDesc => 'AIカスタマイズ南浦旅行コース生成';
+
+  @override
+  String get moreSavedCoursesDesc => '保存されたAIおすすめコースを確認';
+
+  @override
+  String get moreMyActivitySection => 'マイ活動＆特典';
+
+  @override
+  String get moreProfileDetailDesc => 'アカウント情報と活動履歴の管理';
+
+  @override
+  String get morePointHistoryDesc => 'ポイント獲得・利用・ギフト履歴';
+
+  @override
+  String get moreCouponListDesc => '利用可能な南浦店舗の割引クーポン';
+
+  @override
+  String get moreFavoritesTitle => 'お気に入り';
+
+  @override
+  String get moreFavoritesDesc => 'ブックマークした名所や店舗';
+
+  @override
+  String get moreSwitchToCustomer => '顧客モードに切り替え';
+
+  @override
+  String get moreSwitchToBusiness => '事業者モードに切り替え';
+
+  @override
+  String get moreSwitchToCustomerDesc => '南浦旅行者画面に切り替えます。';
+
+  @override
+  String get moreSwitchToBusinessDesc => '店舗、予約、レビューを管理します。';
+
+  @override
+  String get moreLoginPromptDesc => 'ログインしてすべての特典をご利用ください';
 }

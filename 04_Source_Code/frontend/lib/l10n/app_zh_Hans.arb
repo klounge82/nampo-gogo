@@ -409,5 +409,31 @@
   "pointGiftEmptyReceived": "暂无已收礼物记录。",
   "pointGiftInvalidAmount": "赠送积分需在100P至5,000P之间，且为10P的倍数。",
   "pointGiftInsufficient": "可赠送积分不足。",
-  "pointGiftEmptyToken": "请输入礼物代码。"
+  "pointGiftEmptyToken": "请输入礼物代码。",
+  "missionProgressCompletedTotal": "已完成任务 {completed} / {total}",
+  "@missionProgressCompletedTotal": {
+    "placeholders": {
+      "completed": {},
+      "total": {}
+    }
+  },
+  "missionTotalCountLabel": "共 {count} 个",
+  "@missionTotalCountLabel": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "moreAiCourseDesc": "生成AI定制南浦旅游路线",
+  "moreSavedCoursesDesc": "查看已保存的AI推荐路线",
+  "moreMyActivitySection": "我的活动与权益",
+  "moreProfileDetailDesc": "管理个人信息与活动历史",
+  "morePointHistoryDesc": "积分获取、使用及赠送记录",
+  "moreCouponListDesc": "可使用的南浦商户优惠券",
+  "moreFavoritesTitle": "收藏夹",
+  "moreFavoritesDesc": "已收藏的南浦名胜与商铺",
+  "moreSwitchToCustomer": "切换到用户模式",
+  "moreSwitchToBusiness": "切换到商家模式",
+  "moreSwitchToCustomerDesc": "切换到南浦旅行者界面。",
+  "moreSwitchToBusinessDesc": "管理您的店铺、预约与评价。",
+  "moreLoginPromptDesc": "登录以享受全部权益"
 }

@@ -2418,6 +2418,96 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'선물 코드를 입력해 주세요.'**
   String get pointGiftEmptyToken;
+
+  /// No description provided for @missionProgressCompletedTotal.
+  ///
+  /// In ko, this message translates to:
+  /// **'완료 미션 {completed} / {total}'**
+  String missionProgressCompletedTotal(Object completed, Object total);
+
+  /// No description provided for @missionTotalCountLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'총 {count}개'**
+  String missionTotalCountLabel(Object count);
+
+  /// No description provided for @moreAiCourseDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'AI 맞춤 남포동 여행 코스 생성'**
+  String get moreAiCourseDesc;
+
+  /// No description provided for @moreSavedCoursesDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장된 AI 추천 코스 확인'**
+  String get moreSavedCoursesDesc;
+
+  /// No description provided for @moreMyActivitySection.
+  ///
+  /// In ko, this message translates to:
+  /// **'나의 활동 및 혜택'**
+  String get moreMyActivitySection;
+
+  /// No description provided for @moreProfileDetailDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'내 정보 및 활동 내역 상세 관리'**
+  String get moreProfileDetailDesc;
+
+  /// No description provided for @morePointHistoryDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'포인트 적립, 사용 및 선물 내역'**
+  String get morePointHistoryDesc;
+
+  /// No description provided for @moreCouponListDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'사용 가능한 남포동 매장 할인 쿠폰'**
+  String get moreCouponListDesc;
+
+  /// No description provided for @moreFavoritesTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'즐겨찾기'**
+  String get moreFavoritesTitle;
+
+  /// No description provided for @moreFavoritesDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'내가 찜한 남포동 명소 및 상점'**
+  String get moreFavoritesDesc;
+
+  /// No description provided for @moreSwitchToCustomer.
+  ///
+  /// In ko, this message translates to:
+  /// **'고객 모드로 전환'**
+  String get moreSwitchToCustomer;
+
+  /// No description provided for @moreSwitchToBusiness.
+  ///
+  /// In ko, this message translates to:
+  /// **'사업자 모드로 전환'**
+  String get moreSwitchToBusiness;
+
+  /// No description provided for @moreSwitchToCustomerDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'남포동 여행자 화면으로 전환합니다.'**
+  String get moreSwitchToCustomerDesc;
+
+  /// No description provided for @moreSwitchToBusinessDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'내 매장, 예약, 리뷰를 관리합니다.'**
+  String get moreSwitchToBusinessDesc;
+
+  /// No description provided for @moreLoginPromptDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'로그인하고 모든 혜택을 누려보세요'**
+  String get moreLoginPromptDesc;
 }
 
 class _AppLocalizationsDelegate

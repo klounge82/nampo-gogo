@@ -7,8 +7,7 @@ import 'home_screen.dart';
 import 'explore_screen.dart';
 import 'map_screen.dart';
 import 'mission_screen.dart';
-import 'profile_screen.dart';
-import 'recommendation_input_screen.dart';
+import 'more_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -45,9 +44,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     HomeScreen(),
     ExploreScreen(),
     MapScreen(),
-    RecommendationInputScreen(),
     MissionScreen(),
-    ProfileScreen(),
+    MoreScreen(),
   ];
 
   @override
@@ -65,9 +63,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           bottomNavigationBar: NavigationBarTheme(
             data: NavigationBarThemeData(
               indicatorColor: AppColors.primary.withAlpha(38), // 0.15 opacity
-              labelBehavior: isNarrow
-                  ? NavigationDestinationLabelBehavior.alwaysShow
-                  : NavigationDestinationLabelBehavior.alwaysShow,
+              labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
               labelTextStyle: WidgetStateProperty.resolveWith((states) {
                 final isSelected = states.contains(WidgetState.selected);
                 return TextStyle(
@@ -104,19 +100,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                   label: l10n.mapTitle,
                 ),
                 NavigationDestination(
-                  icon: const Icon(Icons.auto_awesome_outlined),
-                  selectedIcon: const Icon(Icons.auto_awesome, color: AppColors.primary),
-                  label: l10n.recommendTitle,
-                ),
-                NavigationDestination(
                   icon: const Icon(Icons.assignment_outlined),
                   selectedIcon: const Icon(Icons.assignment, color: AppColors.primary),
                   label: l10n.missionTitle,
                 ),
                 NavigationDestination(
-                  icon: const Icon(Icons.person_outlined),
-                  selectedIcon: const Icon(Icons.person, color: AppColors.primary),
-                  label: l10n.profileTitle,
+                  icon: const Icon(Icons.more_horiz_outlined),
+                  selectedIcon: const Icon(Icons.more_horiz, color: AppColors.primary),
+                  label: l10n.more,
                 ),
               ],
             ),

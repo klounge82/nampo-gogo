@@ -1199,6 +1199,55 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get pointGiftEmptyToken => '请输入礼物代码。';
+
+  @override
+  String missionProgressCompletedTotal(Object completed, Object total) {
+    return '已完成任务 $completed / $total';
+  }
+
+  @override
+  String missionTotalCountLabel(Object count) {
+    return '共 $count 个';
+  }
+
+  @override
+  String get moreAiCourseDesc => '生成AI定制南浦旅游路线';
+
+  @override
+  String get moreSavedCoursesDesc => '查看已保存的AI推荐路线';
+
+  @override
+  String get moreMyActivitySection => '我的活动与权益';
+
+  @override
+  String get moreProfileDetailDesc => '管理个人信息与活动历史';
+
+  @override
+  String get morePointHistoryDesc => '积分获取、使用及赠送记录';
+
+  @override
+  String get moreCouponListDesc => '可使用的南浦商户优惠券';
+
+  @override
+  String get moreFavoritesTitle => '收藏夹';
+
+  @override
+  String get moreFavoritesDesc => '已收藏的南浦名胜与商铺';
+
+  @override
+  String get moreSwitchToCustomer => '切换到用户模式';
+
+  @override
+  String get moreSwitchToBusiness => '切换到商家模式';
+
+  @override
+  String get moreSwitchToCustomerDesc => '切换到南浦旅行者界面。';
+
+  @override
+  String get moreSwitchToBusinessDesc => '管理您的店铺、预约与评价。';
+
+  @override
+  String get moreLoginPromptDesc => '登录以享受全部权益';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -2396,4 +2445,53 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get pointGiftEmptyToken => '请输入礼物代码。';
+
+  @override
+  String missionProgressCompletedTotal(Object completed, Object total) {
+    return '已完成任务 $completed / $total';
+  }
+
+  @override
+  String missionTotalCountLabel(Object count) {
+    return '共 $count 个';
+  }
+
+  @override
+  String get moreAiCourseDesc => '生成AI定制南浦旅游路线';
+
+  @override
+  String get moreSavedCoursesDesc => '查看已保存的AI推荐路线';
+
+  @override
+  String get moreMyActivitySection => '我的活动与权益';
+
+  @override
+  String get moreProfileDetailDesc => '管理个人信息与活动历史';
+
+  @override
+  String get morePointHistoryDesc => '积分获取、使用及赠送记录';
+
+  @override
+  String get moreCouponListDesc => '可使用的南浦商户优惠券';
+
+  @override
+  String get moreFavoritesTitle => '收藏夹';
+
+  @override
+  String get moreFavoritesDesc => '已收藏的南浦名胜与商铺';
+
+  @override
+  String get moreSwitchToCustomer => '切换到用户模式';
+
+  @override
+  String get moreSwitchToBusiness => '切换到商家模式';
+
+  @override
+  String get moreSwitchToCustomerDesc => '切换到南浦旅行者界面。';
+
+  @override
+  String get moreSwitchToBusinessDesc => '管理您的店铺、预约与评价。';
+
+  @override
+  String get moreLoginPromptDesc => '登录以享受全部权益';
 }

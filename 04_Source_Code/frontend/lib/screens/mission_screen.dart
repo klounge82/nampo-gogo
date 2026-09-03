@@ -7,7 +7,7 @@ import '../providers/auth_provider.dart';
 import '../providers/locale_provider.dart';
 import '../l10n/app_localizations.dart';
 import '../utils/l10n_mappers.dart';
-import 'mission_detail_screen.dart';
+import '../widgets/mission_card.dart';
 
 class MissionScreen extends StatefulWidget {
   const MissionScreen({super.key});
@@ -22,6 +22,15 @@ class _MissionScreenState extends State<MissionScreen> {
   List<Mission> _missions = [];
   bool _isLoading = false;
   String? _lastLocaleCode;
+  String _selectedCategory = 'ALL';
+
+  final List<String> _categoryKeys = [
+    'ALL',
+    'FOOD',
+    'ATTRACTION',
+    'EXPERIENCE',
+    'SHOPPING',
+  ];
 
   @override
   void didChangeDependencies() {
@@ -43,8 +52,25 @@ class _MissionScreenState extends State<MissionScreen> {
       });
     } catch (_) {
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  List<Mission> get _filteredMissions {
+    if (_selectedCategory == 'ALL') return _missions;
+    return _missions.where((m) {
+      final cat = m.category.toUpperCase();
+      if (_selectedCategory == 'FOOD') {
+        return cat.contains('FOOD') || cat.contains('음식') || cat.contains('식당') || cat.contains('맛집') || cat.contains('먹거리');
+      } else if (_selectedCategory == 'ATTRACTION') {
+        return cat.contains('ATTRACTION') || cat.contains('명소') || cat.contains('관광') || cat.contains('볼거리') || cat.contains('SIGHTS');
+      } else if (_selectedCategory == 'EXPERIENCE') {
+        return cat.contains('EXPERIENCE') || cat.contains('체험') || cat.contains('문화') || cat.contains('CULTURE');
+      } else if (_selectedCategory == 'SHOPPING') {
+        return cat.contains('SHOPPING') || cat.contains('쇼핑') || cat.contains('시장') || cat.contains('MARKET');
+      }
+      return true;
+    }).toList();
   }
 
   @override
@@ -54,6 +80,10 @@ class _MissionScreenState extends State<MissionScreen> {
     final isLoggedIn = authProvider.isLoggedIn;
     final user = authProvider.currentUser;
     final currentPoints = user?.currentPoints ?? 0;
+
+    final totalMissions = _missions.length;
+    final completedCount = _missions.where((m) => m.isCompleted).length;
+    final progressPercent = totalMissions > 0 ? (completedCount / totalMissions).clamp(0.0, 1.0) : 0.0;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -78,7 +108,7 @@ class _MissionScreenState extends State<MissionScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Point Dashboard Card
+                // Point & Mission Progress Dashboard Card
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(20.0),
@@ -127,50 +157,113 @@ class _MissionScreenState extends State<MissionScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12.0),
+                      const SizedBox(height: 16.0),
                       Container(height: 1.0, color: Colors.white24),
                       const SizedBox(height: 12.0),
+
+                      // Clean Mission Progress Indicator
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            isLoggedIn
-                                ? l10n.completedMissionsCountFormat(_missions.where((m) => m.isCompleted).length)
-                                : l10n.completedMissionsCountFormat(0),
+                            l10n.missionProgressCompletedTotal(completedCount.toString(), totalMissions.toString()),
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 12.0,
+                              fontSize: 13.0,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                           Text(
-                            isLoggedIn
-                                ? L10nMappers.mapUserTier(l10n, user?.lifetimeEarnedPoints ?? 0)
-                                : l10n.guestModeNotice,
+                            '${(progressPercent * 100).toInt()}%',
                             style: const TextStyle(
-                              color: Colors.white,
+                              color: Colors.white70,
                               fontSize: 12.0,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],
                       ),
+                      const SizedBox(height: 8.0),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4.0),
+                        child: LinearProgressIndicator(
+                          value: progressPercent,
+                          backgroundColor: Colors.white24,
+                          valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                          minHeight: 6.0,
+                        ),
+                      ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 28.0),
+                const SizedBox(height: 24.0),
 
-                // Section Header
-                Text(
-                  l10n.missionAllList,
-                  style: const TextStyle(
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                // Customer-Facing Category Filter Tabs
+                SizedBox(
+                  height: 38.0,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: _categoryKeys.length,
+                    separatorBuilder: (context, idx) => const SizedBox(width: 8.0),
+                    itemBuilder: (context, idx) {
+                      final key = _categoryKeys[idx];
+                      final isSelected = _selectedCategory == key;
+                      final label = L10nMappers.mapCategory(l10n, key);
+
+                      return ChoiceChip(
+                        label: Text(
+                          label,
+                          style: TextStyle(
+                            fontSize: 13.0,
+                            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                            color: isSelected ? Colors.white : AppColors.textPrimary,
+                          ),
+                        ),
+                        selected: isSelected,
+                        selectedColor: AppColors.primary,
+                        backgroundColor: AppColors.surface,
+                        side: BorderSide(
+                          color: isSelected ? AppColors.primary : AppColors.border,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        onSelected: (selected) {
+                          if (selected) {
+                            setState(() => _selectedCategory = key);
+                          }
+                        },
+                      );
+                    },
                   ),
                 ),
-                const SizedBox(height: 16.0),
+                const SizedBox(height: 20.0),
 
-                // Mission List
+                // Section Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      l10n.missionAllList,
+                      style: const TextStyle(
+                        fontSize: 17.0,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      l10n.missionTotalCountLabel(_filteredMissions.length.toString()),
+                      style: const TextStyle(
+                        fontSize: 13.0,
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12.0),
+
+                // Mission List with Clean Cards
                 _isLoading
                     ? const Center(
                         child: Padding(
@@ -180,7 +273,7 @@ class _MissionScreenState extends State<MissionScreen> {
                           ),
                         ),
                       )
-                    : _missions.isEmpty
+                    : _filteredMissions.isEmpty
                     ? Center(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 40.0),
@@ -193,126 +286,12 @@ class _MissionScreenState extends State<MissionScreen> {
                     : ListView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        itemCount: _missions.length,
+                        itemCount: _filteredMissions.length,
                         itemBuilder: (context, index) {
-                          final mission = _missions[index];
-                          return _buildMissionItemCard(context, mission);
+                          final mission = _filteredMissions[index];
+                          return MissionCard(mission: mission);
                         },
                       ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMissionItemCard(BuildContext context, Mission mission) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 14.0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-      elevation: 0.5,
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(12.0),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: InkWell(
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => MissionDetailScreen(missionId: mission.id),
-              ),
-            );
-          },
-          borderRadius: BorderRadius.circular(12.0),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Left Icon/Badge
-                Container(
-                  width: 48.0,
-                  height: 48.0,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withAlpha(26),
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.emoji_events_outlined,
-                      color: AppColors.primary,
-                      size: 26.0,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16.0),
-
-                // Details
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6.0,
-                              vertical: 2.0,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.secondary.withAlpha(26),
-                              borderRadius: BorderRadius.circular(4.0),
-                            ),
-                            child: Text(
-                              '${mission.points} P',
-                              style: const TextStyle(
-                                color: AppColors.secondary,
-                                fontSize: 10.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          Text(
-                            L10nMappers.mapMissionAuthType(
-                              AppLocalizations.of(context)!,
-                              mission.authType,
-                            ),
-                            style: const TextStyle(
-                              fontSize: 10.0,
-                              color: AppColors.textSecondary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6.0),
-                      Text(
-                        mission.title,
-                        style: const TextStyle(
-                          fontSize: 14.0,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4.0),
-                      Text(
-                        mission.description,
-                        style: const TextStyle(
-                          fontSize: 11.0,
-                          color: AppColors.textSecondary,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
               ],
             ),
           ),
