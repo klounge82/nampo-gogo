@@ -11,6 +11,7 @@ import json
 
 from .database import engine, Base, SessionLocal, get_db
 from . import models, schemas, auth, config
+from .services.point_service import PointService
 from .translation import TranslationProviderAdapter
 
 import os
@@ -1615,22 +1616,17 @@ def earn_points(
     if req.user_id and (getattr(current_user, "role", "").upper() in ["ADMIN", "BUSINESS"]):
         target_user_id = req.user_id
 
-    user = db.query(models.User).filter(models.User.id == target_user_id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="해당 사용자를 찾을 수 없습니다.")
-
     try:
-        user.current_points += req.points
-        new_history = models.PointHistory(
+        user = PointService.mutate_points(
+            db=db,
             user_id=target_user_id,
-            points=req.points,
-            activity=req.activity
+            amount=req.points,
+            activity=req.activity,
+            transaction_type="ADMIN_CREDIT" if getattr(current_user, "role", "").upper() == "ADMIN" else "POINT_EARN",
+            source_type="API"
         )
-        db.add(new_history)
-        db.commit()
-        db.refresh(user)
         
-        # Insert activity log
+        # Insert activity log in same transaction
         create_activity_log(
             db=db,
             user_id=target_user_id,
@@ -1640,6 +1636,11 @@ def earn_points(
             icon="paid",
             color="amber"
         )
+        db.commit()
+        db.refresh(user)
+    except HTTPException:
+        db.rollback()
+        raise
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
@@ -1661,28 +1662,17 @@ def spend_points(
     if req.user_id and (getattr(current_user, "role", "").upper() in ["ADMIN", "BUSINESS"]):
         target_user_id = req.user_id
 
-    user = db.query(models.User).filter(models.User.id == target_user_id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="해당 사용자를 찾을 수 없습니다.")
-
-    if user.current_points < req.points:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="보유 포인트가 부족합니다."
-        )
-
     try:
-        user.current_points -= req.points
-        new_history = models.PointHistory(
+        user = PointService.mutate_points(
+            db=db,
             user_id=target_user_id,
-            points=-req.points, # negative for spending
-            activity=req.activity
+            amount=-req.points,
+            activity=req.activity,
+            transaction_type="POINT_SPEND",
+            source_type="API"
         )
-        db.add(new_history)
-        db.commit()
-        db.refresh(user)
         
-        # Insert activity log
+        # Insert activity log in same transaction
         create_activity_log(
             db=db,
             user_id=target_user_id,
@@ -1692,6 +1682,11 @@ def spend_points(
             icon="paid",
             color="amber"
         )
+        db.commit()
+        db.refresh(user)
+    except HTTPException:
+        db.rollback()
+        raise
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
@@ -1725,32 +1720,22 @@ def exchange_coupon(
     if req.user_id and req.user_id != current_user.id and getattr(current_user, "role", "").upper() != "ADMIN":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="다른 사용자의 명의로 쿠폰을 교환할 수 없습니다.")
 
-    user = current_user
-    if user.current_points < coupon.cost_points:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="보유 포인트가 부족합니다."
-        )
-
     from datetime import timedelta
     expires_at = datetime.utcnow() + timedelta(days=coupon.expiry_days)
 
     try:
-        # 1. Deduct user points
-        user.current_points -= coupon.cost_points
-
-        # 2. Add point history (Lifetime points UNCHANGED)
-        point_history = models.PointHistory(
+        # 1. Deduct user points with row-locking via PointService
+        user = PointService.mutate_points(
+            db=db,
             user_id=target_user_id,
-            points=-coupon.cost_points,
+            amount=-coupon.cost_points,
             activity=f"쿠폰 교환: {coupon.title}",
             transaction_type="SPEND_COUPON",
             source_type="COUPON",
             source_id=coupon_id
         )
-        db.add(point_history)
 
-        # 3. Create user coupon
+        # 2. Create user coupon
         new_user_coupon = models.UserCoupon(
             user_id=target_user_id,
             coupon_id=coupon_id,
@@ -1758,11 +1743,9 @@ def exchange_coupon(
             expires_at=expires_at
         )
         db.add(new_user_coupon)
-
-        db.commit()
-        db.refresh(new_user_coupon)
+        db.flush()
         
-        # Insert activity logs
+        # 3. Insert activity logs
         create_activity_log(
             db=db,
             user_id=target_user_id,
@@ -1783,6 +1766,11 @@ def exchange_coupon(
             icon="paid",
             color="amber"
         )
+        db.commit()
+        db.refresh(new_user_coupon)
+    except HTTPException:
+        db.rollback()
+        raise
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"쿠폰 교환 중 오류 발생: {str(e)}")
@@ -7110,21 +7098,19 @@ def confirm_payment(
             )
 
     elif payment.target_type == "POINT_CHARGE":
-        # Add points to User profile
-        user = db.query(models.User).filter(models.User.id == payment.user_id).first()
-        if user:
-            # Let's say 1 KRW = 1 Point (or 10%)
-            earned_points = int(payment.amount * 0.1) # 10% cash back
-            user.current_points += earned_points
-            db.commit()
-            
-            # Point history log
-            history = models.PointHistory(
+        # Add points to User profile atomically with PointHistory and ActivityLog in ONE transaction
+        earned_points = int(payment.amount * 0.1) # 10% cash back
+        if earned_points > 0:
+            user = PointService.mutate_points(
+                db=db,
                 user_id=payment.user_id,
-                points=earned_points,
-                activity="포인트 충전 보너스 적재"
+                amount=earned_points,
+                activity="포인트 충전 보너스 적재",
+                transaction_type="POINT_CHARGE_BONUS",
+                source_type="PAYMENT",
+                source_id=payment.id,
+                update_lifetime=True
             )
-            db.add(history)
             
             create_activity_log(
                 db=db,
@@ -7133,7 +7119,7 @@ def confirm_payment(
                 title="포인트 충전",
                 description=f"충전 보너스 포인트 {earned_points}P 가 적재되었습니다.",
                 target_type="POINT",
-                target_id=history.id,
+                target_id=payment.id,
                 icon="add_circle",
                 color="blue"
             )
@@ -7189,44 +7175,49 @@ def refund_payment(
             detail="운영 환경에서는 가상 PG 환불을 직접 수행할 수 없으며, 제휴된 PG 관리 서버를 거쳐 진행해야 합니다."
         )
 
-    # Deduct refunded amount
-    refund = models.PaymentRefund(
-        payment_id=payment.id,
-        refund_amount=req.refund_amount,
-        reason=req.reason,
-        status="completed"
-    )
-    db.add(refund)
+    try:
+        # Deduct refunded amount
+        refund = models.PaymentRefund(
+            payment_id=payment.id,
+            refund_amount=req.refund_amount,
+            reason=req.reason,
+            status="completed"
+        )
+        db.add(refund)
 
-    payment.status = "refunded"
-    db.commit()
+        payment.status = "refunded"
 
-    # Log action
-    log = models.PaymentLog(
-        payment_id=payment.id,
-        action="REFUND",
-        payload_json=json.dumps({"amount": req.refund_amount, "reason": req.reason})
-    )
-    db.add(log)
-    
-    # Target refund adjustments (e.g. deduct point bonus if point_charge refunded)
-    if payment.target_type == "POINT_CHARGE":
-        user = db.query(models.User).filter(models.User.id == payment.user_id).first()
-        if user:
+        # Log action
+        log = models.PaymentLog(
+            payment_id=payment.id,
+            action="REFUND",
+            payload_json=json.dumps({"amount": req.refund_amount, "reason": req.reason})
+        )
+        db.add(log)
+
+        # Target refund adjustments (e.g. deduct point bonus if point_charge refunded)
+        if payment.target_type == "POINT_CHARGE":
             earned_points = int(payment.amount * 0.1)
-            user.current_points = max(0, user.current_points - earned_points)
-            
-            history = models.PointHistory(
-                user_id=payment.user_id,
-                points=-earned_points,
-                activity="포인트 충전 취소에 따른 포인트 회수"
-            )
-            db.add(history)
-            db.commit()
+            if earned_points > 0:
+                PointService.mutate_points(
+                    db=db,
+                    user_id=payment.user_id,
+                    amount=-earned_points,
+                    activity="포인트 충전 취소에 따른 포인트 회수",
+                    transaction_type="POINT_CHARGE_REFUND",
+                    source_type="PAYMENT",
+                    source_id=payment.id
+                )
 
-    db.commit()
-    db.refresh(refund)
-    return refund
+        db.commit()
+        db.refresh(refund)
+        return refund
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/payments", response_model=List[schemas.PaymentOut], tags=["Payment"])
 def get_user_payments(
