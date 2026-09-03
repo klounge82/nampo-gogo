@@ -3,6 +3,7 @@ import '../services/reservation_service.dart';
 import '../services/business_service.dart';
 import '../theme/business_theme.dart';
 import '../utils/reservation_status_helper.dart';
+import 'qr_scanner_screen.dart';
 
 class BusinessReservationsScreen extends StatefulWidget {
   final int initialTabIndex;
@@ -204,6 +205,133 @@ class _BusinessReservationsScreenState extends State<BusinessReservationsScreen>
     final displayHour = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
     final minStr = dt.minute.toString().padLeft(2, '0');
     return '$period $displayHour:$minStr';
+  }
+
+  Future<void> _handleQrScan() async {
+    final scannedCode = await Navigator.of(context).push<String>(
+      MaterialPageRoute(builder: (_) => const QrScannerScreen()),
+    );
+    if (scannedCode == null || scannedCode.isEmpty || !mounted) return;
+
+    // Look for matching reservation by ID or token in current store reservations
+    final cleanCode = scannedCode.trim();
+    Map<String, dynamic>? targetRes;
+    for (final r in _reservations) {
+      final map = r as Map<String, dynamic>;
+      if (map['id']?.toString() == cleanCode ||
+          map['qr_code']?.toString() == cleanCode ||
+          map['verification_code']?.toString() == cleanCode) {
+        targetRes = map;
+        break;
+      }
+    }
+
+    if (!mounted) return;
+
+    if (targetRes == null) {
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('예약 확인 실패', style: TextStyle(fontWeight: FontWeight.bold)),
+          content: Text('스캔된 코드 [$cleanCode]에 해당하는 매장 예약을 찾을 수 없습니다.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('확인'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    final resId = targetRes['id']?.toString() ?? '';
+    final status = targetRes['status']?.toString().toUpperCase() ?? '';
+    final dateStr = targetRes['reservation_date']?.toString();
+    final timeStr = targetRes['start_time']?.toString();
+    final formattedDateTime = ReservationStatusHelper.formatDateTimeSafe(dateStr, timeStr);
+    final partySize = (targetRes['party_size'] as num?)?.toInt() ?? 1;
+    final userId = targetRes['user_id']?.toString() ?? '손님';
+
+    if (status == 'COMPLETED') {
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('이미 완료된 예약', style: TextStyle(fontWeight: FontWeight.bold)),
+          content: Text('$formattedDateTime ($partySize명)\n이미 입장이 완료 처리된 예약입니다.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('확인'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    if (status == 'REJECTED' || status == 'CANCELLED' || status == 'NO_SHOW') {
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('유효하지 않은 예약', style: TextStyle(fontWeight: FontWeight.bold)),
+          content: Text('$formattedDateTime ($partySize명)\n취소 또는 거절/노쇼 처리된 예약입니다.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('확인'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    // Show Quick Accept / Confirmation Modal
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('예약 QR 확인', style: TextStyle(fontWeight: FontWeight.bold)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('예약 일시: $formattedDateTime', style: const TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 6),
+            Text('예약자 ID: ${_maskUserId(userId)}'),
+            Text('예약 인원: $partySize명'),
+            const SizedBox(height: 12),
+            const Text(
+              '고객의 방문 및 입장을 확인하고 승인/완료 처리하시겠습니까?',
+              style: TextStyle(fontSize: 13, color: Colors.black87),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('닫기', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: BusinessTheme.primaryTeal,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('입장 확인 (완료)'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true && mounted) {
+      if (status == 'PENDING') {
+        await _actionReservation(resId, 'approve');
+      }
+      if (mounted) {
+        await _actionReservation(resId, 'complete', resMap: targetRes);
+      }
+    }
   }
 
   void _showTimeRestrictionDialog({
@@ -468,6 +596,17 @@ class _BusinessReservationsScreenState extends State<BusinessReservationsScreen>
         title: const Text('예약 관리'),
         backgroundColor: BusinessTheme.primaryTeal,
         foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.qr_code_scanner, color: Colors.white),
+            tooltip: '예약 QR 스캔',
+            onPressed: _handleQrScan,
+          ),
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Colors.white),
+            onPressed: _loadData,
+          ),
+        ],
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Colors.white,
