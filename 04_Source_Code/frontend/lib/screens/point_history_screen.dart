@@ -4,7 +4,9 @@ import '../constants/colors.dart';
 import '../models/point_history.dart';
 import '../repositories/point_repository.dart';
 import '../providers/auth_provider.dart';
+import '../l10n/app_localizations.dart';
 import 'payment_screen.dart';
+import 'point_gift_screen.dart';
 
 class PointHistoryScreen extends StatefulWidget {
   const PointHistoryScreen({super.key});
@@ -189,43 +191,74 @@ class _PointHistoryScreenState extends State<PointHistoryScreen> {
             ],
           ),
           const SizedBox(height: 16.0),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton.icon(
-              onPressed: () {
-                final user = context.read<AuthProvider>().currentUser;
-                if (user == null) return;
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => PaymentScreen(
-                      amount: 10000,
-                      targetType: 'POINT_CHARGE',
-                      targetId: user.id,
-                      targetName: '남포 GoGo 10,000 포인트 충전',
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton.icon(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const PointGiftScreen(),
                     ),
+                  ).then((_) => _loadPointsAndHistory());
+                },
+                icon: const Icon(Icons.card_giftcard, color: Colors.white, size: 18),
+                label: Text(
+                  AppLocalizations.of(context)?.pointGiftTitle ?? '포인트 선물',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
                   ),
-                );
-              },
-              icon: const Icon(Icons.add_circle, color: Colors.white, size: 18),
-              label: const Text(
-                '포인트 충전하기',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
+                ),
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.white.withAlpha(40),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.white.withAlpha(40),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
+              const SizedBox(width: 8.0),
+              TextButton.icon(
+                onPressed: () {
+                  final user = context.read<AuthProvider>().currentUser;
+                  if (user == null) return;
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => PaymentScreen(
+                        amount: 10000,
+                        targetType: 'POINT_CHARGE',
+                        targetId: user.id,
+                        targetName: '남포 GoGo 10,000 포인트 충전',
+                      ),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.add_circle, color: Colors.white, size: 18),
+                label: const Text(
+                  '포인트 충전하기',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.white.withAlpha(40),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
         ],
       ),

@@ -372,5 +372,42 @@
   "verificationLocationPermissionDeniedTitle": "位置情報の権限が必要です",
   "verificationLocationPermissionDeniedBody": "このミッションには現在地の確認が必要です。アプリの位置情報権限を許可してから再試行してください。",
   "verificationLocationUnavailableTitle": "現在地を確認できません",
-  "verificationLocationUnavailableBody": "GPS位置情報を取得できませんでした。しばらくしてから再試行するか、位置情報サービスの状態を確認してください。"
+  "verificationLocationUnavailableBody": "GPS位置情報を取得できませんでした。しばらくしてから再試行するか、位置情報サービスの状態を確認してください。",
+  "pointGiftTitle": "ポイントギフト",
+  "pointGiftSendTab": "ギフトを贈る",
+  "pointGiftReceiveTab": "ギフトを受け取る",
+  "pointGiftSentListTab": "贈ったギフト",
+  "pointGiftReceivedListTab": "受け取ったギフト",
+  "pointGiftAmountLabel": "贈るポイント",
+  "pointGiftAmountHint": "最小100P、10P単位、最大5,000P",
+  "pointGiftSendButton": "ギフトコードを作成",
+  "pointGiftTokenLabel": "ギフトコード (トークン)",
+  "pointGiftTokenHint": "受け取ったギフトコードを入力してください",
+  "pointGiftClaimButton": "ギフトを受け取る",
+  "pointGiftCopyToken": "コードをコピー",
+  "pointGiftTokenCopied": "ギフトコードをクリップボードにコピーしました。",
+  "pointGiftCancelButton": "ギフト取消",
+  "pointGiftCancelConfirm": "ギフト予約を取り消してポイントを返還しますか？",
+  "pointGiftCancelSuccess": "ギフトが正常に取り消されました。",
+  "pointGiftRuleTitle": "ポイントギフトのご案内",
+  "pointGiftRule1": "• 贈ったポイントの70%が受取人に付与され、30%は手数料として消滅します。",
+  "pointGiftRule2": "• 未受取のギフトは発行から7日後に自動的に失効・返還されます。",
+  "pointGiftRule3": "• 受け取ったギフトポイントの有効期限は90日間で、再ギフトはできません。",
+  "pointGiftRule4": "• イベント/登録ボーナス等の譲渡不可ポイントはギフトできません。",
+  "pointGiftCreatedSuccess": "ギフトが作成されました！下記のコードをコピーして友だちに共有してください。",
+  "pointGiftClaimSuccess": "{points}Pのギフトを受け取りました！",
+  "@pointGiftClaimSuccess": {
+    "placeholders": {
+      "points": {}
+    }
+  },
+  "pointGiftStatusPending": "受取待ち",
+  "pointGiftStatusAccepted": "受取完了",
+  "pointGiftStatusCancelled": "取消済み",
+  "pointGiftStatusExpired": "失効済み",
+  "pointGiftEmptySent": "贈ったギフト履歴はありません。",
+  "pointGiftEmptyReceived": "受け取ったギフト履歴はありません。",
+  "pointGiftInvalidAmount": "ギフトポイントは100P以上5,000P以下、10P単位である必要があります。",
+  "pointGiftInsufficient": "ギフト可能なポイントが不足しています。",
+  "pointGiftEmptyToken": "ギフトコードを入力してください。"
 }

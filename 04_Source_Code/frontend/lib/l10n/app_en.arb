@@ -372,5 +372,42 @@
   "verificationLocationPermissionDeniedTitle": "Location permission required",
   "verificationLocationPermissionDeniedBody": "This mission requires your current location. Please allow the app to access your location and try again.",
   "verificationLocationUnavailableTitle": "Unable to determine current location",
-  "verificationLocationUnavailableBody": "Failed to obtain GPS location information. Please try again shortly or check the status of location services."
+  "verificationLocationUnavailableBody": "Failed to obtain GPS location information. Please try again shortly or check the status of location services.",
+  "pointGiftTitle": "Point Gift",
+  "pointGiftSendTab": "Send Gift",
+  "pointGiftReceiveTab": "Receive Gift",
+  "pointGiftSentListTab": "Sent Gifts",
+  "pointGiftReceivedListTab": "Received Gifts",
+  "pointGiftAmountLabel": "Points to Gift",
+  "pointGiftAmountHint": "Min 100P, 10P unit, Max 5,000P",
+  "pointGiftSendButton": "Create Gift",
+  "pointGiftTokenLabel": "Gift Code (Token)",
+  "pointGiftTokenHint": "Enter the gift code you received",
+  "pointGiftClaimButton": "Claim Gift",
+  "pointGiftCopyToken": "Copy Code",
+  "pointGiftTokenCopied": "Gift code copied to clipboard.",
+  "pointGiftCancelButton": "Cancel Gift",
+  "pointGiftCancelConfirm": "Are you sure you want to cancel this gift reservation and refund the points?",
+  "pointGiftCancelSuccess": "Gift was successfully cancelled.",
+  "pointGiftRuleTitle": "Point Gift Notice",
+  "pointGiftRule1": "• 70% of sent points are credited to the receiver; 30% is extinguished as a fee.",
+  "pointGiftRule2": "• Unclaimed gifts automatically expire and are refunded after 7 days.",
+  "pointGiftRule3": "• Received gift points expire after 90 days and cannot be re-gifted.",
+  "pointGiftRule4": "• Non-transferable points (signup/event bonus) cannot be gifted.",
+  "pointGiftCreatedSuccess": "Gift created! Copy the code below and send it to your friend.",
+  "pointGiftClaimSuccess": "Successfully claimed {points}P gift!",
+  "@pointGiftClaimSuccess": {
+    "placeholders": {
+      "points": {}
+    }
+  },
+  "pointGiftStatusPending": "Pending",
+  "pointGiftStatusAccepted": "Claimed",
+  "pointGiftStatusCancelled": "Cancelled",
+  "pointGiftStatusExpired": "Expired",
+  "pointGiftEmptySent": "No sent gifts found.",
+  "pointGiftEmptyReceived": "No received gifts found.",
+  "pointGiftInvalidAmount": "Gift amount must be between 100P and 5,000P in 10P increments.",
+  "pointGiftInsufficient": "Insufficient giftable points.",
+  "pointGiftEmptyToken": "Please enter a gift code."
 }

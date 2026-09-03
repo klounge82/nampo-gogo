@@ -1114,4 +1114,103 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get verificationLocationUnavailableBody =>
       'GPS 위치 정보를 가져오지 못했습니다. 잠시 후 다시 시도하거나 위치 서비스 상태를 확인해 주세요.';
+
+  @override
+  String get pointGiftTitle => '포인트 선물';
+
+  @override
+  String get pointGiftSendTab => '선물하기';
+
+  @override
+  String get pointGiftReceiveTab => '선물 받기';
+
+  @override
+  String get pointGiftSentListTab => '보낸 선물';
+
+  @override
+  String get pointGiftReceivedListTab => '받은 선물';
+
+  @override
+  String get pointGiftAmountLabel => '선물할 포인트';
+
+  @override
+  String get pointGiftAmountHint => '최소 100P, 10P 단위, 최대 5,000P';
+
+  @override
+  String get pointGiftSendButton => '선물 생성하기';
+
+  @override
+  String get pointGiftTokenLabel => '선물 코드 (토큰)';
+
+  @override
+  String get pointGiftTokenHint => '전달받은 선물 코드를 입력하세요';
+
+  @override
+  String get pointGiftClaimButton => '선물 수령하기';
+
+  @override
+  String get pointGiftCopyToken => '코드 복사';
+
+  @override
+  String get pointGiftTokenCopied => '선물 코드가 클립보드에 복사되었습니다.';
+
+  @override
+  String get pointGiftCancelButton => '선물 취소';
+
+  @override
+  String get pointGiftCancelConfirm => '선물 예약을 취소하고 포인트를 반환받으시겠습니까?';
+
+  @override
+  String get pointGiftCancelSuccess => '선물이 성공적으로 취소되었습니다.';
+
+  @override
+  String get pointGiftRuleTitle => '포인트 선물 안내';
+
+  @override
+  String get pointGiftRule1 => '• 보낸 포인트의 70%가 수신자에게 지급되며, 30%는 수수료로 소멸됩니다.';
+
+  @override
+  String get pointGiftRule2 => '• 미수령 선물은 발송 후 7일이 지나면 자동 만료 및 반환됩니다.';
+
+  @override
+  String get pointGiftRule3 => '• 수령한 선물 포인트의 유효기간은 90일이며, 타인에게 재선물할 수 없습니다.';
+
+  @override
+  String get pointGiftRule4 => '• 이벤트/가입 보너스 등 일부 비양도성 포인트는 선물이 불가합니다.';
+
+  @override
+  String get pointGiftCreatedSuccess => '선물이 생성되었습니다! 아래 코드를 복사하여 친구에게 전달하세요.';
+
+  @override
+  String pointGiftClaimSuccess(Object points) {
+    return '${points}P 선물을 성공적으로 수령했습니다!';
+  }
+
+  @override
+  String get pointGiftStatusPending => '수령 대기중';
+
+  @override
+  String get pointGiftStatusAccepted => '수령 완료';
+
+  @override
+  String get pointGiftStatusCancelled => '취소됨';
+
+  @override
+  String get pointGiftStatusExpired => '만료됨';
+
+  @override
+  String get pointGiftEmptySent => '보낸 선물 내역이 없습니다.';
+
+  @override
+  String get pointGiftEmptyReceived => '받은 선물 내역이 없습니다.';
+
+  @override
+  String get pointGiftInvalidAmount =>
+      '선물 포인트는 100P 이상 5,000P 이하이며, 10P 단위여야 합니다.';
+
+  @override
+  String get pointGiftInsufficient => '선물 가능한 포인트가 부족합니다.';
+
+  @override
+  String get pointGiftEmptyToken => '선물 코드를 입력해 주세요.';
 }

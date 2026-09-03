@@ -699,3 +699,65 @@ class PointService:
         exp_op.status = "COMPLETED"
         exp_op.completed_at = now
         return True
+
+    @staticmethod
+    def list_user_gifts(
+        db: Session,
+        user_id: str,
+        limit: int = 20,
+        offset: int = 0
+    ) -> dict:
+        """
+        Lists customer-safe gift history for the authenticated user.
+        Includes sent gifts (sender_id == user_id) and received gifts (recipient_id == user_id).
+        Excludes raw tokens, token hashes, and internal operation IDs.
+        Provides bounded pagination (default limit 20, max 100).
+        """
+        from datetime import datetime
+        from sqlalchemy import or_
+
+        bounded_limit = max(1, min(limit, 100))
+        bounded_offset = max(0, offset)
+        now = datetime.utcnow()
+
+        query = (
+            db.query(models.PointGift)
+            .filter(
+                or_(
+                    models.PointGift.sender_id == user_id,
+                    models.PointGift.recipient_id == user_id
+                )
+            )
+            .order_by(models.PointGift.created_at.desc())
+        )
+
+        total_count = query.count()
+        gifts = query.offset(bounded_offset).limit(bounded_limit).all()
+
+        results = []
+        for g in gifts:
+            direction = "SENT" if g.sender_id == user_id else "RECEIVED"
+            # Read-only safe representation of status: if pending but expired, display EXPIRED
+            effective_status = g.status
+            if effective_status == "PENDING" and g.expires_at < now:
+                effective_status = "EXPIRED"
+
+            results.append({
+                "gift_id": g.id,
+                "direction": direction,
+                "gross_points": g.gross_points,
+                "net_points": g.net_points,
+                "fee_points": g.fee_points,
+                "status": effective_status,
+                "created_at": g.created_at.isoformat() if g.created_at else None,
+                "expires_at": g.expires_at.isoformat() if g.expires_at else None,
+                "accepted_at": g.accepted_at.isoformat() if g.accepted_at else None,
+                "cancelled_at": g.cancelled_at.isoformat() if g.cancelled_at else None,
+            })
+
+        return {
+            "total_count": total_count,
+            "limit": bounded_limit,
+            "offset": bounded_offset,
+            "gifts": results
+        }

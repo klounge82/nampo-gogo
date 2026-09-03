@@ -372,5 +372,42 @@
   "verificationLocationPermissionDeniedTitle": "위치 권한이 필요합니다",
   "verificationLocationPermissionDeniedBody": "이 미션은 현재 위치 확인이 필요합니다. 앱의 위치 권한을 허용한 후 다시 시도해 주세요.",
   "verificationLocationUnavailableTitle": "현재 위치를 확인할 수 없습니다",
-  "verificationLocationUnavailableBody": "GPS 위치 정보를 가져오지 못했습니다. 잠시 후 다시 시도하거나 위치 서비스 상태를 확인해 주세요."
+  "verificationLocationUnavailableBody": "GPS 위치 정보를 가져오지 못했습니다. 잠시 후 다시 시도하거나 위치 서비스 상태를 확인해 주세요.",
+  "pointGiftTitle": "포인트 선물",
+  "pointGiftSendTab": "선물하기",
+  "pointGiftReceiveTab": "선물 받기",
+  "pointGiftSentListTab": "보낸 선물",
+  "pointGiftReceivedListTab": "받은 선물",
+  "pointGiftAmountLabel": "선물할 포인트",
+  "pointGiftAmountHint": "최소 100P, 10P 단위, 최대 5,000P",
+  "pointGiftSendButton": "선물 생성하기",
+  "pointGiftTokenLabel": "선물 코드 (토큰)",
+  "pointGiftTokenHint": "전달받은 선물 코드를 입력하세요",
+  "pointGiftClaimButton": "선물 수령하기",
+  "pointGiftCopyToken": "코드 복사",
+  "pointGiftTokenCopied": "선물 코드가 클립보드에 복사되었습니다.",
+  "pointGiftCancelButton": "선물 취소",
+  "pointGiftCancelConfirm": "선물 예약을 취소하고 포인트를 반환받으시겠습니까?",
+  "pointGiftCancelSuccess": "선물이 성공적으로 취소되었습니다.",
+  "pointGiftRuleTitle": "포인트 선물 안내",
+  "pointGiftRule1": "• 보낸 포인트의 70%가 수신자에게 지급되며, 30%는 수수료로 소멸됩니다.",
+  "pointGiftRule2": "• 미수령 선물은 발송 후 7일이 지나면 자동 만료 및 반환됩니다.",
+  "pointGiftRule3": "• 수령한 선물 포인트의 유효기간은 90일이며, 타인에게 재선물할 수 없습니다.",
+  "pointGiftRule4": "• 이벤트/가입 보너스 등 일부 비양도성 포인트는 선물이 불가합니다.",
+  "pointGiftCreatedSuccess": "선물이 생성되었습니다! 아래 코드를 복사하여 친구에게 전달하세요.",
+  "pointGiftClaimSuccess": "{points}P 선물을 성공적으로 수령했습니다!",
+  "@pointGiftClaimSuccess": {
+    "placeholders": {
+      "points": {}
+    }
+  },
+  "pointGiftStatusPending": "수령 대기중",
+  "pointGiftStatusAccepted": "수령 완료",
+  "pointGiftStatusCancelled": "취소됨",
+  "pointGiftStatusExpired": "만료됨",
+  "pointGiftEmptySent": "보낸 선물 내역이 없습니다.",
+  "pointGiftEmptyReceived": "받은 선물 내역이 없습니다.",
+  "pointGiftInvalidAmount": "선물 포인트는 100P 이상 5,000P 이하이며, 10P 단위여야 합니다.",
+  "pointGiftInsufficient": "선물 가능한 포인트가 부족합니다.",
+  "pointGiftEmptyToken": "선물 코드를 입력해 주세요."
 }

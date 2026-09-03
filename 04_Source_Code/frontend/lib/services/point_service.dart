@@ -103,4 +103,109 @@ class PointService {
       rethrow;
     }
   }
+
+  // POST /users/points/gift/create
+  Future<Map<String, dynamic>> createGift(
+    int grossPoints, {
+    String? idempotencyKey,
+  }) async {
+    try {
+      final token = await const FlutterSecureStorage().read(key: 'access_token');
+      final response = await _dio.post(
+        '/users/points/gift/create',
+        data: {
+          'gross_points': grossPoints,
+          ...?idempotencyKey == null ? null : {'idempotency_key': idempotencyKey},
+        },
+        options: Options(
+          headers: {
+            if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+      if (response.statusCode == 200 && response.data != null) {
+        return response.data as Map<String, dynamic>;
+      }
+      throw Exception('선물 생성 실패');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // POST /users/points/gift/claim
+  Future<Map<String, dynamic>> claimGift(
+    String giftToken, {
+    String? idempotencyKey,
+  }) async {
+    try {
+      final token = await const FlutterSecureStorage().read(key: 'access_token');
+      final response = await _dio.post(
+        '/users/points/gift/claim',
+        data: {
+          'gift_token': giftToken,
+          ...?idempotencyKey == null ? null : {'idempotency_key': idempotencyKey},
+        },
+        options: Options(
+          headers: {
+            if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+      if (response.statusCode == 200 && response.data != null) {
+        return response.data as Map<String, dynamic>;
+      }
+      throw Exception('선물 수령 실패');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // POST /users/points/gift/{gift_id}/cancel
+  Future<Map<String, dynamic>> cancelGift(String giftId) async {
+    try {
+      final token = await const FlutterSecureStorage().read(key: 'access_token');
+      final response = await _dio.post(
+        '/users/points/gift/$giftId/cancel',
+        options: Options(
+          headers: {
+            if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+      if (response.statusCode == 200 && response.data != null) {
+        return response.data as Map<String, dynamic>;
+      }
+      throw Exception('선물 취소 실패');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // GET /users/points/gifts
+  Future<Map<String, dynamic>> listGifts({
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    try {
+      final token = await const FlutterSecureStorage().read(key: 'access_token');
+      final response = await _dio.get(
+        '/users/points/gifts',
+        queryParameters: {
+          'limit': limit,
+          'offset': offset,
+        },
+        options: Options(
+          headers: {
+            if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+      if (response.statusCode == 200 && response.data != null) {
+        return response.data as Map<String, dynamic>;
+      }
+      throw Exception('선물 내역 조회 실패');
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

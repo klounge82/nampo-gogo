@@ -1776,6 +1776,25 @@ def cancel_point_gift(
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/users/points/gifts", tags=["Points"])
+def list_user_point_gifts(
+    limit: int = 20,
+    offset: int = 0,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    try:
+        return PointService.list_user_gifts(
+            db=db,
+            user_id=current_user.id,
+            limit=limit,
+            offset=offset
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 # --- COUPON / REWARD MVP APIs ---
 
 class ExchangeRequest(BaseModel):

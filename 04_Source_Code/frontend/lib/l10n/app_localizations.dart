@@ -2226,6 +2226,198 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'GPS 위치 정보를 가져오지 못했습니다. 잠시 후 다시 시도하거나 위치 서비스 상태를 확인해 주세요.'**
   String get verificationLocationUnavailableBody;
+
+  /// No description provided for @pointGiftTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'포인트 선물'**
+  String get pointGiftTitle;
+
+  /// No description provided for @pointGiftSendTab.
+  ///
+  /// In ko, this message translates to:
+  /// **'선물하기'**
+  String get pointGiftSendTab;
+
+  /// No description provided for @pointGiftReceiveTab.
+  ///
+  /// In ko, this message translates to:
+  /// **'선물 받기'**
+  String get pointGiftReceiveTab;
+
+  /// No description provided for @pointGiftSentListTab.
+  ///
+  /// In ko, this message translates to:
+  /// **'보낸 선물'**
+  String get pointGiftSentListTab;
+
+  /// No description provided for @pointGiftReceivedListTab.
+  ///
+  /// In ko, this message translates to:
+  /// **'받은 선물'**
+  String get pointGiftReceivedListTab;
+
+  /// No description provided for @pointGiftAmountLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'선물할 포인트'**
+  String get pointGiftAmountLabel;
+
+  /// No description provided for @pointGiftAmountHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'최소 100P, 10P 단위, 최대 5,000P'**
+  String get pointGiftAmountHint;
+
+  /// No description provided for @pointGiftSendButton.
+  ///
+  /// In ko, this message translates to:
+  /// **'선물 생성하기'**
+  String get pointGiftSendButton;
+
+  /// No description provided for @pointGiftTokenLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'선물 코드 (토큰)'**
+  String get pointGiftTokenLabel;
+
+  /// No description provided for @pointGiftTokenHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'전달받은 선물 코드를 입력하세요'**
+  String get pointGiftTokenHint;
+
+  /// No description provided for @pointGiftClaimButton.
+  ///
+  /// In ko, this message translates to:
+  /// **'선물 수령하기'**
+  String get pointGiftClaimButton;
+
+  /// No description provided for @pointGiftCopyToken.
+  ///
+  /// In ko, this message translates to:
+  /// **'코드 복사'**
+  String get pointGiftCopyToken;
+
+  /// No description provided for @pointGiftTokenCopied.
+  ///
+  /// In ko, this message translates to:
+  /// **'선물 코드가 클립보드에 복사되었습니다.'**
+  String get pointGiftTokenCopied;
+
+  /// No description provided for @pointGiftCancelButton.
+  ///
+  /// In ko, this message translates to:
+  /// **'선물 취소'**
+  String get pointGiftCancelButton;
+
+  /// No description provided for @pointGiftCancelConfirm.
+  ///
+  /// In ko, this message translates to:
+  /// **'선물 예약을 취소하고 포인트를 반환받으시겠습니까?'**
+  String get pointGiftCancelConfirm;
+
+  /// No description provided for @pointGiftCancelSuccess.
+  ///
+  /// In ko, this message translates to:
+  /// **'선물이 성공적으로 취소되었습니다.'**
+  String get pointGiftCancelSuccess;
+
+  /// No description provided for @pointGiftRuleTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'포인트 선물 안내'**
+  String get pointGiftRuleTitle;
+
+  /// No description provided for @pointGiftRule1.
+  ///
+  /// In ko, this message translates to:
+  /// **'• 보낸 포인트의 70%가 수신자에게 지급되며, 30%는 수수료로 소멸됩니다.'**
+  String get pointGiftRule1;
+
+  /// No description provided for @pointGiftRule2.
+  ///
+  /// In ko, this message translates to:
+  /// **'• 미수령 선물은 발송 후 7일이 지나면 자동 만료 및 반환됩니다.'**
+  String get pointGiftRule2;
+
+  /// No description provided for @pointGiftRule3.
+  ///
+  /// In ko, this message translates to:
+  /// **'• 수령한 선물 포인트의 유효기간은 90일이며, 타인에게 재선물할 수 없습니다.'**
+  String get pointGiftRule3;
+
+  /// No description provided for @pointGiftRule4.
+  ///
+  /// In ko, this message translates to:
+  /// **'• 이벤트/가입 보너스 등 일부 비양도성 포인트는 선물이 불가합니다.'**
+  String get pointGiftRule4;
+
+  /// No description provided for @pointGiftCreatedSuccess.
+  ///
+  /// In ko, this message translates to:
+  /// **'선물이 생성되었습니다! 아래 코드를 복사하여 친구에게 전달하세요.'**
+  String get pointGiftCreatedSuccess;
+
+  /// No description provided for @pointGiftClaimSuccess.
+  ///
+  /// In ko, this message translates to:
+  /// **'{points}P 선물을 성공적으로 수령했습니다!'**
+  String pointGiftClaimSuccess(Object points);
+
+  /// No description provided for @pointGiftStatusPending.
+  ///
+  /// In ko, this message translates to:
+  /// **'수령 대기중'**
+  String get pointGiftStatusPending;
+
+  /// No description provided for @pointGiftStatusAccepted.
+  ///
+  /// In ko, this message translates to:
+  /// **'수령 완료'**
+  String get pointGiftStatusAccepted;
+
+  /// No description provided for @pointGiftStatusCancelled.
+  ///
+  /// In ko, this message translates to:
+  /// **'취소됨'**
+  String get pointGiftStatusCancelled;
+
+  /// No description provided for @pointGiftStatusExpired.
+  ///
+  /// In ko, this message translates to:
+  /// **'만료됨'**
+  String get pointGiftStatusExpired;
+
+  /// No description provided for @pointGiftEmptySent.
+  ///
+  /// In ko, this message translates to:
+  /// **'보낸 선물 내역이 없습니다.'**
+  String get pointGiftEmptySent;
+
+  /// No description provided for @pointGiftEmptyReceived.
+  ///
+  /// In ko, this message translates to:
+  /// **'받은 선물 내역이 없습니다.'**
+  String get pointGiftEmptyReceived;
+
+  /// No description provided for @pointGiftInvalidAmount.
+  ///
+  /// In ko, this message translates to:
+  /// **'선물 포인트는 100P 이상 5,000P 이하이며, 10P 단위여야 합니다.'**
+  String get pointGiftInvalidAmount;
+
+  /// No description provided for @pointGiftInsufficient.
+  ///
+  /// In ko, this message translates to:
+  /// **'선물 가능한 포인트가 부족합니다.'**
+  String get pointGiftInsufficient;
+
+  /// No description provided for @pointGiftEmptyToken.
+  ///
+  /// In ko, this message translates to:
+  /// **'선물 코드를 입력해 주세요.'**
+  String get pointGiftEmptyToken;
 }
 
 class _AppLocalizationsDelegate

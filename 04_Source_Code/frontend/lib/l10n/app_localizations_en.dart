@@ -1145,4 +1145,109 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get verificationLocationUnavailableBody =>
       'Failed to obtain GPS location information. Please try again shortly or check the status of location services.';
+
+  @override
+  String get pointGiftTitle => 'Point Gift';
+
+  @override
+  String get pointGiftSendTab => 'Send Gift';
+
+  @override
+  String get pointGiftReceiveTab => 'Receive Gift';
+
+  @override
+  String get pointGiftSentListTab => 'Sent Gifts';
+
+  @override
+  String get pointGiftReceivedListTab => 'Received Gifts';
+
+  @override
+  String get pointGiftAmountLabel => 'Points to Gift';
+
+  @override
+  String get pointGiftAmountHint => 'Min 100P, 10P unit, Max 5,000P';
+
+  @override
+  String get pointGiftSendButton => 'Create Gift';
+
+  @override
+  String get pointGiftTokenLabel => 'Gift Code (Token)';
+
+  @override
+  String get pointGiftTokenHint => 'Enter the gift code you received';
+
+  @override
+  String get pointGiftClaimButton => 'Claim Gift';
+
+  @override
+  String get pointGiftCopyToken => 'Copy Code';
+
+  @override
+  String get pointGiftTokenCopied => 'Gift code copied to clipboard.';
+
+  @override
+  String get pointGiftCancelButton => 'Cancel Gift';
+
+  @override
+  String get pointGiftCancelConfirm =>
+      'Are you sure you want to cancel this gift reservation and refund the points?';
+
+  @override
+  String get pointGiftCancelSuccess => 'Gift was successfully cancelled.';
+
+  @override
+  String get pointGiftRuleTitle => 'Point Gift Notice';
+
+  @override
+  String get pointGiftRule1 =>
+      '• 70% of sent points are credited to the receiver; 30% is extinguished as a fee.';
+
+  @override
+  String get pointGiftRule2 =>
+      '• Unclaimed gifts automatically expire and are refunded after 7 days.';
+
+  @override
+  String get pointGiftRule3 =>
+      '• Received gift points expire after 90 days and cannot be re-gifted.';
+
+  @override
+  String get pointGiftRule4 =>
+      '• Non-transferable points (signup/event bonus) cannot be gifted.';
+
+  @override
+  String get pointGiftCreatedSuccess =>
+      'Gift created! Copy the code below and send it to your friend.';
+
+  @override
+  String pointGiftClaimSuccess(Object points) {
+    return 'Successfully claimed ${points}P gift!';
+  }
+
+  @override
+  String get pointGiftStatusPending => 'Pending';
+
+  @override
+  String get pointGiftStatusAccepted => 'Claimed';
+
+  @override
+  String get pointGiftStatusCancelled => 'Cancelled';
+
+  @override
+  String get pointGiftStatusExpired => 'Expired';
+
+  @override
+  String get pointGiftEmptySent => 'No sent gifts found.';
+
+  @override
+  String get pointGiftEmptyReceived => 'No received gifts found.';
+
+  @override
+  String get pointGiftInvalidAmount =>
+      'Gift amount must be between 100P and 5,000P in 10P increments.';
+
+  @override
+  String get pointGiftInsufficient => 'Insufficient giftable points.';
+
+  @override
+  String get pointGiftEmptyToken => 'Please enter a gift code.';
 }

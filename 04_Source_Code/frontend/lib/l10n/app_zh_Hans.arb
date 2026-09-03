@@ -372,5 +372,42 @@
   "verificationLocationPermissionDeniedTitle": "需要定位权限",
   "verificationLocationPermissionDeniedBody": "此任务需要确认当前位置。请允许应用的定位权限后重试。",
   "verificationLocationUnavailableTitle": "无法确定当前位置",
-  "verificationLocationUnavailableBody": "无法获取GPS位置信息。请稍后重试或检查定位服务状态。"
+  "verificationLocationUnavailableBody": "无法获取GPS位置信息。请稍后重试或检查定位服务状态。",
+  "pointGiftTitle": "积分礼物",
+  "pointGiftSendTab": "赠送积分",
+  "pointGiftReceiveTab": "接收礼物",
+  "pointGiftSentListTab": "已赠礼物",
+  "pointGiftReceivedListTab": "已收礼物",
+  "pointGiftAmountLabel": "赠送积分数",
+  "pointGiftAmountHint": "最少100P，10P单位，最多5,000P",
+  "pointGiftSendButton": "创建礼物代码",
+  "pointGiftTokenLabel": "礼物代码 (Token)",
+  "pointGiftTokenHint": "请输入接收到的礼物代码",
+  "pointGiftClaimButton": "领取礼物",
+  "pointGiftCopyToken": "复制代码",
+  "pointGiftTokenCopied": "礼物代码已复制到剪贴板。",
+  "pointGiftCancelButton": "取消礼物",
+  "pointGiftCancelConfirm": "确定要取消此礼物预约并退还积分吗？",
+  "pointGiftCancelSuccess": "礼物已成功取消。",
+  "pointGiftRuleTitle": "积分礼物说明",
+  "pointGiftRule1": "• 赠送积分的70%将发放给接收方，30%作为手续费销毁。",
+  "pointGiftRule2": "• 未领取的礼物将在发放7天后自动失效并退还。",
+  "pointGiftRule3": "• 接收到的礼物积分有效期为90天，不可再次转赠。",
+  "pointGiftRule4": "• 活动/注册奖励等不可转让积分无法用于赠送。",
+  "pointGiftCreatedSuccess": "礼物已创建！请复制下方代码分享给朋友。",
+  "pointGiftClaimSuccess": "成功领取 {points}P 礼物！",
+  "@pointGiftClaimSuccess": {
+    "placeholders": {
+      "points": {}
+    }
+  },
+  "pointGiftStatusPending": "等待领取",
+  "pointGiftStatusAccepted": "已领取",
+  "pointGiftStatusCancelled": "已取消",
+  "pointGiftStatusExpired": "已失效",
+  "pointGiftEmptySent": "暂无已赠礼物记录。",
+  "pointGiftEmptyReceived": "暂无已收礼物记录。",
+  "pointGiftInvalidAmount": "赠送积分需在100P至5,000P之间，且为10P的倍数。",
+  "pointGiftInsufficient": "可赠送积分不足。",
+  "pointGiftEmptyToken": "请输入礼物代码。"
 }

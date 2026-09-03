@@ -51,4 +51,24 @@ class PointRepository {
     );
     return res['current_points'] as int? ?? 0;
   }
+
+  // Create point gift
+  Future<Map<String, dynamic>> createGift(int grossPoints, {String? idempotencyKey}) async {
+    return _pointService.createGift(grossPoints, idempotencyKey: idempotencyKey);
+  }
+
+  // Claim point gift
+  Future<Map<String, dynamic>> claimGift(String giftToken, {String? idempotencyKey}) async {
+    return _pointService.claimGift(giftToken, idempotencyKey: idempotencyKey);
+  }
+
+  // Cancel point gift
+  Future<Map<String, dynamic>> cancelGift(String giftId) async {
+    return _pointService.cancelGift(giftId);
+  }
+
+  // List point gifts
+  Future<Map<String, dynamic>> listGifts({int limit = 20, int offset = 0}) async {
+    return _pointService.listGifts(limit: limit, offset: offset);
+  }
 }

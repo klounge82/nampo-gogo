@@ -21,7 +21,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get adminDashboardTitle => '系统管理后台';
 
   @override
-  String get switchToCustomerMode => '고객모드로 전환';
+  String get switchToCustomerMode => '切换到用户模式';
 
   @override
   String get aiCategoryCafe => '特色咖啡馆';
@@ -1101,6 +1101,104 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get verificationLocationUnavailableBody =>
       '无法获取GPS位置信息。请稍后重试或检查定位服务状态。';
+
+  @override
+  String get pointGiftTitle => '积分礼物';
+
+  @override
+  String get pointGiftSendTab => '赠送积分';
+
+  @override
+  String get pointGiftReceiveTab => '接收礼物';
+
+  @override
+  String get pointGiftSentListTab => '已赠礼物';
+
+  @override
+  String get pointGiftReceivedListTab => '已收礼物';
+
+  @override
+  String get pointGiftAmountLabel => '赠送积分数';
+
+  @override
+  String get pointGiftAmountHint => '最少100P，10P单位，最多5,000P';
+
+  @override
+  String get pointGiftSendButton => '创建礼物代码';
+
+  @override
+  String get pointGiftTokenLabel => '礼物代码 (Token)';
+
+  @override
+  String get pointGiftTokenHint => '请输入接收到的礼物代码';
+
+  @override
+  String get pointGiftClaimButton => '领取礼物';
+
+  @override
+  String get pointGiftCopyToken => '复制代码';
+
+  @override
+  String get pointGiftTokenCopied => '礼物代码已复制到剪贴板。';
+
+  @override
+  String get pointGiftCancelButton => '取消礼物';
+
+  @override
+  String get pointGiftCancelConfirm => '确定要取消此礼物预约并退还积分吗？';
+
+  @override
+  String get pointGiftCancelSuccess => '礼物已成功取消。';
+
+  @override
+  String get pointGiftRuleTitle => '积分礼物说明';
+
+  @override
+  String get pointGiftRule1 => '• 赠送积分的70%将发放给接收方，30%作为手续费销毁。';
+
+  @override
+  String get pointGiftRule2 => '• 未领取的礼物将在发放7天后自动失效并退还。';
+
+  @override
+  String get pointGiftRule3 => '• 接收到的礼物积分有效期为90天，不可再次转赠。';
+
+  @override
+  String get pointGiftRule4 => '• 活动/注册奖励等不可转让积分无法用于赠送。';
+
+  @override
+  String get pointGiftCreatedSuccess => '礼物已创建！请复制下方代码分享给朋友。';
+
+  @override
+  String pointGiftClaimSuccess(Object points) {
+    return '成功领取 ${points}P 礼物！';
+  }
+
+  @override
+  String get pointGiftStatusPending => '等待领取';
+
+  @override
+  String get pointGiftStatusAccepted => '已领取';
+
+  @override
+  String get pointGiftStatusCancelled => '已取消';
+
+  @override
+  String get pointGiftStatusExpired => '已失效';
+
+  @override
+  String get pointGiftEmptySent => '暂无已赠礼物记录。';
+
+  @override
+  String get pointGiftEmptyReceived => '暂无已收礼物记录。';
+
+  @override
+  String get pointGiftInvalidAmount => '赠送积分需在100P至5,000P之间，且为10P的倍数。';
+
+  @override
+  String get pointGiftInsufficient => '可赠送积分不足。';
+
+  @override
+  String get pointGiftEmptyToken => '请输入礼物代码。';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -2200,4 +2298,102 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   @override
   String get verificationLocationUnavailableBody =>
       '无法获取GPS位置信息。请稍后重试或检查定位服务状态。';
+
+  @override
+  String get pointGiftTitle => '积分礼物';
+
+  @override
+  String get pointGiftSendTab => '赠送积分';
+
+  @override
+  String get pointGiftReceiveTab => '接收礼物';
+
+  @override
+  String get pointGiftSentListTab => '已赠礼物';
+
+  @override
+  String get pointGiftReceivedListTab => '已收礼物';
+
+  @override
+  String get pointGiftAmountLabel => '赠送积分数';
+
+  @override
+  String get pointGiftAmountHint => '最少100P，10P单位，最多5,000P';
+
+  @override
+  String get pointGiftSendButton => '创建礼物代码';
+
+  @override
+  String get pointGiftTokenLabel => '礼物代码 (Token)';
+
+  @override
+  String get pointGiftTokenHint => '请输入接收到的礼物代码';
+
+  @override
+  String get pointGiftClaimButton => '领取礼物';
+
+  @override
+  String get pointGiftCopyToken => '复制代码';
+
+  @override
+  String get pointGiftTokenCopied => '礼物代码已复制到剪贴板。';
+
+  @override
+  String get pointGiftCancelButton => '取消礼物';
+
+  @override
+  String get pointGiftCancelConfirm => '确定要取消此礼物预约并退还积分吗？';
+
+  @override
+  String get pointGiftCancelSuccess => '礼物已成功取消。';
+
+  @override
+  String get pointGiftRuleTitle => '积分礼物说明';
+
+  @override
+  String get pointGiftRule1 => '• 赠送积分的70%将发放给接收方，30%作为手续费销毁。';
+
+  @override
+  String get pointGiftRule2 => '• 未领取的礼物将在发放7天后自动失效并退还。';
+
+  @override
+  String get pointGiftRule3 => '• 接收到的礼物积分有效期为90天，不可再次转赠。';
+
+  @override
+  String get pointGiftRule4 => '• 活动/注册奖励等不可转让积分无法用于赠送。';
+
+  @override
+  String get pointGiftCreatedSuccess => '礼物已创建！请复制下方代码分享给朋友。';
+
+  @override
+  String pointGiftClaimSuccess(Object points) {
+    return '成功领取 ${points}P 礼物！';
+  }
+
+  @override
+  String get pointGiftStatusPending => '等待领取';
+
+  @override
+  String get pointGiftStatusAccepted => '已领取';
+
+  @override
+  String get pointGiftStatusCancelled => '已取消';
+
+  @override
+  String get pointGiftStatusExpired => '已失效';
+
+  @override
+  String get pointGiftEmptySent => '暂无已赠礼物记录。';
+
+  @override
+  String get pointGiftEmptyReceived => '暂无已收礼物记录。';
+
+  @override
+  String get pointGiftInvalidAmount => '赠送积分需在100P至5,000P之间，且为10P的倍数。';
+
+  @override
+  String get pointGiftInsufficient => '可赠送积分不足。';
+
+  @override
+  String get pointGiftEmptyToken => '请输入礼物代码。';
 }

@@ -1107,4 +1107,103 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get verificationLocationUnavailableBody =>
       'GPS位置情報を取得できませんでした。しばらくしてから再試行するか、位置情報サービスの状態を確認してください。';
+
+  @override
+  String get pointGiftTitle => 'ポイントギフト';
+
+  @override
+  String get pointGiftSendTab => 'ギフトを贈る';
+
+  @override
+  String get pointGiftReceiveTab => 'ギフトを受け取る';
+
+  @override
+  String get pointGiftSentListTab => '贈ったギフト';
+
+  @override
+  String get pointGiftReceivedListTab => '受け取ったギフト';
+
+  @override
+  String get pointGiftAmountLabel => '贈るポイント';
+
+  @override
+  String get pointGiftAmountHint => '最小100P、10P単位、最大5,000P';
+
+  @override
+  String get pointGiftSendButton => 'ギフトコードを作成';
+
+  @override
+  String get pointGiftTokenLabel => 'ギフトコード (トークン)';
+
+  @override
+  String get pointGiftTokenHint => '受け取ったギフトコードを入力してください';
+
+  @override
+  String get pointGiftClaimButton => 'ギフトを受け取る';
+
+  @override
+  String get pointGiftCopyToken => 'コードをコピー';
+
+  @override
+  String get pointGiftTokenCopied => 'ギフトコードをクリップボードにコピーしました。';
+
+  @override
+  String get pointGiftCancelButton => 'ギフト取消';
+
+  @override
+  String get pointGiftCancelConfirm => 'ギフト予約を取り消してポイントを返還しますか？';
+
+  @override
+  String get pointGiftCancelSuccess => 'ギフトが正常に取り消されました。';
+
+  @override
+  String get pointGiftRuleTitle => 'ポイントギフトのご案内';
+
+  @override
+  String get pointGiftRule1 => '• 贈ったポイントの70%が受取人に付与され、30%は手数料として消滅します。';
+
+  @override
+  String get pointGiftRule2 => '• 未受取のギフトは発行から7日後に自動的に失効・返還されます。';
+
+  @override
+  String get pointGiftRule3 => '• 受け取ったギフトポイントの有効期限は90日間で、再ギフトはできません。';
+
+  @override
+  String get pointGiftRule4 => '• イベント/登録ボーナス等の譲渡不可ポイントはギフトできません。';
+
+  @override
+  String get pointGiftCreatedSuccess => 'ギフトが作成されました！下記のコードをコピーして友だちに共有してください。';
+
+  @override
+  String pointGiftClaimSuccess(Object points) {
+    return '${points}Pのギフトを受け取りました！';
+  }
+
+  @override
+  String get pointGiftStatusPending => '受取待ち';
+
+  @override
+  String get pointGiftStatusAccepted => '受取完了';
+
+  @override
+  String get pointGiftStatusCancelled => '取消済み';
+
+  @override
+  String get pointGiftStatusExpired => '失効済み';
+
+  @override
+  String get pointGiftEmptySent => '贈ったギフト履歴はありません。';
+
+  @override
+  String get pointGiftEmptyReceived => '受け取ったギフト履歴はありません。';
+
+  @override
+  String get pointGiftInvalidAmount =>
+      'ギフトポイントは100P以上5,000P以下、10P単位である必要があります。';
+
+  @override
+  String get pointGiftInsufficient => 'ギフト可能なポイントが不足しています。';
+
+  @override
+  String get pointGiftEmptyToken => 'ギフトコードを入力してください。';
 }
