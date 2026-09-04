@@ -1,0 +1,21 @@
+{
+  "app_name": "NAMPO GOGO",
+  "version_code": 98,
+  "version_name": "1.0.0+98",
+  "stage": "Post-Phase12 Product Completion",
+  "chunk": "Post-Batch-D",
+  "formal_golden": "VC29",
+  "current_test_client": "VC96 (Physical) / VC74 (Emulator baseline)",
+  "point_work_status": "CLOSED (PM_ACCEPTED)",
+  "map_spatial_status": "VC74_INSTALLED_ON_PC_EMULATOR_PENDING_PM_ACCEPTANCE",
+  "unresolved_major_errors_count": 0,
+  "total_unresolved_errors_count": 2,
+  "last_updated_at": "2026-09-04 11:35:00",
+  "latest_product_head": "9ca2d8eb53534f7f8d69abe102e8e7f9ef54662d",
+  "next_gate": "DESK_E2E_20",
+  "source_app_version": "1.0.0+98",
+  "last_confirmed_physical_validation_cycle": "VC96",
+  "last_confirmed_physical_apk_version": "1.0.0+96",
+  "last_confirmed_physical_device": "Samsung S24 Ultra",
+  "emulator_baseline": "VC74"
+}

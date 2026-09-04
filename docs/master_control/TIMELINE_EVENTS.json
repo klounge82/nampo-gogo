@@ -1,5 +1,243 @@
 [
   {
+    "event_id": "EVT-20260823-04",
+    "event_date": "2026-08-23",
+    "event_time": "08:59:30",
+    "time_confidence": "EXACT",
+    "time_source": "SYSTEM",
+    "badge_ko": "🔍 포렌식",
+    "summary_ko": "VC69 PM 실기기 증거 기반 종합 트리아지 및 원인 규명 (수정/빌드 없음)",
+    "details_ko": "혼합 언어 노출, 공간 검토중 배지/0m 표시 모순, 광복로 좌표 미노출, 홈 대형 빈 공간 등 4대 PM 실기기 이슈 원인 정밀 분석 및 3대 수정 그룹 계획 수립",
+    "result_ko": "CHUNK_05C_1_HOLD_FOR_CONSOLIDATED_TRIAGE",
+    "related_change_id": "MC-CHANGE-0009-A",
+    "related_error_id": null,
+    "related_incident_id": null
+  },
+  {
+    "event_id": "EVT-20260823-03",
+    "event_date": "2026-08-23",
+    "event_time": "01:11:55",
+    "time_confidence": "EXACT",
+    "time_source": "SYSTEM",
+    "badge_ko": "🧪 검증",
+    "summary_ko": "Major-05C Chunk 1 고객 기본 탐색 & 읽기 E2E 무수정 전수 검증 개시",
+    "details_ko": "jazzbj@naver.com 계정 300P/0P 기준 로그인/홈/탐색/검색/지도/장소상세/다국어 7개 읽기 테스트 및 UX 계약 검증, 소스 수정 없이 검증 및 트리아지만 수행",
+    "result_ko": "CHUNK_05C_1_VERIFICATION_IN_PROGRESS",
+    "related_change_id": "MC-CHANGE-0008",
+    "related_error_id": null,
+    "related_incident_id": null
+  },
+  {
+    "event_id": "EVT-20260823-02",
+    "event_date": "2026-08-23",
+    "event_time": "01:07:45",
+    "time_confidence": "EXACT",
+    "time_source": "SYSTEM",
+    "badge_ko": "🚀 마일스톤",
+    "summary_ko": "Major-05B PM 공식 승인 및 Major-05C 전체 고객 E2E 마스터 프리플라이트 개시",
+    "details_ko": "Major-05B 100% 완료 공식 락(Lock), 관제실 MINOR 오류 1건 정정(Timeline 배지표기), PM 계정(jazzbj@naver.com 300P/0P) Before-State 동결 및 25개 E2E 테스트 매트릭스 & 5개 캘리브레이션 청크 수립",
+    "result_ko": "MAJOR_05B_COMPLETE_MAJOR_05C_MASTER_PREFLIGHT_IN_PROGRESS",
+    "related_change_id": "MC-CHANGE-0007",
+    "related_error_id": "ERR-20260822-TIMELINE-SEVERITY-BADGE-001",
+    "related_incident_id": null
+  },
+  {
+    "event_id": "EVT-20260823-01",
+    "event_date": "2026-08-23",
+    "event_time": "00:44:30",
+    "time_confidence": "EXACT",
+    "time_source": "SYSTEM",
+    "badge_ko": "📋 감사",
+    "summary_ko": "Major-05B 종료 감사 및 Major-05C 진입 게이트 READ-ONLY 개시",
+    "details_ko": "Map/Spatial 성공 결과 동결, Major-05B 공식 범위 및 Live DB 데이터/API 헬스 종합 점검, 열린 오류 및 Minor 배치 정책 검증, 05B 종료 여부 및 05C 진입 조건 확정",
+    "result_ko": "MAJOR_05B_CLOSURE_AUDIT_IN_PROGRESS",
+    "related_change_id": "MC-CHANGE-0006",
+    "related_error_id": null,
+    "related_incident_id": null
+  },
+  {
+    "event_id": "EVT-20260822-19",
+    "event_date": "2026-08-22",
+    "event_time": "13:18:00",
+    "time_confidence": "EXACT",
+    "time_source": "BUILD_EVIDENCE",
+    "badge_ko": "✅ 검증완료",
+    "summary_ko": "현장 재방문 없는 사진 인증 소스 포렌식 및 Field Test Readiness Gate PASS",
+    "details_ko": "PM 계정(jazzbj@naver.com, 300P/0P) 정밀 동기화, pre-commit/post-commit 실패 단계 통합 분석, 11개 백엔드 유닛테스트 및 A~I 예외 매트릭스 100% 검증, Railway 배포 및 Field Test Readiness Gate PASS 통과",
+    "result_ko": "PASS (FIELD_RETRIP_REQUIRED_NOW=NO, FIELD_TEST_READINESS_GATE=PASS)",
+    "related_change_id": "MC-CHANGE-0005-I2",
+    "related_error_id": "ERR-20260822-PHOTO-SUBMIT-500-001",
+    "related_incident_id": null
+  },
+  {
+    "event_id": "EVT-20260822-18",
+    "event_date": "2026-08-22",
+    "event_time": "12:53:30",
+    "time_confidence": "EXACT",
+    "time_source": "SYSTEM",
+    "badge_ko": "🔍 포렌식",
+    "summary_ko": "VC69 PM 현장 재시도 전 트랜잭션 진실 및 보고서 모순 해소 READ-ONLY 게이트 개시",
+    "details_ko": "HTTP 500 원인 보고와 Live DB Partial Write 0 기록 간 모순 포렌식 규명, Live DB Read-Only 스냅샷 및 코드 실행 순서 정밀 감사",
+    "result_ko": "PRE_RETRY_TRUTH_RECONCILIATION_IN_PROGRESS",
+    "related_change_id": "MC-CHANGE-0005-I",
+    "related_error_id": "ERR-20260822-PHOTO-SUBMIT-500-001",
+    "related_incident_id": null
+  },
+  {
+    "event_id": "EVT-20260822-17",
+    "event_date": "2026-08-22",
+    "event_time": "12:51:00",
+    "time_confidence": "EXACT",
+    "time_source": "BUILD_EVIDENCE",
+    "badge_ko": "🛠 수정",
+    "summary_ko": "현장사진 인증 트랜잭션 원자성 보장 + HTTP 500 예외 방어 및 Railway 배포 (VC69)",
+    "details_ko": "백엔드 verify_mission 내 UserMission/PointHistory 1회 단일 트랜잭션 커밋과 ActivityLog 독립 예외 방어 처리 구축, 클라이언트 에러 메시지 매핑 강화, Railway 프로덕션 서버 배포 및 VC69 릴리스 빌드 & 삼성 실기기 설치 완료",
+    "result_ko": "FIX_APPLIED_PENDING_PM_FIELD_VERIFICATION (VC69)",
+    "related_change_id": "MC-CHANGE-0005-I",
+    "related_error_id": "ERR-20260822-PHOTO-SUBMIT-500-001",
+    "related_incident_id": null
+  },
+  {
+    "event_id": "EVT-20260822-16",
+    "event_date": "2026-08-22",
+    "event_time": "12:04:00",
+    "time_confidence": "EXACT",
+    "time_source": "BUILD_EVIDENCE",
+    "badge_ko": "🛠 수정",
+    "summary_ko": "고객 지도 대표위치 푸른 핀 숨김 및 목적지 오해 요소 완전 제거 (VC68)",
+    "details_ko": "SPATIAL-CUSTOMER-MAP-CLARITY-001 구현: MissionEligibleAreaMap에서 LINE_BUFFER/비단일점 인증 지도 렌더링 시 reference_neutral_pin(청록색 대표위치 마커)을 기본 숨김 처리하여 고객이 목적지 핀으로 오해하는 유인 제거, 사용자 위치 '내 위치' 및 Production 승인 산책로만 명확히 노출, VC68 릴리스 빌드 & 삼성 실기기 설치 완료",
+    "result_ko": "RESOLVED (VC68)",
+    "related_change_id": "MC-CHANGE-0005-H1",
+    "related_error_id": "ERR-20260822-BLUE-PIN-AMBIGUITY-001",
+    "related_incident_id": null
+  },
+  {
+    "event_id": "EVT-20260822-15",
+    "event_date": "2026-08-22",
+    "event_time": "11:51:00",
+    "time_confidence": "EXACT",
+    "time_source": "BUILD_EVIDENCE",
+    "badge_ko": "🛠 수정",
+    "summary_ko": "고객 화면 Production Geometry SOT 직결 + Candidate 유출 차단 (VC67)",
+    "details_ko": "SPATIAL-CUSTOMER-SOT-001 구현: MissionEligibleAreaMap에서 Production API geometry_data 우선 파싱 적용 및 후보 유출 문구 제거, LocationService._minDistanceToPolyline 배열 기반 좌표 대응 교정, 고객 지도/GPS 인증이 100% 승인된 Production geometry만 사용하도록 차단 조치, VC67 릴리스 빌드 & 삼성 실기기 설치 완료",
+    "result_ko": "FIX_APPLIED_PENDING_PM_DEVICE_VERIFICATION (VC67)",
+    "related_change_id": "MC-CHANGE-0005-H",
+    "related_error_id": "ERR-20260822-CUSTOMER-GEOM-LEAK-001",
+    "related_incident_id": null
+  },
+  {
+    "event_id": "EVT-20260822-14",
+    "event_date": "2026-08-22",
+    "event_time": "11:22:00",
+    "time_confidence": "EXACT",
+    "time_source": "BUILD_EVIDENCE",
+    "badge_ko": "🛠 수정",
+    "summary_ko": "교차점/동일 좌표 공유 제어점 탭 지원 + Smart Snap + 이전 끝점 시작 퀵 액션 (VC66)",
+    "details_ko": "SPATIAL-SHARED-JUNCTION-001 구현: Marker.onTap 핸들러 장착으로 기존 제어점 직탭 시 단 한 번의 터치로 새 구간 P1 생성 지원, 25m 이내 Smart Snap 구현, [이전 구간 끝점에서 시작] 퀵버튼 탑재, cross-line 동일 좌표 허용(duplicate guard를 active line으로 한정), VC66 릴리스 빌드 & 삼성 실기기 설치 완료",
+    "result_ko": "FIX_APPLIED_PENDING_PM_DEVICE_VERIFICATION (VC66)",
+    "related_change_id": "MC-CHANGE-0005-GR3",
+    "related_error_id": "ERR-20260822-SHARED-JUNCTION-001",
+    "related_incident_id": null
+  },
+  {
+    "event_id": "EVT-20260822-13",
+    "event_date": "2026-08-22",
+    "event_time": "11:03:00",
+    "time_confidence": "EXACT",
+    "time_source": "BUILD_EVIDENCE",
+    "badge_ko": "🛠 수정",
+    "summary_ko": "Geometry 카운터 위치 변경 + 새 구간 첫 점 마커 즉시 표출 및 가짜 연결선 완전 해제 (VC65)",
+    "details_ko": "실시간 Geometry 카운터 배지를 하단 우측(bottom: 195, right: 12, SafeArea)으로 이동하여 상단 패널 가림 현상 100% 제거, _buildPolygons()를 lines 구간별 코리도 생성 방식으로 변경하여 새 구간 첫 점 입력 시 녹색 P1 마커 즉시 표시 및 이전 구간과의 가짜 연결선 완전 제거, VC65 삼성 실기기 설치 완료",
+    "result_ko": "PASS (VC65 릴리스 빌드 & 삼성 실기기 설치 완료)",
+    "related_change_id": "MC-CHANGE-0005-GR2",
+    "related_error_id": "ERR-20260822-FIRSTPT-RESERVE",
+    "related_incident_id": null
+  },
+  {
+    "event_id": "EVT-20260822-12",
+    "event_date": "2026-08-22",
+    "event_time": "10:45:00",
+    "time_confidence": "EXACT",
+    "time_source": "BUILD_EVIDENCE",
+    "badge_ko": "🛠 수정",
+    "summary_ko": "Admin HTTP 401 Bearer 헤더 추가 + 실시간 Geometry 카운터 + 새 구간 첫 점 즉시 표출 교정 (VC64)",
+    "details_ko": "AdminService _dio에 FlutterSecureStorage Bearer access_token 인터셉터 장착하여 Production PATCH HTTP 401 100% 해제, _buildLiveGeometryCounterBadge 실시간 카운터 배지 추가, _buildMarkers 구간별(lines) 마커 생성 구조 개선으로 새 구간 첫 점 터치 즉시 녹색 P1 마커 표출 및 이전 구간과의 연동 연결 차단, VC64 삼성 실기기 설치 완료",
+    "result_ko": "VC64 FIX_APPLIED_PENDING_PM_DEVICE_VERIFICATION",
+    "related_change_id": "MC-CHANGE-0005-GR",
+    "related_error_id": "ERR-20260822-PROD-401-001",
+    "related_incident_id": null
+  },
+  {
+    "event_id": "EVT-20260822-11",
+    "event_date": "2026-08-22",
+    "event_time": "10:26:00",
+    "time_confidence": "EXACT",
+    "time_source": "BUILD_EVIDENCE",
+    "badge_ko": "🛠 수정",
+    "summary_ko": "실기기 Multi-Line 저장 덮어쓰기 원인 수정 및 단일 Canonical 지오메트리 계약 보장 (VC63)",
+    "details_ko": "PM 실기기 검증 우선 원칙(CONSTITUTION-PM-DEVICE-TRUTH-001) 반영, admin_store_manage_screen.dart L351-361 onCandidateSaved 콜백이 lines 없이 points만 넘겨 CandidateStore를 덮어쓰던 런타임 실기기 손실 경로 규명, onCandidateSaved/initialLines에 lines 파라미터 연동, SpatialCandidateRecord JSON 직렬화 추가, 하드 적용 차단 가드 탑재, VC63 삼성 실기기 설치 완료",
+    "result_ko": "VC63 FIX_APPLIED_PENDING_PM_DEVICE_VERIFICATION",
+    "related_change_id": "MC-CHANGE-0005-FR",
+    "related_error_id": "ERR-20260822-MULTILINE-001",
+    "related_incident_id": null
+  },
+  {
+    "event_id": "EVT-20260822-10",
+    "event_date": "2026-08-22",
+    "event_time": "10:06:00",
+    "time_confidence": "EXACT",
+    "time_source": "BUILD_EVIDENCE",
+    "badge_ko": "🛠 수정",
+    "summary_ko": "Multi-Line 독립 구간 보존 계약 수정 및 Production 적용 확인창 연동 (VC62)",
+    "details_ko": "SpatialCandidateRecord 및 SpatialCandidateStore에 lines: List<List<LatLng>> 구조 반영하여 임시 후보 저장/로드 시 2개 독립 구간 데이터 유지 조치, _loadSavedCandidate 및 _confirmAndApplyToProduction이 2개 독립 구간(7개 점, 버퍼 50m)을 정확히 표출/전송하도록 수정, VC62 삼성 실기기 설치 완료",
+    "result_ko": "VC62 PASS",
+    "related_change_id": "MC-CHANGE-0005-F",
+    "related_error_id": "ERR-20260822-MULTILINE-001",
+    "related_incident_id": null
+  },
+  {
+    "event_id": "EVT-20260822-09",
+    "event_date": "2026-08-22",
+    "event_time": "09:53:00",
+    "time_confidence": "EXACT",
+    "time_source": "BUILD_EVIDENCE",
+    "badge_ko": "🛠 수정",
+    "summary_ko": "Production DB 적용 실제 HTTP API 호출 및 Read-Back 검증 연동 (VC61)",
+    "details_ko": "Live PostgreSQL 9개 매장 READ-ONLY 검증 완료, 기존 _applyToProductionDB의 로컬 후보 저장 팝업 우회 문제 원인 규명, HTTP PATCH /admin/stores/{id}/spatial-geometry 호출 및 연타 방지, 서버 Read-Back 일치 검증, APPLIED 성공 팝업(또는 HTTP 에러 모달) 탑재, VC61 삼성 실기기 설치 완료",
+    "result_ko": "VC61 PASS",
+    "related_change_id": "MC-CHANGE-0005-E",
+    "related_error_id": "ERR-20260822-PROD-APPLY-001",
+    "related_incident_id": null
+  },
+  {
+    "event_id": "EVT-20260822-08",
+    "event_date": "2026-08-22",
+    "event_time": "09:19:00",
+    "time_confidence": "EXACT",
+    "time_source": "BUILD_EVIDENCE",
+    "badge_ko": "🛠 수정",
+    "summary_ko": "Non-Point 대표위치 핀 기본 숨김 및 수정 모드 토글 표시 처리 (VC60)",
+    "details_ko": "LINE_BUFFER 및 POLYGON_AREA 공간편집 시 대표 위치 핀(Cyan Pin)이 인증점과 혼동되는 문제를 기본 숨김으로 고치고, [대표위치 수정] 토글 시에만 핀 표시하도록 개선. 기존 PM 6-point/50m 후보 보존, VC60 삼성 실기기 설치 완료",
+    "result_ko": "VC60 PASS",
+    "related_change_id": "MC-CHANGE-0005-D1",
+    "related_error_id": "ERR-20260822-MINOR-002",
+    "related_incident_id": null
+  },
+  {
+    "event_id": "EVT-20260822-07",
+    "event_date": "2026-08-22",
+    "event_time": "02:32:00",
+    "time_confidence": "EXACT",
+    "time_source": "BUILD_EVIDENCE",
+    "badge_ko": "🛠 수정",
+    "summary_ko": "초기 하드코딩 5개 지점 제거 및 빈 편집기 시작 규칙(GEOMETRY-NO-AUTO-INVENT-001) 차단 탑재 (VC59)",
+    "details_ko": "수영강변 공간편집기 진입 시 자동 연결되던 5개 하드코딩 지점 원인 규명 및 완전 제거, 승인 Geometry 미존재 시 빈 화면 시작 차단, PM 직접 지정(PM_DRAWN) 출처 잠금, VC59 삼성 실기기 설치 완료",
+    "result_ko": "VC59 PASS",
+    "related_change_id": "MC-CHANGE-0005-D",
+    "related_error_id": "ERR-20260822-FALSE-GEOM-001",
+    "related_incident_id": null
+  },
+  {
     "event_id": "EVT-20260822-05",
     "event_date": "2026-08-22",
     "event_time": "01:35:00",
@@ -11,7 +249,9 @@
     "result_ko": "VC57 PASS",
     "related_change_id": "MC-CHANGE-0005-C",
     "related_error_id": null,
-    "related_incident_id": null
+    "related_incident_id": null,
+    "severity": null,
+    "error_status": null
   },
   {
     "event_id": "EVT-20260822-04",
@@ -25,7 +265,9 @@
     "result_ko": "VC56 PASS",
     "related_change_id": "MC-CHANGE-0005-B",
     "related_error_id": null,
-    "related_incident_id": null
+    "related_incident_id": null,
+    "severity": null,
+    "error_status": null
   },
   {
     "event_id": "EVT-20260822-03",
@@ -39,7 +281,10 @@
     "result_ko": "복구 완료 (200 OK)",
     "related_change_id": "MC-CHANGE-0005-B",
     "related_error_id": "ERR-20260822-PROD-SCHEMA-001",
-    "related_incident_id": null
+    "related_incident_id": null,
+    "severity": "CRITICAL",
+    "error_status": "RESOLVED",
+    "error_summary": "Production /stores API HTTP 500 caused by missing geometry columns on PostgreSQL stores table"
   },
   {
     "event_id": "EVT-20260822-01",
@@ -53,7 +298,10 @@
     "result_ko": "안정화 완료",
     "related_change_id": "DEV-ENV-MEM-001",
     "related_error_id": "ERR-20260822-DEVENV-001",
-    "related_incident_id": null
+    "related_incident_id": null,
+    "severity": "MAJOR",
+    "error_status": "RESOLVED_WORKSPACE_CONFIG_UPDATED",
+    "error_summary": "Antigravity language_server.exe excessive memory growth (reached 7.4GB in idle state)"
   },
   {
     "event_id": "EVT-20260822-02",
@@ -67,7 +315,10 @@
     "result_ko": "원인 규명",
     "related_change_id": "MC-CHANGE-0005-A",
     "related_error_id": "ERR-20260822-PROD-SCHEMA-001",
-    "related_incident_id": null
+    "related_incident_id": null,
+    "severity": "CRITICAL",
+    "error_status": "RESOLVED",
+    "error_summary": "Production /stores API HTTP 500 caused by missing geometry columns on PostgreSQL stores table"
   },
   {
     "event_id": "EVT-20260822-06",
@@ -81,7 +332,10 @@
     "result_ko": "VC58 PASS",
     "related_change_id": "MC-CHANGE-0005-C1",
     "related_error_id": "ERR-20260822-SPATIAL-SAVE-001",
-    "related_incident_id": null
+    "related_incident_id": null,
+    "severity": "MAJOR",
+    "error_status": "LOGGED",
+    "error_summary": "관리자 공간범위 저장 시 Production DB 영향 안내 불명확 및 Production 적용 단계 미분리"
   },
   {
     "event_id": "EVT-20260821-02",
@@ -95,7 +349,9 @@
     "result_ko": "MC-03M PASS",
     "related_change_id": "MC-03M",
     "related_error_id": null,
-    "related_incident_id": null
+    "related_incident_id": null,
+    "severity": null,
+    "error_status": null
   },
   {
     "event_id": "EVT-20260821-01",
@@ -109,7 +365,9 @@
     "result_ko": "MC-03L PASS",
     "related_change_id": "MC-03L",
     "related_error_id": null,
-    "related_incident_id": null
+    "related_incident_id": null,
+    "severity": null,
+    "error_status": null
   },
   {
     "event_id": "EVT-20260820-07",
@@ -123,7 +381,10 @@
     "result_ko": "포인트 조사 종결 (CLOSED)",
     "related_change_id": "VC54",
     "related_error_id": "ERR-20260820-003",
-    "related_incident_id": "INC-POINT-HISTORY-LIFETIME-001"
+    "related_incident_id": "INC-POINT-HISTORY-LIFETIME-001",
+    "severity": "MINOR",
+    "error_status": "RESOLVED",
+    "error_summary": null
   },
   {
     "event_id": "EVT-20260820-06",
@@ -137,7 +398,9 @@
     "result_ko": "BACKEND_RUNTIME_SAFE",
     "related_change_id": "MC-03",
     "related_error_id": null,
-    "related_incident_id": "INC-DUPLICATE-PROD-CORRECTION-001"
+    "related_incident_id": "INC-DUPLICATE-PROD-CORRECTION-001",
+    "severity": null,
+    "error_status": null
   },
   {
     "event_id": "EVT-20260820-05",
@@ -151,7 +414,10 @@
     "result_ko": "장부 300P 일치 (PASS)",
     "related_change_id": "MC-CHANGE-0004-W",
     "related_error_id": "ERR-20260820-002",
-    "related_incident_id": "INC-DUPLICATE-PROD-CORRECTION-001"
+    "related_incident_id": "INC-DUPLICATE-PROD-CORRECTION-001",
+    "severity": "MAJOR",
+    "error_status": "RESOLVED",
+    "error_summary": null
   },
   {
     "event_id": "EVT-20260820-04",
@@ -165,7 +431,9 @@
     "result_ko": "VC53 설치 성공",
     "related_change_id": "MC-CHANGE-0003",
     "related_error_id": null,
-    "related_incident_id": null
+    "related_incident_id": null,
+    "severity": null,
+    "error_status": null
   },
   {
     "event_id": "EVT-20260820-03",
@@ -179,7 +447,10 @@
     "result_ko": "중복 레코드 확인",
     "related_change_id": "MC-CHANGE-0004-R",
     "related_error_id": "ERR-20260820-002",
-    "related_incident_id": "INC-DUPLICATE-PROD-CORRECTION-001"
+    "related_incident_id": "INC-DUPLICATE-PROD-CORRECTION-001",
+    "severity": "MAJOR",
+    "error_status": "RESOLVED",
+    "error_summary": null
   },
   {
     "event_id": "EVT-20260820-02",
@@ -193,7 +464,9 @@
     "result_ko": "300P 정책 확정",
     "related_change_id": "MC-CHANGE-0003",
     "related_error_id": null,
-    "related_incident_id": "INC-SIGNUP-POLICY-HISTORY-001"
+    "related_incident_id": "INC-SIGNUP-POLICY-HISTORY-001",
+    "severity": null,
+    "error_status": null
   },
   {
     "event_id": "EVT-20260820-01",
@@ -207,7 +480,10 @@
     "result_ko": "원인 규명 완료",
     "related_change_id": "MC-CHANGE-0002",
     "related_error_id": "ERR-20260820-001",
-    "related_incident_id": "INC-DEVICE-POINT-MISMATCH-001"
+    "related_incident_id": "INC-DEVICE-POINT-MISMATCH-001",
+    "severity": "CRITICAL",
+    "error_status": "RESOLVED",
+    "error_summary": null
   },
   {
     "event_id": "EVT-20260817-01",
@@ -221,7 +497,10 @@
     "result_ko": "해결됨",
     "related_change_id": "VC42",
     "related_error_id": "ERR-20260817-001",
-    "related_incident_id": "INC-QR-SCAN-001"
+    "related_incident_id": "INC-QR-SCAN-001",
+    "severity": "MAJOR",
+    "error_status": "RESOLVED",
+    "error_summary": null
   },
   {
     "event_id": "EVT-20260816-01",
@@ -235,7 +514,9 @@
     "result_ko": "1000P 기록",
     "related_change_id": "FORMAL_GOLDEN",
     "related_error_id": null,
-    "related_incident_id": null
+    "related_incident_id": null,
+    "severity": null,
+    "error_status": null
   },
   {
     "event_id": "EVT-20260816-02",
@@ -249,6 +530,165 @@
     "result_ko": "해결됨",
     "related_change_id": "VC40",
     "related_error_id": "ERR-20260816-001",
-    "related_incident_id": "INC-R8-PROGUARD-001"
+    "related_incident_id": "INC-R8-PROGUARD-001",
+    "severity": "CRITICAL",
+    "error_status": "RESOLVED",
+    "error_summary": null
+  },
+  {
+    "event_id": "EVT-MC-CHANGE-0015",
+    "event_date": "2026-08-24",
+    "event_time": "10:19:00",
+    "change_id": "MC-CHANGE-0015",
+    "event_type": "QA_SETUP",
+    "event_name": "PC Android Emulator QA Setup (VC71 Existing Release APK Only)",
+    "severity": "NORMAL",
+    "summary": "PASS (PC_QA_Emulator booted, existing VC71 release APK installed on emulator-5554, com.nampogogo.app versionCode=71 launched on PC screen for Win+Shift+S QA inspection)",
+    "details": "PASS (PC_QA_Emulator booted, existing VC71 release APK installed on emulator-5554, com.nampogogo.app versionCode=71 launched on PC screen for Win+Shift+S QA inspection)",
+    "related_change_id": "MC-CHANGE-0015",
+    "related_error_id": "ERR-20260823-I18N-MIXED-LANG-001"
+  },
+  {
+    "event_id": "EVT-MC-CHANGE-0016",
+    "event_date": "2026-08-24",
+    "event_time": "10:19:00",
+    "change_id": "MC-CHANGE-0016",
+    "event_type": "QA_SETUP",
+    "event_name": "Windows Desktop One-Click PC QA Launcher (NAMPO GOGO PC.lnk Shortcut & Icon)",
+    "severity": "NORMAL",
+    "summary": "PASS (Created 'NAMPO GOGO PC.lnk' Desktop shortcut with official app icon, helper script in AppData, dynamic emulator reuse & duplicate guard PASS, com.nampogogo.app versionCode=71 foreground launch PASS)",
+    "details": "PASS (Created 'NAMPO GOGO PC.lnk' Desktop shortcut with official app icon, helper script in AppData, dynamic emulator reuse & duplicate guard PASS, com.nampogogo.app versionCode=71 foreground launch PASS)",
+    "related_change_id": "MC-CHANGE-0016",
+    "related_error_id": "ERR-20260823-I18N-MIXED-LANG-001"
+  },
+  {
+    "event_id": "EVT-MC-CHANGE-0015-R",
+    "event_date": "2026-08-24",
+    "event_time": "10:19:00",
+    "change_id": "MC-CHANGE-0015-R",
+    "event_type": "REVIEW",
+    "event_name": "VC72 Final Two-String Correction Package Review (Exact Values + Test Lock)",
+    "severity": "NORMAL",
+    "summary": "PASS (Exact 2-target translation package confirmed, ARB keys signupCustomerSubtitle & signupBusinessSubtitle defined, locked 1 Flutter file + 5 ARB files, 0 DB writes, ready for VC72 one-build implementation)",
+    "details": "PASS (Exact 2-target translation package confirmed, ARB keys signupCustomerSubtitle & signupBusinessSubtitle defined, locked 1 Flutter file + 5 ARB files, 0 DB writes, ready for VC72 one-build implementation)",
+    "related_change_id": "MC-CHANGE-0015-R",
+    "related_error_id": "ERR-20260823-I18N-MIXED-LANG-001"
+  },
+  {
+    "event_id": "EVT-MC-CHANGE-0017",
+    "event_date": "2026-08-24",
+    "event_time": "10:19:00",
+    "change_id": "MC-CHANGE-0017",
+    "event_type": "POLICY_UPDATE",
+    "event_name": "Master Control Compact Execution Protocol & I18N-by-Default Constitution Registration",
+    "severity": "NORMAL",
+    "summary": "PASS (Registered CONSTITUTION-I18N-SIMULTANEOUS-001 and POLICY-COMPACT-EXECUTION-001, established MC_PRECHECK header shortcut, zero app/backend/db changes, zero builds)",
+    "details": "PASS (Registered CONSTITUTION-I18N-SIMULTANEOUS-001 and POLICY-COMPACT-EXECUTION-001, established MC_PRECHECK header shortcut, zero app/backend/db changes, zero builds)",
+    "related_change_id": "MC-CHANGE-0017",
+    "related_error_id": "ERR-20260823-I18N-MIXED-LANG-001"
+  },
+  {
+    "event_id": "EVT-MC-CHANGE-0018",
+    "event_date": "2026-08-24",
+    "event_time": "10:19:00",
+    "change_id": "MC-CHANGE-0018",
+    "event_type": "IMPLEMENTATION",
+    "event_name": "VC73 Mission List ZH_Hans Forensic & Full Localized Render Path Fix",
+    "severity": "NORMAL",
+    "summary": "PASS (Added localizedTitle and localizedDescription getters to Mission model, localized categoryGeneral, badgeTest, and authTypePhotoGps in ARB and L10nMappers, ran real-payload E2E rendered widget tests, built VC73 release APK SHA256: a0e1ddde8899783a51f8900c2d8ac2f89af3ea133cbdebc2bcf86af67d67fb2f, installed on PC_QA_Emulator, updated launcher expectedVersion to 73, Samsung device untouched)",
+    "details": "PASS (Added localizedTitle and localizedDescription getters to Mission model, localized categoryGeneral, badgeTest, and authTypePhotoGps in ARB and L10nMappers, ran real-payload E2E rendered widget tests, built VC73 release APK SHA256: a0e1ddde8899783a51f8900c2d8ac2f89af3ea133cbdebc2bcf86af67d67fb2f, installed on PC_QA_Emulator, updated launcher expectedVersion to 73, Samsung device untouched)",
+    "related_change_id": "MC-CHANGE-0018",
+    "related_error_id": "ERR-20260823-I18N-MIXED-LANG-001"
+  },
+  {
+    "event_id": "EVT-MC-CHANGE-0019",
+    "event_date": "2026-08-24",
+    "event_time": "10:19:00",
+    "change_id": "MC-CHANGE-0019",
+    "event_type": "IMPLEMENTATION",
+    "event_name": "VC74 Customer Runtime I18N Full Closure & Spatial Overlay Localization",
+    "severity": "NORMAL",
+    "summary": "PASS (Registered POLICY-I18N-FULL-CLOSURE-001, localized spatialMapTitleSuyeong, spatialMapApprovedTrail, spatialMapCandidateNotice, spatialMapInsideNotice, spatialMapOutsideNotice across 5 ARB files, ran real-payload E2E rendered widget tests, built VC74 release APK SHA256: 99745a66c752d0a2e2c55d1819d9ccf8c818d00364cb0ca4a586c4462346fee5, installed on PC_QA_Emulator, updated launcher expectedVersion to 74, Samsung device untouched)",
+    "details": "PASS (Registered POLICY-I18N-FULL-CLOSURE-001, localized spatialMapTitleSuyeong, spatialMapApprovedTrail, spatialMapCandidateNotice, spatialMapInsideNotice, spatialMapOutsideNotice across 5 ARB files, ran real-payload E2E rendered widget tests, built VC74 release APK SHA256: 99745a66c752d0a2e2c55d1819d9ccf8c818d00364cb0ca4a586c4462346fee5, installed on PC_QA_Emulator, updated launcher expectedVersion to 74, Samsung device untouched)",
+    "related_change_id": "MC-CHANGE-0019",
+    "related_error_id": "ERR-20260823-I18N-MIXED-LANG-001"
+  },
+  {
+    "event_id": "EVT-MC-CHANGE-0086",
+    "event_date": "2026-09-03",
+    "event_time": "18:30:00",
+    "change_id": "MC-CHANGE-0086",
+    "event_type": "IMPLEMENTATION",
+    "event_name": "Phase 12 Gates 1-4 Point Economy V2 Hardening & Point Gifting",
+    "severity": "NORMAL",
+    "summary": "PASS (Phase 12 Gates 1-4 complete: transaction atomicity, sender/receiver verification, gift UI/API integration, 27 backend tests PASS)",
+    "details": "PASS (Phase 12 Gates 1-4 complete across commits 9213e9c, 123ee57, d56f246, 681b1d5. Reconciled point transaction safety, atomic ledger operations, sender/receiver verification, and gift UI/API integration)",
+    "related_change_id": "MC-CHANGE-0086",
+    "related_error_id": null
+  },
+  {
+    "event_id": "EVT-MC-CHANGE-0087",
+    "event_date": "2026-09-03",
+    "event_time": "21:15:00",
+    "change_id": "MC-CHANGE-0087",
+    "event_type": "IMPLEMENTATION",
+    "event_name": "Batch A Mission Journey & 5-Tab Navigation Refinement",
+    "severity": "NORMAL",
+    "summary": "PASS (Committed 425861d. Refined 5-tab main navigation layout, enhanced mission journey progress indicators, unified active/completed mission views)",
+    "details": "PASS (Committed 425861d. Refined 5-tab main navigation layout, enhanced mission journey progress indicators, unified active/completed mission views, and validated multi-tab state preservation)",
+    "related_change_id": "MC-CHANGE-0087",
+    "related_error_id": null
+  },
+  {
+    "event_id": "EVT-MC-CHANGE-0088",
+    "event_date": "2026-09-03",
+    "event_time": "22:40:00",
+    "change_id": "MC-CHANGE-0088",
+    "event_type": "IMPLEMENTATION",
+    "event_name": "Batch B Explore Places & Missions Bidirectional Connection",
+    "severity": "NORMAL",
+    "summary": "PASS (Committed 194d66b. Connected explore attraction cards with direct mission launch buttons, linked place details to active area missions)",
+    "details": "PASS (Committed 194d66b. Connected explore attraction cards with direct mission launch buttons, linked place details to active area missions, and verified cross-navigation)",
+    "related_change_id": "MC-CHANGE-0088",
+    "related_error_id": null
+  },
+  {
+    "event_id": "EVT-MC-CHANGE-0089",
+    "event_date": "2026-09-03",
+    "event_time": "23:55:00",
+    "change_id": "MC-CHANGE-0089",
+    "event_type": "IMPLEMENTATION",
+    "event_name": "Batch C Business Reservation QR Check-in Streamlining",
+    "severity": "NORMAL",
+    "summary": "PASS (Committed 1b222da. Streamlined business scanner QR validation flow, enhanced check-in response feedback, and hardened reservation status transition safety)",
+    "details": "PASS (Committed 1b222da. Streamlined business scanner QR validation flow, enhanced check-in response feedback, and hardened reservation status transition safety)",
+    "related_change_id": "MC-CHANGE-0089",
+    "related_error_id": null
+  },
+  {
+    "event_id": "EVT-MC-CHANGE-0090",
+    "event_date": "2026-09-04",
+    "event_time": "09:30:00",
+    "change_id": "MC-CHANGE-0090",
+    "event_type": "IMPLEMENTATION",
+    "event_name": "Batch D Admin Point & Gift Monitoring API & Control Room UI",
+    "severity": "NORMAL",
+    "summary": "PASS (Committed 9ca2d8e. Added secure read-only admin point/gift APIs [summary, history, lots, gifts], integrated Control Room monitoring tab in AdminAppShell with search, ledger audit, FEFO lot inspection, and gift flow status)",
+    "details": "PASS (Committed 9ca2d8e. Added secure read-only admin point/gift APIs [summary, history, lots, gifts], integrated Control Room monitoring tab in AdminAppShell with search, ledger audit, FEFO lot inspection, and gift flow status. 6 files committed. 7 backend unit tests 100% PASS)",
+    "related_change_id": "MC-CHANGE-0090",
+    "related_error_id": null
+  },
+  {
+    "event_id": "EVT-MC-CHANGE-0091",
+    "event_date": "2026-09-04",
+    "event_time": "11:35:00",
+    "change_id": "MC-CHANGE-0091",
+    "event_type": "AUDIT_RECONCILIATION",
+    "event_name": "Master Control Post-Batch-D Governance Reconciliation & Version Semantics",
+    "severity": "NORMAL",
+    "summary": "PASS (Reconciled version semantics: source 1.0.0+98, physical validation VC96, emulator baseline VC74, HEAD 9ca2d8e, 2 OPEN errors preserved, zero app source modified)",
+    "details": "PASS (Audited SOT mutation provenance. Reconciled version semantics to distinguish current source version 1.0.0+98 from physical validation cycle VC96 and emulator baseline VC74. Zero history deletion, zero application source modified)",
+    "related_change_id": "MC-CHANGE-0091",
+    "related_error_id": null
   }
 ]
