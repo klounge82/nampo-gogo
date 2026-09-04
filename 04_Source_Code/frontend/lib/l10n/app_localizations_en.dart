@@ -146,7 +146,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get attractionCategory => 'Sights';
 
   @override
-  String get authTypeGps => 'GPS Verification';
+  String get authTypeGps => 'Visit Verification';
 
   @override
   String get authTypeManual => 'Visit Verification';
@@ -329,13 +329,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get missionAllList => 'All Missions';
 
   @override
-  String get missionAuthActionGps => 'GPS Verify';
+  String get missionAuthActionGps => 'Visit Verification';
 
   @override
   String get missionAuthActionPhoto => 'Take Photo';
 
   @override
-  String get missionAuthActionQr => 'Scan QR';
+  String get missionAuthActionQr => 'QR Verification';
 
   @override
   String get missionCompletedCount => 'Completed Missions';
@@ -367,7 +367,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Check location and details of the place for this mission.';
 
   @override
-  String get missionStartAction => 'Start Mission';
+  String get missionStartAction => 'Challenge';
 
   @override
   String get missionTitle => 'Missions';
@@ -1048,7 +1048,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get badgeTest => 'Test';
 
   @override
-  String get authTypePhotoGps => 'Photo + GPS Verification';
+  String get authTypePhotoGps => 'Photo Verification';
 
   @override
   String get spatialMapTitleSuyeong => 'Suyeong River Eligible Trail Map';
@@ -1330,4 +1330,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get missionOutsideRadiusNotice =>
       'Cannot perform this mission from your current location. Please check the distance to the location and try again.';
+
+  @override
+  String get authTypeTrail => 'Trail';
+
+  @override
+  String get missionStateAvailable => 'Available';
+
+  @override
+  String get missionStateCompleted => 'Completed';
 }

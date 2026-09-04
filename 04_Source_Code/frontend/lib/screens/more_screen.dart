@@ -77,17 +77,6 @@ class MoreScreen extends StatelessWidget {
           _buildSectionHeader(l10n.moreMyActivitySection),
           const SizedBox(height: 8.0),
           _buildMenuTile(
-            icon: Icons.person_outline,
-            title: l10n.profileTitle,
-            subtitle: l10n.moreProfileDetailDesc,
-            color: Colors.indigo,
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const ProfileScreen()),
-              );
-            },
-          ),
-          _buildMenuTile(
             icon: Icons.stars_outlined,
             title: l10n.pointHistoryTitle,
             subtitle: l10n.morePointHistoryDesc,
@@ -210,7 +199,6 @@ class MoreScreen extends StatelessWidget {
     AppLocalizations l10n,
   ) {
     return Container(
-      padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(16.0),
@@ -223,59 +211,72 @@ class MoreScreen extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 28,
-            backgroundColor: AppColors.primary.withAlpha(30),
-            child: const Icon(Icons.person, size: 32, color: AppColors.primary),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            if (isLoggedIn) {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const ProfileScreen()),
+              );
+            } else {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const AuthScreen()),
+              );
+            }
+          },
+          borderRadius: BorderRadius.circular(16.0),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
               children: [
-                Text(
-                  isLoggedIn ? (user?.nickname ?? user?.username ?? '') : l10n.guestModeNotice,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                CircleAvatar(
+                  radius: 28,
+                  backgroundColor: AppColors.primary.withAlpha(30),
+                  child: const Icon(Icons.person, size: 32, color: AppColors.primary),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isLoggedIn ? (user?.nickname ?? user?.username ?? '') : l10n.guestModeNotice,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        isLoggedIn ? (user?.email ?? '') : l10n.moreLoginPromptDesc,
+                        style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  isLoggedIn ? (user?.email ?? '') : l10n.moreLoginPromptDesc,
-                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                ),
+                if (!isLoggedIn)
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const AuthScreen()),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    child: Text(l10n.loginTitle, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  )
+                else
+                  const Icon(Icons.chevron_right, color: AppColors.textSecondary),
               ],
             ),
           ),
-          if (!isLoggedIn)
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const AuthScreen()),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              ),
-              child: Text(l10n.loginTitle, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-            )
-          else
-            IconButton(
-              icon: const Icon(Icons.chevron_right, color: AppColors.textSecondary),
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const ProfileScreen()),
-                );
-              },
-            ),
-        ],
+        ),
       ),
     );
   }

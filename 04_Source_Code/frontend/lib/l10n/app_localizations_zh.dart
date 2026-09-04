@@ -141,13 +141,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get attractionCategory => '景点';
 
   @override
-  String get authTypeGps => 'GPS认证';
+  String get authTypeGps => '到访认证';
 
   @override
   String get authTypeManual => '到访认证';
 
   @override
-  String get authTypePhoto => '图片验证';
+  String get authTypePhoto => '照片认证';
 
   @override
   String get authTypeQr => 'QR认证';
@@ -324,13 +324,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get missionAllList => '全部任务列表';
 
   @override
-  String get missionAuthActionGps => 'GPS验证';
+  String get missionAuthActionGps => '到访认证';
 
   @override
   String get missionAuthActionPhoto => '拍摄照片';
 
   @override
-  String get missionAuthActionQr => '扫描二维码';
+  String get missionAuthActionQr => 'QR认证';
 
   @override
   String get missionCompletedCount => '已完成任务';
@@ -360,7 +360,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get missionRelatedStoreSub => '查看执行任务地点的详细位置与地址。';
 
   @override
-  String get missionStartAction => '挑战任务';
+  String get missionStartAction => '挑战';
 
   @override
   String get missionTitle => '任务';
@@ -945,7 +945,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get myLocationCheckButton => '查看我的位置';
+  String get myLocationCheckButton => '确认当前位置';
 
   @override
   String get missionAuthMethodHeader => '验证方式说明';
@@ -954,7 +954,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get missionRewardInfoHeader => '任务奖励信息';
 
   @override
-  String get missionStartAuthButton => '开始任务验证';
+  String get missionStartAuthButton => '开始认证';
 
   @override
   String get missionCompletedBadge => '验证完成';
@@ -1016,7 +1016,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get badgeTest => '测试用';
 
   @override
-  String get authTypePhotoGps => '图片 + GPS 验证';
+  String get authTypePhotoGps => '照片认证';
 
   @override
   String get spatialMapTitleSuyeong => '水营江边可认证散步区域 Map';
@@ -1276,6 +1276,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get missionOutsideRadiusNotice => '在当前位置无法执行此任务。请确认与地点的距离后重试。';
+
+  @override
+  String get authTypeTrail => '探访';
+
+  @override
+  String get missionStateAvailable => '可挑战';
+
+  @override
+  String get missionStateCompleted => '已完成';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1415,13 +1424,13 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get attractionCategory => '景点';
 
   @override
-  String get authTypeGps => 'GPS认证';
+  String get authTypeGps => '到访认证';
 
   @override
   String get authTypeManual => '到访认证';
 
   @override
-  String get authTypePhoto => '图片验证';
+  String get authTypePhoto => '照片认证';
 
   @override
   String get authTypeQr => 'QR认证';
@@ -1598,13 +1607,13 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get missionAllList => '全部任务列表';
 
   @override
-  String get missionAuthActionGps => 'GPS验证';
+  String get missionAuthActionGps => '到访认证';
 
   @override
   String get missionAuthActionPhoto => '拍摄照片';
 
   @override
-  String get missionAuthActionQr => '扫描二维码';
+  String get missionAuthActionQr => 'QR认证';
 
   @override
   String get missionCompletedCount => '已完成任务';
@@ -1634,7 +1643,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get missionRelatedStoreSub => '查看执行任务地点的详细位置与地址。';
 
   @override
-  String get missionStartAction => '挑战任务';
+  String get missionStartAction => '挑战';
 
   @override
   String get missionTitle => '任务';
@@ -2219,7 +2228,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   }
 
   @override
-  String get myLocationCheckButton => '查看我的位置';
+  String get myLocationCheckButton => '确认当前位置';
 
   @override
   String get missionAuthMethodHeader => '验证方式说明';
@@ -2228,7 +2237,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get missionRewardInfoHeader => '任务奖励信息';
 
   @override
-  String get missionStartAuthButton => '开始任务验证';
+  String get missionStartAuthButton => '开始认证';
 
   @override
   String get missionCompletedBadge => '验证完成';
@@ -2290,7 +2299,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get badgeTest => '测试用';
 
   @override
-  String get authTypePhotoGps => '图片 + GPS 验证';
+  String get authTypePhotoGps => '照片认证';
 
   @override
   String get spatialMapTitleSuyeong => '水营江边可认证散步区域 Map';
@@ -2550,4 +2559,13 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get missionOutsideRadiusNotice => '在当前位置无法执行此任务。请确认与地点的距离后重试。';
+
+  @override
+  String get authTypeTrail => '探访';
+
+  @override
+  String get missionStateAvailable => '可挑战';
+
+  @override
+  String get missionStateCompleted => '已完成';
 }

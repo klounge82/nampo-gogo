@@ -10,7 +10,6 @@ import '../providers/locale_provider.dart';
 import '../providers/auth_provider.dart';
 import '../l10n/app_localizations.dart';
 import '../utils/l10n_mappers.dart';
-import 'package:geolocator/geolocator.dart';
 import '../repositories/place_repository.dart';
 import '../services/location_service.dart';
 import '../widgets/mission_eligible_area_map.dart';
@@ -132,8 +131,8 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
         if (mission.storeId.isNotEmpty) {
           final place = await PlaceRepository().getPlaceDetail(mission.storeId);
           final spatialRes = LocationService.evaluateSpatialPosition(
-            userLat: latitude!,
-            userLng: longitude!,
+            userLat: latitude,
+            userLng: longitude,
             geometryType: place.geometryType,
             geometryData: place.geometryData,
             placeLat: place.latitude,
@@ -723,15 +722,13 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
 
   String _getActionButtonLabel(AppLocalizations l10n, String authType) {
     final type = authType.toUpperCase();
-    if (type.contains('PHOTO_GPS')) {
-      return '📸📍 ${l10n.missionStartAuthButton}';
-    } else if (type.contains('QR')) {
+    if (type.contains('QR')) {
       return '🔍 ${l10n.missionAuthActionQr}';
     } else if (type.contains('GPS') || type.contains('LOCATION')) {
       return '📍 ${l10n.missionAuthActionGps}';
     } else if (type.contains('PHOTO') || type.contains('사진')) {
       return '📸 ${l10n.missionAuthActionPhoto}';
     }
-    return '🎉 ${l10n.missionStartAction}';
+    return '🎉 ${l10n.missionStartAuthButton}';
   }
 }

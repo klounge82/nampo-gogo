@@ -142,7 +142,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get attractionCategory => '観光スポット';
 
   @override
-  String get authTypeGps => 'GPS認証';
+  String get authTypeGps => '訪問認証';
 
   @override
   String get authTypeManual => '訪問認証';
@@ -325,13 +325,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get missionAllList => '全ミッション一覧';
 
   @override
-  String get missionAuthActionGps => 'GPS認証';
+  String get missionAuthActionGps => '訪問認証';
 
   @override
-  String get missionAuthActionPhoto => '現地写真撮影';
+  String get missionAuthActionPhoto => '写真撮影';
 
   @override
-  String get missionAuthActionQr => 'QRスキャン';
+  String get missionAuthActionQr => 'QR認証';
 
   @override
   String get missionCompletedCount => '完了したミッション';
@@ -362,7 +362,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get missionRelatedStoreSub => 'ミッションを行うスポットの詳細位置・住所を確認します。';
 
   @override
-  String get missionStartAction => 'ミッションに挑戦';
+  String get missionStartAction => '挑戦';
 
   @override
   String get missionTitle => 'ミッション';
@@ -951,7 +951,7 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get myLocationCheckButton => '現在地基準で確認';
+  String get myLocationCheckButton => '現在地確認';
 
   @override
   String get missionAuthMethodHeader => '認証方法案内';
@@ -960,7 +960,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get missionRewardInfoHeader => 'ミッション報酬情報';
 
   @override
-  String get missionStartAuthButton => 'ミッション認証を開始';
+  String get missionStartAuthButton => '認証開始';
 
   @override
   String get missionCompletedBadge => '認証完了';
@@ -1022,7 +1022,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get badgeTest => 'テスト用';
 
   @override
-  String get authTypePhotoGps => '写真 + GPS 認証';
+  String get authTypePhotoGps => '写真認証';
 
   @override
   String get spatialMapTitleSuyeong => '水営江辺認証可能散策区域 Map';
@@ -1284,4 +1284,13 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get missionOutsideRadiusNotice =>
       '現在の位置ではこのミッションを実行できません。場所との距離を確認してから再試行してください。';
+
+  @override
+  String get authTypeTrail => '探訪';
+
+  @override
+  String get missionStateAvailable => '挑戦可能';
+
+  @override
+  String get missionStateCompleted => '完了';
 }

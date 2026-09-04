@@ -370,7 +370,7 @@ abstract class AppLocalizations {
   /// No description provided for @authTypeGps.
   ///
   /// In ko, this message translates to:
-  /// **'GPS 인증'**
+  /// **'방문 인증'**
   String get authTypeGps;
 
   /// No description provided for @authTypeManual.
@@ -382,7 +382,7 @@ abstract class AppLocalizations {
   /// No description provided for @authTypePhoto.
   ///
   /// In ko, this message translates to:
-  /// **'현장사진 인증'**
+  /// **'사진 인증'**
   String get authTypePhoto;
 
   /// No description provided for @authTypeQr.
@@ -736,19 +736,19 @@ abstract class AppLocalizations {
   /// No description provided for @missionAuthActionGps.
   ///
   /// In ko, this message translates to:
-  /// **'GPS 인증'**
+  /// **'방문 인증'**
   String get missionAuthActionGps;
 
   /// No description provided for @missionAuthActionPhoto.
   ///
   /// In ko, this message translates to:
-  /// **'현장 사진 촬영'**
+  /// **'사진 촬영'**
   String get missionAuthActionPhoto;
 
   /// No description provided for @missionAuthActionQr.
   ///
   /// In ko, this message translates to:
-  /// **'QR 스캔'**
+  /// **'QR 인증'**
   String get missionAuthActionQr;
 
   /// No description provided for @missionCompletedCount.
@@ -808,7 +808,7 @@ abstract class AppLocalizations {
   /// No description provided for @missionStartAction.
   ///
   /// In ko, this message translates to:
-  /// **'미션 도전하기'**
+  /// **'도전'**
   String get missionStartAction;
 
   /// No description provided for @missionTitle.
@@ -1948,7 +1948,7 @@ abstract class AppLocalizations {
   /// No description provided for @myLocationCheckButton.
   ///
   /// In ko, this message translates to:
-  /// **'내 위치 기준 확인'**
+  /// **'내 위치 확인'**
   String get myLocationCheckButton;
 
   /// No description provided for @missionAuthMethodHeader.
@@ -1966,7 +1966,7 @@ abstract class AppLocalizations {
   /// No description provided for @missionStartAuthButton.
   ///
   /// In ko, this message translates to:
-  /// **'미션 인증 시작하기'**
+  /// **'인증 시작'**
   String get missionStartAuthButton;
 
   /// No description provided for @missionCompletedBadge.
@@ -2086,7 +2086,7 @@ abstract class AppLocalizations {
   /// No description provided for @authTypePhotoGps.
   ///
   /// In ko, this message translates to:
-  /// **'사진 + GPS 인증'**
+  /// **'사진 인증'**
   String get authTypePhotoGps;
 
   /// No description provided for @spatialMapTitleSuyeong.
@@ -2556,6 +2556,24 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'현재 위치에서는 이 미션을 수행할 수 없습니다. 장소와의 거리를 확인한 후 다시 시도해 주세요.'**
   String get missionOutsideRadiusNotice;
+
+  /// No description provided for @authTypeTrail.
+  ///
+  /// In ko, this message translates to:
+  /// **'탐방'**
+  String get authTypeTrail;
+
+  /// No description provided for @missionStateAvailable.
+  ///
+  /// In ko, this message translates to:
+  /// **'도전 가능'**
+  String get missionStateAvailable;
+
+  /// No description provided for @missionStateCompleted.
+  ///
+  /// In ko, this message translates to:
+  /// **'완료'**
+  String get missionStateCompleted;
 }
 
 class _AppLocalizationsDelegate

@@ -24,7 +24,12 @@ class L10nMappers {
       case 'PHOTO':
       case 'PHOTO_VERIFICATION':
       case 'PHOTO_GPS':
-      return l10n.authTypePhotoGps;
+        return l10n.authTypePhoto;
+      case 'ROUTE':
+      case 'TRAIL':
+      case 'EXPLORE':
+      case 'COURSE':
+        return l10n.authTypeTrail;
       default:
         return l10n.authTypeManual;
     }

@@ -98,7 +98,7 @@ void main() {
       // Assert Chinese Category, Test Badge, and Auth Badge
       expect(find.text('常规'), findsOneWidget);
       expect(find.text('测试用'), findsOneWidget);
-      expect(find.text('图片 + GPS 验证'), findsOneWidget);
+      expect(find.text('照片认证'), findsOneWidget);
 
       // Assert NO Korean Leakage on ZH Screen
       expect(find.text('일반'), findsNothing);
@@ -133,7 +133,7 @@ void main() {
       // Assert Japanese Category, Test Badge, and Auth Badge
       expect(find.text('一般'), findsOneWidget);
       expect(find.text('テスト用'), findsOneWidget);
-      expect(find.text('写真 + GPS 認証'), findsOneWidget);
+      expect(find.text('写真認証'), findsOneWidget);
 
       // Assert NO Korean Leakage on JA Screen
       expect(find.text('일반'), findsNothing);
@@ -162,7 +162,7 @@ void main() {
       expect(find.text('[QA] Yongdusan Park GPS Visit Mission'), findsOneWidget);
       expect(find.text('General'), findsOneWidget);
       expect(find.text('Test'), findsOneWidget);
-      expect(find.text('Photo + GPS Verification'), findsOneWidget);
+      expect(find.text('Photo Verification'), findsOneWidget);
     });
 
     testWidgets('TEST SPATIAL ARB STRINGS ZH_HANS: AppLocalizations renders Simplified Chinese spatial map strings without Korean fallback', (WidgetTester tester) async {

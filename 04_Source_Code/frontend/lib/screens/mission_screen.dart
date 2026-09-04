@@ -22,6 +22,7 @@ class _MissionScreenState extends State<MissionScreen> {
   List<Mission> _missions = [];
   bool _isLoading = false;
   String? _lastLocaleCode;
+  String _selectedState = 'AVAILABLE'; // 'AVAILABLE' | 'COMPLETED'
   String _selectedCategory = 'ALL';
 
   final List<String> _categoryKeys = [
@@ -57,8 +58,17 @@ class _MissionScreenState extends State<MissionScreen> {
   }
 
   List<Mission> get _filteredMissions {
-    if (_selectedCategory == 'ALL') return _missions;
-    return _missions.where((m) {
+    // 1st Axis: State Filter (Available vs Completed)
+    final stateFiltered = _missions.where((m) {
+      if (_selectedState == 'COMPLETED') {
+        return m.isCompleted;
+      }
+      return !m.isCompleted;
+    }).toList();
+
+    // 2nd Axis: Category Filter
+    if (_selectedCategory == 'ALL') return stateFiltered;
+    return stateFiltered.where((m) {
       final cat = m.category.toUpperCase();
       if (_selectedCategory == 'FOOD') {
         return cat.contains('FOOD') || cat.contains('음식') || cat.contains('식당') || cat.contains('맛집') || cat.contains('먹거리');
@@ -83,6 +93,7 @@ class _MissionScreenState extends State<MissionScreen> {
 
     final totalMissions = _missions.length;
     final completedCount = _missions.where((m) => m.isCompleted).length;
+    final availableCount = _missions.where((m) => !m.isCompleted).length;
     final progressPercent = totalMissions > 0 ? (completedCount / totalMissions).clamp(0.0, 1.0) : 0.0;
 
     return Scaffold(
@@ -121,7 +132,7 @@ class _MissionScreenState extends State<MissionScreen> {
                     borderRadius: BorderRadius.circular(16.0),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primary.withAlpha(76), // 0.3 opacity
+                        color: AppColors.primary.withAlpha(76),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -196,9 +207,121 @@ class _MissionScreenState extends State<MissionScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 24.0),
+                const SizedBox(height: 20.0),
 
-                // Customer-Facing Category Filter Tabs
+                // UX-04: Primary State Selector [도전 가능 N] [완료 N]
+                Row(
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        onTap: () => setState(() => _selectedState = 'AVAILABLE'),
+                        borderRadius: BorderRadius.circular(12.0),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 12.0),
+                          decoration: BoxDecoration(
+                            color: _selectedState == 'AVAILABLE'
+                                ? AppColors.primary
+                                : AppColors.surface,
+                            borderRadius: BorderRadius.circular(12.0),
+                            border: Border.all(
+                              color: _selectedState == 'AVAILABLE'
+                                  ? AppColors.primary
+                                  : AppColors.border,
+                            ),
+                            boxShadow: _selectedState == 'AVAILABLE'
+                                ? [
+                                    BoxShadow(
+                                      color: AppColors.primary.withAlpha(40),
+                                      blurRadius: 6,
+                                      offset: const Offset(0, 2),
+                                    )
+                                  ]
+                                : [],
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.flag_outlined,
+                                size: 16.0,
+                                color: _selectedState == 'AVAILABLE'
+                                    ? Colors.white
+                                    : AppColors.textSecondary,
+                              ),
+                              const SizedBox(width: 6.0),
+                              Text(
+                                '${l10n.missionStateAvailable} $availableCount',
+                                style: TextStyle(
+                                  fontSize: 14.0,
+                                  fontWeight: FontWeight.bold,
+                                  color: _selectedState == 'AVAILABLE'
+                                      ? Colors.white
+                                      : AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12.0),
+                    Expanded(
+                      child: InkWell(
+                        onTap: () => setState(() => _selectedState = 'COMPLETED'),
+                        borderRadius: BorderRadius.circular(12.0),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 12.0),
+                          decoration: BoxDecoration(
+                            color: _selectedState == 'COMPLETED'
+                                ? AppColors.primary
+                                : AppColors.surface,
+                            borderRadius: BorderRadius.circular(12.0),
+                            border: Border.all(
+                              color: _selectedState == 'COMPLETED'
+                                  ? AppColors.primary
+                                  : AppColors.border,
+                            ),
+                            boxShadow: _selectedState == 'COMPLETED'
+                                ? [
+                                    BoxShadow(
+                                      color: AppColors.primary.withAlpha(40),
+                                      blurRadius: 6,
+                                      offset: const Offset(0, 2),
+                                    )
+                                  ]
+                                : [],
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.check_circle_outline,
+                                size: 16.0,
+                                color: _selectedState == 'COMPLETED'
+                                    ? Colors.white
+                                    : AppColors.textSecondary,
+                              ),
+                              const SizedBox(width: 6.0),
+                              Text(
+                                '${l10n.missionStateCompleted} $completedCount',
+                                style: TextStyle(
+                                  fontSize: 14.0,
+                                  fontWeight: FontWeight.bold,
+                                  color: _selectedState == 'COMPLETED'
+                                      ? Colors.white
+                                      : AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16.0),
+
+                // Secondary Category Filter Tabs
                 SizedBox(
                   height: 38.0,
                   child: ListView.separated(
@@ -244,7 +367,9 @@ class _MissionScreenState extends State<MissionScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      l10n.missionAllList,
+                      _selectedState == 'COMPLETED'
+                          ? l10n.missionCompletedCount
+                          : l10n.missionAllList,
                       style: const TextStyle(
                         fontSize: 17.0,
                         fontWeight: FontWeight.bold,

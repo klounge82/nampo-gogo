@@ -27,9 +27,17 @@ class _BusinessPendingShellState extends State<BusinessPendingShell> {
     final user = authProvider.currentUser;
     final status = user?.businessApplicationStatus ?? 'PENDING';
 
-    return Theme(
-      data: BusinessTheme.themeData,
-      child: Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        final authP = Provider.of<AuthProvider>(context, listen: false);
+        final modeP = Provider.of<AppModeProvider>(context, listen: false);
+        modeP.switchMode(AppMode.customer, authP.currentUser);
+      },
+      child: Theme(
+        data: BusinessTheme.themeData,
+        child: Scaffold(
         backgroundColor: const Color(0xFFF4F8FA),
         appBar: AppBar(
           title: Text(
@@ -186,6 +194,7 @@ class _BusinessPendingShellState extends State<BusinessPendingShell> {
               ),
             ),
           ),
+        ),
         ),
       ),
     );

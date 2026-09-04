@@ -35,9 +35,21 @@ class _BusinessAppShellState extends State<BusinessAppShell> {
     // Sync mode with user
     modeProvider.syncUser(authProvider.currentUser);
 
-    return Theme(
-      data: BusinessTheme.themeData,
-      child: Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (_currentIndex != 0) {
+          setState(() => _currentIndex = 0);
+          return;
+        }
+        final authP = Provider.of<AuthProvider>(context, listen: false);
+        final modeP = Provider.of<AppModeProvider>(context, listen: false);
+        modeP.switchMode(AppMode.customer, authP.currentUser);
+      },
+      child: Theme(
+        data: BusinessTheme.themeData,
+        child: Scaffold(
         body: IndexedStack(index: _currentIndex, children: _pages),
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: _currentIndex,
@@ -76,6 +88,7 @@ class _BusinessAppShellState extends State<BusinessAppShell> {
               label: '예약 관리',
             ),
           ],
+        ),
         ),
       ),
     );

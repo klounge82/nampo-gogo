@@ -61,28 +61,49 @@ class MissionCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Top Header: Category Icon + Category Name & Status Badge
+                // Top Header: Canonical Auth Label + Status Badge
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(6.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
                       decoration: BoxDecoration(
                         color: _getCategoryColor(mission.category).withAlpha(20),
                         borderRadius: BorderRadius.circular(6.0),
                       ),
-                      child: Icon(
-                        _getCategoryIcon(mission.category),
-                        size: 16.0,
-                        color: _getCategoryColor(mission.category),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            _getCategoryIcon(mission.category),
+                            size: 14.0,
+                            color: _getCategoryColor(mission.category),
+                          ),
+                          const SizedBox(width: 4.0),
+                          Text(
+                            L10nMappers.mapCategory(l10n, mission.category),
+                            style: TextStyle(
+                              fontSize: 11.0,
+                              fontWeight: FontWeight.bold,
+                              color: _getCategoryColor(mission.category),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(width: 8.0),
-                    Text(
-                      L10nMappers.mapCategory(l10n, mission.category),
-                      style: TextStyle(
-                        fontSize: 12.0,
-                        fontWeight: FontWeight.bold,
-                        color: _getCategoryColor(mission.category),
+                    const SizedBox(width: 6.0),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                      decoration: BoxDecoration(
+                        color: _getAuthColor(mission.authType).withAlpha(20),
+                        borderRadius: BorderRadius.circular(6.0),
+                      ),
+                      child: Text(
+                        L10nMappers.mapMissionAuthType(l10n, mission.authType),
+                        style: TextStyle(
+                          fontSize: 11.0,
+                          fontWeight: FontWeight.bold,
+                          color: _getAuthColor(mission.authType),
+                        ),
                       ),
                     ),
                     const Spacer(),
@@ -132,14 +153,13 @@ class MissionCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 10.0),
 
-                // Title (Reward-first visually prominent title)
+                // Title
                 Text(
                   displayTitle,
                   style: TextStyle(
                     fontSize: 15.0,
                     fontWeight: FontWeight.bold,
                     color: isCompleted ? AppColors.textSecondary : AppColors.textPrimary,
-                    decoration: isCompleted ? TextDecoration.none : null,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -195,7 +215,7 @@ class MissionCard extends StatelessWidget {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: isCompleted ? Colors.grey.shade300 : AppColors.primary,
                         foregroundColor: isCompleted ? Colors.grey.shade600 : Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 8.0),
                         minimumSize: Size.zero,
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         shape: RoundedRectangleBorder(
@@ -221,39 +241,27 @@ class MissionCard extends StatelessWidget {
     );
   }
 
-  IconData _getCategoryIcon(String category) {
-    final cat = category.toUpperCase();
-    if (cat.contains('PHOTO') || cat.contains('사진')) {
+  IconData _getAuthIcon(String authType) {
+    final type = authType.toUpperCase();
+    if (type.contains('PHOTO')) {
       return Icons.camera_alt_outlined;
-    } else if (cat.contains('GPS') || cat.contains('LOCATION') || cat.contains('위치')) {
-      return Icons.location_on_outlined;
-    } else if (cat.contains('QR')) {
+    } else if (type.contains('QR')) {
       return Icons.qr_code_scanner_rounded;
-    } else if (cat.contains('FOOD') || cat.contains('식당') || cat.contains('음식') || cat.contains('맛집')) {
-      return Icons.restaurant_rounded;
-    } else if (cat.contains('SHOPPING') || cat.contains('쇼핑') || cat.contains('시장')) {
-      return Icons.shopping_bag_outlined;
-    } else if (cat.contains('EXPERIENCE') || cat.contains('체험') || cat.contains('문화')) {
-      return Icons.theater_comedy_outlined;
+    } else if (type.contains('ROUTE') || type.contains('TRAIL') || type.contains('EXPLORE')) {
+      return Icons.explore_outlined;
     }
-    return Icons.explore_outlined;
+    return Icons.place_outlined;
   }
 
-  Color _getCategoryColor(String category) {
-    final cat = category.toUpperCase();
-    if (cat.contains('PHOTO') || cat.contains('사진')) {
+  Color _getAuthColor(String authType) {
+    final type = authType.toUpperCase();
+    if (type.contains('PHOTO')) {
       return Colors.purple;
-    } else if (cat.contains('GPS') || cat.contains('LOCATION') || cat.contains('위치')) {
-      return Colors.blue;
-    } else if (cat.contains('QR')) {
+    } else if (type.contains('QR')) {
       return Colors.teal;
-    } else if (cat.contains('FOOD') || cat.contains('식당') || cat.contains('음식') || cat.contains('맛집')) {
-      return Colors.orange;
-    } else if (cat.contains('SHOPPING') || cat.contains('쇼핑') || cat.contains('시장')) {
-      return Colors.pink;
-    } else if (cat.contains('EXPERIENCE') || cat.contains('체험') || cat.contains('문화')) {
+    } else if (type.contains('ROUTE') || type.contains('TRAIL') || type.contains('EXPLORE')) {
       return Colors.indigo;
     }
-    return AppColors.primary;
+    return Colors.blue;
   }
 }

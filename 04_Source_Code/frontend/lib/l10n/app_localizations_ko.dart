@@ -143,13 +143,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get attractionCategory => '관광지';
 
   @override
-  String get authTypeGps => 'GPS 인증';
+  String get authTypeGps => '방문 인증';
 
   @override
   String get authTypeManual => '방문 인증';
 
   @override
-  String get authTypePhoto => '현장사진 인증';
+  String get authTypePhoto => '사진 인증';
 
   @override
   String get authTypeQr => 'QR 인증';
@@ -326,13 +326,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get missionAllList => '전체 미션 목록';
 
   @override
-  String get missionAuthActionGps => 'GPS 인증';
+  String get missionAuthActionGps => '방문 인증';
 
   @override
-  String get missionAuthActionPhoto => '현장 사진 촬영';
+  String get missionAuthActionPhoto => '사진 촬영';
 
   @override
-  String get missionAuthActionQr => 'QR 스캔';
+  String get missionAuthActionQr => 'QR 인증';
 
   @override
   String get missionCompletedCount => '완료한 미션';
@@ -363,7 +363,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get missionRelatedStoreSub => '미션을 수행할 매장의 상세 위치 및 주소를 확인합니다.';
 
   @override
-  String get missionStartAction => '미션 도전하기';
+  String get missionStartAction => '도전';
 
   @override
   String get missionTitle => '미션';
@@ -957,7 +957,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get myLocationCheckButton => '내 위치 기준 확인';
+  String get myLocationCheckButton => '내 위치 확인';
 
   @override
   String get missionAuthMethodHeader => '인증 방식 안내';
@@ -966,7 +966,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get missionRewardInfoHeader => '미션 보상 정보';
 
   @override
-  String get missionStartAuthButton => '미션 인증 시작하기';
+  String get missionStartAuthButton => '인증 시작';
 
   @override
   String get missionCompletedBadge => '인증 완료';
@@ -1028,7 +1028,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get badgeTest => '테스트용';
 
   @override
-  String get authTypePhotoGps => '사진 + GPS 인증';
+  String get authTypePhotoGps => '사진 인증';
 
   @override
   String get spatialMapTitleSuyeong => '수영강변 인증 가능 산책 구역 Map';
@@ -1291,4 +1291,13 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get missionOutsideRadiusNotice =>
       '현재 위치에서는 이 미션을 수행할 수 없습니다. 장소와의 거리를 확인한 후 다시 시도해 주세요.';
+
+  @override
+  String get authTypeTrail => '탐방';
+
+  @override
+  String get missionStateAvailable => '도전 가능';
+
+  @override
+  String get missionStateCompleted => '완료';
 }
