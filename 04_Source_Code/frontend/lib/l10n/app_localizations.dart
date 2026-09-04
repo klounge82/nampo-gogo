@@ -2520,6 +2520,42 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'+{points}P 미션'**
   String exploreMissionRewardBadge(Object points);
+
+  /// No description provided for @cameraErrorTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'카메라 오류'**
+  String get cameraErrorTitle;
+
+  /// No description provided for @verificationFailedTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'인증 실패'**
+  String get verificationFailedTitle;
+
+  /// No description provided for @verificationFailedBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'미션 인증 처리 중 오류가 발생했습니다.'**
+  String get verificationFailedBody;
+
+  /// No description provided for @qrInvalidCode.
+  ///
+  /// In ko, this message translates to:
+  /// **'유효하지 않은 QR 코드입니다.'**
+  String get qrInvalidCode;
+
+  /// No description provided for @missionAlreadyCompleted.
+  ///
+  /// In ko, this message translates to:
+  /// **'이미 완료한 미션입니다.'**
+  String get missionAlreadyCompleted;
+
+  /// No description provided for @missionOutsideRadiusNotice.
+  ///
+  /// In ko, this message translates to:
+  /// **'현재 위치에서는 이 미션을 수행할 수 없습니다. 장소와의 거리를 확인한 후 다시 시도해 주세요.'**
+  String get missionOutsideRadiusNotice;
 }
 
 class _AppLocalizationsDelegate

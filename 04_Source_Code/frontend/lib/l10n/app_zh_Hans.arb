@@ -447,5 +447,11 @@
     "placeholders": {
       "points": {}
     }
-  }
+  },
+  "cameraErrorTitle": "相机错误",
+  "verificationFailedTitle": "验证失败",
+  "verificationFailedBody": "任务验证处理过程中发生错误。",
+  "qrInvalidCode": "无效的二维码。",
+  "missionAlreadyCompleted": "已完成的任务。",
+  "missionOutsideRadiusNotice": "在当前位置无法执行此任务。请确认与地点的距离后重试。"
 }

@@ -1310,4 +1310,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String exploreMissionRewardBadge(Object points) {
     return '+${points}P Mission';
   }
+
+  @override
+  String get cameraErrorTitle => 'Camera Error';
+
+  @override
+  String get verificationFailedTitle => 'Verification Failed';
+
+  @override
+  String get verificationFailedBody =>
+      'An error occurred during mission verification.';
+
+  @override
+  String get qrInvalidCode => 'Invalid QR code.';
+
+  @override
+  String get missionAlreadyCompleted => 'This mission is already completed.';
+
+  @override
+  String get missionOutsideRadiusNotice =>
+      'Cannot perform this mission from your current location. Please check the distance to the location and try again.';
 }

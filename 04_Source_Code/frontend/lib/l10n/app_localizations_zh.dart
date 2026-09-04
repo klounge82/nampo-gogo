@@ -1258,6 +1258,24 @@ class AppLocalizationsZh extends AppLocalizations {
   String exploreMissionRewardBadge(Object points) {
     return '+${points}P 任务';
   }
+
+  @override
+  String get cameraErrorTitle => '相机错误';
+
+  @override
+  String get verificationFailedTitle => '验证失败';
+
+  @override
+  String get verificationFailedBody => '任务验证处理过程中发生错误。';
+
+  @override
+  String get qrInvalidCode => '无效的二维码。';
+
+  @override
+  String get missionAlreadyCompleted => '已完成的任务。';
+
+  @override
+  String get missionOutsideRadiusNotice => '在当前位置无法执行此任务。请确认与地点的距离后重试。';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -2514,4 +2532,22 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String exploreMissionRewardBadge(Object points) {
     return '+${points}P 任务';
   }
+
+  @override
+  String get cameraErrorTitle => '相机错误';
+
+  @override
+  String get verificationFailedTitle => '验证失败';
+
+  @override
+  String get verificationFailedBody => '任务验证处理过程中发生错误。';
+
+  @override
+  String get qrInvalidCode => '无效的二维码。';
+
+  @override
+  String get missionAlreadyCompleted => '已完成的任务。';
+
+  @override
+  String get missionOutsideRadiusNotice => '在当前位置无法执行此任务。请确认与地点的距离后重试。';
 }

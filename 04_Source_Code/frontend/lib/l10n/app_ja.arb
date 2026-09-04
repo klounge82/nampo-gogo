@@ -447,5 +447,11 @@
     "placeholders": {
       "points": {}
     }
-  }
+  },
+  "cameraErrorTitle": "カメラエラー",
+  "verificationFailedTitle": "認証に失敗しました",
+  "verificationFailedBody": "ミッション認証処理中にエラーが発生しました。",
+  "qrInvalidCode": "無効なQRコードです。",
+  "missionAlreadyCompleted": "既に完了したミッションです。",
+  "missionOutsideRadiusNotice": "現在の位置ではこのミッションを実行できません。場所との距離を確認してから再試行してください。"
 }

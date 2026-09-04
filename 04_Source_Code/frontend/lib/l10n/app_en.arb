@@ -447,5 +447,11 @@
     "placeholders": {
       "points": {}
     }
-  }
+  },
+  "cameraErrorTitle": "Camera Error",
+  "verificationFailedTitle": "Verification Failed",
+  "verificationFailedBody": "An error occurred during mission verification.",
+  "qrInvalidCode": "Invalid QR code.",
+  "missionAlreadyCompleted": "This mission is already completed.",
+  "missionOutsideRadiusNotice": "Cannot perform this mission from your current location. Please check the distance to the location and try again."
 }

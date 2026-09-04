@@ -86,6 +86,7 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
   }
 
   Future<void> _performServerVerification(Mission mission) async {
+    final l10n = AppLocalizations.of(context);
     final authUpper = mission.authType.toUpperCase();
     final isPhotoGps = authUpper.contains('PHOTO_GPS');
     final isPhoto = authUpper.contains('PHOTO');
@@ -95,7 +96,6 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
     double? longitude;
 
     if (isPhoto || isPhotoGps) {
-      final l10n = AppLocalizations.of(context);
       try {
         final pos = await LocationService().getCurrentLocation();
         latitude = pos.latitude;
@@ -177,7 +177,7 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
         imageBase64 = base64Encode(bytes);
       } catch (camErr) {
         if (!mounted) return;
-        _showErrorDialog('카메라 오류', '사진을 촬영할 수 없습니다. 카메라 권한을 확인해주세요.');
+        _showErrorDialog(l10n?.cameraErrorTitle ?? '카메라 오류', l10n?.cameraStartFailed ?? '사진을 촬영할 수 없습니다. 카메라 권한을 확인해주세요.');
         return;
       }
     } else {
@@ -188,8 +188,8 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
       } catch (locErr) {
         if (!mounted) return;
         _showErrorDialog(
-          '위치 오류',
-          'GPS 위치 정보를 가져올 수 없습니다. 위치 권한 및 GPS를 확인해주세요.',
+          l10n?.verificationLocationUnavailableTitle ?? '위치 오류',
+          l10n?.verificationLocationUnavailableBody ?? 'GPS 위치 정보를 가져올 수 없습니다. 위치 권한 및 GPS를 확인해주세요.',
         );
         return;
       }
@@ -216,9 +216,10 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
         if (!mounted) return;
         _showSuccessDialog(context, res['points_awarded'] as int);
       } else {
+        final l10n = AppLocalizations.of(context);
         _showErrorDialog(
-          '인증 실패',
-          _mapErrorMessage(res['message'] as String? ?? '서버 검증 오류'),
+          l10n?.verificationFailedTitle ?? '인증 실패',
+          _mapErrorMessage(l10n, res['message'] as String? ?? ''),
         );
       }
     } catch (e) {
@@ -231,7 +232,8 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
 
   Future<void> _performQRVerification(Mission mission, String qrCode) async {
     if (qrCode.trim().isEmpty) {
-      _showErrorDialog('인증 실패', '유효하지 않은 QR 코드입니다.');
+      final l10n = AppLocalizations.of(context);
+      _showErrorDialog(l10n?.verificationFailedTitle ?? '인증 실패', l10n?.qrInvalidCode ?? '유효하지 않은 QR 코드입니다.');
       return;
     }
     setState(() => _isAuthenticating = true);
@@ -262,9 +264,10 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
         if (!mounted) return;
         _showSuccessDialog(context, res['points_awarded'] as int);
       } else {
+        final l10n = AppLocalizations.of(context);
         _showErrorDialog(
-          '인증 실패',
-          _mapErrorMessage(res['message'] as String? ?? '검증 오류'),
+          l10n?.verificationFailedTitle ?? '인증 실패',
+          _mapErrorMessage(l10n, res['message'] as String? ?? ''),
         );
       }
     } catch (e) {
@@ -277,8 +280,8 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
 
   void _handleVerificationError(dynamic error) {
     final l10n = AppLocalizations.of(context);
-    String title = l10n?.dialogErrorTitle ?? '인증 실패';
-    String body = l10n?.dialogErrorTitle ?? '미션 인증 처리 중 오류가 발생했습니다.';
+    String title = l10n?.verificationFailedTitle ?? l10n?.dialogErrorTitle ?? '인증 실패';
+    String body = l10n?.verificationFailedBody ?? '미션 인증 처리 중 오류가 발생했습니다.';
 
     if (error is DioException && error.response?.data != null) {
       final data = error.response!.data;
@@ -342,27 +345,27 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
           l10n?.verificationLocationUnavailableBody ??
           'GPS 위치 정보를 가져오지 못했습니다. 잠시 후 다시 시도하거나 위치 서비스 상태를 확인해 주세요.';
     } else {
-      body = _extractErrorMessage(error);
+      body = _extractErrorMessage(l10n, error);
     }
 
     _showErrorDialog(title, body);
   }
 
-  String _extractErrorMessage(dynamic error) {
+  String _extractErrorMessage(AppLocalizations? l10n, dynamic error) {
     if (error is DioException && error.response?.data != null) {
       final data = error.response!.data;
       if (data is Map &&
           data.containsKey('detail') &&
           data['detail'] is String) {
-        return _mapErrorMessage(data['detail'] as String);
+        return _mapErrorMessage(l10n, data['detail'] as String);
       } else if (data is String && data.isNotEmpty) {
-        return _mapErrorMessage(data);
+        return _mapErrorMessage(l10n, data);
       }
     }
-    return _mapErrorMessage(error.toString());
+    return _mapErrorMessage(l10n, error.toString());
   }
 
-  String _mapErrorMessage(String raw) {
+  String _mapErrorMessage(AppLocalizations? l10n, String raw) {
     final clean = raw
         .replaceAll('Exception:', '')
         .replaceAll('DioException', '')
@@ -375,38 +378,32 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
         clean.contains('유효하지 않거나') ||
         clean.contains('만료된') ||
         clean.contains('폐기된') ||
-        clean.contains('INVALID')) {
-      return '유효하지 않은 QR 코드입니다.';
+        clean.contains('INVALID') ||
+        clean.contains('QR')) {
+      return l10n?.qrInvalidCode ?? '유효하지 않은 QR 코드입니다.';
     } else if (clean.contains('반경') ||
         clean.contains('거리') ||
         clean.contains('위치') ||
-        clean.contains('GPS')) {
-      if (clean.length > 5 &&
-          !clean.contains('{') &&
-          !clean.contains('Instance of')) {
-        return clean;
-      }
-      return '현재 위치에서는 이 미션을 수행할 수 없습니다. 장소와의 거리를 확인한 후 다시 시도해 주세요.';
-    } else if (clean.contains('이미') || clean.contains('완료')) {
-      return '이미 완료한 미션입니다.';
+        clean.contains('GPS') ||
+        clean.contains('400') ||
+        clean.contains('OUTSIDE')) {
+      return l10n?.missionOutsideRadiusNotice ?? '현재 위치에서는 이 미션을 수행할 수 없습니다. 장소와의 거리를 확인한 후 다시 시도해 주세요.';
+    } else if (clean.contains('이미') || clean.contains('완료') || clean.contains('COMPLETED') || clean.contains('ALREADY')) {
+      return l10n?.missionAlreadyCompleted ?? '이미 완료한 미션입니다.';
     } else if (clean.contains('권한') || clean.contains('permission')) {
-      return 'QR 스캔을 위해 카메라 권한이 필요합니다.';
+      return l10n?.cameraPermissionRequired ?? 'QR 스캔을 위해 카메라 권한이 필요합니다.';
     } else if (clean.contains('위치 서비스') || clean.contains('location')) {
-      return '위치 서비스를 켜주세요.';
+      return l10n?.verificationLocationServiceDisabledTitle ?? '위치 서비스를 켜주세요.';
     } else if (clean.contains('네트워크') ||
         clean.contains('Connection') ||
         clean.contains('SocketException')) {
-      return '네트워크 연결을 확인해 주세요.';
-    } else if (clean.contains('400')) {
-      return '현재 위치에서는 이 미션을 수행할 수 없습니다. 장소와의 거리를 확인한 후 다시 시도해 주세요.';
+      return l10n?.errorNetwork ?? '네트워크 연결을 확인해 주세요.';
     }
-    return clean.isEmpty ? '유효하지 않은 QR 코드입니다.' : clean;
+    return clean.isEmpty ? (l10n?.qrInvalidCode ?? '유효하지 않은 QR 코드입니다.') : clean;
   }
 
   void _showErrorDialog(String title, String message) {
     final l10n = AppLocalizations.of(context)!;
-    final locale = Localizations.localeOf(context);
-    final langCode = locale.languageCode;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
