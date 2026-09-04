@@ -17,6 +17,28 @@ class MissionCard extends StatelessWidget {
     this.onActionButtonTap,
   });
 
+  String _cleanDisplayTitle(String rawTitle) {
+    var t = rawTitle.trim();
+    if (t.endsWith(' 인증!')) {
+      t = t.substring(0, t.length - 4).trim();
+    } else if (t.endsWith(' 인증')) {
+      t = t.substring(0, t.length - 3).trim();
+    } else if (t.endsWith(' 认证！')) {
+      t = t.substring(0, t.length - 4).trim();
+    } else if (t.endsWith(' 认证')) {
+      t = t.substring(0, t.length - 3).trim();
+    } else if (t.endsWith(' 認証！')) {
+      t = t.substring(0, t.length - 4).trim();
+    } else if (t.endsWith(' 認証')) {
+      t = t.substring(0, t.length - 3).trim();
+    } else if (t.endsWith(' Verification!')) {
+      t = t.substring(0, t.length - 14).trim();
+    } else if (t.endsWith(' Verification')) {
+      t = t.substring(0, t.length - 13).trim();
+    }
+    return t;
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -24,11 +46,10 @@ class MissionCard extends StatelessWidget {
     final langCode = locale.languageCode;
     final isCompleted = mission.isCompleted;
 
-    final displayTitle = mission.localizedTitle(langCode);
-    final displayDescription = mission.localizedDescription(langCode);
+    final displayTitle = _cleanDisplayTitle(mission.localizedTitle(langCode));
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12.0),
+      margin: const EdgeInsets.only(bottom: 10.0),
       decoration: BoxDecoration(
         color: isCompleted ? const Color(0xFFF8FAFC) : AppColors.surface,
         borderRadius: BorderRadius.circular(14.0),
@@ -57,59 +78,69 @@ class MissionCard extends StatelessWidget {
               },
           borderRadius: BorderRadius.circular(14.0),
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                // Top Header: Canonical Auth Label + Status Badge
-                Row(
+                // Top Header: Category Badge + Canonical Auth Badge + Status
+                Wrap(
+                  spacing: 6.0,
+                  runSpacing: 4.0,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  alignment: WrapAlignment.spaceBetween,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                      decoration: BoxDecoration(
-                        color: _getCategoryColor(mission.category).withAlpha(20),
-                        borderRadius: BorderRadius.circular(6.0),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            _getCategoryIcon(mission.category),
-                            size: 14.0,
-                            color: _getCategoryColor(mission.category),
+                    Wrap(
+                      spacing: 6.0,
+                      runSpacing: 4.0,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 7.0, vertical: 3.5),
+                          decoration: BoxDecoration(
+                            color: _getCategoryColor(mission.category).withAlpha(20),
+                            borderRadius: BorderRadius.circular(6.0),
                           ),
-                          const SizedBox(width: 4.0),
-                          Text(
-                            L10nMappers.mapCategory(l10n, mission.category),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                _getCategoryIcon(mission.category),
+                                size: 13.0,
+                                color: _getCategoryColor(mission.category),
+                              ),
+                              const SizedBox(width: 4.0),
+                              Text(
+                                L10nMappers.mapCategory(l10n, mission.category),
+                                style: TextStyle(
+                                  fontSize: 11.0,
+                                  fontWeight: FontWeight.bold,
+                                  color: _getCategoryColor(mission.category),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 7.0, vertical: 3.5),
+                          decoration: BoxDecoration(
+                            color: _getAuthColor(mission.authType).withAlpha(20),
+                            borderRadius: BorderRadius.circular(6.0),
+                          ),
+                          child: Text(
+                            L10nMappers.mapMissionAuthType(l10n, mission.authType),
                             style: TextStyle(
                               fontSize: 11.0,
                               fontWeight: FontWeight.bold,
-                              color: _getCategoryColor(mission.category),
+                              color: _getAuthColor(mission.authType),
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 6.0),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                      decoration: BoxDecoration(
-                        color: _getAuthColor(mission.authType).withAlpha(20),
-                        borderRadius: BorderRadius.circular(6.0),
-                      ),
-                      child: Text(
-                        L10nMappers.mapMissionAuthType(l10n, mission.authType),
-                        style: TextStyle(
-                          fontSize: 11.0,
-                          fontWeight: FontWeight.bold,
-                          color: _getAuthColor(mission.authType),
                         ),
-                      ),
+                      ],
                     ),
-                    const Spacer(),
                     if (isCompleted)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 3.0),
                         decoration: BoxDecoration(
                           color: Colors.green.withAlpha(25),
                           borderRadius: BorderRadius.circular(6.0),
@@ -151,9 +182,9 @@ class MissionCard extends StatelessWidget {
                     ],
                   ],
                 ),
-                const SizedBox(height: 10.0),
+                const SizedBox(height: 8.0),
 
-                // Title
+                // Concise Clean Title (List View: Title Only, Long descriptions reserved for Detail screen)
                 Text(
                   displayTitle,
                   style: TextStyle(
@@ -164,27 +195,14 @@ class MissionCard extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4.0),
+                const SizedBox(height: 10.0),
 
-                // Description
-                Text(
-                  displayDescription,
-                  style: const TextStyle(
-                    fontSize: 13.0,
-                    color: AppColors.textSecondary,
-                    height: 1.3,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 12.0),
-
-                // Reward points & Action
+                // Reward points & Concise Action
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 9.0, vertical: 4.0),
                       decoration: BoxDecoration(
                         color: isCompleted
                             ? Colors.grey.withAlpha(25)
@@ -194,7 +212,7 @@ class MissionCard extends StatelessWidget {
                       child: Text(
                         '+ ${mission.points} P',
                         style: TextStyle(
-                          fontSize: 14.0,
+                          fontSize: 13.0,
                           fontWeight: FontWeight.bold,
                           color: isCompleted ? AppColors.textSecondary : AppColors.primary,
                         ),
@@ -215,7 +233,7 @@ class MissionCard extends StatelessWidget {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: isCompleted ? Colors.grey.shade300 : AppColors.primary,
                         foregroundColor: isCompleted ? Colors.grey.shade600 : Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 8.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 7.0),
                         minimumSize: Size.zero,
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         shape: RoundedRectangleBorder(
@@ -241,16 +259,40 @@ class MissionCard extends StatelessWidget {
     );
   }
 
-  IconData _getAuthIcon(String authType) {
-    final type = authType.toUpperCase();
-    if (type.contains('PHOTO')) {
+  IconData _getCategoryIcon(String category) {
+    final cat = category.toUpperCase();
+    if (cat.contains('PHOTO') || cat.contains('사진')) {
       return Icons.camera_alt_outlined;
-    } else if (type.contains('QR')) {
+    } else if (cat.contains('GPS') || cat.contains('LOCATION') || cat.contains('위치')) {
+      return Icons.location_on_outlined;
+    } else if (cat.contains('QR')) {
       return Icons.qr_code_scanner_rounded;
-    } else if (type.contains('ROUTE') || type.contains('TRAIL') || type.contains('EXPLORE')) {
-      return Icons.explore_outlined;
+    } else if (cat.contains('FOOD') || cat.contains('식당') || cat.contains('음식') || cat.contains('맛집')) {
+      return Icons.restaurant_rounded;
+    } else if (cat.contains('SHOPPING') || cat.contains('쇼핑') || cat.contains('시장')) {
+      return Icons.shopping_bag_outlined;
+    } else if (cat.contains('EXPERIENCE') || cat.contains('체험') || cat.contains('문화')) {
+      return Icons.theater_comedy_outlined;
     }
-    return Icons.place_outlined;
+    return Icons.explore_outlined;
+  }
+
+  Color _getCategoryColor(String category) {
+    final cat = category.toUpperCase();
+    if (cat.contains('PHOTO') || cat.contains('사진')) {
+      return Colors.purple;
+    } else if (cat.contains('GPS') || cat.contains('LOCATION') || cat.contains('위치')) {
+      return Colors.blue;
+    } else if (cat.contains('QR')) {
+      return Colors.teal;
+    } else if (cat.contains('FOOD') || cat.contains('식당') || cat.contains('음식') || cat.contains('맛집')) {
+      return Colors.orange;
+    } else if (cat.contains('SHOPPING') || cat.contains('쇼핑') || cat.contains('시장')) {
+      return Colors.pink;
+    } else if (cat.contains('EXPERIENCE') || cat.contains('체험') || cat.contains('문화')) {
+      return Colors.indigo;
+    }
+    return AppColors.primary;
   }
 
   Color _getAuthColor(String authType) {
