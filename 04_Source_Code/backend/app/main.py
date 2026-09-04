@@ -4963,6 +4963,53 @@ def update_review_hide_status(review_id: str, req: schemas.ReviewHideUpdate, adm
 def get_admin_audit_logs(skip: int = 0, limit: int = 30, admin: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
     return db.query(models.AdminAuditLog).order_by(models.AdminAuditLog.created_at.desc()).offset(skip).limit(limit).all()
 
+# --- ADMIN POINT & GIFT READ-ONLY MONITORING APIS ---
+
+@app.get("/admin/points/users/{user_id}/summary", tags=["Admin Points"])
+def get_admin_user_point_summary(
+    user_id: str,
+    admin: models.User = Depends(get_admin_user),
+    db: Session = Depends(get_db)
+):
+    return PointService.admin_get_user_point_summary(db=db, user_id=user_id)
+
+
+@app.get("/admin/points/users/{user_id}/history", tags=["Admin Points"])
+def get_admin_user_point_history(
+    user_id: str,
+    limit: int = 20,
+    offset: int = 0,
+    admin: models.User = Depends(get_admin_user),
+    db: Session = Depends(get_db)
+):
+    return PointService.admin_get_user_point_history(db=db, user_id=user_id, limit=limit, offset=offset)
+
+
+@app.get("/admin/points/users/{user_id}/lots", tags=["Admin Points"])
+def get_admin_user_point_lots(
+    user_id: str,
+    limit: int = 50,
+    offset: int = 0,
+    status_filter: Optional[str] = None,
+    admin: models.User = Depends(get_admin_user),
+    db: Session = Depends(get_db)
+):
+    return PointService.admin_get_user_point_lots(db=db, user_id=user_id, limit=limit, offset=offset, status_filter=status_filter)
+
+
+@app.get("/admin/gifts", tags=["Admin Gifts"])
+def list_admin_point_gifts(
+    limit: int = 20,
+    offset: int = 0,
+    status_filter: Optional[str] = None,
+    user_id: Optional[str] = None,
+    admin: models.User = Depends(get_admin_user),
+    db: Session = Depends(get_db)
+):
+    return PointService.admin_list_gifts(db=db, limit=limit, offset=offset, status_filter=status_filter, user_id=user_id)
+
+
+
 # --- AI RECOMMENDATION MVP APIs ---
 
 import math

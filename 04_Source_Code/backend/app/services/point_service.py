@@ -761,3 +761,168 @@ class PointService:
             "offset": bounded_offset,
             "gifts": results
         }
+
+    @staticmethod
+    def admin_get_user_point_summary(db: Session, user_id: str) -> dict:
+        """
+        Retrieves administrative point balance summary for a target user.
+        Distinguishes authoritative usable lot points from cached user.current_points.
+        """
+        user = db.query(models.User).filter(models.User.id == user_id).first()
+        if not user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="해당 사용자를 찾을 수 없습니다.")
+
+        authoritative_points = PointService.get_authoritative_usable_points(db, user.id)
+
+        return {
+            "user_id": user.id,
+            "authoritative_usable_points": authoritative_points,
+            "cached_current_points": user.current_points,
+            "lifetime_earned_points": user.lifetime_earned_points
+        }
+
+    @staticmethod
+    def admin_get_user_point_history(db: Session, user_id: str, limit: int = 20, offset: int = 0) -> dict:
+        """
+        Retrieves administrative paginated point audit ledger for a target user.
+        """
+        user = db.query(models.User).filter(models.User.id == user_id).first()
+        if not user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="해당 사용자를 찾을 수 없습니다.")
+
+        bounded_limit = max(1, min(limit, 100))
+        bounded_offset = max(0, offset)
+
+        query = db.query(models.PointHistory).filter(models.PointHistory.user_id == user.id)
+        total_count = query.count()
+        histories = query.order_by(models.PointHistory.created_at.desc(), models.PointHistory.id.desc()).offset(bounded_offset).limit(bounded_limit).all()
+
+        return {
+            "user_id": user.id,
+            "total_count": total_count,
+            "limit": bounded_limit,
+            "offset": bounded_offset,
+            "history": [
+                {
+                    "id": h.id,
+                    "user_id": h.user_id,
+                    "amount": h.points,
+                    "activity": h.activity,
+                    "transaction_type": h.transaction_type,
+                    "source_type": h.source_type,
+                    "source_id": h.source_id,
+                    "created_at": h.created_at.isoformat() if h.created_at else None
+                }
+                for h in histories
+            ]
+        }
+
+    @staticmethod
+    def admin_get_user_point_lots(db: Session, user_id: str, limit: int = 50, offset: int = 0, status_filter: Optional[str] = None) -> dict:
+        """
+        Retrieves administrative FEFO lot list for a target user.
+        Strictly READ ONLY - does not modify or consume any lot.
+        Ordered by finite expires_at ASC (NULLS LAST), created_at ASC, id ASC.
+        """
+        user = db.query(models.User).filter(models.User.id == user_id).first()
+        if not user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="해당 사용자를 찾을 수 없습니다.")
+
+        bounded_limit = max(1, min(limit, 100))
+        bounded_offset = max(0, offset)
+
+        query = db.query(models.PointLot).filter(models.PointLot.user_id == user.id)
+        if status_filter:
+            query = query.filter(models.PointLot.status == status_filter.upper())
+
+        query = query.order_by(
+            models.PointLot.expires_at.asc().nullslast(),
+            models.PointLot.created_at.asc(),
+            models.PointLot.id.asc()
+        )
+
+        total_count = query.count()
+        lots = query.offset(bounded_offset).limit(bounded_limit).all()
+
+        return {
+            "user_id": user.id,
+            "total_count": total_count,
+            "limit": bounded_limit,
+            "offset": bounded_offset,
+            "lots": [
+                {
+                    "lot_id": lot.id,
+                    "source_type": lot.source_type,
+                    "original_points": lot.original_points,
+                    "remaining_points": lot.remaining_points,
+                    "reserved_points": lot.reserved_points,
+                    "usable_points": max(0, lot.remaining_points - lot.reserved_points),
+                    "is_transferable": lot.is_transferable,
+                    "expires_at": lot.expires_at.isoformat() if lot.expires_at else None,
+                    "status": lot.status,
+                    "created_at": lot.created_at.isoformat() if lot.created_at else None
+                }
+                for lot in lots
+            ]
+        }
+
+    @staticmethod
+    def admin_list_gifts(
+        db: Session,
+        limit: int = 20,
+        offset: int = 0,
+        status_filter: Optional[str] = None,
+        user_id: Optional[str] = None
+    ) -> dict:
+        """
+        Administrative cross-user gift list.
+        Excludes raw tokens, token hashes, and internal operation IDs.
+        """
+        from datetime import datetime
+        from sqlalchemy import or_
+
+        bounded_limit = max(1, min(limit, 100))
+        bounded_offset = max(0, offset)
+        now = datetime.utcnow()
+
+        query = db.query(models.PointGift)
+        if user_id:
+            query = query.filter(
+                or_(
+                    models.PointGift.sender_id == user_id,
+                    models.PointGift.recipient_id == user_id
+                )
+            )
+        if status_filter:
+            query = query.filter(models.PointGift.status == status_filter.upper())
+
+        query = query.order_by(models.PointGift.created_at.desc(), models.PointGift.id.desc())
+        total_count = query.count()
+        gifts = query.offset(bounded_offset).limit(bounded_limit).all()
+
+        results = []
+        for g in gifts:
+            effective_status = g.status
+            if effective_status == "PENDING" and g.expires_at < now:
+                effective_status = "EXPIRED"
+
+            results.append({
+                "gift_id": g.id,
+                "sender_id": g.sender_id,
+                "recipient_id": g.recipient_id,
+                "gross_points": g.gross_points,
+                "net_points": g.net_points,
+                "fee_points": g.fee_points,
+                "status": effective_status,
+                "created_at": g.created_at.isoformat() if g.created_at else None,
+                "expires_at": g.expires_at.isoformat() if g.expires_at else None,
+                "accepted_at": g.accepted_at.isoformat() if g.accepted_at else None,
+                "cancelled_at": g.cancelled_at.isoformat() if g.cancelled_at else None
+            })
+
+        return {
+            "total_count": total_count,
+            "limit": bounded_limit,
+            "offset": bounded_offset,
+            "gifts": results
+        }

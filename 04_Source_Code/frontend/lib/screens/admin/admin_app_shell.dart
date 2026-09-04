@@ -9,6 +9,7 @@ import 'admin_dashboard_screen.dart';
 import 'admin_business_approval_screen.dart';
 import 'admin_member_manage_screen.dart';
 import '../admin_store_manage_screen.dart';
+import 'admin_point_gift_monitor_screen.dart';
 
 class AdminAppShell extends StatefulWidget {
   const AdminAppShell({super.key});
@@ -239,8 +240,9 @@ class _AdminAppShellState extends State<AdminAppShell> {
           _buildNavItem(1, Icons.verified_user, '사업자 승인', active: true, isMobile: isMobile),
           _buildNavItem(2, Icons.people, '회원 관리', active: true, isMobile: isMobile),
           _buildNavItem(3, Icons.store, '매장 관리', active: true, isMobile: isMobile),
-          _buildNavItem(4, Icons.rate_review, '리뷰·신고', active: false, isMobile: isMobile),
-          _buildNavItem(5, Icons.settings, '시스템 설정', active: false, isMobile: isMobile),
+          _buildNavItem(4, Icons.card_giftcard, '포인트 / 선물 관리', active: true, isMobile: isMobile),
+          _buildNavItem(5, Icons.rate_review, '리뷰·신고', active: false, isMobile: isMobile),
+          _buildNavItem(6, Icons.settings, '시스템 설정', active: false, isMobile: isMobile),
 
           const Spacer(),
 
@@ -481,6 +483,8 @@ class _AdminAppShellState extends State<AdminAppShell> {
         return const AdminMemberManageScreen();
       case 3:
         return const AdminStoreManageScreen();
+      case 4:
+        return const AdminPointGiftMonitorScreen();
       default:
         return const Center(child: Text('준비 중인 기능입니다.'));
     }
