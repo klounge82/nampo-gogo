@@ -6075,7 +6075,7 @@ def remove_profile_image(current_user: models.User = Depends(get_current_user), 
     db.add(current_user)
     db.commit()
     db.refresh(current_user)
-    return current_user
+    return build_user_out_dict(db, current_user)
 
 @app.post("/auth/change-password", tags=["Profile"])
 def change_password(req: schemas.ChangePasswordRequest, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
