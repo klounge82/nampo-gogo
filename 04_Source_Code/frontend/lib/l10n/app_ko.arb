@@ -456,5 +456,13 @@
   "missionOutsideRadiusNotice": "현재 위치에서는 이 미션을 수행할 수 없습니다. 장소와의 거리를 확인한 후 다시 시도해 주세요.",
   "authTypeTrail": "탐방",
   "missionStateAvailable": "도전 가능",
-  "missionStateCompleted": "완료"
+  "missionStateCompleted": "완료",
+  "moreBenefitsSection": "혜택",
+  "moreSupportSection": "지원",
+  "moreModeSwitchSection": "모드 전환",
+  "moreAdminSwitch": "관리자 모드로 전환",
+  "profileSecuritySection": "보안 및 계정",
+  "profileGeneralMember": "일반 회원",
+  "profileBusinessMember": "사업자 회원",
+  "profileAdminMember": "관리자"
 }

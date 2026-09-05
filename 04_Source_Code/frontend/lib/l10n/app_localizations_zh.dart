@@ -1285,6 +1285,30 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get missionStateCompleted => '已完成';
+
+  @override
+  String get moreBenefitsSection => '优惠福利';
+
+  @override
+  String get moreSupportSection => '支持与帮助';
+
+  @override
+  String get moreModeSwitchSection => '模式切换';
+
+  @override
+  String get moreAdminSwitch => '切换到管理员模式';
+
+  @override
+  String get profileSecuritySection => '安全与账号';
+
+  @override
+  String get profileGeneralMember => '普通会员';
+
+  @override
+  String get profileBusinessMember => '商家会员';
+
+  @override
+  String get profileAdminMember => '管理员';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -2568,4 +2592,28 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get missionStateCompleted => '已完成';
+
+  @override
+  String get moreBenefitsSection => '优惠福利';
+
+  @override
+  String get moreSupportSection => '支持与帮助';
+
+  @override
+  String get moreModeSwitchSection => '模式切换';
+
+  @override
+  String get moreAdminSwitch => '切换到管理员模式';
+
+  @override
+  String get profileSecuritySection => '安全与账号';
+
+  @override
+  String get profileGeneralMember => '普通会员';
+
+  @override
+  String get profileBusinessMember => '商家会员';
+
+  @override
+  String get profileAdminMember => '管理员';
 }

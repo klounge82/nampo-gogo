@@ -1300,4 +1300,28 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get missionStateCompleted => '완료';
+
+  @override
+  String get moreBenefitsSection => '혜택';
+
+  @override
+  String get moreSupportSection => '지원';
+
+  @override
+  String get moreModeSwitchSection => '모드 전환';
+
+  @override
+  String get moreAdminSwitch => '관리자 모드로 전환';
+
+  @override
+  String get profileSecuritySection => '보안 및 계정';
+
+  @override
+  String get profileGeneralMember => '일반 회원';
+
+  @override
+  String get profileBusinessMember => '사업자 회원';
+
+  @override
+  String get profileAdminMember => '관리자';
 }

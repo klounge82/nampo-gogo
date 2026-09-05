@@ -1,35 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../main.dart';
 import '../constants/colors.dart';
 import '../config/production_config.dart';
 import '../utils/l10n_mappers.dart';
 import '../providers/auth_provider.dart';
-import '../providers/app_mode_provider.dart';
-import '../providers/locale_provider.dart';
-import 'business_application_screen.dart';
-import 'auth_screen.dart';
-import 'point_history_screen.dart';
-import 'coupon_list_screen.dart';
-import 'user_coupon_screen.dart';
-import 'my_reservations_screen.dart';
-import 'my_reviews_screen.dart';
-import '../main.dart';
-import 'analytics_dashboard_screen.dart';
-import 'payment_history_screen.dart';
-import 'notification_settings_screen.dart';
-import 'favorites_screen.dart';
-import 'activity_screen.dart';
-import 'saved_courses_screen.dart';
-import 'language_settings_screen.dart';
+import '../l10n/app_localizations.dart';
 import 'profile_edit_screen.dart';
 import 'change_password_screen.dart';
 import 'account_delete_screen.dart';
-import 'policy_viewer_screen.dart';
-import '../l10n/app_localizations.dart';
-import '../widgets/language_selector_button.dart';
-import '../config/production_config.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'auth_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -39,16 +18,6 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        Provider.of<AuthProvider>(context, listen: false).refreshUser();
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -66,18 +35,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
         elevation: 0.5,
-        actions: [
-          const Padding(
-            padding: EdgeInsets.only(right: 8.0),
-            child: Center(child: LanguageSelectorButton()),
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         child: Column(
           children: [
-            // Profile Card Header (Conditional login UI)
+            // 1. Profile Card Header (Dedicated Account Information)
             Container(
               color: AppColors.surface,
               padding: const EdgeInsets.symmetric(
@@ -111,7 +74,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         Row(
                           children: [
                             Text(
-                              isLoggedIn ? '${user?.nickname}' : '게스트 사용자',
+                              isLoggedIn ? (user?.nickname ?? '') : l10n.guestModeNotice,
                               style: const TextStyle(
                                 fontSize: 18.0,
                                 fontWeight: FontWeight.bold,
@@ -123,9 +86,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: AppColors.primary.withValues(alpha: 0.15),
+                                  color: AppColors.primary.withAlpha(38),
                                   borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                                  border: Border.all(color: AppColors.primary.withAlpha(76)),
                                 ),
                                 child: Text(
                                   L10nMappers.mapUserTier(
@@ -139,503 +102,91 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 8.0),
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (_) => const ProfileEditScreen(),
-                                    ),
-                                  );
-                                },
-                                child: const Icon(
-                                  Icons.edit,
-                                  size: 18,
-                                  color: Colors.blueAccent,
-                                ),
-                              ),
                             ],
                           ],
                         ),
                         const SizedBox(height: 4.0),
                         Text(
                           isLoggedIn
-                              ? (user?.email != null
-                                    ? _maskEmail(user!.email)
-                                    : '')
+                              ? (user?.email != null ? _maskEmail(user!.email) : '')
                               : l10n.guestModeNotice,
                           style: const TextStyle(
                             fontSize: 13.0,
                             color: AppColors.textSecondary,
                           ),
                         ),
+                        if (isLoggedIn) ...[
+                          const SizedBox(height: 6.0),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade100,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              user?.isAdmin == true
+                                  ? l10n.profileAdminMember
+                                  : (user?.isApprovedBusiness == true
+                                      ? l10n.profileBusinessMember
+                                      : l10n.profileGeneralMember),
+                              style: TextStyle(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey.shade700,
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
-                  isLoggedIn
-                      ? OutlinedButton(
-                          onPressed: () => authProvider.logout(),
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: AppColors.primary),
-                            foregroundColor: AppColors.primary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                          ),
-                          child: Text(
-                            l10n.profileLogout,
-                            style: const TextStyle(fontSize: 12.0),
-                          ),
-                        )
-                      : Column(
-                          children: [
-                            ElevatedButton(
-                              onPressed: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (_) => const AuthScreen(),
-                                  ),
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primary,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 14.0,
-                                  vertical: 6.0,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20.0),
-                                ),
-                              ),
-                              child: Text(
-                                l10n.loginTitle,
-                                style: const TextStyle(
-                                  fontSize: 12.0,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
                 ],
               ),
             ),
+            const SizedBox(height: 16.0),
 
-            // Assets Overview (Points, Coupons)
-            Container(
-              margin: const EdgeInsets.all(16.0),
-              padding: const EdgeInsets.symmetric(vertical: 16.0),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(12.0),
-                border: Border.all(color: AppColors.border),
-              ),
-              child: Row(
-                children: [
-                  _buildAssetColumn(
-                    icon: Icons.monetization_on,
-                    iconColor: AppColors.primary,
-                    value: isLoggedIn ? '${user?.currentPoints ?? 0} P' : '0 P',
-                    label: '보유 포인트',
-                    onTap: () {
-                      if (isLoggedIn) {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const PointHistoryScreen(),
-                          ),
-                        );
-                      } else {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const AuthScreen()),
-                        );
-                      }
-                    },
-                  ),
-                  Container(width: 1.0, height: 40.0, color: AppColors.border),
-                  _buildAssetColumn(
-                    icon: Icons.stars,
-                    iconColor: Colors.amber,
-                    value: isLoggedIn ? '${user?.lifetimeEarnedPoints ?? 0} P' : '0 P',
-                    label: '누적 획득',
-                    onTap: () {
-                      if (isLoggedIn) {
-                        ScaffoldMessenger.of(context).clearSnackBars();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              '누적 획득: ${user?.lifetimeEarnedPoints ?? 0} P (등급: ${L10nMappers.mapUserTier(l10n, user?.lifetimeEarnedPoints ?? 0)})',
-                            ),
-                            behavior: SnackBarBehavior.floating,
-                            duration: const Duration(seconds: 2),
-                          ),
-                        );
-                      } else {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const AuthScreen()),
-                        );
-                      }
-                    },
-                  ),
-                  Container(width: 1.0, height: 40.0, color: AppColors.border),
-                  _buildAssetColumn(
-                    icon: Icons.confirmation_number,
-                    iconColor: AppColors.secondary,
-                    value: isLoggedIn ? l10n.profileCheckAction : '0 개',
-                    label: l10n.profileCouponsLabel,
-                    onTap: () {
-                      if (isLoggedIn) {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const UserCouponScreen(),
-                          ),
-                        );
-                      } else {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const AuthScreen()),
-                        );
-                      }
-                    },
-                  ),
-                ],
-              ),
-            ),
-
-            // Menu List
+            // 2. Account Management Sections
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8.0, bottom: 8.0, top: 12.0),
-                    child: Text(
-                      l10n.profileServiceSettings,
-                      style: const TextStyle(
-                        fontSize: 14.0,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ),
-                  _buildMenuCard([
-                    if (isLoggedIn && user?.isAdmin == true)
-                      _buildMenuItem(
-                        context,
-                        icon: Icons.admin_panel_settings,
-                        title: '관리자 모드로 전환',
-                        onTap: () async {
-                          await Provider.of<AppModeProvider>(
-                            context,
-                            listen: false,
-                          ).switchMode(AppMode.admin, user);
-
-                          if (context.mounted) {
-                            Navigator.of(context).pushAndRemoveUntil(
-                              MaterialPageRoute(
-                                builder: (_) => const RootNavigationSelector(),
-                              ),
-                              (route) => false,
-                            );
-                          }
-                        },
-                      ),
-                    _buildMenuItem(
-                      context,
-                      icon: Icons.storefront,
-                      title: l10n.profilePointStore,
-                      onTap: () {
-                        if (isLoggedIn) {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const CouponListScreen(),
-                            ),
-                          );
-                        } else {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const AuthScreen(),
-                            ),
-                          );
-                        }
-                      },
-                    ),
-                    _buildMenuItem(
-                      context,
-                      icon: Icons.calendar_month,
-                      title: l10n.profileMyReservations,
-                      onTap: () {
-                        if (isLoggedIn) {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const MyReservationsScreen(),
-                            ),
-                          );
-                        } else {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const AuthScreen(),
-                            ),
-                          );
-                        }
-                      },
-                    ),
-                    _buildMenuItem(
-                      context,
-                      icon: Icons.rate_review_outlined,
-                      title: l10n.profileMyReviews,
-                      onTap: () {
-                        if (isLoggedIn) {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const MyReviewsScreen(),
-                            ),
-                          );
-                        } else {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const AuthScreen(),
-                            ),
-                          );
-                        }
-                      },
-                    ),
-                    if (isLoggedIn)
-                      _buildMenuItem(
-                        context,
-                        icon: user?.isApprovedBusiness == true
-                            ? Icons.swap_horiz
-                            : Icons.storefront,
-                        title: user?.isApprovedBusiness == true
-                            ? '사업자 모드로 전환'
-                            : l10n.profileBusinessApply,
-                        onTap: () async {
-                          if (user?.isApprovedBusiness == true) {
-                            await Provider.of<AppModeProvider>(
-                              context,
-                              listen: false,
-                            ).switchMode(AppMode.business, user);
-
-                            if (context.mounted) {
-                              Navigator.of(context).pushAndRemoveUntil(
-                                MaterialPageRoute(
-                                  builder: (_) => const RootNavigationSelector(),
-                                ),
-                                (route) => false,
-                              );
-                            }
-                          } else {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    const BusinessApplicationScreen(),
-                              ),
-                            );
-                          }
-                        },
-                      ),
-                    _buildMenuItem(
-                      context,
-                      icon: Icons.history,
-                      title: l10n.profileActivityLog,
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const ActivityScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                    _buildMenuItem(
-                      context,
-                      icon: Icons.payment,
-                      title: l10n.profilePaymentHistory,
-                      onTap: () {
-                        if (isLoggedIn) {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const PaymentHistoryScreen(),
-                            ),
-                          );
-                        } else {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const AuthScreen(),
-                            ),
-                          );
-                        }
-                      },
-                    ),
-                    _buildMenuItem(
-                      context,
-                      icon: Icons.favorite_border,
-                      title: l10n.profileFavorites,
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const FavoritesScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                    _buildMenuItem(
-                      context,
-                      icon: Icons.feedback_outlined,
-                      title: l10n.profileFeedback,
-                      onTap: () =>
-                          _launchURL(context, ProductionConfig.supportUrl),
-                    ),
-                    _buildMenuItem(
-                      context,
-                      icon: Icons.notifications_active_outlined,
-                      title: l10n.notificationSetting,
-                      onTap: () {
-                        if (isLoggedIn) {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  const NotificationSettingsScreen(),
-                            ),
-                          );
-                        } else {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const AuthScreen(),
-                            ),
-                          );
-                        }
-                      },
-                    ),
-                    _buildMenuItem(
-                      context,
-                      icon: Icons.favorite_border,
-                      title: l10n.mySavedCourses,
-                      onTap: () {
-                        if (isLoggedIn) {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const SavedCoursesScreen(),
-                            ),
-                          );
-                        } else {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const AuthScreen(),
-                            ),
-                          );
-                        }
-                      },
-                    ),
-                    _buildMenuItem(
-                      context,
-                      icon: Icons.language_outlined,
-                      title: l10n.languageSetting,
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const LanguageSettingsScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                  ]),
-
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8.0, bottom: 8.0, top: 20.0),
-                    child: Text(
-                      l10n.profileInfoSupport,
-                      style: const TextStyle(
-                        fontSize: 14.0,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ),
-                  _buildMenuCard([
-                    _buildMenuItem(
-                      context,
-                      icon: Icons.shield_outlined,
-                      title: l10n.profilePrivacyPolicy,
-                      onTap: () {
-                        final loc = context.read<LocaleProvider>().currentLocaleCode;
-                        PolicyViewerScreen.show(
-                          context,
-                          title: l10n.profilePrivacyPolicy,
-                          content: PolicyTexts.getPrivacyPolicy(loc),
-                        );
-                      },
-                    ),
-                    _buildMenuItem(
-                      context,
-                      icon: Icons.description_outlined,
-                      title: l10n.profileTerms,
-                      onTap: () {
-                        final loc = context.read<LocaleProvider>().currentLocaleCode;
-                        PolicyViewerScreen.show(
-                          context,
-                          title: l10n.profileTerms,
-                          content: PolicyTexts.getTermsOfService(loc),
-                        );
-                      },
-                    ),
-                    _buildMenuItem(
-                      context,
-                      icon: Icons.event_note_outlined,
-                      title: l10n.policyRefundTitle,
-                      onTap: () {
-                        final loc = context.read<LocaleProvider>().currentLocaleCode;
-                        PolicyViewerScreen.show(
-                          context,
-                          title: l10n.policyRefundTitle,
-                          content: PolicyTexts.getReservationPolicy(loc),
-                        );
-                      },
-                    ),
-                    _buildMenuItem(
-                      context,
-                      icon: Icons.rate_review_outlined,
-                      title: l10n.profileMyReviews,
-                      onTap: () {
-                        final loc = context.read<LocaleProvider>().currentLocaleCode;
-                        PolicyViewerScreen.show(
-                          context,
-                          title: l10n.profileMyReviews,
-                          content: PolicyTexts.getReviewVisitPolicy(loc),
-                        );
-                      },
-                    ),
-                    _buildMenuItem(
-                      context,
-                      icon: Icons.location_on_outlined,
-                      title: l10n.locationInfoTitle,
-                      onTap: () {
-                        final loc = context.read<LocaleProvider>().currentLocaleCode;
-                        PolicyViewerScreen.show(
-                          context,
-                          title: l10n.locationInfoTitle,
-                          content: PolicyTexts.getLocationCameraGuide(loc),
-                        );
-                      },
-                    ),
-                    _buildMenuItem(
-                      context,
-                      icon: Icons.support_agent_outlined,
-                      title: l10n.customerSupportCenter,
-                      onTap: () => _launchURL(context, ProductionConfig.supportUrl),
-                    ),
-                  ]),
-
                   if (isLoggedIn) ...[
+                    // Section 1: 계정 정보 (Account Info)
                     Padding(
-                      padding: const EdgeInsets.only(
-                        left: 8.0,
-                        bottom: 8.0,
-                        top: 20.0,
-                      ),
+                      padding: const EdgeInsets.only(left: 8.0, bottom: 8.0, top: 8.0),
                       child: Text(
-                        l10n.profileAccountManagement,
+                        l10n.profileTitle,
                         style: const TextStyle(
-                          fontSize: 14.0,
+                          fontSize: 13.0,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                    _buildMenuCard([
+                      _buildMenuItem(
+                        context,
+                        icon: Icons.edit_outlined,
+                        title: l10n.profileEdit,
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const ProfileEditScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                    ]),
+                    const SizedBox(height: 16.0),
+
+                    // Section 2: 보안 및 계정 (Security & Account)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
+                      child: Text(
+                        l10n.profileSecuritySection,
+                        style: const TextStyle(
+                          fontSize: 13.0,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textSecondary,
                         ),
@@ -654,6 +205,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           );
                         },
                       ),
+                    ]),
+                    const SizedBox(height: 16.0),
+
+                    // Section 3: 계정 관리 (Account Management)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
+                      child: Text(
+                        l10n.profileAccountManagement,
+                        style: const TextStyle(
+                          fontSize: 13.0,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                    _buildMenuCard([
+                      _buildMenuItem(
+                        context,
+                        icon: Icons.logout,
+                        title: l10n.profileLogout,
+                        onTap: () async {
+                          await authProvider.logout();
+                          if (context.mounted) {
+                            Navigator.of(context).pop();
+                          }
+                        },
+                      ),
                       _buildMenuItem(
                         context,
                         icon: Icons.no_accounts_outlined,
@@ -667,8 +245,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         },
                       ),
                     ]),
+                  ] else ...[
+                    _buildMenuCard([
+                      _buildMenuItem(
+                        context,
+                        icon: Icons.login,
+                        title: l10n.loginTitle,
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const AuthScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                    ]),
                   ],
-                  const SizedBox(height: 20.0),
+
+                  const SizedBox(height: 24.0),
                   const Center(
                     child: Text(
                       ProductionConfig.currentBuildMarker,
@@ -681,42 +275,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(height: 28.0),
                 ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAssetColumn({
-    required IconData icon,
-    required Color iconColor,
-    required String value,
-    required String label,
-    VoidCallback? onTap,
-  }) {
-    return Expanded(
-      child: InkWell(
-        onTap: onTap,
-        child: Column(
-          children: [
-            Icon(icon, color: iconColor, size: 28.0),
-            const SizedBox(height: 6.0),
-            Text(
-              value,
-              style: const TextStyle(
-                fontSize: 16.0,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 2.0),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 11.0,
-                color: AppColors.textSecondary,
               ),
             ),
           ],
@@ -760,41 +318,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         onTap: onTap,
         dense: true,
-      ),
-    );
-  }
-
-  void _showComingSoon(BuildContext context, String title) {
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('[$title] 페이지는 MVP 1차 릴리즈 이후 공개됩니다.'),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: AppColors.textPrimary,
-      ),
-    );
-  }
-
-  Future<void> _launchURL(BuildContext context, String urlString) async {
-    try {
-      final Uri url = Uri.parse(urlString);
-      if (await canLaunchUrl(url)) {
-        await launchUrl(url, mode: LaunchMode.externalApplication);
-      } else {
-        _showErrorSnackBar(context);
-      }
-    } catch (_) {
-      _showErrorSnackBar(context);
-    }
-  }
-
-  void _showErrorSnackBar(BuildContext context) {
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('페이지를 열 수 없습니다. 잠시 후 다시 시도해 주세요.'),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: Colors.redAccent,
       ),
     );
   }

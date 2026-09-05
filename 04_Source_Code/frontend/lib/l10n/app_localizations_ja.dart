@@ -1293,4 +1293,28 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get missionStateCompleted => '完了';
+
+  @override
+  String get moreBenefitsSection => '特典';
+
+  @override
+  String get moreSupportSection => 'サポート';
+
+  @override
+  String get moreModeSwitchSection => 'モード切替';
+
+  @override
+  String get moreAdminSwitch => '管理者モードに切り替え';
+
+  @override
+  String get profileSecuritySection => 'セキュリティとアカウント';
+
+  @override
+  String get profileGeneralMember => '一般会員';
+
+  @override
+  String get profileBusinessMember => '事業者会員';
+
+  @override
+  String get profileAdminMember => '管理者';
 }

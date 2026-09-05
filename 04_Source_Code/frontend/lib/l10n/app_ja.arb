@@ -456,5 +456,13 @@
   "missionOutsideRadiusNotice": "現在の位置ではこのミッションを実行できません。場所との距離を確認してから再試行してください。",
   "authTypeTrail": "探訪",
   "missionStateAvailable": "挑戦可能",
-  "missionStateCompleted": "完了"
+  "missionStateCompleted": "完了",
+  "moreBenefitsSection": "特典",
+  "moreSupportSection": "サポート",
+  "moreModeSwitchSection": "モード切替",
+  "moreAdminSwitch": "管理者モードに切り替え",
+  "profileSecuritySection": "セキュリティとアカウント",
+  "profileGeneralMember": "一般会員",
+  "profileBusinessMember": "事業者会員",
+  "profileAdminMember": "管理者"
 }

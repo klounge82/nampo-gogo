@@ -2574,6 +2574,54 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'완료'**
   String get missionStateCompleted;
+
+  /// No description provided for @moreBenefitsSection.
+  ///
+  /// In ko, this message translates to:
+  /// **'혜택'**
+  String get moreBenefitsSection;
+
+  /// No description provided for @moreSupportSection.
+  ///
+  /// In ko, this message translates to:
+  /// **'지원'**
+  String get moreSupportSection;
+
+  /// No description provided for @moreModeSwitchSection.
+  ///
+  /// In ko, this message translates to:
+  /// **'모드 전환'**
+  String get moreModeSwitchSection;
+
+  /// No description provided for @moreAdminSwitch.
+  ///
+  /// In ko, this message translates to:
+  /// **'관리자 모드로 전환'**
+  String get moreAdminSwitch;
+
+  /// No description provided for @profileSecuritySection.
+  ///
+  /// In ko, this message translates to:
+  /// **'보안 및 계정'**
+  String get profileSecuritySection;
+
+  /// No description provided for @profileGeneralMember.
+  ///
+  /// In ko, this message translates to:
+  /// **'일반 회원'**
+  String get profileGeneralMember;
+
+  /// No description provided for @profileBusinessMember.
+  ///
+  /// In ko, this message translates to:
+  /// **'사업자 회원'**
+  String get profileBusinessMember;
+
+  /// No description provided for @profileAdminMember.
+  ///
+  /// In ko, this message translates to:
+  /// **'관리자'**
+  String get profileAdminMember;
 }
 
 class _AppLocalizationsDelegate

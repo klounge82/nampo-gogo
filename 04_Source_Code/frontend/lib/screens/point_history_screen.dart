@@ -7,6 +7,7 @@ import '../providers/auth_provider.dart';
 import '../l10n/app_localizations.dart';
 import 'payment_screen.dart';
 import 'point_gift_screen.dart';
+import 'coupon_list_screen.dart';
 
 class PointHistoryScreen extends StatefulWidget {
   const PointHistoryScreen({super.key});
@@ -191,9 +192,39 @@ class _PointHistoryScreenState extends State<PointHistoryScreen> {
             ],
           ),
           const SizedBox(height: 16.0),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+          Wrap(
+            spacing: 8.0,
+            runSpacing: 8.0,
+            alignment: WrapAlignment.end,
             children: [
+              TextButton.icon(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const CouponListScreen(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.storefront, color: Colors.white, size: 18),
+                label: Text(
+                  AppLocalizations.of(context)?.profilePointStore ?? '포인트 교환소',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.white.withAlpha(40),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
               TextButton.icon(
                 onPressed: () {
                   Navigator.of(context).push(
@@ -222,7 +253,6 @@ class _PointHistoryScreenState extends State<PointHistoryScreen> {
                   ),
                 ),
               ),
-              const SizedBox(width: 8.0),
               TextButton.icon(
                 onPressed: () {
                   final user = context.read<AuthProvider>().currentUser;

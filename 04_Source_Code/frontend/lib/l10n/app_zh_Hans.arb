@@ -456,5 +456,13 @@
   "missionOutsideRadiusNotice": "在当前位置无法执行此任务。请确认与地点的距离后重试。",
   "authTypeTrail": "探访",
   "missionStateAvailable": "可挑战",
-  "missionStateCompleted": "已完成"
+  "missionStateCompleted": "已完成",
+  "moreBenefitsSection": "优惠福利",
+  "moreSupportSection": "支持与帮助",
+  "moreModeSwitchSection": "模式切换",
+  "moreAdminSwitch": "切换到管理员模式",
+  "profileSecuritySection": "安全与账号",
+  "profileGeneralMember": "普通会员",
+  "profileBusinessMember": "商家会员",
+  "profileAdminMember": "管理员"
 }

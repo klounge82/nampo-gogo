@@ -456,5 +456,13 @@
   "missionOutsideRadiusNotice": "Cannot perform this mission from your current location. Please check the distance to the location and try again.",
   "authTypeTrail": "Trail",
   "missionStateAvailable": "Available",
-  "missionStateCompleted": "Completed"
+  "missionStateCompleted": "Completed",
+  "moreBenefitsSection": "Benefits",
+  "moreSupportSection": "Support",
+  "moreModeSwitchSection": "Mode Switch",
+  "moreAdminSwitch": "Switch to Admin Mode",
+  "profileSecuritySection": "Security & Account",
+  "profileGeneralMember": "Regular Member",
+  "profileBusinessMember": "Business Member",
+  "profileAdminMember": "Admin"
 }

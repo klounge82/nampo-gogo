@@ -1339,4 +1339,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get missionStateCompleted => 'Completed';
+
+  @override
+  String get moreBenefitsSection => 'Benefits';
+
+  @override
+  String get moreSupportSection => 'Support';
+
+  @override
+  String get moreModeSwitchSection => 'Mode Switch';
+
+  @override
+  String get moreAdminSwitch => 'Switch to Admin Mode';
+
+  @override
+  String get profileSecuritySection => 'Security & Account';
+
+  @override
+  String get profileGeneralMember => 'Regular Member';
+
+  @override
+  String get profileBusinessMember => 'Business Member';
+
+  @override
+  String get profileAdminMember => 'Admin';
 }
