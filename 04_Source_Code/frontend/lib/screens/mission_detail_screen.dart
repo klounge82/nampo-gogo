@@ -455,7 +455,9 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(
-          _mission?.localizedTitle(langCode) ?? l10n.missionDetailTitle,
+          _mission != null
+              ? L10nMappers.cleanMissionDisplayTitle(_mission!.localizedTitle(langCode))
+              : l10n.missionDetailTitle,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: AppColors.surface,
@@ -530,7 +532,7 @@ class _MissionDetailScreenState extends State<MissionDetailScreen> {
                 ),
                 const SizedBox(height: 14.0),
                 Text(
-                  mission.localizedTitle(langCode),
+                  L10nMappers.cleanMissionDisplayTitle(mission.localizedTitle(langCode)),
                   style: const TextStyle(
                     fontSize: 20.0,
                     fontWeight: FontWeight.bold,

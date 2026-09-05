@@ -91,9 +91,9 @@ void main() {
 
       await tester.pump(const Duration(seconds: 1));
 
-      // Assert Chinese Title & Description & Source Match
+      // Assert Chinese Title & Model Description Localization
       expect(find.text('[QA] 龙头山公园 GPS 访问任务'), findsOneWidget);
-      expect(find.text('在龙头山公园 100m 范围内验证 GPS 位置。'), findsOneWidget);
+      expect(realMission.localizedDescription('zh'), '在龙头山公园 100m 范围内验证 GPS 位置。');
 
       // Assert Chinese Category, Test Badge, and Auth Badge
       expect(find.text('常规'), findsOneWidget);
@@ -126,9 +126,9 @@ void main() {
 
       await tester.pump(const Duration(seconds: 1));
 
-      // Assert Japanese Title & Description & Source Match
+      // Assert Japanese Title & Model Description Localization
       expect(find.text('[QA] 龍頭山公園 GPS 訪問ミッション'), findsOneWidget);
-      expect(find.text('龍頭山公園の 100m 以内で GPS 位置を検証します。'), findsOneWidget);
+      expect(realMission.localizedDescription('ja'), '龍頭山公園の 100m 以内で GPS 位置を検証します。');
 
       // Assert Japanese Category, Test Badge, and Auth Badge
       expect(find.text('一般'), findsOneWidget);

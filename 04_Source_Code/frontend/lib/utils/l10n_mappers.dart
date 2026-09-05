@@ -35,6 +35,30 @@ class L10nMappers {
     }
   }
 
+  /// Presentation-layer display title cleaner that removes redundant verification suffixes
+  /// e.g. "자갈치시장 수산물 탐방 인증" -> "자갈치시장 수산물 탐방"
+  static String cleanMissionDisplayTitle(String rawTitle) {
+    var t = rawTitle.trim();
+    if (t.endsWith(' 인증!')) {
+      t = t.substring(0, t.length - 4).trim();
+    } else if (t.endsWith(' 인증')) {
+      t = t.substring(0, t.length - 3).trim();
+    } else if (t.endsWith(' 认证！')) {
+      t = t.substring(0, t.length - 4).trim();
+    } else if (t.endsWith(' 认证')) {
+      t = t.substring(0, t.length - 3).trim();
+    } else if (t.endsWith(' 認証！')) {
+      t = t.substring(0, t.length - 4).trim();
+    } else if (t.endsWith(' 認証')) {
+      t = t.substring(0, t.length - 3).trim();
+    } else if (t.endsWith(' Verification!')) {
+      t = t.substring(0, t.length - 14).trim();
+    } else if (t.endsWith(' Verification')) {
+      t = t.substring(0, t.length - 13).trim();
+    }
+    return t;
+  }
+
   /// Maps place category or auth badge to localized string
   static String mapCategory(AppLocalizations l10n, String category) {
     final catUpper = category.toUpperCase();

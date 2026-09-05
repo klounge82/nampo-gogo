@@ -17,28 +17,6 @@ class MissionCard extends StatelessWidget {
     this.onActionButtonTap,
   });
 
-  String _cleanDisplayTitle(String rawTitle) {
-    var t = rawTitle.trim();
-    if (t.endsWith(' 인증!')) {
-      t = t.substring(0, t.length - 4).trim();
-    } else if (t.endsWith(' 인증')) {
-      t = t.substring(0, t.length - 3).trim();
-    } else if (t.endsWith(' 认证！')) {
-      t = t.substring(0, t.length - 4).trim();
-    } else if (t.endsWith(' 认证')) {
-      t = t.substring(0, t.length - 3).trim();
-    } else if (t.endsWith(' 認証！')) {
-      t = t.substring(0, t.length - 4).trim();
-    } else if (t.endsWith(' 認証')) {
-      t = t.substring(0, t.length - 3).trim();
-    } else if (t.endsWith(' Verification!')) {
-      t = t.substring(0, t.length - 14).trim();
-    } else if (t.endsWith(' Verification')) {
-      t = t.substring(0, t.length - 13).trim();
-    }
-    return t;
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -46,7 +24,7 @@ class MissionCard extends StatelessWidget {
     final langCode = locale.languageCode;
     final isCompleted = mission.isCompleted;
 
-    final displayTitle = _cleanDisplayTitle(mission.localizedTitle(langCode));
+    final displayTitle = L10nMappers.cleanMissionDisplayTitle(mission.localizedTitle(langCode));
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10.0),
