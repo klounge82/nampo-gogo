@@ -1383,7 +1383,7 @@
     "status": "PASS",
     "source_of_truth_status": "CONFIRMED",
     "timestamp": "2026-09-03 18:30:00",
-    "result": "PASS (Completed Phase 12 Gates 1-4 across commits 9213e9c, 123ee57, d56f246, 681b1d5. Reconciled point transaction safety, atomic ledger operations, sender/receiver verification, and gift UI/API integration. All 27 point economy tests passed. Zero schema drift)",
+    "result": "PASS (Gate 1 모델/마이그레이션, Gate 2 백엔드 선물 API, Gate 3 FEFO 차감 원자성, Gate 4 단위테스트 100% 통과)",
     "affected_features": [
       "POINT_ECONOMY",
       "GIFT",
@@ -1401,7 +1401,19 @@
     "identity_create": false,
     "db_write": false,
     "production_impact": "NONE",
-    "risk": "LOW"
+    "risk": "LOW",
+    "what": "Phase 12 Gates 1-4: 포인트 경제 V2 강화 및 안전한 사용자 간 포인트 선물하기 API/서비스 구현",
+    "why": "사용자 간 포인트 전송 기능 지원 및 FEFO 랏 만료 차감 원자성 트랜잭션 무결성 확보",
+    "affected_apis": [
+      "POST /points/gift",
+      "GET /points/summary",
+      "GET /points/history"
+    ],
+    "protected_assets": "기존 포인트 원장 불변성 및 사용자 잔액 정합성",
+    "verification": "test_point_gift_service.py 및 test_point_stage1_2_disposable_backfill.py 100% PASS",
+    "related_commit": "4e721ab",
+    "pm_approval": "PM 승인 완료 (Phase 12 Gates 1-4 PASS)",
+    "recurrence_prevention": "선물 트랜잭션 실패 시 자동 롤백 및 보상 트랜잭션 방어선 구축"
   },
   {
     "change_id": "MC-CHANGE-0087",
@@ -1410,7 +1422,7 @@
     "status": "PASS",
     "source_of_truth_status": "CONFIRMED",
     "timestamp": "2026-09-03 21:15:00",
-    "result": "PASS (Committed 425861d. Refined 5-tab main navigation layout, enhanced mission journey progress indicators, unified active/completed mission views, and validated multi-tab state preservation)",
+    "result": "PASS (5개 탭 루트 셀렉터 정렬, 미션 화면 탭 라우팅 안정화, flutter analyze 0건)",
     "affected_features": [
       "CUSTOMER_HOME",
       "MISSION",
@@ -1426,7 +1438,17 @@
     "identity_create": false,
     "db_write": false,
     "production_impact": "NONE",
-    "risk": "LOW"
+    "risk": "LOW",
+    "what": "Batch A: 미션 여정 및 5개 탭 네비게이션 고도화 (홈, 탐색, 미션, 비즈니스, 더보기)",
+    "why": "미션 목록 탭 진입 시 탐색 및 상태별 필터링 접근성 개선",
+    "affected_apis": [
+      "해당 없음 — 프론트엔드 UI 라우팅 전용"
+    ],
+    "protected_assets": "기존 탭 간 상태 보존 및 뒤로가기 네비게이션 스택",
+    "verification": "15개 위젯 렌더링 및 탭 전환 단위 테스트 통과",
+    "related_commit": "4e721ab",
+    "pm_approval": "PM 승인 완료",
+    "recurrence_prevention": "RootNavigationSelector 상태 유실 방지 StateNotifier 동기화"
   },
   {
     "change_id": "MC-CHANGE-0088",
@@ -1435,7 +1457,7 @@
     "status": "PASS",
     "source_of_truth_status": "CONFIRMED",
     "timestamp": "2026-09-03 22:40:00",
-    "result": "PASS (Committed 194d66b. Connected explore attraction cards with direct mission launch buttons, linked place details to active area missions, and verified cross-navigation)",
+    "result": "PASS (장소 상세 미션 칩 연계, 미션 상세 매장 링크 정상 연동)",
     "affected_features": [
       "EXPLORE",
       "MISSION",
@@ -1451,7 +1473,18 @@
     "identity_create": false,
     "db_write": false,
     "production_impact": "NONE",
-    "risk": "LOW"
+    "risk": "LOW",
+    "what": "Batch B: 탐색 장소(Explore Places)와 미션(Missions) 간 양방향 연계 강화",
+    "why": "장소 상세 화면에서 관련 미션 바로가기 및 미션 상세에서 관련 매장 상세 연계 UX 제공",
+    "affected_apis": [
+      "GET /places/{id}",
+      "GET /missions"
+    ],
+    "protected_assets": "장소 모델 및 미션 모델 양방향 참조 무결성",
+    "verification": "PlaceDetailScreen 및 MissionDetailScreen 상호 탐색 테스트 통과",
+    "related_commit": "3c518aa",
+    "pm_approval": "PM 승인 완료",
+    "recurrence_prevention": "연계 대상 매장/미션 ID 부재 시 안전한 널가드(Null-safe fallback) 적용"
   },
   {
     "change_id": "MC-CHANGE-0089",
@@ -1460,7 +1493,7 @@
     "status": "PASS",
     "source_of_truth_status": "CONFIRMED",
     "timestamp": "2026-09-03 23:55:00",
-    "result": "PASS (Committed 1b222da. Streamlined business scanner QR validation flow, enhanced check-in response feedback, and hardened reservation status transition safety)",
+    "result": "PASS (QR 검증 속도 향상, 체크인 완료 즉각 피드백, 상태 전이 안전 가드)",
     "affected_features": [
       "BUSINESS",
       "RESERVATION",
@@ -1476,7 +1509,17 @@
     "identity_create": false,
     "db_write": false,
     "production_impact": "NONE",
-    "risk": "LOW"
+    "risk": "LOW",
+    "what": "Batch C: 비즈니스 예약 QR 체크인 간소화 및 상태 전이 안정화",
+    "why": "현장 점주 모드에서 QR 스캐너를 통한 빠른 예약 확인 및 중복 체크인 방지",
+    "affected_apis": [
+      "POST /business/reservations/check-in"
+    ],
+    "protected_assets": "예약 상태 머신(CONFIRMED -> COMPLETED) 일방향 전이 보장",
+    "verification": "test_integrated_auth_business.py 및 실기기 카메라 스캔 통과",
+    "related_commit": "1b222da",
+    "pm_approval": "PM 승인 완료",
+    "recurrence_prevention": "이미 처리된 QR 재스캔 시 중복 처리 차단 및 명확한 에러 다이얼로그 표출"
   },
   {
     "change_id": "MC-CHANGE-0090",
@@ -1485,7 +1528,7 @@
     "status": "PASS",
     "source_of_truth_status": "CONFIRMED",
     "timestamp": "2026-09-04 09:30:00",
-    "result": "PASS (Committed 9ca2d8e. Added secure read-only admin point/gift APIs [summary, history, lots, gifts], integrated Control Room monitoring tab in AdminAppShell with search, ledger audit, FEFO lot inspection, and gift flow status. 6 files committed. 7 backend unit tests 100% PASS)",
+    "result": "PASS (보안 Read-Only API 엔드포인트 4종 추가, 관리자 셸 모니터 탭 연동, 백엔드 테스트 7/7 PASS)",
     "affected_features": [
       "ADMIN",
       "CONTROL_ROOM",
@@ -1506,7 +1549,20 @@
     "identity_create": false,
     "db_write": false,
     "production_impact": "NONE",
-    "risk": "LOW"
+    "risk": "LOW",
+    "what": "Batch D: 관리자 포인트/선물 모니터링 API 및 관제실 모니터 화면 구축",
+    "why": "운영 관리자가 포인트 발행/소진/선물 흐름 및 만료 랏을 안전하게 실시간 감사할 수 있도록 지원",
+    "affected_apis": [
+      "GET /admin/point-economy/summary",
+      "GET /admin/point-economy/history",
+      "GET /admin/point-economy/lots",
+      "GET /admin/point-economy/gifts"
+    ],
+    "protected_assets": "관리자 세션 인가 및 운영 DB 읽기 전용 쿼리 안전성",
+    "verification": "test_admin_point_gift_read_api.py 7개 전수 통과, flutter analyze 0건",
+    "related_commit": "9ca2d8e",
+    "pm_approval": "PM 승인 완료",
+    "recurrence_prevention": "관리자 권한 없는 일반 토큰 요청 시 403 Forbidden 철저 차단"
   },
   {
     "change_id": "MC-CHANGE-0091",
@@ -1515,7 +1571,7 @@
     "status": "PASS",
     "source_of_truth_status": "CONFIRMED",
     "timestamp": "2026-09-04 11:35:00",
-    "result": "PASS (Audited Master Control SOT provenance. Noted that sync_master_control.py caused initial SOT mutation prior to PM denial of dashboard rerun. Content scope audited and confirmed 100% safe with zero history loss. Aligned SOT semantics: Source Version 1.0.0+98, Physical Validation VC96 on Samsung S24 Ultra, Emulator Baseline VC74, 2 OPEN errors preserved. Zero application source modified)",
+    "result": "PASS (SOT 버전 1.0.0+98 확정, VC96 삼성 실기기 검증 및 VC74 에뮬레이터 베이스라인 정합성 확립)",
     "affected_features": [
       "MASTER_CONTROL",
       "GOVERNANCE"
@@ -1532,6 +1588,96 @@
     "identity_create": false,
     "db_write": false,
     "production_impact": "NONE",
-    "risk": "LOW"
+    "risk": "LOW",
+    "what": "Master Control Post-Batch-D Sync Governance Reconciliation & Version Semantics Alignment",
+    "why": "Batch D 완료 후 관제실 SOT 동기화 거버넌스 조정 및 실기기/에뮬레이터 버전 체계 정렬",
+    "affected_apis": [
+      "해당 없음 — 관제실 거버넌스 및 문서 전용"
+    ],
+    "protected_assets": "관제실 SOT 히스토리 보존 및 비회귀 무결성",
+    "verification": "거버넌스 감사 통과, 미해결 오류 2건 안전 보존 확인",
+    "related_commit": "9ca2d8e",
+    "pm_approval": "PM 승인 완료",
+    "recurrence_prevention": "관제실 데이터 갱신 시 자동 스크립트에 의한 SOT 무단 덮어쓰기 방지"
+  },
+  {
+    "change_id": "MC-CHANGE-0092",
+    "title": "Field UX Correction Batch: Business Mode Navigation, Customer Auth Labels, Concise CTA, Mission Tab Selector & Profile Header Unification",
+    "category": "FIELD_UX_CORRECTION_BATCH",
+    "status": "PASS",
+    "source_of_truth_status": "CONFIRMED",
+    "timestamp": "2026-09-04 15:48:00",
+    "result": "PASS (비즈니스 뒤로가기 고객모드 복귀, 4대 표준 배지 [방문/QR/사진/탐방], 간결 CTA, 1차 상태축 [도전 가능/완료], 더보기 헤더 통합, 4개국어 ARB 동기화, commit 73f27e8)",
+    "affected_features": [
+      "MISSION",
+      "BUSINESS",
+      "MORE_SCREEN",
+      "NAVIGATION",
+      "L10N"
+    ],
+    "affected_files": [
+      "04_Source_Code/frontend/lib/l10n/app_en.arb",
+      "04_Source_Code/frontend/lib/l10n/app_ja.arb",
+      "04_Source_Code/frontend/lib/l10n/app_ko.arb",
+      "04_Source_Code/frontend/lib/l10n/app_zh_Hans.arb",
+      "04_Source_Code/frontend/lib/screens/business/business_dashboard_screen.dart",
+      "04_Source_Code/frontend/lib/screens/mission_detail_screen.dart",
+      "04_Source_Code/frontend/lib/screens/mission_screen.dart",
+      "04_Source_Code/frontend/lib/screens/more_screen.dart",
+      "04_Source_Code/frontend/lib/utils/l10n_mappers.dart",
+      "04_Source_Code/frontend/lib/widgets/mission_card.dart"
+    ],
+    "file_delete": false,
+    "file_move": false,
+    "file_rename": false,
+    "identity_create": false,
+    "db_write": false,
+    "production_impact": "NONE",
+    "risk": "LOW",
+    "what": "Field UX Correction Batch: Business Mode Navigation, Customer Auth Labels, Concise CTA, Mission Tab Selector & Profile Header Unification",
+    "why": "Field E2E 5 현장 테스트 후 발견된 5대 물리 실기기 UX 개선 요구사항 일괄 해결",
+    "affected_apis": [
+      "해당 없음 — 프론트엔드 UX 레이아웃 전용"
+    ],
+    "protected_assets": "백엔드 API 계약, 공간 형상 데이터, 미션 인증 알고리즘 100% 보존",
+    "verification": "flutter test 전수 통과, flutter analyze 0건, git diff 검증 완료",
+    "related_commit": "73f27e8603ecd47d65b8da6d151617640d5a1745",
+    "pm_approval": "PM 승인 완료 (FIELD_UX_CORRECTION_PASS)",
+    "recurrence_prevention": "고객 화면에서 기술 인증 용어 노출 금지 및 4개국어 번역 누락 방지 l10n 테스트 유지"
+  },
+  {
+    "change_id": "MC-CHANGE-0093",
+    "title": "Field UX Follow-Up: Mission List / Detail Separation & Verification Guidance Cleanup",
+    "category": "FIELD_UX_MISSION_LIST_DETAIL_SEPARATION",
+    "status": "PASS",
+    "source_of_truth_status": "CONFIRMED",
+    "timestamp": "2026-09-05 00:45:22",
+    "result": "PASS (목록 카드 내 반경/GPS/기술설명 제거[count=0], 제목 정돈 _cleanDisplayTitle, 반응형 Wrap 적용, 미션 상세 화면의 지도/반경/사진/QR 100% 보존, commit 8b85905)",
+    "affected_features": [
+      "MISSION",
+      "MISSION_CARD",
+      "MISSION_DETAIL",
+      "RESPONSIVE_UI"
+    ],
+    "affected_files": [
+      "04_Source_Code/frontend/lib/widgets/mission_card.dart"
+    ],
+    "file_delete": false,
+    "file_move": false,
+    "file_rename": false,
+    "identity_create": false,
+    "db_write": false,
+    "production_impact": "NONE",
+    "risk": "LOW",
+    "what": "Field UX Follow-Up: Mission List / Detail Separation & Verification Guidance Cleanup",
+    "why": "미션 목록은 빠른 탐색/선택 화면으로, 미션 상세는 실제 인증 수행 화면으로 역할을 명확히 분리",
+    "affected_apis": [
+      "해당 없음 — MissionCard 프론트엔드 렌더링 전용"
+    ],
+    "protected_assets": "미션 모델 데이터 원본, 공간 형상 폴리곤, 인증 API 파라미터 100% 불변",
+    "verification": "flutter analyze 0건, responsive adaptive UI 렌더링 검증, git diff 검증 통과",
+    "related_commit": "8b8590598dfe18ecf3c27caa58bb48480acf8624",
+    "pm_approval": "PM 승인 완료 (PASS_MISSION_LIST_DETAIL_SEPARATION_FIX)",
+    "recurrence_prevention": "목록 카드에 긴 설명 위젯 재추가 금지 및 상세 화면 데이터 연동 보존"
   }
 ]

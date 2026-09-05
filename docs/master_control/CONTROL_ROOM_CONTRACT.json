@@ -1,0 +1,130 @@
+{
+  "contract_version": 1,
+  "effective_date": "2026-09-05",
+  "summary_label": "KR",
+  "activation_boundary_change_id": "MC-CHANGE-0093",
+  "error_severity": {
+    "CRITICAL": {
+      "ko": "치명적",
+      "icon": "🔴",
+      "class": "severity-critical",
+      "bg": "#490202",
+      "border": "#f85149",
+      "text": "#ff7b72"
+    },
+    "MAJOR": {
+      "ko": "중대",
+      "icon": "🟠",
+      "class": "severity-major",
+      "bg": "#3d1e03",
+      "border": "#d29922",
+      "text": "#e3b341"
+    },
+    "MEDIUM": {
+      "ko": "보통",
+      "icon": "🟡",
+      "class": "severity-medium",
+      "bg": "#332b00",
+      "border": "#bb8009",
+      "text": "#d29922"
+    },
+    "MINOR": {
+      "ko": "경미",
+      "icon": "🔵",
+      "class": "severity-minor",
+      "bg": "#0c2d6b",
+      "border": "#388bfd",
+      "text": "#79c0ff"
+    },
+    "INFO": {
+      "ko": "정보",
+      "icon": "⚪",
+      "class": "severity-info",
+      "bg": "#21262d",
+      "border": "#30363d",
+      "text": "#8b949e"
+    }
+  },
+  "work_importance": {
+    "HIGH": {
+      "ko": "중대",
+      "icon": "🟠",
+      "display_family": "major",
+      "class": "severity-major"
+    },
+    "MEDIUM": {
+      "ko": "보통",
+      "icon": "🟡",
+      "display_family": "medium",
+      "class": "severity-medium"
+    },
+    "LOW": {
+      "ko": "경미",
+      "icon": "🔵",
+      "display_family": "minor",
+      "class": "severity-minor"
+    }
+  },
+  "change_detail_fields": {
+    "what": "무슨 작업인가?",
+    "why": "이유 / 배경",
+    "result": "작업 결과",
+    "affected_features": "영향 기능",
+    "affected_files": "영향 파일",
+    "affected_apis": "영향 API",
+    "protected_assets": "보호 대상",
+    "verification": "검증 결과",
+    "related_commit": "관련 Commit",
+    "pm_approval": "PM 승인 여부",
+    "recurrence_prevention": "재발 방지 / 후속 주의사항"
+  },
+  "error_detail_fields": {
+    "symptom": "증상",
+    "occurrence_condition": "발생 조건",
+    "root_cause": "원인",
+    "fix": "조치 내용",
+    "verification": "검증 결과",
+    "affected_area": "영향 영역",
+    "related_files": "관련 파일/API",
+    "related_change": "관련 변경/Commit",
+    "closure_evidence": "종료 근거",
+    "recurrence_prevention": "재발 방지"
+  },
+  "toggle_labels": {
+    "closed": "상세 ▼",
+    "open": "접기 ▲"
+  },
+  "id_policy": {
+    "prohibited_placeholder_ids": [
+      "MC-CHANGE-0000",
+      "MC-CHANGE-XXXX",
+      "ERR-0000"
+    ],
+    "general_change_pattern": "^MC-CHANGE-\\d{4}(-[A-Z0-9]+)*$",
+    "special_root_prefixes": [
+      "MC-03N",
+      "POLICY-",
+      "INC-"
+    ]
+  },
+  "required_top_components": [
+    "PROJECT_PROGRESS_BAR",
+    "SUMMARY_STATUS_CARDS",
+    "CONSTITUTION_ARTICLES_TOGGLE",
+    "CURRENT_REMAINING_WORK_OVERVIEW",
+    "WORK_ERROR_TIMELINE"
+  ],
+  "progress_governance": {
+    "source": "docs/master_control/CURRENT_STATE_SOT.json (roadmap_stages: Major-05A~05I)",
+    "calculation_rule": "ROADMAP_PERCENT = round((ROADMAP_COMPLETED_STAGE_COUNT / ROADMAP_TOTAL_STAGE_COUNT) * 100)",
+    "progress_hardcoded": false,
+    "operational_gates": {
+      "desk_e2e_20": "PASS",
+      "field_e2e_5": "5/5 PASS",
+      "field_ux_correction": "PASS (commit 73f27e8)",
+      "mission_list_detail_followup": "PASS (commit 8b85905)",
+      "current_work": "Control Room permanent governance / top command view finalization",
+      "next_gate": "PM_TOP_VIEW_CONFIRMATION"
+    }
+  }
+}
