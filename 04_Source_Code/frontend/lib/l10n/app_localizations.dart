@@ -2446,7 +2446,7 @@ abstract class AppLocalizations {
   /// No description provided for @moreMyActivitySection.
   ///
   /// In ko, this message translates to:
-  /// **'나의 활동 및 혜택'**
+  /// **'나의 활동'**
   String get moreMyActivitySection;
 
   /// No description provided for @moreProfileDetailDesc.
@@ -2622,6 +2622,276 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'관리자'**
   String get profileAdminMember;
+
+  /// No description provided for @profilePhotoGallery.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진 선택 (갤러리)'**
+  String get profilePhotoGallery;
+
+  /// No description provided for @profilePhotoCamera.
+  ///
+  /// In ko, this message translates to:
+  /// **'카메라 촬영'**
+  String get profilePhotoCamera;
+
+  /// No description provided for @profilePhotoDefault.
+  ///
+  /// In ko, this message translates to:
+  /// **'기본 이미지로 변경'**
+  String get profilePhotoDefault;
+
+  /// No description provided for @profileImageUpdateSuccess.
+  ///
+  /// In ko, this message translates to:
+  /// **'프로필 사진이 변경되었습니다.'**
+  String get profileImageUpdateSuccess;
+
+  /// No description provided for @profileImageUpdateFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'프로필 이미지를 변경하지 못했습니다. 잠시 후 다시 시도해 주세요.'**
+  String get profileImageUpdateFailed;
+
+  /// No description provided for @profileImageResetSuccess.
+  ///
+  /// In ko, this message translates to:
+  /// **'기본 이미지로 변경되었습니다.'**
+  String get profileImageResetSuccess;
+
+  /// No description provided for @profileImageResetFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'기본 이미지로 변경하지 못했습니다. 잠시 후 다시 시도해 주세요.'**
+  String get profileImageResetFailed;
+
+  /// No description provided for @profileUpdateSuccess.
+  ///
+  /// In ko, this message translates to:
+  /// **'프로필 수정이 완료되었습니다.'**
+  String get profileUpdateSuccess;
+
+  /// No description provided for @profileUpdateFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'프로필을 수정하지 못했습니다. 잠시 후 다시 시도해 주세요.'**
+  String get profileUpdateFailed;
+
+  /// No description provided for @nicknameRequired.
+  ///
+  /// In ko, this message translates to:
+  /// **'닉네임을 입력해 주세요.'**
+  String get nicknameRequired;
+
+  /// No description provided for @nicknameTooLong.
+  ///
+  /// In ko, this message translates to:
+  /// **'닉네임은 최대 30자 이하로 작성해 주세요.'**
+  String get nicknameTooLong;
+
+  /// No description provided for @myReviewsTabActiveFormat.
+  ///
+  /// In ko, this message translates to:
+  /// **'작성한 리뷰 ({count})'**
+  String myReviewsTabActiveFormat(Object count);
+
+  /// No description provided for @myReviewsTabDeletedFormat.
+  ///
+  /// In ko, this message translates to:
+  /// **'삭제한 리뷰 ({count})'**
+  String myReviewsTabDeletedFormat(Object count);
+
+  /// No description provided for @myReviewsActiveEmpty.
+  ///
+  /// In ko, this message translates to:
+  /// **'작성한 매장 후기가 없습니다.'**
+  String get myReviewsActiveEmpty;
+
+  /// No description provided for @myReviewsDeletedEmpty.
+  ///
+  /// In ko, this message translates to:
+  /// **'삭제한 매장 후기가 없습니다.'**
+  String get myReviewsDeletedEmpty;
+
+  /// No description provided for @myReviewsDeleteSuccess.
+  ///
+  /// In ko, this message translates to:
+  /// **'리뷰가 삭제되었습니다.'**
+  String get myReviewsDeleteSuccess;
+
+  /// No description provided for @myReviewsDeleteFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'리뷰 삭제 중 오류가 발생했습니다.'**
+  String get myReviewsDeleteFailed;
+
+  /// No description provided for @myReviewsRestoreConfirmTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'리뷰를 복구하시겠습니까?'**
+  String get myReviewsRestoreConfirmTitle;
+
+  /// No description provided for @myReviewsRestoreConfirmBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'기존 리뷰 내용과 방문 인증 배지가 그대로 복구됩니다.'**
+  String get myReviewsRestoreConfirmBody;
+
+  /// No description provided for @myReviewsRestoreAction.
+  ///
+  /// In ko, this message translates to:
+  /// **'복구하기'**
+  String get myReviewsRestoreAction;
+
+  /// No description provided for @myReviewsRestoreSuccess.
+  ///
+  /// In ko, this message translates to:
+  /// **'리뷰가 복구되었습니다.'**
+  String get myReviewsRestoreSuccess;
+
+  /// No description provided for @myReviewsRestoreFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'리뷰 복구 중 오류가 발생했습니다.'**
+  String get myReviewsRestoreFailed;
+
+  /// No description provided for @myReviewsLoadFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'리뷰를 불러오지 못했습니다.'**
+  String get myReviewsLoadFailed;
+
+  /// No description provided for @activityToday.
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘'**
+  String get activityToday;
+
+  /// No description provided for @activityYesterday.
+  ///
+  /// In ko, this message translates to:
+  /// **'어제'**
+  String get activityYesterday;
+
+  /// No description provided for @activityThisWeek.
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 주'**
+  String get activityThisWeek;
+
+  /// No description provided for @activityThisMonth.
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 달'**
+  String get activityThisMonth;
+
+  /// No description provided for @activityOlder.
+  ///
+  /// In ko, this message translates to:
+  /// **'이전 활동'**
+  String get activityOlder;
+
+  /// No description provided for @couponStatusAvailable.
+  ///
+  /// In ko, this message translates to:
+  /// **'사용하기'**
+  String get couponStatusAvailable;
+
+  /// No description provided for @couponStatusUsed.
+  ///
+  /// In ko, this message translates to:
+  /// **'사용완료'**
+  String get couponStatusUsed;
+
+  /// No description provided for @couponStatusExpired.
+  ///
+  /// In ko, this message translates to:
+  /// **'기간만료'**
+  String get couponStatusExpired;
+
+  /// No description provided for @couponExchangeAvailable.
+  ///
+  /// In ko, this message translates to:
+  /// **'교환가능'**
+  String get couponExchangeAvailable;
+
+  /// No description provided for @couponPointsShort.
+  ///
+  /// In ko, this message translates to:
+  /// **'포인트부족'**
+  String get couponPointsShort;
+
+  /// No description provided for @noActivityLogs.
+  ///
+  /// In ko, this message translates to:
+  /// **'활동 기록이 없습니다.'**
+  String get noActivityLogs;
+
+  /// No description provided for @startAppActivityDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'남포 GoGo 앱을 사용하면서 활동을 시작해 보세요.'**
+  String get startAppActivityDesc;
+
+  /// No description provided for @couponExchangeSuccessTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'🎉 교환 성공!'**
+  String get couponExchangeSuccessTitle;
+
+  /// No description provided for @couponExchangeSuccessBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'쿠폰 교환이 정상 완료되었습니다.\n내 쿠폰함에서 바코드를 확인해 주세요.'**
+  String get couponExchangeSuccessBody;
+
+  /// No description provided for @refundRequest.
+  ///
+  /// In ko, this message translates to:
+  /// **'환불 신청'**
+  String get refundRequest;
+
+  /// No description provided for @refundReason.
+  ///
+  /// In ko, this message translates to:
+  /// **'환불 사유'**
+  String get refundReason;
+
+  /// No description provided for @refundSuccess.
+  ///
+  /// In ko, this message translates to:
+  /// **'환불 처리가 성공적으로 완료되었습니다.'**
+  String get refundSuccess;
+
+  /// No description provided for @refundFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'환불 요청을 처리하지 못했습니다.'**
+  String get refundFailed;
+
+  /// No description provided for @pointCharge.
+  ///
+  /// In ko, this message translates to:
+  /// **'포인트 충전'**
+  String get pointCharge;
+
+  /// No description provided for @reservationDeposit.
+  ///
+  /// In ko, this message translates to:
+  /// **'예약 보증금 결제'**
+  String get reservationDeposit;
+
+  /// No description provided for @paymentDateLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'결제일자'**
+  String get paymentDateLabel;
+
+  /// No description provided for @noPaymentsHistory.
+  ///
+  /// In ko, this message translates to:
+  /// **'결제 및 이용 내역이 존재하지 않습니다.'**
+  String get noPaymentsHistory;
 }
 
 class _AppLocalizationsDelegate

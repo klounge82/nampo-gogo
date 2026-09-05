@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../constants/colors.dart';
 import '../providers/payment_provider.dart';
 import '../providers/auth_provider.dart';
+import '../l10n/app_localizations.dart';
 import '../config/production_config.dart';
 
 class PaymentHistoryScreen extends StatefulWidget {
@@ -32,6 +33,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
   final DateFormat _dateFormat = DateFormat('yyyy-MM-dd HH:mm');
 
   Future<void> _refundTransaction(String paymentId, int amount) async {
+    final l10n = AppLocalizations.of(context);
     final token = context.read<AuthProvider>().accessToken;
     if (token == null || token.isEmpty) return;
 
@@ -39,14 +41,15 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('운영 환불 기능 제한'),
-          content: const Text(
-            '현재 운영(Live) 결제 환경입니다. 가상 PG 환불 처리는 불가능하며, 고객 센터를 통해 환불 요청을 진행하십시오.',
+          title: Text(l10n?.policyRefundTitle ?? 'Policy'),
+          content: Text(
+            l10n?.policyNoticeHeader ??
+                'Live payment environment. Direct refunds are handled via customer support.',
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('확인'),
+              child: Text(l10n?.confirm ?? 'OK'),
             ),
           ],
         ),
@@ -59,17 +62,17 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     final bool? confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('환불 신청'),
+        title: Text(l10n?.refundRequest ?? 'Request Refund'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('환불 신청 금액: ${_currencyFormat.format(amount)}'),
+            Text('${l10n?.refundRequest ?? 'Refund'}: ${_currencyFormat.format(amount)}'),
             const SizedBox(height: 12),
             TextField(
               controller: reasonController,
-              decoration: const InputDecoration(
-                labelText: '환불 사유',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n?.refundReason ?? 'Refund Reason',
+                border: const OutlineInputBorder(),
               ),
             ),
           ],
@@ -77,11 +80,11 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('취소'),
+            child: Text(l10n?.cancel ?? 'Cancel'),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('확인'),
+            child: Text(l10n?.confirm ?? 'OK'),
           ),
         ],
       ),
@@ -90,9 +93,11 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     if (confirm == true) {
       final reason = reasonController.text.trim();
       if (reason.isEmpty) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('환불 사유를 입력하셔야 합니다.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n?.refundReason ?? 'Please enter a refund reason.'),
+          ),
+        );
         return;
       }
 
@@ -106,12 +111,16 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
       if (mounted) {
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('환불 처리가 성공적으로 완료되었습니다.')),
+            SnackBar(
+              content: Text(l10n?.refundSuccess ?? 'Refund processed successfully.'),
+            ),
           );
         } else {
-          final err = context.read<PaymentProvider>().errorMessage ?? '환불 에러';
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('환불 실패: $err'), backgroundColor: Colors.red),
+            SnackBar(
+              content: Text(l10n?.refundFailed ?? 'Failed to process refund request.'),
+              backgroundColor: Colors.red,
+            ),
           );
         }
       }
@@ -120,12 +129,13 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
-          '결제 및 이용 이력',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          l10n?.profilePaymentHistory ?? 'Payment History',
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
@@ -140,12 +150,16 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
           }
 
           if (provider.errorMessage != null) {
-            return Center(child: Text('결제 내역 조회 실패: ${provider.errorMessage}'));
+            return Center(child: Text(l10n?.errorNetwork ?? 'Network error.'));
           }
 
           final list = provider.payments;
           if (list.isEmpty) {
-            return const Center(child: Text('결제 및 이용 내역이 존재하지 않습니다.'));
+            return Center(
+              child: Text(
+                l10n?.noPaymentsHistory ?? 'No payment history found.',
+              ),
+            );
           }
 
           return ListView.builder(
@@ -171,8 +185,8 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                       children: [
                         Text(
                           pay.targetType == 'POINT_CHARGE'
-                              ? '💎 포인트 충전'
-                              : '📅 예약 보증금 결제',
+                              ? '💎 ${l10n?.pointCharge ?? 'Point Charge'}'
+                              : '📅 ${l10n?.reservationDeposit ?? 'Reservation Deposit'}',
                           style: const TextStyle(
                             fontSize: 13.0,
                             fontWeight: FontWeight.bold,
@@ -217,7 +231,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                     ),
                     const SizedBox(height: 4.0),
                     Text(
-                      '결제일자: ${_dateFormat.format(pay.createdAt)}',
+                      '${l10n?.paymentDateLabel ?? 'Date'}: ${_dateFormat.format(pay.createdAt)}',
                       style: const TextStyle(
                         fontSize: 11.0,
                         color: Colors.grey,
@@ -226,7 +240,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                     if (pay.refunds.isNotEmpty) ...[
                       const Divider(height: 20.0),
                       Text(
-                        '환불 사유: ${pay.refunds.first.reason ?? '사유 없음'}',
+                        '${l10n?.refundReason ?? 'Refund Reason'}: ${pay.refunds.first.reason ?? '-'}',
                         style: const TextStyle(
                           fontSize: 11.5,
                           color: Colors.deepOrange,
@@ -249,9 +263,9 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                               vertical: 4,
                             ),
                           ),
-                          child: const Text(
-                            '환불 신청',
-                            style: TextStyle(fontSize: 11.5),
+                          child: Text(
+                            l10n?.refundRequest ?? 'Request Refund',
+                            style: const TextStyle(fontSize: 11.5),
                           ),
                         ),
                       ),

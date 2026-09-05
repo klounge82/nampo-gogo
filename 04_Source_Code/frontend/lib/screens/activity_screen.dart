@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 import '../providers/activity_provider.dart';
 import '../providers/auth_provider.dart';
+import '../l10n/app_localizations.dart';
 import '../widgets/activity_card.dart';
 import 'travel_log_screen.dart';
 
@@ -35,24 +35,41 @@ class _ActivityScreenState extends State<ActivityScreen> {
       final parsedDay = DateTime(parsed.year, parsed.month, parsed.day);
 
       if (parsedDay == today) {
-        return '오늘';
+        return 'today';
       } else if (parsedDay == yesterday) {
-        return '어제';
+        return 'yesterday';
       } else if (today.difference(parsedDay).inDays < 7) {
-        return '이번 주';
+        return 'thisWeek';
       } else if (today.difference(parsedDay).inDays < 30) {
-        return '이번 달';
+        return 'thisMonth';
       } else {
-        return '이전 활동';
+        return 'older';
       }
     } catch (_) {
-      return '이전 활동';
+      return 'older';
+    }
+  }
+
+  String _getGroupLabel(String key, AppLocalizations? l10n) {
+    switch (key) {
+      case 'today':
+        return l10n?.activityToday ?? 'Today';
+      case 'yesterday':
+        return l10n?.activityYesterday ?? 'Yesterday';
+      case 'thisWeek':
+        return l10n?.activityThisWeek ?? 'This Week';
+      case 'thisMonth':
+        return l10n?.activityThisMonth ?? 'This Month';
+      case 'older':
+      default:
+        return l10n?.activityOlder ?? 'Earlier';
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final actProvider = context.watch<ActivityProvider>();
+    final l10n = AppLocalizations.of(context);
 
     // 1. Group activities
     final Map<String, List<dynamic>> groupedMap = {};
@@ -63,18 +80,18 @@ class _ActivityScreenState extends State<ActivityScreen> {
     }
 
     // Define priority order for groups
-    final groupOrder = ['오늘', '어제', '이번 주', '이번 달', '이전 활동'];
+    final groupOrder = ['today', 'yesterday', 'thisWeek', 'thisMonth', 'older'];
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          '내 활동 기록',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          l10n?.profileActivityLog ?? 'Activity Log',
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
           IconButton(
             icon: const Icon(Icons.auto_stories),
-            tooltip: '여행로그 완성',
+            tooltip: l10n?.travelLogTitle ?? 'Travel Log',
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const TravelLogScreen()),
@@ -87,16 +104,17 @@ class _ActivityScreenState extends State<ActivityScreen> {
       body: actProvider.isLoading
           ? const Center(child: CircularProgressIndicator())
           : actProvider.activities.isEmpty
-          ? _buildEmptyState()
+          ? _buildEmptyState(l10n)
           : RefreshIndicator(
               onRefresh: () async => _refreshList(),
               child: ListView.builder(
                 itemCount: groupOrder.length,
                 itemBuilder: (context, index) {
-                  final groupName = groupOrder[index];
-                  final items = groupedMap[groupName];
-                  if (items == null || items.isEmpty)
+                  final groupKey = groupOrder[index];
+                  final items = groupedMap[groupKey];
+                  if (items == null || items.isEmpty) {
                     return const SizedBox.shrink();
+                  }
 
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -109,7 +127,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                           bottom: 8.0,
                         ),
                         child: Text(
-                          groupName,
+                          _getGroupLabel(groupKey, l10n),
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.bold,
@@ -129,25 +147,25 @@ class _ActivityScreenState extends State<ActivityScreen> {
     );
   }
 
-  Widget _buildEmptyState() {
-    return const Center(
+  Widget _buildEmptyState(AppLocalizations? l10n) {
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.history, size: 64, color: Colors.grey),
-          SizedBox(height: 16),
+          const Icon(Icons.history, size: 64, color: Colors.grey),
+          const SizedBox(height: 16),
           Text(
-            '활동 기록이 없습니다.',
-            style: TextStyle(
+            l10n?.noActivityLogs ?? 'No activity history.',
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: Colors.grey,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
-            '남포 GoGo 앱을 사용하면서 활동을 시작해 보세요.',
-            style: TextStyle(fontSize: 12, color: Colors.grey),
+            l10n?.startAppActivityDesc ?? 'Start exploring with Nampo GoGo to build your activity history.',
+            style: const TextStyle(fontSize: 12, color: Colors.grey),
           ),
         ],
       ),

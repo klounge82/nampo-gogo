@@ -1224,7 +1224,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get moreSavedCoursesDesc => '保存されたAIおすすめコースを確認';
 
   @override
-  String get moreMyActivitySection => 'マイ活動＆特典';
+  String get moreMyActivitySection => 'マイ活動';
 
   @override
   String get moreProfileDetailDesc => 'アカウント情報と活動履歴の管理';
@@ -1317,4 +1317,145 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get profileAdminMember => '管理者';
+
+  @override
+  String get profilePhotoGallery => 'ギャラリーから選択';
+
+  @override
+  String get profilePhotoCamera => '写真を撮る';
+
+  @override
+  String get profilePhotoDefault => 'デフォルト画像に変更';
+
+  @override
+  String get profileImageUpdateSuccess => 'プロフィール画像が更新されました。';
+
+  @override
+  String get profileImageUpdateFailed =>
+      'プロフィール画像を更新できませんでした。しばらくしてからもう一度お試しください。';
+
+  @override
+  String get profileImageResetSuccess => 'デフォルト画像に変更されました。';
+
+  @override
+  String get profileImageResetFailed => 'デフォルト画像に戻せませんでした。しばらくしてからもう一度お試しください。';
+
+  @override
+  String get profileUpdateSuccess => 'プロフィールが更新されました。';
+
+  @override
+  String get profileUpdateFailed => 'プロフィールを更新できませんでした。しばらくしてからもう一度お試しください。';
+
+  @override
+  String get nicknameRequired => 'ニックネームを入力してください。';
+
+  @override
+  String get nicknameTooLong => 'ニックネームは30文字以内で入力してください。';
+
+  @override
+  String myReviewsTabActiveFormat(Object count) {
+    return '作成したレビュー ($count)';
+  }
+
+  @override
+  String myReviewsTabDeletedFormat(Object count) {
+    return '削除したレビュー ($count)';
+  }
+
+  @override
+  String get myReviewsActiveEmpty => '作成したレビューはありません。';
+
+  @override
+  String get myReviewsDeletedEmpty => '削除したレビューはありません。';
+
+  @override
+  String get myReviewsDeleteSuccess => 'レビューが削除されました。';
+
+  @override
+  String get myReviewsDeleteFailed => 'レビューの削除中にエラーが発生しました。';
+
+  @override
+  String get myReviewsRestoreConfirmTitle => 'レビューを復元しますか？';
+
+  @override
+  String get myReviewsRestoreConfirmBody => '元のレビュー内容と訪問認証バッジが復元されます。';
+
+  @override
+  String get myReviewsRestoreAction => '復元する';
+
+  @override
+  String get myReviewsRestoreSuccess => 'レビューが復元されました。';
+
+  @override
+  String get myReviewsRestoreFailed => 'レビューの復元中にエラーが発生しました。';
+
+  @override
+  String get myReviewsLoadFailed => 'レビューの読み込みに失敗しました。';
+
+  @override
+  String get activityToday => '今日';
+
+  @override
+  String get activityYesterday => '昨日';
+
+  @override
+  String get activityThisWeek => '今週';
+
+  @override
+  String get activityThisMonth => '今月';
+
+  @override
+  String get activityOlder => '過去のアクティビティ';
+
+  @override
+  String get couponStatusAvailable => '使用する';
+
+  @override
+  String get couponStatusUsed => '使用済み';
+
+  @override
+  String get couponStatusExpired => '有効期限切れ';
+
+  @override
+  String get couponExchangeAvailable => '交換可能';
+
+  @override
+  String get couponPointsShort => 'ポイント不足';
+
+  @override
+  String get noActivityLogs => 'アクティビティ履歴がありません。';
+
+  @override
+  String get startAppActivityDesc => '南浦GoGoアプリを利用してアクティビティを開始しましょう。';
+
+  @override
+  String get couponExchangeSuccessTitle => '🎉 交換成功！';
+
+  @override
+  String get couponExchangeSuccessBody =>
+      'クーポンの交換が完了しました。\nマイクーポンからバーコードをご確認ください。';
+
+  @override
+  String get refundRequest => '返金申請';
+
+  @override
+  String get refundReason => '返金理由';
+
+  @override
+  String get refundSuccess => '返金処理が正常に完了しました。';
+
+  @override
+  String get refundFailed => '返金リクエストを処理できませんでした。';
+
+  @override
+  String get pointCharge => 'ポイントチャージ';
+
+  @override
+  String get reservationDeposit => '予約デポジット決済';
+
+  @override
+  String get paymentDateLabel => '決済日時';
+
+  @override
+  String get noPaymentsHistory => '決済および利用履歴がありません。';
 }

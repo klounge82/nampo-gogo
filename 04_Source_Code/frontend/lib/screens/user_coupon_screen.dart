@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../constants/colors.dart';
+import '../l10n/app_localizations.dart';
 import '../models/coupon.dart';
 import '../repositories/coupon_repository.dart';
 import '../providers/auth_provider.dart';
@@ -110,6 +111,7 @@ class _UserCouponScreenState extends State<UserCouponScreen>
   }
 
   void _showErrorDialog(String title, String message) {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -124,7 +126,10 @@ class _UserCouponScreenState extends State<UserCouponScreen>
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('확인', style: TextStyle(color: AppColors.primary)),
+            child: Text(
+              l10n?.confirm ?? 'OK',
+              style: const TextStyle(color: AppColors.primary),
+            ),
           ),
         ],
       ),
@@ -305,6 +310,7 @@ class _UserCouponScreenState extends State<UserCouponScreen>
   }
 
   Widget _buildCouponCard(UserCoupon userCoupon, bool isUnused) {
+    final l10n = AppLocalizations.of(context);
     final expStr =
         '${userCoupon.expiresAt.year}.${userCoupon.expiresAt.month.toString().padLeft(2, '0')}.${userCoupon.expiresAt.day.toString().padLeft(2, '0')}';
     final isUsed = userCoupon.status == 'used';
@@ -408,10 +414,10 @@ class _UserCouponScreenState extends State<UserCouponScreen>
                 ),
                 child: Text(
                   isUnused
-                      ? '사용하기'
+                      ? (l10n?.couponStatusAvailable ?? 'Use')
                       : isUsed
-                      ? '사용완료'
-                      : '기간만료',
+                      ? (l10n?.couponStatusUsed ?? 'Used')
+                      : (l10n?.couponStatusExpired ?? 'Expired'),
                   style: TextStyle(
                     fontSize: 10.0,
                     fontWeight: FontWeight.bold,

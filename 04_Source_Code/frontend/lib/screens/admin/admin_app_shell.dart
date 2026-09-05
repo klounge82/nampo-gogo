@@ -60,6 +60,7 @@ class _AdminAppShellState extends State<AdminAppShell> {
                         context,
                         listen: false,
                       );
+                      modeProvider.setCustomerInitialTab(4);
                       await modeProvider.switchMode(
                         AppMode.customer,
                         auth.currentUser,
@@ -105,6 +106,7 @@ class _AdminAppShellState extends State<AdminAppShell> {
                               context,
                               listen: false,
                             );
+                            modeProvider.setCustomerInitialTab(4);
                             await modeProvider.switchMode(
                               AppMode.customer,
                               auth.currentUser,
@@ -254,6 +256,7 @@ class _AdminAppShellState extends State<AdminAppShell> {
                 InkWell(
                   onTap: () async {
                     final modeProvider = Provider.of<AppModeProvider>(context, listen: false);
+                    modeProvider.setCustomerInitialTab(4);
                     await modeProvider.switchMode(AppMode.customer, auth.currentUser);
                     if (context.mounted) {
                       Navigator.of(context).pushAndRemoveUntil(
@@ -415,6 +418,7 @@ class _AdminAppShellState extends State<AdminAppShell> {
               OutlinedButton.icon(
                 onPressed: () async {
                   final modeProvider = Provider.of<AppModeProvider>(context, listen: false);
+                  modeProvider.setCustomerInitialTab(4);
                   await modeProvider.switchMode(AppMode.customer, auth.currentUser);
                   if (context.mounted) {
                     Navigator.of(context).pushAndRemoveUntil(

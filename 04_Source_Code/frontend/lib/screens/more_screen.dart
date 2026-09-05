@@ -19,7 +19,6 @@ import 'my_reviews_screen.dart';
 import 'activity_screen.dart';
 import 'payment_history_screen.dart';
 import 'business_application_screen.dart';
-import 'business_dashboard_screen.dart';
 import 'notification_settings_screen.dart';
 import 'language_settings_screen.dart';
 import 'policy_viewer_screen.dart';
@@ -244,11 +243,15 @@ class MoreScreen extends StatelessWidget {
                 subtitle: isBusinessMode ? l10n.moreSwitchToCustomerDesc : l10n.moreSwitchToBusinessDesc,
                 color: Colors.deepOrange,
                 onTap: () async {
+                  appModeProvider.setCustomerInitialTab(4);
                   final targetMode = isBusinessMode ? AppMode.customer : AppMode.business;
                   await appModeProvider.switchMode(targetMode, user);
-                  if (targetMode == AppMode.business && context.mounted) {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const BusinessDashboardScreen()),
+                  if (context.mounted) {
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                        builder: (_) => const RootNavigationSelector(),
+                      ),
+                      (route) => false,
                     );
                   }
                 },
@@ -270,6 +273,7 @@ class MoreScreen extends StatelessWidget {
                 title: l10n.moreAdminSwitch,
                 color: Colors.redAccent,
                 onTap: () async {
+                  appModeProvider.setCustomerInitialTab(4);
                   await appModeProvider.switchMode(AppMode.admin, user);
                   if (context.mounted) {
                     Navigator.of(context).pushAndRemoveUntil(

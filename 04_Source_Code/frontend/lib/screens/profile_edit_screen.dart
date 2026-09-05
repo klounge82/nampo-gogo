@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:image_picker/image_picker.dart';
 import '../providers/auth_provider.dart';
 import '../providers/profile_provider.dart';
 import '../l10n/app_localizations.dart';
@@ -33,25 +33,43 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     super.dispose();
   }
 
-  Future<void> _mockImageUpload(String imageName) async {
-    setState(() => _isSubmitting = true);
+  Future<void> _pickImage(ImageSource source) async {
+    final l10n = AppLocalizations.of(context);
     try {
-      // Create a dummy text file to simulate image upload
-      final tempDir = await getTemporaryDirectory();
-      final file = File('${tempDir.path}/$imageName.webp');
-      await file.writeAsString('mock_image_data_simulated');
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(
+        source: source,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+      if (pickedFile == null) return;
 
+      setState(() => _isSubmitting = true);
+      final file = File(pickedFile.path);
       if (mounted) {
         await context.read<ProfileProvider>().uploadProfileImage(context, file);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('프로필 사진이 변경되었습니다.')));
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                l10n?.profileImageUpdateSuccess ?? 'Profile picture updated successfully.',
+              ),
+            ),
+          );
+        }
       }
     } catch (e) {
+      debugPrint('ProfileEdit: uploadProfileImage failed: $e');
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('사진 업로드 실패: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              l10n?.profileImageUpdateFailed ?? 'Couldn\'t update your profile image. Please try again.',
+            ),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -61,19 +79,30 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   }
 
   Future<void> _removeImage() async {
+    final l10n = AppLocalizations.of(context);
     setState(() => _isSubmitting = true);
     try {
       await context.read<ProfileProvider>().removeProfileImage(context);
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('기본 이미지로 변경되었습니다.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              l10n?.profileImageResetSuccess ?? 'Changed to default image.',
+            ),
+          ),
+        );
       }
     } catch (e) {
+      debugPrint('ProfileEdit: removeProfileImage failed: $e');
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('이미지 제거 실패: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              l10n?.profileImageResetFailed ?? 'Couldn\'t reset profile image. Please try again.',
+            ),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -83,6 +112,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   }
 
   Future<void> _saveProfile() async {
+    final l10n = AppLocalizations.of(context);
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isSubmitting = true);
 
@@ -92,16 +122,26 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         _nicknameController.text.trim(),
       );
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('프로필 수정이 완료되었습니다.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              l10n?.profileUpdateSuccess ?? 'Profile updated successfully.',
+            ),
+          ),
+        );
         Navigator.pop(context);
       }
     } catch (e) {
+      debugPrint('ProfileEdit: updateNickname failed: $e');
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('수정 실패: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              l10n?.profileUpdateFailed ?? 'Couldn\'t update profile. Please try again.',
+            ),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -117,7 +157,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('프로필 수정'),
+        title: Text(l10n.profileEdit),
         centerTitle: true,
         elevation: 0,
       ),
@@ -175,17 +215,17 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                         // Nickname Field
                         TextFormField(
                           controller: _nicknameController,
-                          decoration: const InputDecoration(
-                            labelText: '닉네임',
-                            border: OutlineInputBorder(),
-                            prefixIcon: Icon(Icons.badge),
+                          decoration: InputDecoration(
+                            labelText: l10n.nickname,
+                            border: const OutlineInputBorder(),
+                            prefixIcon: const Icon(Icons.badge),
                           ),
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
-                              return '닉네임을 입력해 주세요.';
+                              return l10n.nicknameRequired;
                             }
                             if (value.trim().length > 30) {
-                              return '닉네임은 최대 30자 이하로 작성해 주세요.';
+                              return l10n.nicknameTooLong;
                             }
                             return null;
                           },
@@ -237,6 +277,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   }
 
   void _showImageOptionsBottomSheet(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     showModalBottomSheet(
       context: context,
       builder: (ctx) {
@@ -245,25 +286,25 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
             children: [
               ListTile(
                 leading: const Icon(Icons.photo_library),
-                title: const Text('시뮬레이터 갤러리 1 (파란색 아바타)'),
+                title: Text(l10n?.profilePhotoGallery ?? 'Choose from Gallery'),
                 onTap: () {
                   Navigator.pop(ctx);
-                  _mockImageUpload('avatar_blue');
+                  _pickImage(ImageSource.gallery);
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('시뮬레이터 갤러리 2 (노란색 아바타)'),
+                leading: const Icon(Icons.camera_alt),
+                title: Text(l10n?.profilePhotoCamera ?? 'Take a Photo'),
                 onTap: () {
                   Navigator.pop(ctx);
-                  _mockImageUpload('avatar_yellow');
+                  _pickImage(ImageSource.camera);
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.delete, color: Colors.red),
-                title: const Text(
-                  '기본 이미지로 변경',
-                  style: TextStyle(color: Colors.red),
+                title: Text(
+                  l10n?.profilePhotoDefault ?? 'Use Default Image',
+                  style: const TextStyle(color: Colors.red),
                 ),
                 onTap: () {
                   Navigator.pop(ctx);

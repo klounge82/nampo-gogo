@@ -125,6 +125,6 @@ class RootNavigationSelector extends StatelessWidget {
     if (modeProvider.isBusinessMode) {
       return const BusinessAppShell();
     }
-    return const MainNavigationScreen();
+    return MainNavigationScreen(initialIndex: modeProvider.customerInitialTab);
   }
 }

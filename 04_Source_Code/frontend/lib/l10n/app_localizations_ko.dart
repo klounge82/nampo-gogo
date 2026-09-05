@@ -1231,7 +1231,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get moreSavedCoursesDesc => '저장된 AI 추천 코스 확인';
 
   @override
-  String get moreMyActivitySection => '나의 활동 및 혜택';
+  String get moreMyActivitySection => '나의 활동';
 
   @override
   String get moreProfileDetailDesc => '내 정보 및 활동 내역 상세 관리';
@@ -1324,4 +1324,145 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get profileAdminMember => '관리자';
+
+  @override
+  String get profilePhotoGallery => '사진 선택 (갤러리)';
+
+  @override
+  String get profilePhotoCamera => '카메라 촬영';
+
+  @override
+  String get profilePhotoDefault => '기본 이미지로 변경';
+
+  @override
+  String get profileImageUpdateSuccess => '프로필 사진이 변경되었습니다.';
+
+  @override
+  String get profileImageUpdateFailed =>
+      '프로필 이미지를 변경하지 못했습니다. 잠시 후 다시 시도해 주세요.';
+
+  @override
+  String get profileImageResetSuccess => '기본 이미지로 변경되었습니다.';
+
+  @override
+  String get profileImageResetFailed => '기본 이미지로 변경하지 못했습니다. 잠시 후 다시 시도해 주세요.';
+
+  @override
+  String get profileUpdateSuccess => '프로필 수정이 완료되었습니다.';
+
+  @override
+  String get profileUpdateFailed => '프로필을 수정하지 못했습니다. 잠시 후 다시 시도해 주세요.';
+
+  @override
+  String get nicknameRequired => '닉네임을 입력해 주세요.';
+
+  @override
+  String get nicknameTooLong => '닉네임은 최대 30자 이하로 작성해 주세요.';
+
+  @override
+  String myReviewsTabActiveFormat(Object count) {
+    return '작성한 리뷰 ($count)';
+  }
+
+  @override
+  String myReviewsTabDeletedFormat(Object count) {
+    return '삭제한 리뷰 ($count)';
+  }
+
+  @override
+  String get myReviewsActiveEmpty => '작성한 매장 후기가 없습니다.';
+
+  @override
+  String get myReviewsDeletedEmpty => '삭제한 매장 후기가 없습니다.';
+
+  @override
+  String get myReviewsDeleteSuccess => '리뷰가 삭제되었습니다.';
+
+  @override
+  String get myReviewsDeleteFailed => '리뷰 삭제 중 오류가 발생했습니다.';
+
+  @override
+  String get myReviewsRestoreConfirmTitle => '리뷰를 복구하시겠습니까?';
+
+  @override
+  String get myReviewsRestoreConfirmBody => '기존 리뷰 내용과 방문 인증 배지가 그대로 복구됩니다.';
+
+  @override
+  String get myReviewsRestoreAction => '복구하기';
+
+  @override
+  String get myReviewsRestoreSuccess => '리뷰가 복구되었습니다.';
+
+  @override
+  String get myReviewsRestoreFailed => '리뷰 복구 중 오류가 발생했습니다.';
+
+  @override
+  String get myReviewsLoadFailed => '리뷰를 불러오지 못했습니다.';
+
+  @override
+  String get activityToday => '오늘';
+
+  @override
+  String get activityYesterday => '어제';
+
+  @override
+  String get activityThisWeek => '이번 주';
+
+  @override
+  String get activityThisMonth => '이번 달';
+
+  @override
+  String get activityOlder => '이전 활동';
+
+  @override
+  String get couponStatusAvailable => '사용하기';
+
+  @override
+  String get couponStatusUsed => '사용완료';
+
+  @override
+  String get couponStatusExpired => '기간만료';
+
+  @override
+  String get couponExchangeAvailable => '교환가능';
+
+  @override
+  String get couponPointsShort => '포인트부족';
+
+  @override
+  String get noActivityLogs => '활동 기록이 없습니다.';
+
+  @override
+  String get startAppActivityDesc => '남포 GoGo 앱을 사용하면서 활동을 시작해 보세요.';
+
+  @override
+  String get couponExchangeSuccessTitle => '🎉 교환 성공!';
+
+  @override
+  String get couponExchangeSuccessBody =>
+      '쿠폰 교환이 정상 완료되었습니다.\n내 쿠폰함에서 바코드를 확인해 주세요.';
+
+  @override
+  String get refundRequest => '환불 신청';
+
+  @override
+  String get refundReason => '환불 사유';
+
+  @override
+  String get refundSuccess => '환불 처리가 성공적으로 완료되었습니다.';
+
+  @override
+  String get refundFailed => '환불 요청을 처리하지 못했습니다.';
+
+  @override
+  String get pointCharge => '포인트 충전';
+
+  @override
+  String get reservationDeposit => '예약 보증금 결제';
+
+  @override
+  String get paymentDateLabel => '결제일자';
+
+  @override
+  String get noPaymentsHistory => '결제 및 이용 내역이 존재하지 않습니다.';
 }

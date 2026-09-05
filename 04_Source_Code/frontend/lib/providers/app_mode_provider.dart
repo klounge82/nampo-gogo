@@ -15,6 +15,13 @@ class AppModeProvider extends ChangeNotifier {
 
   AppMode get activeMode => _activeMode;
 
+  int _customerInitialTab = 0;
+  int get customerInitialTab => _customerInitialTab;
+
+  void setCustomerInitialTab(int index) {
+    _customerInitialTab = index;
+  }
+
   bool get isCustomerMode => _activeMode == AppMode.customer;
   bool get isBusinessMode => _activeMode == AppMode.business;
   bool get isAdminMode => _activeMode == AppMode.admin;

@@ -45,6 +45,7 @@ class _BusinessAppShellState extends State<BusinessAppShell> {
         }
         final authP = Provider.of<AuthProvider>(context, listen: false);
         final modeP = Provider.of<AppModeProvider>(context, listen: false);
+        modeP.setCustomerInitialTab(4);
         modeP.switchMode(AppMode.customer, authP.currentUser);
       },
       child: Theme(

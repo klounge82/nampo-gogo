@@ -1268,7 +1268,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moreSavedCoursesDesc => 'View your saved AI travel courses';
 
   @override
-  String get moreMyActivitySection => 'My Activities & Benefits';
+  String get moreMyActivitySection => 'My Activities';
 
   @override
   String get moreProfileDetailDesc => 'Manage your profile and travel history';
@@ -1347,7 +1347,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moreSupportSection => 'Support';
 
   @override
-  String get moreModeSwitchSection => 'Mode Switch';
+  String get moreModeSwitchSection => 'Switch Mode';
 
   @override
   String get moreAdminSwitch => 'Switch to Admin Mode';
@@ -1356,11 +1356,159 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileSecuritySection => 'Security & Account';
 
   @override
-  String get profileGeneralMember => 'Regular Member';
+  String get profileGeneralMember => 'Standard Member';
 
   @override
   String get profileBusinessMember => 'Business Member';
 
   @override
-  String get profileAdminMember => 'Admin';
+  String get profileAdminMember => 'Administrator';
+
+  @override
+  String get profilePhotoGallery => 'Choose from Gallery';
+
+  @override
+  String get profilePhotoCamera => 'Take a Photo';
+
+  @override
+  String get profilePhotoDefault => 'Use Default Image';
+
+  @override
+  String get profileImageUpdateSuccess =>
+      'Profile picture updated successfully.';
+
+  @override
+  String get profileImageUpdateFailed =>
+      'Couldn\'t update your profile image. Please try again.';
+
+  @override
+  String get profileImageResetSuccess => 'Changed to default image.';
+
+  @override
+  String get profileImageResetFailed =>
+      'Couldn\'t reset profile image. Please try again.';
+
+  @override
+  String get profileUpdateSuccess => 'Profile updated successfully.';
+
+  @override
+  String get profileUpdateFailed =>
+      'Couldn\'t update profile. Please try again.';
+
+  @override
+  String get nicknameRequired => 'Please enter a nickname.';
+
+  @override
+  String get nicknameTooLong => 'Nickname must be 30 characters or less.';
+
+  @override
+  String myReviewsTabActiveFormat(Object count) {
+    return 'My Reviews ($count)';
+  }
+
+  @override
+  String myReviewsTabDeletedFormat(Object count) {
+    return 'Deleted Reviews ($count)';
+  }
+
+  @override
+  String get myReviewsActiveEmpty => 'No reviews written yet.';
+
+  @override
+  String get myReviewsDeletedEmpty => 'No deleted reviews.';
+
+  @override
+  String get myReviewsDeleteSuccess => 'Review deleted.';
+
+  @override
+  String get myReviewsDeleteFailed =>
+      'Failed to delete review. Please try again.';
+
+  @override
+  String get myReviewsRestoreConfirmTitle => 'Restore this review?';
+
+  @override
+  String get myReviewsRestoreConfirmBody =>
+      'The original review content and visit badge will be restored.';
+
+  @override
+  String get myReviewsRestoreAction => 'Restore';
+
+  @override
+  String get myReviewsRestoreSuccess => 'Review restored.';
+
+  @override
+  String get myReviewsRestoreFailed =>
+      'Failed to restore review. Please try again.';
+
+  @override
+  String get myReviewsLoadFailed => 'Failed to load reviews.';
+
+  @override
+  String get activityToday => 'Today';
+
+  @override
+  String get activityYesterday => 'Yesterday';
+
+  @override
+  String get activityThisWeek => 'This Week';
+
+  @override
+  String get activityThisMonth => 'This Month';
+
+  @override
+  String get activityOlder => 'Earlier';
+
+  @override
+  String get couponStatusAvailable => 'Use';
+
+  @override
+  String get couponStatusUsed => 'Used';
+
+  @override
+  String get couponStatusExpired => 'Expired';
+
+  @override
+  String get couponExchangeAvailable => 'Available';
+
+  @override
+  String get couponPointsShort => 'Need Points';
+
+  @override
+  String get noActivityLogs => 'No activity history.';
+
+  @override
+  String get startAppActivityDesc =>
+      'Start exploring with Nampo GoGo to build your activity history.';
+
+  @override
+  String get couponExchangeSuccessTitle => '🎉 Exchange Successful!';
+
+  @override
+  String get couponExchangeSuccessBody =>
+      'Coupon exchange completed.\nPlease check the barcode in My Coupons.';
+
+  @override
+  String get refundRequest => 'Request Refund';
+
+  @override
+  String get refundReason => 'Refund Reason';
+
+  @override
+  String get refundSuccess => 'Refund processed successfully.';
+
+  @override
+  String get refundFailed => 'Failed to process refund request.';
+
+  @override
+  String get pointCharge => 'Point Charge';
+
+  @override
+  String get reservationDeposit => 'Reservation Deposit';
+
+  @override
+  String get paymentDateLabel => 'Payment Date';
+
+  @override
+  String get noPaymentsHistory => 'No payment history found.';
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../constants/colors.dart';
+import '../l10n/app_localizations.dart';
 import '../models/coupon.dart';
 import '../repositories/coupon_repository.dart';
 import '../providers/auth_provider.dart';
@@ -88,12 +89,13 @@ class _CouponListScreenState extends State<CouponListScreen> {
   }
 
   void _showExchangeSuccessDialog(Coupon coupon) {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text(
-          '🎉 교환 성공!',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          l10n?.couponExchangeSuccessTitle ?? '🎉 Exchange Successful!',
+          style: const TextStyle(fontWeight: FontWeight.bold),
           textAlign: TextAlign.center,
         ),
         content: Column(
@@ -108,10 +110,10 @@ class _CouponListScreenState extends State<CouponListScreen> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12.0),
-            const Text(
-              '쿠폰 교환이 정상 완료되었습니다.\n내 쿠폰함에서 바코드를 확인해 주세요.',
+            Text(
+              l10n?.couponExchangeSuccessBody ?? 'Coupon exchange completed.\nPlease check the barcode in My Coupons.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 12.0),
+              style: const TextStyle(fontSize: 12.0),
             ),
           ],
         ),
@@ -125,7 +127,10 @@ class _CouponListScreenState extends State<CouponListScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
               ),
-              child: const Text('확인', style: TextStyle(color: Colors.white)),
+              child: Text(
+                l10n?.confirm ?? 'OK',
+                style: const TextStyle(color: Colors.white),
+              ),
             ),
           ),
         ],
@@ -134,6 +139,7 @@ class _CouponListScreenState extends State<CouponListScreen> {
   }
 
   void _showExchangeFailDialog(String title, String message) {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -148,7 +154,10 @@ class _CouponListScreenState extends State<CouponListScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('확인', style: TextStyle(color: AppColors.primary)),
+            child: Text(
+              l10n?.confirm ?? 'OK',
+              style: const TextStyle(color: AppColors.primary),
+            ),
           ),
         ],
       ),
@@ -339,6 +348,7 @@ class _CouponListScreenState extends State<CouponListScreen> {
   }
 
   Widget _buildShopCard(Coupon coupon, int userPoints) {
+    final l10n = AppLocalizations.of(context);
     final canExchange = userPoints >= coupon.costPoints;
 
     return GestureDetector(
@@ -424,7 +434,9 @@ class _CouponListScreenState extends State<CouponListScreen> {
                           borderRadius: BorderRadius.circular(4.0),
                         ),
                         child: Text(
-                          canExchange ? '교환가능' : '포인트부족',
+                          canExchange
+                              ? (l10n?.couponExchangeAvailable ?? 'Available')
+                              : (l10n?.couponPointsShort ?? 'Need Points'),
                           style: TextStyle(
                             fontSize: 9.0,
                             fontWeight: FontWeight.bold,

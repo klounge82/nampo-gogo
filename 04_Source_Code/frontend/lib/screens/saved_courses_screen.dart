@@ -4,6 +4,7 @@ import '../constants/colors.dart';
 import '../repositories/recommendation_repository.dart';
 import '../providers/auth_provider.dart';
 import '../providers/favorite_provider.dart';
+import '../l10n/app_localizations.dart';
 import 'recommendation_result_screen.dart';
 
 class SavedCoursesScreen extends StatefulWidget {
@@ -16,12 +17,13 @@ class SavedCoursesScreen extends StatefulWidget {
 class _SavedCoursesScreenState extends State<SavedCoursesScreen> {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
-          '저장한 추천 코스',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          l10n?.mySavedCourses ?? 'Saved Courses',
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
@@ -77,24 +79,25 @@ class _SavedCoursesListViewState extends State<SavedCoursesListView> {
   }
 
   Future<void> _deleteCourse(RecommendationModel course) async {
+    final l10n = AppLocalizations.of(context);
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text(
-          '코스 삭제',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          l10n?.deleteAccount ?? 'Delete Course',
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         content: const Text('저장한 추천 코스를 보관함에서 삭제하시겠습니까?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('취소'),
+            child: Text(l10n?.cancel ?? 'Cancel'),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text(
-              '삭제',
-              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+            child: Text(
+              l10n?.confirm ?? 'Delete',
+              style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -216,7 +219,7 @@ class _SavedCoursesListViewState extends State<SavedCoursesListView> {
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('닫기'),
+            child: Text(AppLocalizations.of(context)?.close ?? 'Close'),
           ),
         ],
       ),
@@ -225,6 +228,7 @@ class _SavedCoursesListViewState extends State<SavedCoursesListView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(color: AppColors.primary),
@@ -251,9 +255,9 @@ class _SavedCoursesListViewState extends State<SavedCoursesListView> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                 ),
-                child: const Text(
-                  '다시 시도',
-                  style: TextStyle(color: Colors.white),
+                child: Text(
+                  l10n?.retry ?? 'Retry',
+                  style: const TextStyle(color: Colors.white),
                 ),
               ),
             ],

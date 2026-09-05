@@ -7,10 +7,7 @@ import '../providers/auth_provider.dart';
 import 'review_edit_screen.dart';
 import 'review_write_screen.dart';
 
-import '../services/review_translation_service.dart';
-import '../providers/locale_provider.dart';
 import '../l10n/app_localizations.dart';
-import '../utils/l10n_mappers.dart';
 import '../widgets/review_card_widget.dart';
 
 class MyReviewsScreen extends StatefulWidget {
@@ -23,63 +20,7 @@ class MyReviewsScreen extends StatefulWidget {
 class _MyReviewsScreenState extends State<MyReviewsScreen>
     with SingleTickerProviderStateMixin {
   final ReviewRepository _reviewRepository = ReviewRepository();
-  final ReviewTranslationService _translationService = ReviewTranslationService();
   late TabController _tabController;
-
-  final Set<String> _translatedReviewIds = {};
-  final Map<String, String> _translatedTexts = {};
-  final Set<String> _translatingReviewIds = {};
-  final Set<String> _failedReviewIds = {};
-
-  Future<void> _toggleReviewTranslation(
-    Review rev,
-    AppLocalizations l10n,
-    String currentLocaleCode,
-  ) async {
-    final reviewId = rev.id;
-    if (_translatedReviewIds.contains(reviewId)) {
-      setState(() {
-        _translatedReviewIds.remove(reviewId);
-        _failedReviewIds.remove(reviewId);
-      });
-      return;
-    }
-
-    if (_translatedTexts.containsKey(reviewId)) {
-      setState(() {
-        _translatedReviewIds.add(reviewId);
-        _failedReviewIds.remove(reviewId);
-      });
-      return;
-    }
-
-    setState(() {
-      _translatingReviewIds.add(reviewId);
-      _failedReviewIds.remove(reviewId);
-    });
-
-    try {
-      final result = await _translationService.translateReview(
-        reviewId: reviewId,
-        content: rev.content,
-        targetLocale: currentLocaleCode,
-      );
-      if (mounted) {
-        setState(() {
-          _translatedTexts[reviewId] = result;
-          _translatedReviewIds.add(reviewId);
-          _translatingReviewIds.remove(reviewId);
-        });
-      }
-    } catch (_) {
-      if (mounted) {
-        setState(() {
-          _translatingReviewIds.remove(reviewId);
-          _failedReviewIds.add(reviewId);
-        });
-      }
-    }
-  }
 
   List<Review> _activeReviews = [];
   List<Review> _deletedReviews = [];
@@ -130,6 +71,7 @@ class _MyReviewsScreenState extends State<MyReviewsScreen>
   }
 
   Future<void> _deleteReview(String reviewId) async {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -146,34 +88,46 @@ class _MyReviewsScreenState extends State<MyReviewsScreen>
         reviewId,
         userId: userId,
       );
-      Navigator.of(context).pop(); // Dismiss indicator
+      if (mounted) Navigator.of(context).pop(); // Dismiss indicator
 
       if (success) {
-        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('리뷰가 삭제되었습니다.'),
-            backgroundColor: Colors.black87,
-            behavior: SnackBarBehavior.floating,
-            action: SnackBarAction(
-              label: '실행 취소',
-              textColor: AppColors.primary,
-              onPressed: () => _restoreReview(reviewId),
+        if (mounted) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n?.myReviewsDeleteSuccess ?? 'Review deleted.'),
+              backgroundColor: Colors.black87,
+              behavior: SnackBarBehavior.floating,
+              action: SnackBarAction(
+                label: l10n?.undoAction ?? 'Undo',
+                textColor: AppColors.primary,
+                onPressed: () => _restoreReview(reviewId),
+              ),
             ),
-          ),
-        );
+          );
+        }
         _loadMyReviews();
       } else {
-        _showErrorDialog('삭제 실패', '리뷰 삭제 중 오류가 발생했습니다.');
+        if (mounted) {
+          _showErrorDialog(
+            l10n?.dialogErrorTitle ?? '오류',
+            l10n?.myReviewsDeleteFailed ?? 'Failed to delete review.',
+          );
+        }
       }
     } catch (e) {
-      Navigator.of(context).pop();
-      final cleanMsg = e.toString().replaceAll('Exception:', '').trim();
-      _showErrorDialog('삭제 실패', cleanMsg);
+      if (mounted) {
+        Navigator.of(context).pop();
+        _showErrorDialog(
+          l10n?.dialogErrorTitle ?? '오류',
+          l10n?.myReviewsDeleteFailed ?? 'Failed to delete review.',
+        );
+      }
     }
   }
 
   Future<void> _restoreReview(String reviewId) async {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -187,50 +141,57 @@ class _MyReviewsScreenState extends State<MyReviewsScreen>
 
     try {
       await _reviewRepository.restoreReview(reviewId, userId: userId);
-      Navigator.of(context).pop(); // Dismiss indicator
+      if (mounted) Navigator.of(context).pop(); // Dismiss indicator
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('✅ 리뷰가 복구되었습니다.'),
-          backgroundColor: Colors.green,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n?.myReviewsRestoreSuccess ?? 'Review restored.'),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
       _loadMyReviews();
     } catch (e) {
-      Navigator.of(context).pop();
-      final cleanMsg = e.toString().replaceAll('Exception:', '').trim();
-      _showErrorDialog('복구 실패', cleanMsg);
+      if (mounted) {
+        Navigator.of(context).pop();
+        _showErrorDialog(
+          l10n?.dialogErrorTitle ?? '오류',
+          l10n?.myReviewsRestoreFailed ?? 'Failed to restore review.',
+        );
+      }
     }
   }
 
   void _confirmDelete(String reviewId) {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text(
-          '리뷰를 삭제하시겠습니까?',
-          style: TextStyle(
+        title: Text(
+          l10n?.deleteReviewConfirmTitle ?? 'Delete review?',
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
             color: AppColors.secondary,
           ),
         ),
-        content: const Text(
-          '삭제한 리뷰는 공개 목록에서 숨겨집니다.\n내가 작성한 리뷰에서 언제든 다시 작성하거나 복구할 수 있습니다.',
+        content: Text(
+          l10n?.deleteReviewConfirmContent ?? 'Deleted reviews will be hidden from public.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('취소', style: TextStyle(color: Colors.grey)),
+            child: Text(l10n?.cancel ?? 'Cancel', style: const TextStyle(color: Colors.grey)),
           ),
           TextButton(
             onPressed: () {
               Navigator.of(ctx).pop();
               _deleteReview(reviewId);
             },
-            child: const Text(
-              '삭제',
-              style: TextStyle(
+            child: Text(
+              l10n?.confirm ?? 'Confirm',
+              style: const TextStyle(
                 color: AppColors.secondary,
                 fontWeight: FontWeight.bold,
               ),
@@ -242,32 +203,33 @@ class _MyReviewsScreenState extends State<MyReviewsScreen>
   }
 
   void _confirmRestore(String reviewId) {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text(
-          '리뷰를 복구하시겠습니까?',
-          style: TextStyle(
+        title: Text(
+          l10n?.myReviewsRestoreConfirmTitle ?? 'Restore review?',
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
             color: AppColors.secondary,
           ),
         ),
-        content: const Text(
-          '기존 리뷰 내용과 방문 인증 배지가 그대로 복구됩니다.\nQR 코드를 다시 인증할 필요가 없습니다.',
+        content: Text(
+          l10n?.myReviewsRestoreConfirmBody ?? 'The original review content and badge will be restored.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('취소', style: TextStyle(color: Colors.grey)),
+            child: Text(l10n?.cancel ?? 'Cancel', style: const TextStyle(color: Colors.grey)),
           ),
           TextButton(
             onPressed: () {
               Navigator.of(ctx).pop();
               _restoreReview(reviewId);
             },
-            child: const Text(
-              '복구하기',
-              style: TextStyle(
+            child: Text(
+              l10n?.myReviewsRestoreAction ?? 'Restore',
+              style: const TextStyle(
                 color: AppColors.primary,
                 fontWeight: FontWeight.bold,
               ),
@@ -279,6 +241,7 @@ class _MyReviewsScreenState extends State<MyReviewsScreen>
   }
 
   void _showErrorDialog(String title, String message) {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -293,7 +256,7 @@ class _MyReviewsScreenState extends State<MyReviewsScreen>
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('확인', style: TextStyle(color: AppColors.primary)),
+            child: Text(l10n?.confirm ?? 'OK', style: const TextStyle(color: AppColors.primary)),
           ),
         ],
       ),
@@ -307,7 +270,7 @@ class _MyReviewsScreenState extends State<MyReviewsScreen>
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(
-          l10n?.reviews ?? '내가 작성한 리뷰',
+          l10n?.reviews ?? 'Reviews',
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: AppColors.surface,
@@ -319,8 +282,8 @@ class _MyReviewsScreenState extends State<MyReviewsScreen>
           unselectedLabelColor: AppColors.textSecondary,
           indicatorColor: AppColors.primary,
           tabs: [
-            Tab(text: '작성한 리뷰 (${_activeReviews.length})'),
-            Tab(text: '삭제한 리뷰 (${_deletedReviews.length})'),
+            Tab(text: l10n?.myReviewsTabActiveFormat(_activeReviews.length) ?? 'Active (${_activeReviews.length})'),
+            Tab(text: l10n?.myReviewsTabDeletedFormat(_deletedReviews.length) ?? 'Deleted (${_deletedReviews.length})'),
           ],
         ),
       ),
@@ -333,11 +296,11 @@ class _MyReviewsScreenState extends State<MyReviewsScreen>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('리뷰를 불러오지 못했습니다: $_errorMessage'),
+                  Text(l10n?.myReviewsLoadFailed ?? 'Failed to load reviews.'),
                   const SizedBox(height: 16.0),
                   ElevatedButton(
                     onPressed: _loadMyReviews,
-                    child: const Text('다시 시도'),
+                    child: Text(l10n?.retry ?? 'Retry'),
                   ),
                 ],
               ),
@@ -353,10 +316,13 @@ class _MyReviewsScreenState extends State<MyReviewsScreen>
   }
 
   Widget _buildReviewList(List<Review> list, {required bool isDeletedTab}) {
+    final l10n = AppLocalizations.of(context);
     if (list.isEmpty) {
       return Center(
         child: Text(
-          isDeletedTab ? '삭제한 매장 후기가 없습니다.' : '작성한 매장 후기가 없습니다.',
+          isDeletedTab
+              ? (l10n?.myReviewsDeletedEmpty ?? 'No deleted reviews.')
+              : (l10n?.myReviewsActiveEmpty ?? 'No reviews written yet.'),
           style: const TextStyle(color: AppColors.textSecondary),
         ),
       );

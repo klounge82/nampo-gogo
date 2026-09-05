@@ -254,7 +254,6 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
-    final modeProvider = Provider.of<AppModeProvider>(context);
     final user = authProvider.currentUser;
 
     final memberships = user?.businessMemberships ?? [];
@@ -279,6 +278,7 @@ class _BusinessDashboardScreenState extends State<BusinessDashboardScreen> {
                   context,
                   listen: false,
                 );
+                modeProvider.setCustomerInitialTab(4);
                 modeProvider.switchMode(
                   AppMode.customer,
                   authProvider.currentUser,

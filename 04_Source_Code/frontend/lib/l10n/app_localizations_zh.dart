@@ -1217,7 +1217,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get moreSavedCoursesDesc => '查看已保存的AI推荐路线';
 
   @override
-  String get moreMyActivitySection => '我的活动与权益';
+  String get moreMyActivitySection => '我的活动';
 
   @override
   String get moreProfileDetailDesc => '管理个人信息与活动历史';
@@ -1287,7 +1287,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get missionStateCompleted => '已完成';
 
   @override
-  String get moreBenefitsSection => '优惠福利';
+  String get moreBenefitsSection => '权益';
 
   @override
   String get moreSupportSection => '支持与帮助';
@@ -1309,6 +1309,145 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get profileAdminMember => '管理员';
+
+  @override
+  String get profilePhotoGallery => '从相册选择';
+
+  @override
+  String get profilePhotoCamera => '拍照';
+
+  @override
+  String get profilePhotoDefault => '恢复默认图片';
+
+  @override
+  String get profileImageUpdateSuccess => '头像已成功更新。';
+
+  @override
+  String get profileImageUpdateFailed => '无法更新头像，请稍后重试。';
+
+  @override
+  String get profileImageResetSuccess => '已恢复为默认图片。';
+
+  @override
+  String get profileImageResetFailed => '无法恢复默认图片，请稍后重试。';
+
+  @override
+  String get profileUpdateSuccess => '个人资料修改成功。';
+
+  @override
+  String get profileUpdateFailed => '无法修改个人资料，请稍后重试。';
+
+  @override
+  String get nicknameRequired => '请输入昵称。';
+
+  @override
+  String get nicknameTooLong => '昵称最多30个字符。';
+
+  @override
+  String myReviewsTabActiveFormat(Object count) {
+    return '已发布的评价 ($count)';
+  }
+
+  @override
+  String myReviewsTabDeletedFormat(Object count) {
+    return '已删除的评价 ($count)';
+  }
+
+  @override
+  String get myReviewsActiveEmpty => '暂无已发布的评价。';
+
+  @override
+  String get myReviewsDeletedEmpty => '暂无已删除的评价。';
+
+  @override
+  String get myReviewsDeleteSuccess => '评价已删除。';
+
+  @override
+  String get myReviewsDeleteFailed => '删除评价失败，请稍后重试。';
+
+  @override
+  String get myReviewsRestoreConfirmTitle => '是否恢复此评价？';
+
+  @override
+  String get myReviewsRestoreConfirmBody => '将恢复原评价内容及访问认证徽章。';
+
+  @override
+  String get myReviewsRestoreAction => '恢复';
+
+  @override
+  String get myReviewsRestoreSuccess => '评价已恢复。';
+
+  @override
+  String get myReviewsRestoreFailed => '恢复评价失败，请稍后重试。';
+
+  @override
+  String get myReviewsLoadFailed => '无法加载评价。';
+
+  @override
+  String get activityToday => '今天';
+
+  @override
+  String get activityYesterday => '昨天';
+
+  @override
+  String get activityThisWeek => '本周';
+
+  @override
+  String get activityThisMonth => '本月';
+
+  @override
+  String get activityOlder => '更早';
+
+  @override
+  String get couponStatusAvailable => '去使用';
+
+  @override
+  String get couponStatusUsed => '已使用';
+
+  @override
+  String get couponStatusExpired => '已过期';
+
+  @override
+  String get couponExchangeAvailable => '可兑换';
+
+  @override
+  String get couponPointsShort => '积分不足';
+
+  @override
+  String get noActivityLogs => '暂无活动记录。';
+
+  @override
+  String get startAppActivityDesc => '开始使用南浦GoGo探索并记录您的活动。';
+
+  @override
+  String get couponExchangeSuccessTitle => '🎉 兑换成功！';
+
+  @override
+  String get couponExchangeSuccessBody => '优惠券兑换成功。\n请在“我的优惠券”中查看条形码。';
+
+  @override
+  String get refundRequest => '申请退款';
+
+  @override
+  String get refundReason => '退款原因';
+
+  @override
+  String get refundSuccess => '退款处理已成功完成。';
+
+  @override
+  String get refundFailed => '无法处理退款请求。';
+
+  @override
+  String get pointCharge => '积分充值';
+
+  @override
+  String get reservationDeposit => '预约定金支付';
+
+  @override
+  String get paymentDateLabel => '支付日期';
+
+  @override
+  String get noPaymentsHistory => '暂无支付及使用记录。';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -2524,7 +2663,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get moreSavedCoursesDesc => '查看已保存的AI推荐路线';
 
   @override
-  String get moreMyActivitySection => '我的活动与权益';
+  String get moreMyActivitySection => '我的活动';
 
   @override
   String get moreProfileDetailDesc => '管理个人信息与活动历史';
@@ -2594,7 +2733,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get missionStateCompleted => '已完成';
 
   @override
-  String get moreBenefitsSection => '优惠福利';
+  String get moreBenefitsSection => '权益';
 
   @override
   String get moreSupportSection => '支持与帮助';
@@ -2616,4 +2755,143 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get profileAdminMember => '管理员';
+
+  @override
+  String get profilePhotoGallery => '从相册选择';
+
+  @override
+  String get profilePhotoCamera => '拍照';
+
+  @override
+  String get profilePhotoDefault => '恢复默认图片';
+
+  @override
+  String get profileImageUpdateSuccess => '头像已成功更新。';
+
+  @override
+  String get profileImageUpdateFailed => '无法更新头像，请稍后重试。';
+
+  @override
+  String get profileImageResetSuccess => '已恢复为默认图片。';
+
+  @override
+  String get profileImageResetFailed => '无法恢复默认图片，请稍后重试。';
+
+  @override
+  String get profileUpdateSuccess => '个人资料修改成功。';
+
+  @override
+  String get profileUpdateFailed => '无法修改个人资料，请稍后重试。';
+
+  @override
+  String get nicknameRequired => '请输入昵称。';
+
+  @override
+  String get nicknameTooLong => '昵称最多30个字符。';
+
+  @override
+  String myReviewsTabActiveFormat(Object count) {
+    return '已发布的评价 ($count)';
+  }
+
+  @override
+  String myReviewsTabDeletedFormat(Object count) {
+    return '已删除的评价 ($count)';
+  }
+
+  @override
+  String get myReviewsActiveEmpty => '暂无已发布的评价。';
+
+  @override
+  String get myReviewsDeletedEmpty => '暂无已删除的评价。';
+
+  @override
+  String get myReviewsDeleteSuccess => '评价已删除。';
+
+  @override
+  String get myReviewsDeleteFailed => '删除评价失败，请稍后重试。';
+
+  @override
+  String get myReviewsRestoreConfirmTitle => '是否恢复此评价？';
+
+  @override
+  String get myReviewsRestoreConfirmBody => '将恢复原评价内容及访问认证徽章。';
+
+  @override
+  String get myReviewsRestoreAction => '恢复';
+
+  @override
+  String get myReviewsRestoreSuccess => '评价已恢复。';
+
+  @override
+  String get myReviewsRestoreFailed => '恢复评价失败，请稍后重试。';
+
+  @override
+  String get myReviewsLoadFailed => '无法加载评价。';
+
+  @override
+  String get activityToday => '今天';
+
+  @override
+  String get activityYesterday => '昨天';
+
+  @override
+  String get activityThisWeek => '本周';
+
+  @override
+  String get activityThisMonth => '本月';
+
+  @override
+  String get activityOlder => '更早';
+
+  @override
+  String get couponStatusAvailable => '去使用';
+
+  @override
+  String get couponStatusUsed => '已使用';
+
+  @override
+  String get couponStatusExpired => '已过期';
+
+  @override
+  String get couponExchangeAvailable => '可兑换';
+
+  @override
+  String get couponPointsShort => '积分不足';
+
+  @override
+  String get noActivityLogs => '暂无活动记录。';
+
+  @override
+  String get startAppActivityDesc => '开始使用南浦GoGo探索并记录您的活动。';
+
+  @override
+  String get couponExchangeSuccessTitle => '🎉 兑换成功！';
+
+  @override
+  String get couponExchangeSuccessBody => '优惠券兑换成功。\n请在“我的优惠券”中查看条形码。';
+
+  @override
+  String get refundRequest => '申请退款';
+
+  @override
+  String get refundReason => '退款原因';
+
+  @override
+  String get refundSuccess => '退款处理已成功完成。';
+
+  @override
+  String get refundFailed => '无法处理退款请求。';
+
+  @override
+  String get pointCharge => '积分充值';
+
+  @override
+  String get reservationDeposit => '预约定金支付';
+
+  @override
+  String get paymentDateLabel => '支付日期';
+
+  @override
+  String get noPaymentsHistory => '暂无支付及使用记录。';
 }
