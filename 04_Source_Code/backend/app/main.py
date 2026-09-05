@@ -6018,7 +6018,7 @@ def update_profile(req: schemas.UserUpdate, current_user: models.User = Depends(
     return current_user
 
 @app.post("/users/me/profile-image", tags=["Profile"])
-def upload_profile_image(req: schemas.ProfileImageUploadRequest, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+def upload_profile_image(req: schemas.ProfileImageUploadRequest, request: Request, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
     import base64
     import re
     
@@ -6060,7 +6060,13 @@ def upload_profile_image(req: schemas.ProfileImageUploadRequest, current_user: m
         raise HTTPException(status_code=500, detail=f"이미지 저장 중 서버 오류 발생: {str(e)}")
 
     # Update DB URL
-    img_url = f"http://10.0.2.2:18080/static/profile_images/{filename}"
+    public_base = os.getenv("PUBLIC_BASE_URL")
+    if public_base:
+        public_base = public_base.rstrip("/")
+    else:
+        public_base = str(request.base_url).rstrip("/")
+
+    img_url = f"{public_base}/static/profile_images/{filename}"
     current_user.profile_image_url = img_url
 
     db.add(current_user)
