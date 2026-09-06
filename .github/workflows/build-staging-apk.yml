@@ -1,0 +1,64 @@
+name: Build Staging Field APK
+
+on:
+  push:
+    branches:
+      - 'staging/**'
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    name: Build Android Staging APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.6'
+          channel: 'stable'
+          cache: true
+
+      - name: Configure Staging Android Keystore
+        working-directory: 04_Source_Code/frontend/android
+        run: |
+          keytool -genkey -v -keystore upload-keystore.jks \
+            -storepass nampogogostaging2026 \
+            -alias nampogogostaging \
+            -keypass nampogogostaging2026 \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -dname "CN=NampoGoGo Staging, OU=Field Test, O=NampoGoGo, L=Busan, C=KR"
+          cat <<EOF > key.properties
+          storePassword=nampogogostaging2026
+          keyPassword=nampogogostaging2026
+          keyAlias=nampogogostaging
+          storeFile=upload-keystore.jks
+          EOF
+
+      - name: Install dependencies
+        working-directory: 04_Source_Code/frontend
+        run: flutter pub get
+
+      - name: Build Staging APK
+        working-directory: 04_Source_Code/frontend
+        run: |
+          flutter build apk --release \
+            --dart-define=APP_ENV=staging \
+            --dart-define=API_BASE_URL=https://backend-staging-f18f.up.railway.app
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nampo-gogo-staging-c420ddd
+          path: 04_Source_Code/frontend/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+          retention-days: 14
