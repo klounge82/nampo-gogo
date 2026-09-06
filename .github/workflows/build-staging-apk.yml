@@ -31,13 +31,16 @@ jobs:
       - name: Configure Staging Android Keystore
         working-directory: 04_Source_Code/frontend/android
         run: |
-          keytool -genkey -v -keystore upload-keystore.jks \
+          mkdir -p app
+          keytool -genkey -v -keystore app/upload-keystore.jks \
             -storepass nampogogostaging2026 \
             -alias nampogogostaging \
             -keypass nampogogostaging2026 \
             -keyalg RSA -keysize 2048 -validity 10000 \
             -dname "CN=NampoGoGo Staging, OU=Field Test, O=NampoGoGo, L=Busan, C=KR"
+          cp app/upload-keystore.jks upload-keystore.jks
           cat <<EOF > key.properties
+          MAPS_API_KEY=AIzaSyCmSL87cU8vAyD-hUpgw_Tz0a8mRQzKmao
           storePassword=nampogogostaging2026
           keyPassword=nampogogostaging2026
           keyAlias=nampogogostaging
@@ -51,7 +54,7 @@ jobs:
       - name: Build Staging APK
         working-directory: 04_Source_Code/frontend
         run: |
-          flutter build apk --release \
+          flutter build apk --release --verbose \
             --dart-define=APP_ENV=staging \
             --dart-define=API_BASE_URL=https://backend-staging-f18f.up.railway.app
 
