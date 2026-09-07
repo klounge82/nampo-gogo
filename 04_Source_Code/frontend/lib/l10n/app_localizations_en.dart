@@ -1719,7 +1719,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get savedPlacesTab => 'Saved Places';
 
   @override
-  String get savedCoursesTab => 'Recommended Courses';
+  String get savedCoursesTab => 'Saved Courses';
 
   @override
   String get favoritesEmptyTitle => 'No saved places yet.';
@@ -1733,7 +1733,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get savedCoursesEmptySubtitle =>
-      'Discover and save personalized travel itineraries!';
+      'Tap \'Save Course\' in recommended courses to add one.';
 
   @override
   String get reservationDetailTitle => 'Reservation Details';
@@ -1789,4 +1789,231 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get saveAction => 'Save';
+
+  @override
+  String get myReservationsTitle => 'My Reservations';
+
+  @override
+  String get activeReservationsTab => 'Active Reservations';
+
+  @override
+  String get pastReservationsTab => 'Past Reservations';
+
+  @override
+  String get noActiveReservations => 'No active reservations.';
+
+  @override
+  String get noPastReservations => 'No past reservations.';
+
+  @override
+  String get reservationLoadError =>
+      'Failed to load reservations.\nPlease try again in a moment.';
+
+  @override
+  String reservationTimeLabel(String time) {
+    return 'Reservation Time: $time';
+  }
+
+  @override
+  String reservationPartySizeLabel(int count) {
+    return 'Party size: $count guests';
+  }
+
+  @override
+  String get reservationStatusPending => 'Pending';
+
+  @override
+  String get reservationStatusApproved => 'Confirmed';
+
+  @override
+  String get reservationStatusRejected => 'Rejected';
+
+  @override
+  String get reservationStatusCancelledCustomer => 'Cancelled by User';
+
+  @override
+  String get reservationStatusCancelledBusiness => 'Cancelled by Store';
+
+  @override
+  String get reservationStatusCancelled => 'Cancelled';
+
+  @override
+  String get reservationStatusCompleted => 'Completed';
+
+  @override
+  String get reservationStatusNoShow => 'No-show';
+
+  @override
+  String get reservationStatusUnknown => 'Status Check Required';
+
+  @override
+  String get savedCoursesTitle => 'Saved Travel Courses';
+
+  @override
+  String get favoritesAddHint =>
+      'Add places you like to your favorites with the heart icon.';
+
+  @override
+  String get savedCoursesAddHint =>
+      'Tap \'Save Course\' in recommended courses to add one.';
+
+  @override
+  String get deleteCourseConfirm =>
+      'Are you sure you want to remove this course from your saved list?';
+
+  @override
+  String get courseDeletedSuccess => 'Course removed successfully.';
+
+  @override
+  String get courseDeleteFail =>
+      'Failed to delete course. Please try again in a moment.';
+
+  @override
+  String get legacyCourseNotice =>
+      'This course was saved in a previous version. Please save a new course.';
+
+  @override
+  String get courseLoadFail =>
+      'Failed to load saved course. Please save a new course.';
+
+  @override
+  String get shareCourseTitle => 'Share Recommended Course';
+
+  @override
+  String get shareCourseDesc =>
+      'Share your personalized Nampo travel course with friends!';
+
+  @override
+  String get copyLinkAction => 'Copy Link';
+
+  @override
+  String get linkCopied => 'Course share link copied to clipboard.';
+
+  @override
+  String saveDateLabel(String date) {
+    return 'Saved: $date';
+  }
+
+  @override
+  String get viewCourseDetail => 'View Course Details';
+
+  @override
+  String get courseSoloLabel => 'Solo';
+
+  @override
+  String get courseCoupleLabel => 'Couple';
+
+  @override
+  String get courseFamilyLabel => 'Family & Friends';
+
+  @override
+  String get transportWalkLabel => 'Walking Course';
+
+  @override
+  String get transportTransitLabel => 'Transit Course';
+
+  @override
+  String get transportDriveLabel => 'Driving Course';
+
+  @override
+  String courseSummaryPlaces(int count, String dist, int mins) {
+    return '$count places · ${dist}km · approx. $mins mins';
+  }
+
+  @override
+  String get recommendedPlaceCourse => 'Recommended Places Route';
+
+  @override
+  String get savedCoursesLoadError => 'Failed to load saved courses list.';
+
+  @override
+  String get notifBasicHeader => 'General Service Notifications';
+
+  @override
+  String get notifReservationDesc =>
+      'Receive reservation confirmations, cancellations, and reminders.';
+
+  @override
+  String get notifMissionDesc =>
+      'Receive alerts for mission completions and earned rewards.';
+
+  @override
+  String get notifPointTitle => 'Points Notifications';
+
+  @override
+  String get notifPointDesc =>
+      'Receive updates on point changes from missions and events.';
+
+  @override
+  String get notifCouponTitle => 'Coupons Notifications';
+
+  @override
+  String get notifCouponDesc =>
+      'Receive notifications about coupon issuance, usage, and expiry.';
+
+  @override
+  String get notifAiTitle => 'AI Course Recommendations';
+
+  @override
+  String get notifAiDesc =>
+      'Receive notifications when your customized course is ready.';
+
+  @override
+  String get notifEventMarketingHeader => 'Events & Marketing';
+
+  @override
+  String get notifSystemTitle => 'System Announcements';
+
+  @override
+  String get notifSystemDesc =>
+      'Receive announcements and maintenance notices.';
+
+  @override
+  String get notifMarketingTitle => 'Marketing Consent';
+
+  @override
+  String get notifMarketingDesc =>
+      'Receive special discounts and recommended events in Nampo-dong.';
+
+  @override
+  String get notifSettingsSaved => 'Notification settings updated.';
+
+  @override
+  String get reservationConfirmSubmitted => 'Reservation Submitted';
+
+  @override
+  String reservationSubmittedBody(String store) {
+    return 'Your reservation request for $store has been submitted.';
+  }
+
+  @override
+  String get reservationStatusWillChange =>
+      'The reservation status will update once reviewed by the store.';
+
+  @override
+  String get applyReservationAction => 'Submit Reservation';
+
+  @override
+  String get selectReservationParty => 'Party Size';
+
+  @override
+  String get selectReservationDate => 'Reservation Date';
+
+  @override
+  String get selectReservationTime => 'Reservation Time';
+
+  @override
+  String get navHome => 'Home';
+
+  @override
+  String get navExplore => 'Explore';
+
+  @override
+  String get navCourses => 'Courses';
+
+  @override
+  String get navSaved => 'Saved';
+
+  @override
+  String get navProfile => 'My Profile';
 }

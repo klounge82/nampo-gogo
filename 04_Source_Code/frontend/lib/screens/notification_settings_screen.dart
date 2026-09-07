@@ -48,48 +48,48 @@ class _NotificationSettingsScreenState
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                _buildSectionHeader(l10n?.notificationPushTitle ?? '기본 서비스 알림'),
+                _buildSectionHeader(l10n?.notifBasicHeader ?? '기본 서비스 알림'),
                 _buildToggleItem(
                   title: l10n?.activityReservationTitle ?? '예약 알림',
-                  subtitle: '예약 확인, 취소 및 리마인더 푸시를 전송합니다.',
+                  subtitle: l10n?.notifReservationDesc ?? '예약 확인, 취소 및 리마인더 푸시를 전송합니다.',
                   value: pref.reservationEnabled,
                   onChanged: (val) => _updatePref(pref, 'reservation', val),
                 ),
                 _buildToggleItem(
                   title: l10n?.activityMissionTitle ?? '미션 알림',
-                  subtitle: '미션 완료 및 리워드 획득 성공을 안내합니다.',
+                  subtitle: l10n?.notifMissionDesc ?? '미션 완료 및 리워드 획득 성공을 안내합니다.',
                   value: pref.missionEnabled,
                   onChanged: (val) => _updatePref(pref, 'mission', val),
                 ),
                 _buildToggleItem(
-                  title: '포인트 알림',
-                  subtitle: '미션 인증 및 이벤트에 따른 포인트 증감을 수신합니다.',
+                  title: l10n?.notifPointTitle ?? '포인트 알림',
+                  subtitle: l10n?.notifPointDesc ?? '미션 인증 및 이벤트에 따른 포인트 증감을 수신합니다.',
                   value: pref.pointEnabled,
                   onChanged: (val) => _updatePref(pref, 'point', val),
                 ),
                 _buildToggleItem(
-                  title: '쿠폰 알림',
-                  subtitle: '쿠폰 획득 및 사용, 만료 기한 경고 알림을 발송합니다.',
+                  title: l10n?.notifCouponTitle ?? '쿠폰 알림',
+                  subtitle: l10n?.notifCouponDesc ?? '쿠폰 획득 및 사용, 만료 기한 경고 알림을 발송합니다.',
                   value: pref.couponEnabled,
                   onChanged: (val) => _updatePref(pref, 'coupon', val),
                 ),
                 _buildToggleItem(
-                  title: 'AI 코스 추천 알림',
-                  subtitle: '요청하신 나만의 테마 여행 코스 산출 완료 알림입니다.',
+                  title: l10n?.notifAiTitle ?? 'AI 코스 추천 알림',
+                  subtitle: l10n?.notifAiDesc ?? '요청하신 나만의 테마 여행 코스 산출 완료 알림입니다.',
                   value: pref.aiEnabled,
                   onChanged: (val) => _updatePref(pref, 'ai', val),
                 ),
                 const SizedBox(height: 16),
-                _buildSectionHeader('이벤트 및 마케팅 알림'),
+                _buildSectionHeader(l10n?.notifEventMarketingHeader ?? '이벤트 및 마케팅 알림'),
                 _buildToggleItem(
-                  title: '시스템 공지 알림',
-                  subtitle: '공지사항 및 시스템 정기 점검 알림을 전송합니다.',
+                  title: l10n?.notifSystemTitle ?? '시스템 공지 알림',
+                  subtitle: l10n?.notifSystemDesc ?? '공지사항 및 시스템 정기 점검 알림을 전송합니다.',
                   value: pref.eventEnabled,
                   onChanged: (val) => _updatePref(pref, 'event', val),
                 ),
                 _buildToggleItem(
-                  title: '마케팅 정보 동의',
-                  subtitle: '다양한 남포동 상권 할인 및 추천 맞춤 이벤트를 수신합니다.',
+                  title: l10n?.notifMarketingTitle ?? '마케팅 정보 동의',
+                  subtitle: l10n?.notifMarketingDesc ?? '다양한 남포동 상권 할인 및 추천 맞춤 이벤트를 수신합니다.',
                   value: pref.marketingConsent,
                   onChanged: (val) => _updatePref(pref, 'marketing', val),
                 ),
@@ -154,6 +154,7 @@ class _NotificationSettingsScreenState
     String type,
     bool value,
   ) {
+    final l10n = AppLocalizations.of(context);
     final updated = NotificationPreferenceModel(
       userId: current.userId,
       reservationEnabled: type == 'reservation'
@@ -174,9 +175,11 @@ class _NotificationSettingsScreenState
     );
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('⚙️ 알림 설정 변경사항이 저장되었습니다.'),
-        duration: Duration(milliseconds: 800),
+      SnackBar(
+        content: Text(
+          l10n?.notifSettingsSaved ?? '⚙️ 알림 설정 변경사항이 저장되었습니다.',
+        ),
+        duration: const Duration(milliseconds: 800),
         behavior: SnackBarBehavior.floating,
       ),
     );

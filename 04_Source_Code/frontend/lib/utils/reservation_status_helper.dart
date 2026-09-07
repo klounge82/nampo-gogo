@@ -1,6 +1,41 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 
 class ReservationStatusHelper {
+  /// Converts any English/legacy reservation status to clear localized text
+  static String getLocalizedLabel(BuildContext context, String? status) {
+    final l10n = AppLocalizations.of(context);
+    if (status == null || status.isEmpty) {
+      return l10n?.reservationStatusUnknown ?? '상태 확인 필요';
+    }
+    final normalized = status.toUpperCase().trim();
+    switch (normalized) {
+      case 'PENDING':
+        return l10n?.reservationStatusPending ?? '승인 대기';
+      case 'APPROVED':
+      case 'CONFIRMED':
+        return l10n?.reservationStatusApproved ?? '예약 승인';
+      case 'REJECTED':
+        return l10n?.reservationStatusRejected ?? '승인 거절';
+      case 'CANCELLED_BY_CUSTOMER':
+        return l10n?.reservationStatusCancelledCustomer ?? '이용자 취소';
+      case 'CANCELLED_BY_BUSINESS':
+        return l10n?.reservationStatusCancelledBusiness ?? '매장 취소';
+      case 'CANCELLED':
+        return l10n?.reservationStatusCancelled ?? '취소됨';
+      case 'COMPLETED':
+        return l10n?.reservationStatusCompleted ?? '이용 완료';
+      case 'NO_SHOW':
+      case 'NOSHOW':
+        return l10n?.reservationStatusNoShow ?? '노쇼';
+      default:
+        if (normalized.contains('CANCEL')) {
+          return l10n?.reservationStatusCancelled ?? '취소됨';
+        }
+        return l10n?.reservationStatusUnknown ?? '상태 확인 필요';
+    }
+  }
+
   /// Converts any English/legacy reservation status to clear Korean text
   static String getKoreanLabel(String? status) {
     if (status == null || status.isEmpty) return '상태 확인 필요';

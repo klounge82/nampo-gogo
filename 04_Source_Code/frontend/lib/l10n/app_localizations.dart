@@ -3268,7 +3268,7 @@ abstract class AppLocalizations {
   /// No description provided for @savedCoursesTab.
   ///
   /// In ko, this message translates to:
-  /// **'추천 코스'**
+  /// **'저장한 코스'**
   String get savedCoursesTab;
 
   /// No description provided for @favoritesEmptyTitle.
@@ -3292,7 +3292,7 @@ abstract class AppLocalizations {
   /// No description provided for @savedCoursesEmptySubtitle.
   ///
   /// In ko, this message translates to:
-  /// **'나만의 여행 코스를 탐색하고 저장해보세요!'**
+  /// **'추천 코스 결과에서 ‘이 코스 보관함 저장’을 눌러 추가해 보세요.'**
   String get savedCoursesEmptySubtitle;
 
   /// No description provided for @reservationDetailTitle.
@@ -3402,6 +3402,408 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'저장'**
   String get saveAction;
+
+  /// No description provided for @myReservationsTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'내 예약 내역'**
+  String get myReservationsTitle;
+
+  /// No description provided for @activeReservationsTab.
+  ///
+  /// In ko, this message translates to:
+  /// **'진행 중인 예약'**
+  String get activeReservationsTab;
+
+  /// No description provided for @pastReservationsTab.
+  ///
+  /// In ko, this message translates to:
+  /// **'지난 예약 내역'**
+  String get pastReservationsTab;
+
+  /// No description provided for @noActiveReservations.
+  ///
+  /// In ko, this message translates to:
+  /// **'진행 중인 예약 신청이 없습니다.'**
+  String get noActiveReservations;
+
+  /// No description provided for @noPastReservations.
+  ///
+  /// In ko, this message translates to:
+  /// **'지난 예약 신청 내역이 없습니다.'**
+  String get noPastReservations;
+
+  /// No description provided for @reservationLoadError.
+  ///
+  /// In ko, this message translates to:
+  /// **'예약 정보를 불러오지 못했습니다.\n잠시 후 다시 시도해 주세요.'**
+  String get reservationLoadError;
+
+  /// No description provided for @reservationTimeLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'예약 시간: {time}'**
+  String reservationTimeLabel(String time);
+
+  /// No description provided for @reservationPartySizeLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'인원수: {count}명'**
+  String reservationPartySizeLabel(int count);
+
+  /// No description provided for @reservationStatusPending.
+  ///
+  /// In ko, this message translates to:
+  /// **'승인 대기'**
+  String get reservationStatusPending;
+
+  /// No description provided for @reservationStatusApproved.
+  ///
+  /// In ko, this message translates to:
+  /// **'예약 승인'**
+  String get reservationStatusApproved;
+
+  /// No description provided for @reservationStatusRejected.
+  ///
+  /// In ko, this message translates to:
+  /// **'승인 거절'**
+  String get reservationStatusRejected;
+
+  /// No description provided for @reservationStatusCancelledCustomer.
+  ///
+  /// In ko, this message translates to:
+  /// **'이용자 취소'**
+  String get reservationStatusCancelledCustomer;
+
+  /// No description provided for @reservationStatusCancelledBusiness.
+  ///
+  /// In ko, this message translates to:
+  /// **'매장 취소'**
+  String get reservationStatusCancelledBusiness;
+
+  /// No description provided for @reservationStatusCancelled.
+  ///
+  /// In ko, this message translates to:
+  /// **'취소됨'**
+  String get reservationStatusCancelled;
+
+  /// No description provided for @reservationStatusCompleted.
+  ///
+  /// In ko, this message translates to:
+  /// **'이용 완료'**
+  String get reservationStatusCompleted;
+
+  /// No description provided for @reservationStatusNoShow.
+  ///
+  /// In ko, this message translates to:
+  /// **'노쇼'**
+  String get reservationStatusNoShow;
+
+  /// No description provided for @reservationStatusUnknown.
+  ///
+  /// In ko, this message translates to:
+  /// **'상태 확인 필요'**
+  String get reservationStatusUnknown;
+
+  /// No description provided for @savedCoursesTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장한 여행 코스'**
+  String get savedCoursesTitle;
+
+  /// No description provided for @favoritesAddHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'관심 있는 장소를 하트 아이콘으로 추가해 보세요.'**
+  String get favoritesAddHint;
+
+  /// No description provided for @savedCoursesAddHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'추천 코스 결과에서 ‘이 코스 보관함 저장’을 눌러 추가해 보세요.'**
+  String get savedCoursesAddHint;
+
+  /// No description provided for @deleteCourseConfirm.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장한 추천 코스를 보관함에서 삭제하시겠습니까?'**
+  String get deleteCourseConfirm;
+
+  /// No description provided for @courseDeletedSuccess.
+  ///
+  /// In ko, this message translates to:
+  /// **'코스가 정상 삭제되었습니다.'**
+  String get courseDeletedSuccess;
+
+  /// No description provided for @courseDeleteFail.
+  ///
+  /// In ko, this message translates to:
+  /// **'삭제에 실패했습니다. 잠시 후 다시 시도해 주세요.'**
+  String get courseDeleteFail;
+
+  /// No description provided for @legacyCourseNotice.
+  ///
+  /// In ko, this message translates to:
+  /// **'이전 버전에서 저장한 코스입니다. 새 코스를 다시 저장해 주세요.'**
+  String get legacyCourseNotice;
+
+  /// No description provided for @courseLoadFail.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장한 코스를 불러오지 못했습니다. 새 코스를 다시 저장해 주세요.'**
+  String get courseLoadFail;
+
+  /// No description provided for @shareCourseTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'추천 코스 공유'**
+  String get shareCourseTitle;
+
+  /// No description provided for @shareCourseDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'내 맞춤 남포동 여행 코스를 친구와 공유하세요!'**
+  String get shareCourseDesc;
+
+  /// No description provided for @copyLinkAction.
+  ///
+  /// In ko, this message translates to:
+  /// **'링크 복사'**
+  String get copyLinkAction;
+
+  /// No description provided for @linkCopied.
+  ///
+  /// In ko, this message translates to:
+  /// **'코스 공유 링크가 클립보드에 복사되었습니다.'**
+  String get linkCopied;
+
+  /// No description provided for @saveDateLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장일: {date}'**
+  String saveDateLabel(String date);
+
+  /// No description provided for @viewCourseDetail.
+  ///
+  /// In ko, this message translates to:
+  /// **'코스 상세보기'**
+  String get viewCourseDetail;
+
+  /// No description provided for @courseSoloLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'나홀로'**
+  String get courseSoloLabel;
+
+  /// No description provided for @courseCoupleLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'커플'**
+  String get courseCoupleLabel;
+
+  /// No description provided for @courseFamilyLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'가족/친구'**
+  String get courseFamilyLabel;
+
+  /// No description provided for @transportWalkLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'도보 코스'**
+  String get transportWalkLabel;
+
+  /// No description provided for @transportTransitLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'대중교통 코스'**
+  String get transportTransitLabel;
+
+  /// No description provided for @transportDriveLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'차량 운전 코스'**
+  String get transportDriveLabel;
+
+  /// No description provided for @courseSummaryPlaces.
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}개 장소 · {dist}km · 약 {mins}분'**
+  String courseSummaryPlaces(int count, String dist, int mins);
+
+  /// No description provided for @recommendedPlaceCourse.
+  ///
+  /// In ko, this message translates to:
+  /// **'추천 장소 구성 코스'**
+  String get recommendedPlaceCourse;
+
+  /// No description provided for @savedCoursesLoadError.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장된 코스 목록을 불러오는 데 실패했습니다.'**
+  String get savedCoursesLoadError;
+
+  /// No description provided for @notifBasicHeader.
+  ///
+  /// In ko, this message translates to:
+  /// **'기본 서비스 알림'**
+  String get notifBasicHeader;
+
+  /// No description provided for @notifReservationDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'예약 확인, 취소 및 리마인더 푸시를 전송합니다.'**
+  String get notifReservationDesc;
+
+  /// No description provided for @notifMissionDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'미션 완료 및 리워드 획득 성공을 안내합니다.'**
+  String get notifMissionDesc;
+
+  /// No description provided for @notifPointTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'포인트 알림'**
+  String get notifPointTitle;
+
+  /// No description provided for @notifPointDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'미션 인증 및 이벤트에 따른 포인트 증감을 수신합니다.'**
+  String get notifPointDesc;
+
+  /// No description provided for @notifCouponTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'쿠폰 알림'**
+  String get notifCouponTitle;
+
+  /// No description provided for @notifCouponDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'쿠폰 획득 및 사용, 만료 기한 경고 알림을 발송합니다.'**
+  String get notifCouponDesc;
+
+  /// No description provided for @notifAiTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'AI 코스 추천 알림'**
+  String get notifAiTitle;
+
+  /// No description provided for @notifAiDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'요청하신 나만의 테마 여행 코스 산출 완료 알림입니다.'**
+  String get notifAiDesc;
+
+  /// No description provided for @notifEventMarketingHeader.
+  ///
+  /// In ko, this message translates to:
+  /// **'이벤트 및 마케팅 알림'**
+  String get notifEventMarketingHeader;
+
+  /// No description provided for @notifSystemTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'시스템 공지 알림'**
+  String get notifSystemTitle;
+
+  /// No description provided for @notifSystemDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'공지사항 및 시스템 정기 점검 알림을 전송합니다.'**
+  String get notifSystemDesc;
+
+  /// No description provided for @notifMarketingTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'마케팅 정보 동의'**
+  String get notifMarketingTitle;
+
+  /// No description provided for @notifMarketingDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'다양한 남포동 상권 할인 및 추천 맞춤 이벤트를 수신합니다.'**
+  String get notifMarketingDesc;
+
+  /// No description provided for @notifSettingsSaved.
+  ///
+  /// In ko, this message translates to:
+  /// **'알림 설정 변경사항이 저장되었습니다.'**
+  String get notifSettingsSaved;
+
+  /// No description provided for @reservationConfirmSubmitted.
+  ///
+  /// In ko, this message translates to:
+  /// **'예약 신청 접수 완료'**
+  String get reservationConfirmSubmitted;
+
+  /// No description provided for @reservationSubmittedBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'{store} 매장에\n예약 신청이 접수되었습니다.'**
+  String reservationSubmittedBody(String store);
+
+  /// No description provided for @reservationStatusWillChange.
+  ///
+  /// In ko, this message translates to:
+  /// **'매장에서 확인한 후 예약 상태가 변경됩니다.'**
+  String get reservationStatusWillChange;
+
+  /// No description provided for @applyReservationAction.
+  ///
+  /// In ko, this message translates to:
+  /// **'예약 신청하기'**
+  String get applyReservationAction;
+
+  /// No description provided for @selectReservationParty.
+  ///
+  /// In ko, this message translates to:
+  /// **'예약 인원'**
+  String get selectReservationParty;
+
+  /// No description provided for @selectReservationDate.
+  ///
+  /// In ko, this message translates to:
+  /// **'예약 날짜'**
+  String get selectReservationDate;
+
+  /// No description provided for @selectReservationTime.
+  ///
+  /// In ko, this message translates to:
+  /// **'예약 시간'**
+  String get selectReservationTime;
+
+  /// No description provided for @navHome.
+  ///
+  /// In ko, this message translates to:
+  /// **'홈'**
+  String get navHome;
+
+  /// No description provided for @navExplore.
+  ///
+  /// In ko, this message translates to:
+  /// **'탐색'**
+  String get navExplore;
+
+  /// No description provided for @navCourses.
+  ///
+  /// In ko, this message translates to:
+  /// **'코스'**
+  String get navCourses;
+
+  /// No description provided for @navSaved.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장'**
+  String get navSaved;
+
+  /// No description provided for @navProfile.
+  ///
+  /// In ko, this message translates to:
+  /// **'내 정보'**
+  String get navProfile;
 }
 
 class _AppLocalizationsDelegate

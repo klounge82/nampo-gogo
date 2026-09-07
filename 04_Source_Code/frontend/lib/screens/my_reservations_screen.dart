@@ -5,6 +5,7 @@ import '../models/reservation.dart';
 import '../repositories/reservation_repository.dart';
 import '../providers/auth_provider.dart';
 import '../utils/reservation_status_helper.dart';
+import '../l10n/app_localizations.dart';
 import 'reservation_detail_screen.dart';
 
 class MyReservationsScreen extends StatefulWidget {
@@ -28,7 +29,9 @@ class _MyReservationsScreenState extends State<MyReservationsScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    _loadReservations();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _loadReservations();
+    });
   }
 
   @override
@@ -83,12 +86,13 @@ class _MyReservationsScreenState extends State<MyReservationsScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
-          '내 예약 내역',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          l10n?.myReservationsTitle ?? '내 예약 내역',
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
@@ -99,9 +103,9 @@ class _MyReservationsScreenState extends State<MyReservationsScreen>
           unselectedLabelColor: AppColors.textSecondary,
           indicatorColor: AppColors.primary,
           indicatorSize: TabBarIndicatorSize.tab,
-          tabs: const [
-            Tab(text: '진행 중인 예약'),
-            Tab(text: '지난 예약 내역'),
+          tabs: [
+            Tab(text: l10n?.activeReservationsTab ?? '진행 중인 예약'),
+            Tab(text: l10n?.pastReservationsTab ?? '지난 예약 내역'),
           ],
         ),
       ),
@@ -114,14 +118,15 @@ class _MyReservationsScreenState extends State<MyReservationsScreen>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                    '예약 정보를 불러오지 못했습니다.\n잠시 후 다시 시도해 주세요.',
+                  Text(
+                    l10n?.reservationLoadError ??
+                        '예약 정보를 불러오지 못했습니다.\n잠시 후 다시 시도해 주세요.',
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16.0),
                   ElevatedButton(
                     onPressed: _loadReservations,
-                    child: const Text('다시 시도'),
+                    child: Text(l10n?.retry ?? '다시 시도'),
                   ),
                 ],
               ),
@@ -140,10 +145,13 @@ class _MyReservationsScreenState extends State<MyReservationsScreen>
     List<Reservation> list, {
     required bool isActive,
   }) {
+    final l10n = AppLocalizations.of(context);
     if (list.isEmpty) {
       return Center(
         child: Text(
-          isActive ? '진행 중인 예약 신청이 없습니다.' : '지난 예약 신청 내역이 없습니다.',
+          isActive
+              ? (l10n?.noActiveReservations ?? '진행 중인 예약 신청이 없습니다.')
+              : (l10n?.noPastReservations ?? '지난 예약 신청 내역이 없습니다.'),
           style: const TextStyle(color: AppColors.textSecondary),
         ),
       );
@@ -164,6 +172,7 @@ class _MyReservationsScreenState extends State<MyReservationsScreen>
   }
 
   Widget _buildReservationCard(Reservation res) {
+    final l10n = AppLocalizations.of(context);
     final timeStr =
         '${res.reservationTime.year}.${res.reservationTime.month.toString().padLeft(2, '0')}.${res.reservationTime.day.toString().padLeft(2, '0')} ${res.reservationTime.hour.toString().padLeft(2, '0')}:${res.reservationTime.minute.toString().padLeft(2, '0')}';
 
@@ -226,7 +235,7 @@ class _MyReservationsScreenState extends State<MyReservationsScreen>
                     ),
                     const SizedBox(height: 6.0),
                     Text(
-                      '예약 시간: $timeStr',
+                      l10n?.reservationTimeLabel(timeStr) ?? '예약 시간: $timeStr',
                       style: const TextStyle(
                         fontSize: 12.0,
                         color: AppColors.textSecondary,
@@ -234,7 +243,8 @@ class _MyReservationsScreenState extends State<MyReservationsScreen>
                     ),
                     const SizedBox(height: 2.0),
                     Text(
-                      '인원수: ${res.partySize} 명',
+                      l10n?.reservationPartySizeLabel(res.partySize) ??
+                          '인원수: ${res.partySize}명',
                       style: const TextStyle(
                         fontSize: 12.0,
                         color: AppColors.textSecondary,
@@ -255,7 +265,7 @@ class _MyReservationsScreenState extends State<MyReservationsScreen>
 
   Widget _buildStatusBadge(String status) {
     final color = ReservationStatusHelper.getStatusColor(status);
-    final label = ReservationStatusHelper.getKoreanLabel(status);
+    final label = ReservationStatusHelper.getLocalizedLabel(context, status);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),

@@ -603,11 +603,11 @@
   "couponAvailableTitle": "Available Coupons",
   "couponUsedTitle": "Used & Expired",
   "savedPlacesTab": "Saved Places",
-  "savedCoursesTab": "Recommended Courses",
+  "savedCoursesTab": "Saved Courses",
   "favoritesEmptyTitle": "No saved places yet.",
   "favoritesEmptySubtitle": "Explore and add your favorite Nampo spots to your list!",
   "savedCoursesEmptyTitle": "No saved courses yet.",
-  "savedCoursesEmptySubtitle": "Discover and save personalized travel itineraries!",
+  "savedCoursesEmptySubtitle": "Tap 'Save Course' in recommended courses to add one.",
   "reservationDetailTitle": "Reservation Details",
   "reservationNumber": "Reservation No.",
   "reservationDate": "Date & Time",
@@ -625,5 +625,113 @@
   "confirmAction": "Confirm",
   "cancelAction": "Cancel",
   "deleteAction": "Delete",
-  "saveAction": "Save"
+  "saveAction": "Save",
+  "myReservationsTitle": "My Reservations",
+  "activeReservationsTab": "Active Reservations",
+  "pastReservationsTab": "Past Reservations",
+  "noActiveReservations": "No active reservations.",
+  "noPastReservations": "No past reservations.",
+  "reservationLoadError": "Failed to load reservations.\nPlease try again in a moment.",
+  "reservationTimeLabel": "Reservation Time: {time}",
+  "@reservationTimeLabel": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "reservationPartySizeLabel": "Party size: {count} guests",
+  "@reservationPartySizeLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reservationStatusPending": "Pending",
+  "reservationStatusApproved": "Confirmed",
+  "reservationStatusRejected": "Rejected",
+  "reservationStatusCancelledCustomer": "Cancelled by User",
+  "reservationStatusCancelledBusiness": "Cancelled by Store",
+  "reservationStatusCancelled": "Cancelled",
+  "reservationStatusCompleted": "Completed",
+  "reservationStatusNoShow": "No-show",
+  "reservationStatusUnknown": "Status Check Required",
+  "savedCoursesTitle": "Saved Travel Courses",
+  "favoritesAddHint": "Add places you like to your favorites with the heart icon.",
+  "savedCoursesAddHint": "Tap 'Save Course' in recommended courses to add one.",
+  "deleteCourseConfirm": "Are you sure you want to remove this course from your saved list?",
+  "courseDeletedSuccess": "Course removed successfully.",
+  "courseDeleteFail": "Failed to delete course. Please try again in a moment.",
+  "legacyCourseNotice": "This course was saved in a previous version. Please save a new course.",
+  "courseLoadFail": "Failed to load saved course. Please save a new course.",
+  "shareCourseTitle": "Share Recommended Course",
+  "shareCourseDesc": "Share your personalized Nampo travel course with friends!",
+  "copyLinkAction": "Copy Link",
+  "linkCopied": "Course share link copied to clipboard.",
+  "saveDateLabel": "Saved: {date}",
+  "@saveDateLabel": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "viewCourseDetail": "View Course Details",
+  "courseSoloLabel": "Solo",
+  "courseCoupleLabel": "Couple",
+  "courseFamilyLabel": "Family & Friends",
+  "transportWalkLabel": "Walking Course",
+  "transportTransitLabel": "Transit Course",
+  "transportDriveLabel": "Driving Course",
+  "courseSummaryPlaces": "{count} places · {dist}km · approx. {mins} mins",
+  "@courseSummaryPlaces": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "dist": {
+        "type": "String"
+      },
+      "mins": {
+        "type": "int"
+      }
+    }
+  },
+  "recommendedPlaceCourse": "Recommended Places Route",
+  "savedCoursesLoadError": "Failed to load saved courses list.",
+  "notifBasicHeader": "General Service Notifications",
+  "notifReservationDesc": "Receive reservation confirmations, cancellations, and reminders.",
+  "notifMissionDesc": "Receive alerts for mission completions and earned rewards.",
+  "notifPointTitle": "Points Notifications",
+  "notifPointDesc": "Receive updates on point changes from missions and events.",
+  "notifCouponTitle": "Coupons Notifications",
+  "notifCouponDesc": "Receive notifications about coupon issuance, usage, and expiry.",
+  "notifAiTitle": "AI Course Recommendations",
+  "notifAiDesc": "Receive notifications when your customized course is ready.",
+  "notifEventMarketingHeader": "Events & Marketing",
+  "notifSystemTitle": "System Announcements",
+  "notifSystemDesc": "Receive announcements and maintenance notices.",
+  "notifMarketingTitle": "Marketing Consent",
+  "notifMarketingDesc": "Receive special discounts and recommended events in Nampo-dong.",
+  "notifSettingsSaved": "Notification settings updated.",
+  "reservationConfirmSubmitted": "Reservation Submitted",
+  "reservationSubmittedBody": "Your reservation request for {store} has been submitted.",
+  "@reservationSubmittedBody": {
+    "placeholders": {
+      "store": {
+        "type": "String"
+      }
+    }
+  },
+  "reservationStatusWillChange": "The reservation status will update once reviewed by the store.",
+  "applyReservationAction": "Submit Reservation",
+  "selectReservationParty": "Party Size",
+  "selectReservationDate": "Reservation Date",
+  "selectReservationTime": "Reservation Time",
+  "navHome": "Home",
+  "navExplore": "Explore",
+  "navCourses": "Courses",
+  "navSaved": "Saved",
+  "navProfile": "My Profile"
 }

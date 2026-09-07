@@ -603,11 +603,11 @@
   "couponAvailableTitle": "可用优惠券",
   "couponUsedTitle": "已使用及已过期",
   "savedPlacesTab": "已收藏地点",
-  "savedCoursesTab": "推荐路线",
+  "savedCoursesTab": "已保存路线",
   "favoritesEmptyTitle": "暂无收藏地点。",
   "favoritesEmptySubtitle": "探索南浦洞精彩景点并加入您的收藏夹吧！",
   "savedCoursesEmptyTitle": "暂无收藏路线。",
-  "savedCoursesEmptySubtitle": "发现并保存专属于您的个性化旅行路线！",
+  "savedCoursesEmptySubtitle": "在推荐路线结果中点击“保存此路线”进行添加。",
   "reservationDetailTitle": "预约详情",
   "reservationNumber": "预约编号",
   "reservationDate": "预约时间",
@@ -625,5 +625,113 @@
   "confirmAction": "确认",
   "cancelAction": "取消",
   "deleteAction": "删除",
-  "saveAction": "保存"
+  "saveAction": "保存",
+  "myReservationsTitle": "我的预约",
+  "activeReservationsTab": "进行中的预约",
+  "pastReservationsTab": "历史预约",
+  "noActiveReservations": "暂无进行中的预约。",
+  "noPastReservations": "暂无历史预约记录。",
+  "reservationLoadError": "无法加载预约信息。\n请稍后重试。",
+  "reservationTimeLabel": "预约时间: {time}",
+  "@reservationTimeLabel": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "reservationPartySizeLabel": "人数: {count}人",
+  "@reservationPartySizeLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reservationStatusPending": "待确认",
+  "reservationStatusApproved": "已确认",
+  "reservationStatusRejected": "已拒绝",
+  "reservationStatusCancelledCustomer": "用户取消",
+  "reservationStatusCancelledBusiness": "商家取消",
+  "reservationStatusCancelled": "已取消",
+  "reservationStatusCompleted": "已完成",
+  "reservationStatusNoShow": "未到店",
+  "reservationStatusUnknown": "需确认状态",
+  "savedCoursesTitle": "已保存旅行路线",
+  "favoritesAddHint": "点击心形图标添加您关注的地点吧。",
+  "savedCoursesAddHint": "在推荐路线结果中点击“保存此路线”进行添加。",
+  "deleteCourseConfirm": "确定要从收藏夹中删除此推荐路线吗？",
+  "courseDeletedSuccess": "路线已成功删除。",
+  "courseDeleteFail": "删除失败，请稍后重试。",
+  "legacyCourseNotice": "这是在之前版本中保存的路线，请重新保存新路线。",
+  "courseLoadFail": "无法加载已保存路线，请重新保存新路线。",
+  "shareCourseTitle": "分享推荐路线",
+  "shareCourseDesc": "与朋友分享您的专属南浦洞旅行路线！",
+  "copyLinkAction": "复制链接",
+  "linkCopied": "路线分享链接已复制到剪贴板。",
+  "saveDateLabel": "保存日期: {date}",
+  "@saveDateLabel": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "viewCourseDetail": "查看路线详情",
+  "courseSoloLabel": "独自一人",
+  "courseCoupleLabel": "情侣",
+  "courseFamilyLabel": "家人/朋友",
+  "transportWalkLabel": "步行路线",
+  "transportTransitLabel": "公共交通路线",
+  "transportDriveLabel": "自驾路线",
+  "courseSummaryPlaces": "{count}个地点 · {dist}km · 约{mins}分钟",
+  "@courseSummaryPlaces": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "dist": {
+        "type": "String"
+      },
+      "mins": {
+        "type": "int"
+      }
+    }
+  },
+  "recommendedPlaceCourse": "推荐景点组合路线",
+  "savedCoursesLoadError": "获取已保存路线列表失败。",
+  "notifBasicHeader": "基础服务通知",
+  "notifReservationDesc": "接收预约确认、取消及提醒推送。",
+  "notifMissionDesc": "接收打卡任务完成及奖励获得通知。",
+  "notifPointTitle": "积分通知",
+  "notifPointDesc": "接收打卡验证及活动积分变动通知。",
+  "notifCouponTitle": "优惠券通知",
+  "notifCouponDesc": "接收优惠券获取、使用及到期提醒通知。",
+  "notifAiTitle": "AI路线推荐通知",
+  "notifAiDesc": "接收定制主题旅行路线生成完成通知。",
+  "notifEventMarketingHeader": "活动与营销通知",
+  "notifSystemTitle": "系统公告通知",
+  "notifSystemDesc": "接收系统公告及定期维护通知。",
+  "notifMarketingTitle": "营销信息接收同意",
+  "notifMarketingDesc": "接收南浦洞商圈丰富折扣及定制推荐活动。",
+  "notifSettingsSaved": "通知设置已保存。",
+  "reservationConfirmSubmitted": "预约申请已提交",
+  "reservationSubmittedBody": "已向{store}提交预约申请。",
+  "@reservationSubmittedBody": {
+    "placeholders": {
+      "store": {
+        "type": "String"
+      }
+    }
+  },
+  "reservationStatusWillChange": "商家确认后将更新预约状态。",
+  "applyReservationAction": "提交预约",
+  "selectReservationParty": "预约人数",
+  "selectReservationDate": "预约日期",
+  "selectReservationTime": "预约时间",
+  "navHome": "首页",
+  "navExplore": "探索",
+  "navCourses": "路线",
+  "navSaved": "收藏",
+  "navProfile": "我的"
 }

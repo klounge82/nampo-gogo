@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/app_mode_provider.dart';
 import '../theme/customer_theme.dart';
+import '../l10n/app_localizations.dart';
 import 'home_screen.dart';
 import 'map_screen.dart';
 import 'recommendation_input_screen.dart';
@@ -31,6 +32,7 @@ class _CustomerAppShellState extends State<CustomerAppShell> {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final modeProvider = Provider.of<AppModeProvider>(context);
+    final l10n = AppLocalizations.of(context);
 
     // Sync mode status with user object
     modeProvider.syncUser(authProvider.currentUser);
@@ -46,31 +48,31 @@ class _CustomerAppShellState extends State<CustomerAppShell> {
               _currentIndex = index;
             });
           },
-          items: const [
+          items: [
             BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home),
-              label: '홈',
+              icon: const Icon(Icons.home_outlined),
+              activeIcon: const Icon(Icons.home),
+              label: l10n?.navHome ?? '홈',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.explore_outlined),
-              activeIcon: Icon(Icons.explore),
-              label: '탐색',
+              icon: const Icon(Icons.explore_outlined),
+              activeIcon: const Icon(Icons.explore),
+              label: l10n?.navExplore ?? '탐색',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.map_outlined),
-              activeIcon: Icon(Icons.map),
-              label: '코스',
+              icon: const Icon(Icons.map_outlined),
+              activeIcon: const Icon(Icons.map),
+              label: l10n?.navCourses ?? '코스',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.bookmark_border),
-              activeIcon: Icon(Icons.bookmark),
-              label: '저장',
+              icon: const Icon(Icons.bookmark_border),
+              activeIcon: const Icon(Icons.bookmark),
+              label: l10n?.navSaved ?? '저장',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
-              label: '내 정보',
+              icon: const Icon(Icons.person_outline),
+              activeIcon: const Icon(Icons.person),
+              label: l10n?.navProfile ?? '내 정보',
             ),
           ],
         ),

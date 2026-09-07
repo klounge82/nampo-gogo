@@ -1662,7 +1662,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get savedPlacesTab => '저장한 장소';
 
   @override
-  String get savedCoursesTab => '추천 코스';
+  String get savedCoursesTab => '저장한 코스';
 
   @override
   String get favoritesEmptyTitle => '저장된 장소가 없습니다.';
@@ -1674,7 +1674,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get savedCoursesEmptyTitle => '저장된 코스가 없습니다.';
 
   @override
-  String get savedCoursesEmptySubtitle => '나만의 여행 코스를 탐색하고 저장해보세요!';
+  String get savedCoursesEmptySubtitle =>
+      '추천 코스 결과에서 ‘이 코스 보관함 저장’을 눌러 추가해 보세요.';
 
   @override
   String get reservationDetailTitle => '예약 상세 내역';
@@ -1729,4 +1730,215 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get saveAction => '저장';
+
+  @override
+  String get myReservationsTitle => '내 예약 내역';
+
+  @override
+  String get activeReservationsTab => '진행 중인 예약';
+
+  @override
+  String get pastReservationsTab => '지난 예약 내역';
+
+  @override
+  String get noActiveReservations => '진행 중인 예약 신청이 없습니다.';
+
+  @override
+  String get noPastReservations => '지난 예약 신청 내역이 없습니다.';
+
+  @override
+  String get reservationLoadError => '예약 정보를 불러오지 못했습니다.\n잠시 후 다시 시도해 주세요.';
+
+  @override
+  String reservationTimeLabel(String time) {
+    return '예약 시간: $time';
+  }
+
+  @override
+  String reservationPartySizeLabel(int count) {
+    return '인원수: $count명';
+  }
+
+  @override
+  String get reservationStatusPending => '승인 대기';
+
+  @override
+  String get reservationStatusApproved => '예약 승인';
+
+  @override
+  String get reservationStatusRejected => '승인 거절';
+
+  @override
+  String get reservationStatusCancelledCustomer => '이용자 취소';
+
+  @override
+  String get reservationStatusCancelledBusiness => '매장 취소';
+
+  @override
+  String get reservationStatusCancelled => '취소됨';
+
+  @override
+  String get reservationStatusCompleted => '이용 완료';
+
+  @override
+  String get reservationStatusNoShow => '노쇼';
+
+  @override
+  String get reservationStatusUnknown => '상태 확인 필요';
+
+  @override
+  String get savedCoursesTitle => '저장한 여행 코스';
+
+  @override
+  String get favoritesAddHint => '관심 있는 장소를 하트 아이콘으로 추가해 보세요.';
+
+  @override
+  String get savedCoursesAddHint => '추천 코스 결과에서 ‘이 코스 보관함 저장’을 눌러 추가해 보세요.';
+
+  @override
+  String get deleteCourseConfirm => '저장한 추천 코스를 보관함에서 삭제하시겠습니까?';
+
+  @override
+  String get courseDeletedSuccess => '코스가 정상 삭제되었습니다.';
+
+  @override
+  String get courseDeleteFail => '삭제에 실패했습니다. 잠시 후 다시 시도해 주세요.';
+
+  @override
+  String get legacyCourseNotice => '이전 버전에서 저장한 코스입니다. 새 코스를 다시 저장해 주세요.';
+
+  @override
+  String get courseLoadFail => '저장한 코스를 불러오지 못했습니다. 새 코스를 다시 저장해 주세요.';
+
+  @override
+  String get shareCourseTitle => '추천 코스 공유';
+
+  @override
+  String get shareCourseDesc => '내 맞춤 남포동 여행 코스를 친구와 공유하세요!';
+
+  @override
+  String get copyLinkAction => '링크 복사';
+
+  @override
+  String get linkCopied => '코스 공유 링크가 클립보드에 복사되었습니다.';
+
+  @override
+  String saveDateLabel(String date) {
+    return '저장일: $date';
+  }
+
+  @override
+  String get viewCourseDetail => '코스 상세보기';
+
+  @override
+  String get courseSoloLabel => '나홀로';
+
+  @override
+  String get courseCoupleLabel => '커플';
+
+  @override
+  String get courseFamilyLabel => '가족/친구';
+
+  @override
+  String get transportWalkLabel => '도보 코스';
+
+  @override
+  String get transportTransitLabel => '대중교통 코스';
+
+  @override
+  String get transportDriveLabel => '차량 운전 코스';
+
+  @override
+  String courseSummaryPlaces(int count, String dist, int mins) {
+    return '$count개 장소 · ${dist}km · 약 $mins분';
+  }
+
+  @override
+  String get recommendedPlaceCourse => '추천 장소 구성 코스';
+
+  @override
+  String get savedCoursesLoadError => '저장된 코스 목록을 불러오는 데 실패했습니다.';
+
+  @override
+  String get notifBasicHeader => '기본 서비스 알림';
+
+  @override
+  String get notifReservationDesc => '예약 확인, 취소 및 리마인더 푸시를 전송합니다.';
+
+  @override
+  String get notifMissionDesc => '미션 완료 및 리워드 획득 성공을 안내합니다.';
+
+  @override
+  String get notifPointTitle => '포인트 알림';
+
+  @override
+  String get notifPointDesc => '미션 인증 및 이벤트에 따른 포인트 증감을 수신합니다.';
+
+  @override
+  String get notifCouponTitle => '쿠폰 알림';
+
+  @override
+  String get notifCouponDesc => '쿠폰 획득 및 사용, 만료 기한 경고 알림을 발송합니다.';
+
+  @override
+  String get notifAiTitle => 'AI 코스 추천 알림';
+
+  @override
+  String get notifAiDesc => '요청하신 나만의 테마 여행 코스 산출 완료 알림입니다.';
+
+  @override
+  String get notifEventMarketingHeader => '이벤트 및 마케팅 알림';
+
+  @override
+  String get notifSystemTitle => '시스템 공지 알림';
+
+  @override
+  String get notifSystemDesc => '공지사항 및 시스템 정기 점검 알림을 전송합니다.';
+
+  @override
+  String get notifMarketingTitle => '마케팅 정보 동의';
+
+  @override
+  String get notifMarketingDesc => '다양한 남포동 상권 할인 및 추천 맞춤 이벤트를 수신합니다.';
+
+  @override
+  String get notifSettingsSaved => '알림 설정 변경사항이 저장되었습니다.';
+
+  @override
+  String get reservationConfirmSubmitted => '예약 신청 접수 완료';
+
+  @override
+  String reservationSubmittedBody(String store) {
+    return '$store 매장에\n예약 신청이 접수되었습니다.';
+  }
+
+  @override
+  String get reservationStatusWillChange => '매장에서 확인한 후 예약 상태가 변경됩니다.';
+
+  @override
+  String get applyReservationAction => '예약 신청하기';
+
+  @override
+  String get selectReservationParty => '예약 인원';
+
+  @override
+  String get selectReservationDate => '예약 날짜';
+
+  @override
+  String get selectReservationTime => '예약 시간';
+
+  @override
+  String get navHome => '홈';
+
+  @override
+  String get navExplore => '탐색';
+
+  @override
+  String get navCourses => '코스';
+
+  @override
+  String get navSaved => '저장';
+
+  @override
+  String get navProfile => '내 정보';
 }

@@ -603,11 +603,11 @@
   "couponAvailableTitle": "利用可能クーポン",
   "couponUsedTitle": "利用済み・期限切れ",
   "savedPlacesTab": "保存した場所",
-  "savedCoursesTab": "おすすめコース",
+  "savedCoursesTab": "保存したコース",
   "favoritesEmptyTitle": "保存された場所がありません。",
   "favoritesEmptySubtitle": "お気に入りの南浦洞スポットを見つけて登録してみましょう！",
   "savedCoursesEmptyTitle": "保存されたコースがありません。",
-  "savedCoursesEmptySubtitle": "自分だけのおすすめ旅行コースを探してみましょう！",
+  "savedCoursesEmptySubtitle": "おすすめコースの結果から「このコースを保存」をタップして追加してみましょう。",
   "reservationDetailTitle": "予約詳細",
   "reservationNumber": "予約番号",
   "reservationDate": "予約日時",
@@ -625,5 +625,113 @@
   "confirmAction": "確認",
   "cancelAction": "キャンセル",
   "deleteAction": "削除",
-  "saveAction": "保存"
+  "saveAction": "保存",
+  "myReservationsTitle": "予約履歴",
+  "activeReservationsTab": "進行中の予約",
+  "pastReservationsTab": "過去の予約",
+  "noActiveReservations": "進行中の予約はありません。",
+  "noPastReservations": "過去の予約履歴はありません。",
+  "reservationLoadError": "予約情報を取得できませんでした。\nしばらくしてから再試行してください。",
+  "reservationTimeLabel": "予約時間: {time}",
+  "@reservationTimeLabel": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "reservationPartySizeLabel": "人数: {count}名",
+  "@reservationPartySizeLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reservationStatusPending": "承認待ち",
+  "reservationStatusApproved": "予約承認",
+  "reservationStatusRejected": "承認拒否",
+  "reservationStatusCancelledCustomer": "ユーザー取消",
+  "reservationStatusCancelledBusiness": "店舗取消",
+  "reservationStatusCancelled": "キャンセル",
+  "reservationStatusCompleted": "利用完了",
+  "reservationStatusNoShow": "無断キャンセル",
+  "reservationStatusUnknown": "状態確認要",
+  "savedCoursesTitle": "保存した旅行コース",
+  "favoritesAddHint": "気になる場所をハートアイコンでお気に入りに追加してみましょう。",
+  "savedCoursesAddHint": "おすすめコースの結果から「このコースを保存」をタップして追加してみましょう。",
+  "deleteCourseConfirm": "保存したおすすめコースをお気に入りから削除しますか？",
+  "courseDeletedSuccess": "コースが正常に削除されました。",
+  "courseDeleteFail": "削除に失敗しました。しばらくしてから再試行してください。",
+  "legacyCourseNotice": "旧バージョンで保存されたコースです。新しいコースを再度保存してください。",
+  "courseLoadFail": "保存したコースを取得できませんでした。新しいコースを再度保存してください。",
+  "shareCourseTitle": "おすすめコースの共有",
+  "shareCourseDesc": "あなただけの南浦洞旅行コースを友達と共有しましょう！",
+  "copyLinkAction": "リンクをコピー",
+  "linkCopied": "コース共有リンクをクリップボードにコピーしました。",
+  "saveDateLabel": "保存日: {date}",
+  "@saveDateLabel": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "viewCourseDetail": "コース詳細を見る",
+  "courseSoloLabel": "ひとり旅",
+  "courseCoupleLabel": "カップル",
+  "courseFamilyLabel": "家族・友達",
+  "transportWalkLabel": "徒歩コース",
+  "transportTransitLabel": "公共交通コース",
+  "transportDriveLabel": "ドライブコース",
+  "courseSummaryPlaces": "{count}ヶ所 · {dist}km · 約{mins}分",
+  "@courseSummaryPlaces": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "dist": {
+        "type": "String"
+      },
+      "mins": {
+        "type": "int"
+      }
+    }
+  },
+  "recommendedPlaceCourse": "おすすめスポット構成コース",
+  "savedCoursesLoadError": "保存されたコース一覧の取得に失敗しました。",
+  "notifBasicHeader": "基本サービス通知",
+  "notifReservationDesc": "予約確認・キャンセル・リマインダー通知を受け取ります。",
+  "notifMissionDesc": "ミッション完了やリワード獲得成功の案内を受け取ります。",
+  "notifPointTitle": "ポイント通知",
+  "notifPointDesc": "ミッション認証やイベントによるポイント変動を受け取ります。",
+  "notifCouponTitle": "クーポン通知",
+  "notifCouponDesc": "クーポンの獲得・利用・有効期限通知を受け取ります。",
+  "notifAiTitle": "AIコースおすすめ通知",
+  "notifAiDesc": "生成されたあなただけのテーマ旅行コースの完了通知を受け取ります。",
+  "notifEventMarketingHeader": "イベント・マーケティング通知",
+  "notifSystemTitle": "システムお知らせ通知",
+  "notifSystemDesc": "お知らせや定期メンテナンス通知を受け取ります。",
+  "notifMarketingTitle": "マーケティング情報同意",
+  "notifMarketingDesc": "南浦洞の多彩な割引やおすすめイベント情報を受け取ります。",
+  "notifSettingsSaved": "通知設定の変更が保存されました。",
+  "reservationConfirmSubmitted": "予約受付完了",
+  "reservationSubmittedBody": "{store}への\n予約申請が受付されました。",
+  "@reservationSubmittedBody": {
+    "placeholders": {
+      "store": {
+        "type": "String"
+      }
+    }
+  },
+  "reservationStatusWillChange": "店舗で確認後、予約状態が更新されます。",
+  "applyReservationAction": "予約を申し込む",
+  "selectReservationParty": "予約人数",
+  "selectReservationDate": "予約日",
+  "selectReservationTime": "予約時間",
+  "navHome": "ホーム",
+  "navExplore": "探索",
+  "navCourses": "コース",
+  "navSaved": "保存",
+  "navProfile": "マイ情報"
 }

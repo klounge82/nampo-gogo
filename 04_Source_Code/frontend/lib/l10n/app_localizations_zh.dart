@@ -1642,7 +1642,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get savedPlacesTab => '已收藏地点';
 
   @override
-  String get savedCoursesTab => '推荐路线';
+  String get savedCoursesTab => '已保存路线';
 
   @override
   String get favoritesEmptyTitle => '暂无收藏地点。';
@@ -1654,7 +1654,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get savedCoursesEmptyTitle => '暂无收藏路线。';
 
   @override
-  String get savedCoursesEmptySubtitle => '发现并保存专属于您的个性化旅行路线！';
+  String get savedCoursesEmptySubtitle => '在推荐路线结果中点击“保存此路线”进行添加。';
 
   @override
   String get reservationDetailTitle => '预约详情';
@@ -1709,6 +1709,217 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get saveAction => '保存';
+
+  @override
+  String get myReservationsTitle => '我的预约';
+
+  @override
+  String get activeReservationsTab => '进行中的预约';
+
+  @override
+  String get pastReservationsTab => '历史预约';
+
+  @override
+  String get noActiveReservations => '暂无进行中的预约。';
+
+  @override
+  String get noPastReservations => '暂无历史预约记录。';
+
+  @override
+  String get reservationLoadError => '无法加载预约信息。\n请稍后重试。';
+
+  @override
+  String reservationTimeLabel(String time) {
+    return '预约时间: $time';
+  }
+
+  @override
+  String reservationPartySizeLabel(int count) {
+    return '人数: $count人';
+  }
+
+  @override
+  String get reservationStatusPending => '待确认';
+
+  @override
+  String get reservationStatusApproved => '已确认';
+
+  @override
+  String get reservationStatusRejected => '已拒绝';
+
+  @override
+  String get reservationStatusCancelledCustomer => '用户取消';
+
+  @override
+  String get reservationStatusCancelledBusiness => '商家取消';
+
+  @override
+  String get reservationStatusCancelled => '已取消';
+
+  @override
+  String get reservationStatusCompleted => '已完成';
+
+  @override
+  String get reservationStatusNoShow => '未到店';
+
+  @override
+  String get reservationStatusUnknown => '需确认状态';
+
+  @override
+  String get savedCoursesTitle => '已保存旅行路线';
+
+  @override
+  String get favoritesAddHint => '点击心形图标添加您关注的地点吧。';
+
+  @override
+  String get savedCoursesAddHint => '在推荐路线结果中点击“保存此路线”进行添加。';
+
+  @override
+  String get deleteCourseConfirm => '确定要从收藏夹中删除此推荐路线吗？';
+
+  @override
+  String get courseDeletedSuccess => '路线已成功删除。';
+
+  @override
+  String get courseDeleteFail => '删除失败，请稍后重试。';
+
+  @override
+  String get legacyCourseNotice => '这是在之前版本中保存的路线，请重新保存新路线。';
+
+  @override
+  String get courseLoadFail => '无法加载已保存路线，请重新保存新路线。';
+
+  @override
+  String get shareCourseTitle => '分享推荐路线';
+
+  @override
+  String get shareCourseDesc => '与朋友分享您的专属南浦洞旅行路线！';
+
+  @override
+  String get copyLinkAction => '复制链接';
+
+  @override
+  String get linkCopied => '路线分享链接已复制到剪贴板。';
+
+  @override
+  String saveDateLabel(String date) {
+    return '保存日期: $date';
+  }
+
+  @override
+  String get viewCourseDetail => '查看路线详情';
+
+  @override
+  String get courseSoloLabel => '独自一人';
+
+  @override
+  String get courseCoupleLabel => '情侣';
+
+  @override
+  String get courseFamilyLabel => '家人/朋友';
+
+  @override
+  String get transportWalkLabel => '步行路线';
+
+  @override
+  String get transportTransitLabel => '公共交通路线';
+
+  @override
+  String get transportDriveLabel => '自驾路线';
+
+  @override
+  String courseSummaryPlaces(int count, String dist, int mins) {
+    return '$count个地点 · ${dist}km · 约$mins分钟';
+  }
+
+  @override
+  String get recommendedPlaceCourse => '推荐景点组合路线';
+
+  @override
+  String get savedCoursesLoadError => '获取已保存路线列表失败。';
+
+  @override
+  String get notifBasicHeader => '基础服务通知';
+
+  @override
+  String get notifReservationDesc => '接收预约确认、取消及提醒推送。';
+
+  @override
+  String get notifMissionDesc => '接收打卡任务完成及奖励获得通知。';
+
+  @override
+  String get notifPointTitle => '积分通知';
+
+  @override
+  String get notifPointDesc => '接收打卡验证及活动积分变动通知。';
+
+  @override
+  String get notifCouponTitle => '优惠券通知';
+
+  @override
+  String get notifCouponDesc => '接收优惠券获取、使用及到期提醒通知。';
+
+  @override
+  String get notifAiTitle => 'AI路线推荐通知';
+
+  @override
+  String get notifAiDesc => '接收定制主题旅行路线生成完成通知。';
+
+  @override
+  String get notifEventMarketingHeader => '活动与营销通知';
+
+  @override
+  String get notifSystemTitle => '系统公告通知';
+
+  @override
+  String get notifSystemDesc => '接收系统公告及定期维护通知。';
+
+  @override
+  String get notifMarketingTitle => '营销信息接收同意';
+
+  @override
+  String get notifMarketingDesc => '接收南浦洞商圈丰富折扣及定制推荐活动。';
+
+  @override
+  String get notifSettingsSaved => '通知设置已保存。';
+
+  @override
+  String get reservationConfirmSubmitted => '预约申请已提交';
+
+  @override
+  String reservationSubmittedBody(String store) {
+    return '已向$store提交预约申请。';
+  }
+
+  @override
+  String get reservationStatusWillChange => '商家确认后将更新预约状态。';
+
+  @override
+  String get applyReservationAction => '提交预约';
+
+  @override
+  String get selectReservationParty => '预约人数';
+
+  @override
+  String get selectReservationDate => '预约日期';
+
+  @override
+  String get selectReservationTime => '预约时间';
+
+  @override
+  String get navHome => '首页';
+
+  @override
+  String get navExplore => '探索';
+
+  @override
+  String get navCourses => '路线';
+
+  @override
+  String get navSaved => '收藏';
+
+  @override
+  String get navProfile => '我的';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -3349,7 +3560,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get savedPlacesTab => '已收藏地点';
 
   @override
-  String get savedCoursesTab => '推荐路线';
+  String get savedCoursesTab => '已保存路线';
 
   @override
   String get favoritesEmptyTitle => '暂无收藏地点。';
@@ -3361,7 +3572,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get savedCoursesEmptyTitle => '暂无收藏路线。';
 
   @override
-  String get savedCoursesEmptySubtitle => '发现并保存专属于您的个性化旅行路线！';
+  String get savedCoursesEmptySubtitle => '在推荐路线结果中点击“保存此路线”进行添加。';
 
   @override
   String get reservationDetailTitle => '预约详情';
@@ -3416,4 +3627,215 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get saveAction => '保存';
+
+  @override
+  String get myReservationsTitle => '我的预约';
+
+  @override
+  String get activeReservationsTab => '进行中的预约';
+
+  @override
+  String get pastReservationsTab => '历史预约';
+
+  @override
+  String get noActiveReservations => '暂无进行中的预约。';
+
+  @override
+  String get noPastReservations => '暂无历史预约记录。';
+
+  @override
+  String get reservationLoadError => '无法加载预约信息。\n请稍后重试。';
+
+  @override
+  String reservationTimeLabel(String time) {
+    return '预约时间: $time';
+  }
+
+  @override
+  String reservationPartySizeLabel(int count) {
+    return '人数: $count人';
+  }
+
+  @override
+  String get reservationStatusPending => '待确认';
+
+  @override
+  String get reservationStatusApproved => '已确认';
+
+  @override
+  String get reservationStatusRejected => '已拒绝';
+
+  @override
+  String get reservationStatusCancelledCustomer => '用户取消';
+
+  @override
+  String get reservationStatusCancelledBusiness => '商家取消';
+
+  @override
+  String get reservationStatusCancelled => '已取消';
+
+  @override
+  String get reservationStatusCompleted => '已完成';
+
+  @override
+  String get reservationStatusNoShow => '未到店';
+
+  @override
+  String get reservationStatusUnknown => '需确认状态';
+
+  @override
+  String get savedCoursesTitle => '已保存旅行路线';
+
+  @override
+  String get favoritesAddHint => '点击心形图标添加您关注的地点吧。';
+
+  @override
+  String get savedCoursesAddHint => '在推荐路线结果中点击“保存此路线”进行添加。';
+
+  @override
+  String get deleteCourseConfirm => '确定要从收藏夹中删除此推荐路线吗？';
+
+  @override
+  String get courseDeletedSuccess => '路线已成功删除。';
+
+  @override
+  String get courseDeleteFail => '删除失败，请稍后重试。';
+
+  @override
+  String get legacyCourseNotice => '这是在之前版本中保存的路线，请重新保存新路线。';
+
+  @override
+  String get courseLoadFail => '无法加载已保存路线，请重新保存新路线。';
+
+  @override
+  String get shareCourseTitle => '分享推荐路线';
+
+  @override
+  String get shareCourseDesc => '与朋友分享您的专属南浦洞旅行路线！';
+
+  @override
+  String get copyLinkAction => '复制链接';
+
+  @override
+  String get linkCopied => '路线分享链接已复制到剪贴板。';
+
+  @override
+  String saveDateLabel(String date) {
+    return '保存日期: $date';
+  }
+
+  @override
+  String get viewCourseDetail => '查看路线详情';
+
+  @override
+  String get courseSoloLabel => '独自一人';
+
+  @override
+  String get courseCoupleLabel => '情侣';
+
+  @override
+  String get courseFamilyLabel => '家人/朋友';
+
+  @override
+  String get transportWalkLabel => '步行路线';
+
+  @override
+  String get transportTransitLabel => '公共交通路线';
+
+  @override
+  String get transportDriveLabel => '自驾路线';
+
+  @override
+  String courseSummaryPlaces(int count, String dist, int mins) {
+    return '$count个地点 · ${dist}km · 约$mins分钟';
+  }
+
+  @override
+  String get recommendedPlaceCourse => '推荐景点组合路线';
+
+  @override
+  String get savedCoursesLoadError => '获取已保存路线列表失败。';
+
+  @override
+  String get notifBasicHeader => '基础服务通知';
+
+  @override
+  String get notifReservationDesc => '接收预约确认、取消及提醒推送。';
+
+  @override
+  String get notifMissionDesc => '接收打卡任务完成及奖励获得通知。';
+
+  @override
+  String get notifPointTitle => '积分通知';
+
+  @override
+  String get notifPointDesc => '接收打卡验证及活动积分变动通知。';
+
+  @override
+  String get notifCouponTitle => '优惠券通知';
+
+  @override
+  String get notifCouponDesc => '接收优惠券获取、使用及到期提醒通知。';
+
+  @override
+  String get notifAiTitle => 'AI路线推荐通知';
+
+  @override
+  String get notifAiDesc => '接收定制主题旅行路线生成完成通知。';
+
+  @override
+  String get notifEventMarketingHeader => '活动与营销通知';
+
+  @override
+  String get notifSystemTitle => '系统公告通知';
+
+  @override
+  String get notifSystemDesc => '接收系统公告及定期维护通知。';
+
+  @override
+  String get notifMarketingTitle => '营销信息接收同意';
+
+  @override
+  String get notifMarketingDesc => '接收南浦洞商圈丰富折扣及定制推荐活动。';
+
+  @override
+  String get notifSettingsSaved => '通知设置已保存。';
+
+  @override
+  String get reservationConfirmSubmitted => '预约申请已提交';
+
+  @override
+  String reservationSubmittedBody(String store) {
+    return '已向$store提交预约申请。';
+  }
+
+  @override
+  String get reservationStatusWillChange => '商家确认后将更新预约状态。';
+
+  @override
+  String get applyReservationAction => '提交预约';
+
+  @override
+  String get selectReservationParty => '预约人数';
+
+  @override
+  String get selectReservationDate => '预约日期';
+
+  @override
+  String get selectReservationTime => '预约时间';
+
+  @override
+  String get navHome => '首页';
+
+  @override
+  String get navExplore => '探索';
+
+  @override
+  String get navCourses => '路线';
+
+  @override
+  String get navSaved => '收藏';
+
+  @override
+  String get navProfile => '我的';
 }

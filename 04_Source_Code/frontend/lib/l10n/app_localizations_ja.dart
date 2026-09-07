@@ -1654,7 +1654,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get savedPlacesTab => '保存した場所';
 
   @override
-  String get savedCoursesTab => 'おすすめコース';
+  String get savedCoursesTab => '保存したコース';
 
   @override
   String get favoritesEmptyTitle => '保存された場所がありません。';
@@ -1666,7 +1666,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get savedCoursesEmptyTitle => '保存されたコースがありません。';
 
   @override
-  String get savedCoursesEmptySubtitle => '自分だけのおすすめ旅行コースを探してみましょう！';
+  String get savedCoursesEmptySubtitle =>
+      'おすすめコースの結果から「このコースを保存」をタップして追加してみましょう。';
 
   @override
   String get reservationDetailTitle => '予約詳細';
@@ -1721,4 +1722,215 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get saveAction => '保存';
+
+  @override
+  String get myReservationsTitle => '予約履歴';
+
+  @override
+  String get activeReservationsTab => '進行中の予約';
+
+  @override
+  String get pastReservationsTab => '過去の予約';
+
+  @override
+  String get noActiveReservations => '進行中の予約はありません。';
+
+  @override
+  String get noPastReservations => '過去の予約履歴はありません。';
+
+  @override
+  String get reservationLoadError => '予約情報を取得できませんでした。\nしばらくしてから再試行してください。';
+
+  @override
+  String reservationTimeLabel(String time) {
+    return '予約時間: $time';
+  }
+
+  @override
+  String reservationPartySizeLabel(int count) {
+    return '人数: $count名';
+  }
+
+  @override
+  String get reservationStatusPending => '承認待ち';
+
+  @override
+  String get reservationStatusApproved => '予約承認';
+
+  @override
+  String get reservationStatusRejected => '承認拒否';
+
+  @override
+  String get reservationStatusCancelledCustomer => 'ユーザー取消';
+
+  @override
+  String get reservationStatusCancelledBusiness => '店舗取消';
+
+  @override
+  String get reservationStatusCancelled => 'キャンセル';
+
+  @override
+  String get reservationStatusCompleted => '利用完了';
+
+  @override
+  String get reservationStatusNoShow => '無断キャンセル';
+
+  @override
+  String get reservationStatusUnknown => '状態確認要';
+
+  @override
+  String get savedCoursesTitle => '保存した旅行コース';
+
+  @override
+  String get favoritesAddHint => '気になる場所をハートアイコンでお気に入りに追加してみましょう。';
+
+  @override
+  String get savedCoursesAddHint => 'おすすめコースの結果から「このコースを保存」をタップして追加してみましょう。';
+
+  @override
+  String get deleteCourseConfirm => '保存したおすすめコースをお気に入りから削除しますか？';
+
+  @override
+  String get courseDeletedSuccess => 'コースが正常に削除されました。';
+
+  @override
+  String get courseDeleteFail => '削除に失敗しました。しばらくしてから再試行してください。';
+
+  @override
+  String get legacyCourseNotice => '旧バージョンで保存されたコースです。新しいコースを再度保存してください。';
+
+  @override
+  String get courseLoadFail => '保存したコースを取得できませんでした。新しいコースを再度保存してください。';
+
+  @override
+  String get shareCourseTitle => 'おすすめコースの共有';
+
+  @override
+  String get shareCourseDesc => 'あなただけの南浦洞旅行コースを友達と共有しましょう！';
+
+  @override
+  String get copyLinkAction => 'リンクをコピー';
+
+  @override
+  String get linkCopied => 'コース共有リンクをクリップボードにコピーしました。';
+
+  @override
+  String saveDateLabel(String date) {
+    return '保存日: $date';
+  }
+
+  @override
+  String get viewCourseDetail => 'コース詳細を見る';
+
+  @override
+  String get courseSoloLabel => 'ひとり旅';
+
+  @override
+  String get courseCoupleLabel => 'カップル';
+
+  @override
+  String get courseFamilyLabel => '家族・友達';
+
+  @override
+  String get transportWalkLabel => '徒歩コース';
+
+  @override
+  String get transportTransitLabel => '公共交通コース';
+
+  @override
+  String get transportDriveLabel => 'ドライブコース';
+
+  @override
+  String courseSummaryPlaces(int count, String dist, int mins) {
+    return '$countヶ所 · ${dist}km · 約$mins分';
+  }
+
+  @override
+  String get recommendedPlaceCourse => 'おすすめスポット構成コース';
+
+  @override
+  String get savedCoursesLoadError => '保存されたコース一覧の取得に失敗しました。';
+
+  @override
+  String get notifBasicHeader => '基本サービス通知';
+
+  @override
+  String get notifReservationDesc => '予約確認・キャンセル・リマインダー通知を受け取ります。';
+
+  @override
+  String get notifMissionDesc => 'ミッション完了やリワード獲得成功の案内を受け取ります。';
+
+  @override
+  String get notifPointTitle => 'ポイント通知';
+
+  @override
+  String get notifPointDesc => 'ミッション認証やイベントによるポイント変動を受け取ります。';
+
+  @override
+  String get notifCouponTitle => 'クーポン通知';
+
+  @override
+  String get notifCouponDesc => 'クーポンの獲得・利用・有効期限通知を受け取ります。';
+
+  @override
+  String get notifAiTitle => 'AIコースおすすめ通知';
+
+  @override
+  String get notifAiDesc => '生成されたあなただけのテーマ旅行コースの完了通知を受け取ります。';
+
+  @override
+  String get notifEventMarketingHeader => 'イベント・マーケティング通知';
+
+  @override
+  String get notifSystemTitle => 'システムお知らせ通知';
+
+  @override
+  String get notifSystemDesc => 'お知らせや定期メンテナンス通知を受け取ります。';
+
+  @override
+  String get notifMarketingTitle => 'マーケティング情報同意';
+
+  @override
+  String get notifMarketingDesc => '南浦洞の多彩な割引やおすすめイベント情報を受け取ります。';
+
+  @override
+  String get notifSettingsSaved => '通知設定の変更が保存されました。';
+
+  @override
+  String get reservationConfirmSubmitted => '予約受付完了';
+
+  @override
+  String reservationSubmittedBody(String store) {
+    return '$storeへの\n予約申請が受付されました。';
+  }
+
+  @override
+  String get reservationStatusWillChange => '店舗で確認後、予約状態が更新されます。';
+
+  @override
+  String get applyReservationAction => '予約を申し込む';
+
+  @override
+  String get selectReservationParty => '予約人数';
+
+  @override
+  String get selectReservationDate => '予約日';
+
+  @override
+  String get selectReservationTime => '予約時間';
+
+  @override
+  String get navHome => 'ホーム';
+
+  @override
+  String get navExplore => '探索';
+
+  @override
+  String get navCourses => 'コース';
+
+  @override
+  String get navSaved => '保存';
+
+  @override
+  String get navProfile => 'マイ情報';
 }

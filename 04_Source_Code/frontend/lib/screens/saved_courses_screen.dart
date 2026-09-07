@@ -54,7 +54,9 @@ class _SavedCoursesListViewState extends State<SavedCoursesListView> {
   @override
   void initState() {
     super.initState();
-    _loadHistory();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _loadHistory();
+    });
   }
 
   Future<void> _loadHistory() async {
@@ -72,11 +74,17 @@ class _SavedCoursesListViewState extends State<SavedCoursesListView> {
         _courses = list;
       });
     } catch (e) {
-      setState(() {
-        _errorMessage = '저장된 코스 목록을 불러오는 데 실패했습니다.';
-      });
+      if (mounted) {
+        final l10n = AppLocalizations.of(context);
+        setState(() {
+          _errorMessage =
+              l10n?.savedCoursesLoadError ?? '저장된 코스 목록을 불러오는 데 실패했습니다.';
+        });
+      }
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -89,7 +97,9 @@ class _SavedCoursesListViewState extends State<SavedCoursesListView> {
           l10n?.deleteAccount ?? 'Delete Course',
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        content: const Text('저장한 추천 코스를 보관함에서 삭제하시겠습니까?'),
+        content: Text(
+          l10n?.deleteCourseConfirm ?? '저장한 추천 코스를 보관함에서 삭제하시겠습니까?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
@@ -99,7 +109,10 @@ class _SavedCoursesListViewState extends State<SavedCoursesListView> {
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(
               l10n?.confirm ?? 'Delete',
-              style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],
@@ -114,16 +127,23 @@ class _SavedCoursesListViewState extends State<SavedCoursesListView> {
         final token = context.read<AuthProvider>().accessToken;
         context.read<FavoriteProvider>().loadFavorites(token: token);
 
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('코스가 정상 삭제되었습니다.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              l10n?.courseDeletedSuccess ?? '코스가 정상 삭제되었습니다.',
+            ),
+          ),
+        );
       }
       _loadHistory();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('삭제에 실패했습니다. 잠시 후 다시 시도해 주세요.'),
+          SnackBar(
+            content: Text(
+              l10n?.courseDeleteFail ??
+                  '삭제에 실패했습니다. 잠시 후 다시 시도해 주세요.',
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -132,10 +152,14 @@ class _SavedCoursesListViewState extends State<SavedCoursesListView> {
   }
 
   void _openCourseDetail(RecommendationModel course) {
+    final l10n = AppLocalizations.of(context);
     if (course.items.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('이전 버전에서 저장한 코스입니다. 새 코스를 다시 저장해 주세요.'),
+        SnackBar(
+          content: Text(
+            l10n?.legacyCourseNotice ??
+                '이전 버전에서 저장한 코스입니다. 새 코스를 다시 저장해 주세요.',
+          ),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -165,8 +189,11 @@ class _SavedCoursesListViewState extends State<SavedCoursesListView> {
       );
     } catch (_) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('저장한 코스를 불러오지 못했습니다. 새 코스를 다시 저장해 주세요.'),
+        SnackBar(
+          content: Text(
+            l10n?.courseLoadFail ??
+                '저장한 코스를 불러오지 못했습니다. 새 코스를 다시 저장해 주세요.',
+          ),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -174,22 +201,33 @@ class _SavedCoursesListViewState extends State<SavedCoursesListView> {
   }
 
   void _shareCourse(RecommendationModel course) {
-    final shareCode = 'NAMPO-${course.id.length > 8 ? course.id.substring(0, 8).toUpperCase() : "COURSE"}';
+    final l10n = AppLocalizations.of(context);
+    final shareCode =
+        'NAMPO-${course.id.length > 8 ? course.id.substring(0, 8).toUpperCase() : "COURSE"}';
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.share, color: AppColors.primary),
-            SizedBox(width: 8),
-            Text('추천 코스 공유', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const Icon(Icons.share, color: AppColors.primary),
+            const SizedBox(width: 8),
+            Text(
+              l10n?.shareCourseTitle ?? '추천 코스 공유',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('내 맞춤 남포동 여행 코스를 친구와 공유하세요!'),
+            Text(
+              l10n?.shareCourseDesc ??
+                  '내 맞춤 남포동 여행 코스를 친구와 공유하세요!',
+            ),
             const SizedBox(height: 12),
             Container(
               width: double.infinity,
@@ -201,7 +239,10 @@ class _SavedCoursesListViewState extends State<SavedCoursesListView> {
               ),
               child: SelectableText(
                 'https://nampogogo.app/course/$shareCode',
-                style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
               ),
             ),
           ],
@@ -211,13 +252,16 @@ class _SavedCoursesListViewState extends State<SavedCoursesListView> {
             onPressed: () {
               Navigator.of(ctx).pop();
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('코스 공유 링크가 클립보드에 복사되었습니다.'),
+                SnackBar(
+                  content: Text(
+                    l10n?.linkCopied ??
+                        '코스 공유 링크가 클립보드에 복사되었습니다.',
+                  ),
                   behavior: SnackBarBehavior.floating,
                 ),
               );
             },
-            child: const Text('링크 복사'),
+            child: Text(l10n?.copyLinkAction ?? '링크 복사'),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
@@ -287,24 +331,33 @@ class _SavedCoursesListViewState extends State<SavedCoursesListView> {
   }
 
   Widget _buildEmptyState() {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
-          Icon(Icons.route_outlined, size: 64.0, color: AppColors.textHint),
-          SizedBox(height: 16.0),
+        children: [
+          const Icon(
+            Icons.route_outlined,
+            size: 64.0,
+            color: AppColors.textHint,
+          ),
+          const SizedBox(height: 16.0),
           Text(
-            '아직 저장한 코스가 없습니다.',
-            style: TextStyle(
+            l10n?.savedCoursesEmptyTitle ?? '아직 저장한 코스가 없습니다.',
+            style: const TextStyle(
               fontSize: 16.0,
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
             ),
           ),
-          SizedBox(height: 8.0),
+          const SizedBox(height: 8.0),
           Text(
-            '추천 코스 결과에서 ‘이 코스 보관함 저장’을 눌러 추가해 보세요.',
-            style: TextStyle(fontSize: 12.0, color: AppColors.textSecondary),
+            l10n?.savedCoursesEmptySubtitle ??
+                '추천 코스 결과에서 ‘이 코스 보관함 저장’을 눌러 추가해 보세요.',
+            style: const TextStyle(
+              fontSize: 12.0,
+              color: AppColors.textSecondary,
+            ),
             textAlign: TextAlign.center,
           ),
         ],
@@ -313,32 +366,38 @@ class _SavedCoursesListViewState extends State<SavedCoursesListView> {
   }
 
   Widget _buildCourseCard(RecommendationModel course) {
+    final l10n = AppLocalizations.of(context);
     final dateStr =
         '${course.createdAt.year}.${course.createdAt.month.toString().padLeft(2, '0')}.${course.createdAt.day.toString().padLeft(2, '0')}';
 
     final companionLabel = course.travelType == "SOLO"
-        ? "나홀로"
+        ? (l10n?.courseSoloLabel ?? "나홀로")
         : course.travelType == "COUPLE"
-        ? "커플"
-        : "가족/친구";
-    final courseTitle = '$companionLabel 남포동 여행';
+        ? (l10n?.courseCoupleLabel ?? "커플")
+        : (l10n?.courseFamilyLabel ?? "가족/친구");
+    final courseTitle = l10n?.recommendCourseFormat(companionLabel) ??
+        '$companionLabel 남포동 여행';
 
     final transportLabel = course.transportMode == "WALK"
-        ? "도보 코스"
+        ? (l10n?.transportWalkLabel ?? "도보 코스")
         : course.transportMode == "TRANSIT"
-        ? "대중교통 코스"
-        : "차량 운전 코스";
+        ? (l10n?.transportTransitLabel ?? "대중교통 코스")
+        : (l10n?.transportDriveLabel ?? "차량 운전 코스");
 
     // Distance and time calculation
     final placeCount = course.items.length;
     double totalDist = 0.8;
     int totalTimeMin = (placeCount * 30) + 15;
 
-    final summaryText =
+    final summaryText = l10n?.courseSummaryPlaces(
+          placeCount,
+          totalDist.toStringAsFixed(1),
+          totalTimeMin,
+        ) ??
         '$placeCount개 장소 · ${totalDist.toStringAsFixed(1)}km · 약 ${totalTimeMin}분';
     final placeNames = course.items.isNotEmpty
         ? course.items.map((i) => i.store.name).join(' → ')
-        : '추천 장소 구성 코스';
+        : (l10n?.recommendedPlaceCourse ?? '추천 장소 구성 코스');
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12.0),
@@ -414,23 +473,23 @@ class _SavedCoursesListViewState extends State<SavedCoursesListView> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    '저장일: $dateStr',
+                    l10n?.saveDateLabel(dateStr) ?? '저장일: $dateStr',
                     style: const TextStyle(
                       fontSize: 11.0,
                       color: AppColors.textHint,
                     ),
                   ),
-                  const Row(
+                  Row(
                     children: [
                       Text(
-                        '코스 상세보기',
-                        style: TextStyle(
+                        l10n?.viewCourseDetail ?? '코스 상세보기',
+                        style: const TextStyle(
                           fontSize: 11.5,
                           color: AppColors.secondary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Icon(
+                      const Icon(
                         Icons.chevron_right,
                         size: 14.0,
                         color: AppColors.secondary,

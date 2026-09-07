@@ -7,8 +7,16 @@ import 'package:frontend/models/mission.dart';
 import 'package:frontend/models/place.dart';
 import 'package:frontend/widgets/mission_card.dart';
 import 'package:frontend/screens/auth_choice_screen.dart';
+import 'package:frontend/screens/favorites_screen.dart';
+import 'package:frontend/screens/notification_settings_screen.dart';
+import 'package:frontend/screens/my_reservations_screen.dart';
+import 'package:frontend/screens/saved_courses_screen.dart';
+import 'package:frontend/screens/customer_app_shell.dart';
 import 'package:frontend/providers/locale_provider.dart';
 import 'package:frontend/providers/auth_provider.dart';
+import 'package:frontend/providers/favorite_provider.dart';
+import 'package:frontend/providers/notification_provider.dart';
+import 'package:frontend/providers/app_mode_provider.dart';
 import 'package:frontend/utils/l10n_mappers.dart';
 
 void main() {
@@ -198,7 +206,6 @@ void main() {
 
     testWidgets('TEST CATEGORY TAXONOMY & PLACE DYNAMIC I18N: Category mapping has zero collisions and Place names translate dynamically', (WidgetTester tester) async {
       late AppLocalizations l10nZh;
-      late AppLocalizations l10nKo;
       await tester.pumpWidget(
         MaterialApp(
           locale: const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans'),
@@ -244,6 +251,209 @@ void main() {
       expect(gwangalliPlace.localizedName('zh'), contains('广安里'));
       expect(gwangalliPlace.localizedName('en'), contains('Gwangalli'));
       expect(gwangalliPlace.localizedName('ja'), contains('広安里'));
+    });
+
+    testWidgets('TEST FAVORITES SCREEN EN: FavoritesScreen renders English title, tabs, empty state without Korean', (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) => LocaleProvider()),
+            ChangeNotifierProvider(create: (_) => AuthProvider()),
+            ChangeNotifierProvider(create: (_) => FavoriteProvider()),
+          ],
+          child: const MaterialApp(
+            locale: Locale('en'),
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: FavoritesScreen(),
+          ),
+        ),
+      );
+
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(find.text('Favorites'), findsOneWidget);
+      expect(find.text('Saved Places'), findsOneWidget);
+      expect(find.text('Saved Courses'), findsOneWidget);
+      expect(find.text('즐겨찾기 보관함'), findsNothing);
+      expect(find.text('저장한 코스'), findsNothing);
+    });
+
+    testWidgets('TEST NOTIFICATION SETTINGS EN: NotificationSettingsScreen renders English headers and toggle items', (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final notifProvider = NotificationProvider()
+        ..setPreferencesForTesting(
+          const NotificationPreferenceModel(
+            userId: 'u_test_001',
+            reservationEnabled: true,
+            missionEnabled: true,
+            pointEnabled: true,
+            couponEnabled: true,
+            aiEnabled: true,
+            eventEnabled: true,
+            marketingConsent: true,
+          ),
+        );
+
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) => LocaleProvider()),
+            ChangeNotifierProvider(create: (_) => AuthProvider()),
+            ChangeNotifierProvider.value(value: notifProvider),
+          ],
+          child: const MaterialApp(
+            locale: Locale('en'),
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: NotificationSettingsScreen(),
+          ),
+        ),
+      );
+
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(find.text('Push Notifications'), findsOneWidget);
+      expect(find.text('General Service Notifications'), findsOneWidget);
+      expect(find.text('Events & Marketing'), findsOneWidget);
+      expect(find.text('포인트 알림'), findsNothing);
+      expect(find.text('쿠폰 알림'), findsNothing);
+      expect(find.text('AI 코스 추천 알림'), findsNothing);
+    });
+
+    testWidgets('TEST MY RESERVATIONS SCREEN EN: MyReservationsScreen renders English title and tab labels', (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) => LocaleProvider()),
+            ChangeNotifierProvider(create: (_) => AuthProvider()),
+          ],
+          child: const MaterialApp(
+            locale: Locale('en'),
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: MyReservationsScreen(),
+          ),
+        ),
+      );
+
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(find.text('My Reservations'), findsOneWidget);
+      expect(find.text('Active Reservations'), findsOneWidget);
+      expect(find.text('Past Reservations'), findsOneWidget);
+      expect(find.text('내 예약 내역'), findsNothing);
+      expect(find.text('진행 중인 예약'), findsNothing);
+    });
+
+    testWidgets('TEST SAVED COURSES SCREEN EN: SavedCoursesScreen renders English title and empty state', (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) => LocaleProvider()),
+            ChangeNotifierProvider(create: (_) => AuthProvider()),
+            ChangeNotifierProvider(create: (_) => FavoriteProvider()),
+          ],
+          child: const MaterialApp(
+            locale: Locale('en'),
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: SavedCoursesScreen(),
+          ),
+        ),
+      );
+
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(find.text('Saved Travel Courses'), findsOneWidget);
+      expect(find.text('No saved courses yet.'), findsOneWidget);
+      expect(find.text('저장한 여행 코스'), findsNothing);
+      expect(find.text('아직 저장한 코스가 없습니다.'), findsNothing);
+    });
+
+    testWidgets('TEST CUSTOMER APP SHELL EN: CustomerAppShell renders English navigation labels', (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) => LocaleProvider()),
+            ChangeNotifierProvider(create: (_) => AuthProvider()),
+            ChangeNotifierProvider(create: (_) => AppModeProvider()),
+            ChangeNotifierProvider(create: (_) => FavoriteProvider()),
+          ],
+          child: const MaterialApp(
+            locale: Locale('en'),
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: SizedBox(
+                width: 1080,
+                height: 2400,
+                child: CustomerAppShell(),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(find.text('Home'), findsOneWidget);
+      expect(find.text('Explore'), findsOneWidget);
+      expect(find.text('Courses'), findsOneWidget);
+      expect(find.text('Saved'), findsOneWidget);
+      expect(find.text('My Profile'), findsOneWidget);
+      expect(find.text('홈'), findsNothing);
+      expect(find.text('탐색'), findsNothing);
+      expect(find.text('내 정보'), findsNothing);
     });
   });
 }

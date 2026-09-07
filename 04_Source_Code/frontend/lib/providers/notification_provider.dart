@@ -96,4 +96,9 @@ class NotificationProvider with ChangeNotifier {
     _preferences = await _repository.updatePreferences(updated, userId: userId);
     notifyListeners();
   }
+
+  void setPreferencesForTesting(NotificationPreferenceModel pref) {
+    _preferences = pref;
+    notifyListeners();
+  }
 }

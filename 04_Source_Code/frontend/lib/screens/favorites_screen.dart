@@ -24,7 +24,9 @@ class _FavoritesScreenState extends State<FavoritesScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    _refreshList();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _refreshList();
+    });
   }
 
   @override
@@ -50,14 +52,14 @@ class _FavoritesScreenState extends State<FavoritesScreen>
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          '즐겨찾기 보관함',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          l10n?.favoritesTitle ?? '즐겨찾기 보관함',
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         bottom: TabBar(
           controller: _tabController,
           tabs: [
             Tab(text: l10n?.savedPlacesTab ?? '저장한 장소'),
-            Tab(text: '저장한 코스'),
+            Tab(text: l10n?.savedCoursesTab ?? '저장한 코스'),
           ],
         ),
       ),
@@ -87,7 +89,9 @@ class _FavoritesScreenState extends State<FavoritesScreen>
             ),
             const SizedBox(height: 16),
             Text(
-              isPlace ? l10n?.favoritesEmptyTitle ?? '저장된 장소가 없습니다.' : '아직 저장한 코스가 없습니다.',
+              isPlace
+                  ? (l10n?.favoritesEmptyTitle ?? '저장된 장소가 없습니다.')
+                  : (l10n?.savedCoursesEmptyTitle ?? '아직 저장한 코스가 없습니다.'),
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -97,8 +101,10 @@ class _FavoritesScreenState extends State<FavoritesScreen>
             const SizedBox(height: 8),
             Text(
               isPlace
-                  ? '관심 있는 장소를 하트 아이콘으로 추가해 보세요.'
-                  : '추천 코스 결과에서 ‘이 코스 보관함 저장’을 눌러 추가해 보세요.',
+                  ? (l10n?.favoritesAddHint ??
+                      '관심 있는 장소를 하트 아이콘으로 추가해 보세요.')
+                  : (l10n?.savedCoursesAddHint ??
+                      '추천 코스 결과에서 ‘이 코스 보관함 저장’을 눌러 추가해 보세요.'),
               style: const TextStyle(fontSize: 12, color: Colors.grey),
               textAlign: TextAlign.center,
             ),

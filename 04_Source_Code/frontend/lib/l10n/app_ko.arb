@@ -603,11 +603,11 @@
   "couponAvailableTitle": "사용 가능한 쿠폰",
   "couponUsedTitle": "사용 완료 및 만료",
   "savedPlacesTab": "저장한 장소",
-  "savedCoursesTab": "추천 코스",
+  "savedCoursesTab": "저장한 코스",
   "favoritesEmptyTitle": "저장된 장소가 없습니다.",
   "favoritesEmptySubtitle": "마음에 드는 남포동 명소를 즐겨찾기에 추가해보세요!",
   "savedCoursesEmptyTitle": "저장된 코스가 없습니다.",
-  "savedCoursesEmptySubtitle": "나만의 여행 코스를 탐색하고 저장해보세요!",
+  "savedCoursesEmptySubtitle": "추천 코스 결과에서 ‘이 코스 보관함 저장’을 눌러 추가해 보세요.",
   "reservationDetailTitle": "예약 상세 내역",
   "reservationNumber": "예약 번호",
   "reservationDate": "예약 일시",
@@ -625,5 +625,113 @@
   "confirmAction": "확인",
   "cancelAction": "취소",
   "deleteAction": "삭제",
-  "saveAction": "저장"
+  "saveAction": "저장",
+  "myReservationsTitle": "내 예약 내역",
+  "activeReservationsTab": "진행 중인 예약",
+  "pastReservationsTab": "지난 예약 내역",
+  "noActiveReservations": "진행 중인 예약 신청이 없습니다.",
+  "noPastReservations": "지난 예약 신청 내역이 없습니다.",
+  "reservationLoadError": "예약 정보를 불러오지 못했습니다.\n잠시 후 다시 시도해 주세요.",
+  "reservationTimeLabel": "예약 시간: {time}",
+  "@reservationTimeLabel": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "reservationPartySizeLabel": "인원수: {count}명",
+  "@reservationPartySizeLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reservationStatusPending": "승인 대기",
+  "reservationStatusApproved": "예약 승인",
+  "reservationStatusRejected": "승인 거절",
+  "reservationStatusCancelledCustomer": "이용자 취소",
+  "reservationStatusCancelledBusiness": "매장 취소",
+  "reservationStatusCancelled": "취소됨",
+  "reservationStatusCompleted": "이용 완료",
+  "reservationStatusNoShow": "노쇼",
+  "reservationStatusUnknown": "상태 확인 필요",
+  "savedCoursesTitle": "저장한 여행 코스",
+  "favoritesAddHint": "관심 있는 장소를 하트 아이콘으로 추가해 보세요.",
+  "savedCoursesAddHint": "추천 코스 결과에서 ‘이 코스 보관함 저장’을 눌러 추가해 보세요.",
+  "deleteCourseConfirm": "저장한 추천 코스를 보관함에서 삭제하시겠습니까?",
+  "courseDeletedSuccess": "코스가 정상 삭제되었습니다.",
+  "courseDeleteFail": "삭제에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+  "legacyCourseNotice": "이전 버전에서 저장한 코스입니다. 새 코스를 다시 저장해 주세요.",
+  "courseLoadFail": "저장한 코스를 불러오지 못했습니다. 새 코스를 다시 저장해 주세요.",
+  "shareCourseTitle": "추천 코스 공유",
+  "shareCourseDesc": "내 맞춤 남포동 여행 코스를 친구와 공유하세요!",
+  "copyLinkAction": "링크 복사",
+  "linkCopied": "코스 공유 링크가 클립보드에 복사되었습니다.",
+  "saveDateLabel": "저장일: {date}",
+  "@saveDateLabel": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "viewCourseDetail": "코스 상세보기",
+  "courseSoloLabel": "나홀로",
+  "courseCoupleLabel": "커플",
+  "courseFamilyLabel": "가족/친구",
+  "transportWalkLabel": "도보 코스",
+  "transportTransitLabel": "대중교통 코스",
+  "transportDriveLabel": "차량 운전 코스",
+  "courseSummaryPlaces": "{count}개 장소 · {dist}km · 약 {mins}분",
+  "@courseSummaryPlaces": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "dist": {
+        "type": "String"
+      },
+      "mins": {
+        "type": "int"
+      }
+    }
+  },
+  "recommendedPlaceCourse": "추천 장소 구성 코스",
+  "savedCoursesLoadError": "저장된 코스 목록을 불러오는 데 실패했습니다.",
+  "notifBasicHeader": "기본 서비스 알림",
+  "notifReservationDesc": "예약 확인, 취소 및 리마인더 푸시를 전송합니다.",
+  "notifMissionDesc": "미션 완료 및 리워드 획득 성공을 안내합니다.",
+  "notifPointTitle": "포인트 알림",
+  "notifPointDesc": "미션 인증 및 이벤트에 따른 포인트 증감을 수신합니다.",
+  "notifCouponTitle": "쿠폰 알림",
+  "notifCouponDesc": "쿠폰 획득 및 사용, 만료 기한 경고 알림을 발송합니다.",
+  "notifAiTitle": "AI 코스 추천 알림",
+  "notifAiDesc": "요청하신 나만의 테마 여행 코스 산출 완료 알림입니다.",
+  "notifEventMarketingHeader": "이벤트 및 마케팅 알림",
+  "notifSystemTitle": "시스템 공지 알림",
+  "notifSystemDesc": "공지사항 및 시스템 정기 점검 알림을 전송합니다.",
+  "notifMarketingTitle": "마케팅 정보 동의",
+  "notifMarketingDesc": "다양한 남포동 상권 할인 및 추천 맞춤 이벤트를 수신합니다.",
+  "notifSettingsSaved": "알림 설정 변경사항이 저장되었습니다.",
+  "reservationConfirmSubmitted": "예약 신청 접수 완료",
+  "reservationSubmittedBody": "{store} 매장에\n예약 신청이 접수되었습니다.",
+  "@reservationSubmittedBody": {
+    "placeholders": {
+      "store": {
+        "type": "String"
+      }
+    }
+  },
+  "reservationStatusWillChange": "매장에서 확인한 후 예약 상태가 변경됩니다.",
+  "applyReservationAction": "예약 신청하기",
+  "selectReservationParty": "예약 인원",
+  "selectReservationDate": "예약 날짜",
+  "selectReservationTime": "예약 시간",
+  "navHome": "홈",
+  "navExplore": "탐색",
+  "navCourses": "코스",
+  "navSaved": "저장",
+  "navProfile": "내 정보"
 }
