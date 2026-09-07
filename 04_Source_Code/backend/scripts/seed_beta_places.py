@@ -108,9 +108,18 @@ BETA_PLACES_SEED: List[Dict[str, Any]] = [
     {
         "id": "store-nampo-toast-01",
         "name": "남포토스트",
+        "name_en": "Nampo Toast",
+        "name_ja": "南浦トースト",
+        "name_zh": "南浦吐司",
         "category": "맛집/카페",
         "address": "부산 중구 광복로 55-1",
+        "address_en": "55-1 Gwangbok-ro, Jung-gu, Busan",
+        "address_ja": "釜山広域市中区光復路55-1",
+        "address_zh": "釜山广域市中区光复路55-1",
         "description": "바삭하고 고소한 수제 토스트와 시원한 갓 짠 과일 음료를 즐길 수 있는 남포동 시그니처 토스트 전문점.",
+        "description_en": "A signature toast specialty shop in Nampo-dong where you can enjoy crispy handmade toast and refreshing freshly squeezed fruit drinks.",
+        "description_ja": "香ばしくサクサクの手作りトーストと絞りたてのフレッシュジュースが楽しめる南浦洞のシグネチャートースト専門店。",
+        "description_zh": "位于南浦洞的招牌手工吐司专营店，提供香脆可口的手工吐司和新鲜清爽的现榨果汁。",
         "latitude": 35.0991,
         "longitude": 129.0302,
         "is_attraction": False,
@@ -127,9 +136,18 @@ BETA_PLACES_SEED: List[Dict[str, Any]] = [
     {
         "id": "store-nampo-gukbap-01",
         "name": "남포돼지국밥",
+        "name_en": "Nampo Dwaeji Gukbap",
+        "name_ja": "南浦テジクッパ",
+        "name_zh": "南浦猪肉汤饭",
         "category": "맛집",
         "address": "부산 중구 자갈치로 30",
+        "address_en": "30 Jagalchi-ro, Jung-gu, Busan",
+        "address_ja": "釜山広域市中区チャガルチ路30",
+        "address_zh": "釜山广域市中区札嘎其路30",
         "description": "30년 전통의 진한 사골 육수와 부드러운 수육이 듬뿍 들어간 남포동 대표 돼지국밥 전문점.",
+        "description_en": "A signature Nampo-dong pork soup restaurant boasting a 30-year tradition of rich pork bone broth and tender boiled pork slices.",
+        "description_ja": "30年の伝統を誇る濃厚な豚骨スープと柔らかい茹で豚肉がたっぷり入った南浦洞を代表するテジクッパ専門店。",
+        "description_zh": "拥有30年传统的南浦洞代表性猪肉汤饭专门店，浓郁骨汤搭配鲜嫩切肉。",
         "latitude": 35.0975,
         "longitude": 129.0298,
         "is_attraction": False,
@@ -223,10 +241,19 @@ def seed_beta_places(db: Session) -> Dict[str, Any]:
             store = models.Store(
                 id=item["id"],
                 name=item["name"],
+                name_en=item.get("name_en"),
+                name_ja=item.get("name_ja"),
+                name_zh=item.get("name_zh"),
                 category=item["category"],
                 rating=4.8 if item["tier"] == "OFFICIAL" else 4.5,
                 address=item["address"],
+                address_en=item.get("address_en"),
+                address_ja=item.get("address_ja"),
+                address_zh=item.get("address_zh"),
                 description=item["description"],
+                description_en=item.get("description_en"),
+                description_ja=item.get("description_ja"),
+                description_zh=item.get("description_zh"),
                 latitude=item["latitude"],
                 longitude=item["longitude"],
                 is_attraction=item["is_attraction"],
@@ -247,6 +274,24 @@ def seed_beta_places(db: Session) -> Dict[str, Any]:
             store.review_verification_type = item["review_verification_type"]
             store.latitude = item["latitude"]
             store.longitude = item["longitude"]
+            if "name_en" in item:
+                store.name_en = item["name_en"]
+            if "name_ja" in item:
+                store.name_ja = item["name_ja"]
+            if "name_zh" in item:
+                store.name_zh = item["name_zh"]
+            if "description_en" in item:
+                store.description_en = item["description_en"]
+            if "description_ja" in item:
+                store.description_ja = item["description_ja"]
+            if "description_zh" in item:
+                store.description_zh = item["description_zh"]
+            if "address_en" in item:
+                store.address_en = item["address_en"]
+            if "address_ja" in item:
+                store.address_ja = item["address_ja"]
+            if "address_zh" in item:
+                store.address_zh = item["address_zh"]
             updated_count += 1
 
         # Seed QR Credential
