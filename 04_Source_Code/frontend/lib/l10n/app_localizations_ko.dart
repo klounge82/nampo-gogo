@@ -390,7 +390,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get placeUnit => '개 매장';
 
   @override
-  String get pointHistoryTitle => '포인트 내역';
+  String get pointHistoryTitle => '포인트 이용 내역';
 
   @override
   String get pointWelcomeBonus => '회원가입 축하 포인트';
@@ -1465,4 +1465,52 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get noPaymentsHistory => '결제 및 이용 내역이 존재하지 않습니다.';
+
+  @override
+  String get favoritesPlacesTab => '즐겨찾기 장소';
+
+  @override
+  String get favoritesCoursesTab => '즐겨찾기 AI 코스';
+
+  @override
+  String get favoritesNoPlaces => '저장된 장소가 없습니다.';
+
+  @override
+  String get favoritesNoCourses => '저장된 추천 코스가 없습니다.';
+
+  @override
+  String get favoritesAddPlacesHint => '관심 있는 장소를 하트 버튼으로 추가해 보세요.';
+
+  @override
+  String get favoritesAddCoursesHint => '추천 코스 상세에서 \'이 코스 저장\'으로 추가할 수 있습니다.';
+
+  @override
+  String get pointAvailableBalance => '사용 가능한 포인트';
+
+  @override
+  String get pointChargeButton => '포인트 충전하기';
+
+  @override
+  String get pointDetailHistory => '상세 이용 내역';
+
+  @override
+  String get pointNoTransactions => '포인트 거래 내역이 없습니다.';
+
+  @override
+  String get pointGiftButton => '포인트 선물하기';
+
+  @override
+  String get pointStoreTitle => '포인트 교환소';
+
+  @override
+  String get retryButton => '다시 시도';
+
+  @override
+  String get errorOccurred => '오류가 발생했습니다';
+
+  @override
+  String get aiRecommendTag => 'AI 추천';
+
+  @override
+  String get popularPlaceTag => '인기 명소';
 }

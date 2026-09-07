@@ -862,7 +862,7 @@ abstract class AppLocalizations {
   /// No description provided for @pointHistoryTitle.
   ///
   /// In ko, this message translates to:
-  /// **'포인트 내역'**
+  /// **'포인트 이용 내역'**
   String get pointHistoryTitle;
 
   /// No description provided for @pointWelcomeBonus.
@@ -2892,6 +2892,102 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'결제 및 이용 내역이 존재하지 않습니다.'**
   String get noPaymentsHistory;
+
+  /// No description provided for @favoritesPlacesTab.
+  ///
+  /// In ko, this message translates to:
+  /// **'즐겨찾기 장소'**
+  String get favoritesPlacesTab;
+
+  /// No description provided for @favoritesCoursesTab.
+  ///
+  /// In ko, this message translates to:
+  /// **'즐겨찾기 AI 코스'**
+  String get favoritesCoursesTab;
+
+  /// No description provided for @favoritesNoPlaces.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장된 장소가 없습니다.'**
+  String get favoritesNoPlaces;
+
+  /// No description provided for @favoritesNoCourses.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장된 추천 코스가 없습니다.'**
+  String get favoritesNoCourses;
+
+  /// No description provided for @favoritesAddPlacesHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'관심 있는 장소를 하트 버튼으로 추가해 보세요.'**
+  String get favoritesAddPlacesHint;
+
+  /// No description provided for @favoritesAddCoursesHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'추천 코스 상세에서 \'이 코스 저장\'으로 추가할 수 있습니다.'**
+  String get favoritesAddCoursesHint;
+
+  /// No description provided for @pointAvailableBalance.
+  ///
+  /// In ko, this message translates to:
+  /// **'사용 가능한 포인트'**
+  String get pointAvailableBalance;
+
+  /// No description provided for @pointChargeButton.
+  ///
+  /// In ko, this message translates to:
+  /// **'포인트 충전하기'**
+  String get pointChargeButton;
+
+  /// No description provided for @pointDetailHistory.
+  ///
+  /// In ko, this message translates to:
+  /// **'상세 이용 내역'**
+  String get pointDetailHistory;
+
+  /// No description provided for @pointNoTransactions.
+  ///
+  /// In ko, this message translates to:
+  /// **'포인트 거래 내역이 없습니다.'**
+  String get pointNoTransactions;
+
+  /// No description provided for @pointGiftButton.
+  ///
+  /// In ko, this message translates to:
+  /// **'포인트 선물하기'**
+  String get pointGiftButton;
+
+  /// No description provided for @pointStoreTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'포인트 교환소'**
+  String get pointStoreTitle;
+
+  /// No description provided for @retryButton.
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 시도'**
+  String get retryButton;
+
+  /// No description provided for @errorOccurred.
+  ///
+  /// In ko, this message translates to:
+  /// **'오류가 발생했습니다'**
+  String get errorOccurred;
+
+  /// No description provided for @aiRecommendTag.
+  ///
+  /// In ko, this message translates to:
+  /// **'AI 추천'**
+  String get aiRecommendTag;
+
+  /// No description provided for @popularPlaceTag.
+  ///
+  /// In ko, this message translates to:
+  /// **'인기 명소'**
+  String get popularPlaceTag;
 }
 
 class _AppLocalizationsDelegate

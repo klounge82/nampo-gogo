@@ -63,11 +63,12 @@ class _PointHistoryScreenState extends State<PointHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
-          '포인트 이용 내역',
+        title: Text(
+          l10n?.pointHistoryTitle ?? '포인트 이용 내역',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: AppColors.surface,
@@ -93,7 +94,7 @@ class _PointHistoryScreenState extends State<PointHistoryScreen> {
                   const SizedBox(height: 16.0),
                   ElevatedButton(
                     onPressed: _loadPointsAndHistory,
-                    child: const Text('다시 시도'),
+                    child: Text(l10n?.retryButton ?? '다시 시도'),
                   ),
                 ],
               ),
@@ -106,13 +107,13 @@ class _PointHistoryScreenState extends State<PointHistoryScreen> {
                 padding: const EdgeInsets.all(16.0),
                 children: [
                   // 1. Current Points Card Dashboard
-                  _buildPointsCard(),
+                  _buildPointsCard(l10n),
                   const SizedBox(height: 24.0),
 
                   // 2. Timeline Title
-                  const Text(
-                    '상세 이용 내역',
-                    style: TextStyle(
+                  Text(
+                    l10n?.pointDetailHistory ?? '상세 이용 내역',
+                    style: const TextStyle(
                       fontSize: 16.0,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
@@ -122,12 +123,12 @@ class _PointHistoryScreenState extends State<PointHistoryScreen> {
 
                   // 3. Point History Timeline List
                   if (_histories.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 48.0),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 48.0),
                       child: Center(
                         child: Text(
-                          '아직 포인트 거래 내역이 없습니다.',
-                          style: TextStyle(color: AppColors.textSecondary),
+                          l10n?.pointNoTransactions ?? '아직 포인트 거래 내역이 없습니다.',
+                          style: const TextStyle(color: AppColors.textSecondary),
                         ),
                       ),
                     )
@@ -139,7 +140,7 @@ class _PointHistoryScreenState extends State<PointHistoryScreen> {
     );
   }
 
-  Widget _buildPointsCard() {
+  Widget _buildPointsCard(AppLocalizations? l10n) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24.0),
@@ -161,8 +162,8 @@ class _PointHistoryScreenState extends State<PointHistoryScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '사용 가능한 포인트',
+          Text(
+            l10n?.pointAvailableBalance ?? '사용 가능한 포인트',
             style: TextStyle(
               color: Colors.white70,
               fontSize: 13.0,
@@ -269,8 +270,8 @@ class _PointHistoryScreenState extends State<PointHistoryScreen> {
                   );
                 },
                 icon: const Icon(Icons.add_circle, color: Colors.white, size: 18),
-                label: const Text(
-                  '포인트 충전하기',
+                label: Text(
+                  l10n?.pointChargeButton ?? '포인트 충전하기',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 13,

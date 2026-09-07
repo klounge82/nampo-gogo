@@ -1511,4 +1511,54 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noPaymentsHistory => 'No payment history found.';
+
+  @override
+  String get favoritesPlacesTab => 'Saved Places';
+
+  @override
+  String get favoritesCoursesTab => 'Saved AI Courses';
+
+  @override
+  String get favoritesNoPlaces => 'No saved places yet.';
+
+  @override
+  String get favoritesNoCourses => 'No saved AI courses yet.';
+
+  @override
+  String get favoritesAddPlacesHint =>
+      'Add places you like using the heart icon.';
+
+  @override
+  String get favoritesAddCoursesHint =>
+      'Save courses from the AI course details page.';
+
+  @override
+  String get pointAvailableBalance => 'Available Points';
+
+  @override
+  String get pointChargeButton => 'Charge Points';
+
+  @override
+  String get pointDetailHistory => 'Transaction Details';
+
+  @override
+  String get pointNoTransactions => 'No point transactions found.';
+
+  @override
+  String get pointGiftButton => 'Gift Points';
+
+  @override
+  String get pointStoreTitle => 'Point Store';
+
+  @override
+  String get retryButton => 'Retry';
+
+  @override
+  String get errorOccurred => 'An error occurred';
+
+  @override
+  String get aiRecommendTag => 'AI Recommended';
+
+  @override
+  String get popularPlaceTag => 'Popular Spot';
 }

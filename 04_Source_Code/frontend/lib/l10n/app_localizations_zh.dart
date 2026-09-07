@@ -1448,6 +1448,54 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get noPaymentsHistory => '暂无支付及使用记录。';
+
+  @override
+  String get favoritesPlacesTab => '收藏地点';
+
+  @override
+  String get favoritesCoursesTab => '收藏AI路线';
+
+  @override
+  String get favoritesNoPlaces => '暂无收藏地点。';
+
+  @override
+  String get favoritesNoCourses => '暂无收藏的推荐路线。';
+
+  @override
+  String get favoritesAddPlacesHint => '点击心形按钮添加感兴趣的地点。';
+
+  @override
+  String get favoritesAddCoursesHint => '可在推荐路线详情中点击“保存路线”进行添加。';
+
+  @override
+  String get pointAvailableBalance => '可用积分';
+
+  @override
+  String get pointChargeButton => '充值积分';
+
+  @override
+  String get pointDetailHistory => '明细记录';
+
+  @override
+  String get pointNoTransactions => '暂无积分交易明细。';
+
+  @override
+  String get pointGiftButton => '赠送积分';
+
+  @override
+  String get pointStoreTitle => '积分商城';
+
+  @override
+  String get retryButton => '重试';
+
+  @override
+  String get errorOccurred => '发生错误';
+
+  @override
+  String get aiRecommendTag => 'AI推荐';
+
+  @override
+  String get popularPlaceTag => '热门名胜';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -2894,4 +2942,52 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get noPaymentsHistory => '暂无支付及使用记录。';
+
+  @override
+  String get favoritesPlacesTab => '收藏地点';
+
+  @override
+  String get favoritesCoursesTab => '收藏AI路线';
+
+  @override
+  String get favoritesNoPlaces => '暂无收藏地点。';
+
+  @override
+  String get favoritesNoCourses => '暂无收藏的推荐路线。';
+
+  @override
+  String get favoritesAddPlacesHint => '点击心形按钮添加感兴趣的地点。';
+
+  @override
+  String get favoritesAddCoursesHint => '可在推荐路线详情中点击“保存路线”进行添加。';
+
+  @override
+  String get pointAvailableBalance => '可用积分';
+
+  @override
+  String get pointChargeButton => '充值积分';
+
+  @override
+  String get pointDetailHistory => '明细记录';
+
+  @override
+  String get pointNoTransactions => '暂无积分交易明细。';
+
+  @override
+  String get pointGiftButton => '赠送积分';
+
+  @override
+  String get pointStoreTitle => '积分商城';
+
+  @override
+  String get retryButton => '重试';
+
+  @override
+  String get errorOccurred => '发生错误';
+
+  @override
+  String get aiRecommendTag => 'AI推荐';
+
+  @override
+  String get popularPlaceTag => '热门名胜';
 }

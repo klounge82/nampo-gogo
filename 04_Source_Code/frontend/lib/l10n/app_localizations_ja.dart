@@ -389,7 +389,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get placeUnit => 'スポット';
 
   @override
-  String get pointHistoryTitle => 'ポイント履歴';
+  String get pointHistoryTitle => 'ポイント利用履歴';
 
   @override
   String get pointWelcomeBonus => '会員登録特典ポイント';
@@ -1458,4 +1458,52 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get noPaymentsHistory => '決済および利用履歴がありません。';
+
+  @override
+  String get favoritesPlacesTab => 'お気に入りの場所';
+
+  @override
+  String get favoritesCoursesTab => 'お気に入りAIコース';
+
+  @override
+  String get favoritesNoPlaces => '保存された場所はありません。';
+
+  @override
+  String get favoritesNoCourses => '保存されたおすすめコースはありません。';
+
+  @override
+  String get favoritesAddPlacesHint => 'ハートボタンでお気に入りの場所を追加してみましょう。';
+
+  @override
+  String get favoritesAddCoursesHint => 'おすすめコース詳細の「コースを保存」から追加できます。';
+
+  @override
+  String get pointAvailableBalance => '利用可能ポイント';
+
+  @override
+  String get pointChargeButton => 'ポイントチャージ';
+
+  @override
+  String get pointDetailHistory => '詳細利用履歴';
+
+  @override
+  String get pointNoTransactions => 'ポイント取引履歴がありません。';
+
+  @override
+  String get pointGiftButton => 'ポイントギフト';
+
+  @override
+  String get pointStoreTitle => 'ポイントストア';
+
+  @override
+  String get retryButton => '再試行';
+
+  @override
+  String get errorOccurred => 'エラーが発生しました';
+
+  @override
+  String get aiRecommendTag => 'AIおすすめ';
+
+  @override
+  String get popularPlaceTag => '人気スポット';
 }
