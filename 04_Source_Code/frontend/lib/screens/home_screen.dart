@@ -66,17 +66,18 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final localeCode = Localizations.localeOf(context).languageCode;
 
     // Convert Place list to Recommendation list for UI rendering if places exist
     final recommendationsToDisplay = _places.isNotEmpty
         ? _places.map((p) => Recommendation(
             id: p.id,
-            name: p.name,
+            name: p.localizedName(localeCode),
             category: p.category,
             rating: p.rating,
-            address: p.address,
-            description: p.description,
-            tags: const ['AI 추천', '남포동 명소'],
+            address: p.localizedAddress(localeCode),
+            description: p.localizedDescription(localeCode),
+            tags: [l10n.tagAiRecommend, l10n.tagNampoSpot],
           )).toList()
         : MockData.recommendations;
 
