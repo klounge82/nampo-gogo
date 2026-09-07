@@ -68,7 +68,12 @@ jobs:
         run: |
           flutter build apk --release \
             --dart-define=APP_ENV=staging \
-            --dart-define=API_BASE_URL=https://backend-staging-f18f.up.railway.app
+            --dart-define=API_BASE_URL=https://backend-staging-f18f.up.railway.app > build_output.log 2>&1 || {
+              ERR=$(tail -n 20 build_output.log | tr '\n' ' ')
+              echo "::error title=Flutter Build Error::$ERR"
+              cat build_output.log
+              exit 1
+            }
 
       - name: Upload APK Artifact
         if: success()
