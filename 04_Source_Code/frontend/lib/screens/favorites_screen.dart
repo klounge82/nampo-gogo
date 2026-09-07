@@ -19,6 +19,17 @@ class _FavoritesScreenState extends State<FavoritesScreen>
     with SingleTickerProviderStateMixin {
   AppLocalizations? get l10n => AppLocalizations.of(context);
   late TabController _tabController;
+  String? _lastLocaleCode;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final currentLoc = context.watch<LocaleProvider>().currentLocaleCode;
+    if (_lastLocaleCode != currentLoc) {
+      _lastLocaleCode = currentLoc;
+      _refreshList();
+    }
+  }
 
   @override
   void initState() {

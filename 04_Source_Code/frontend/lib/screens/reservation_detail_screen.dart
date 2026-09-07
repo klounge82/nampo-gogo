@@ -5,6 +5,7 @@ import '../constants/colors.dart';
 import '../models/reservation.dart';
 import '../repositories/reservation_repository.dart';
 import '../providers/auth_provider.dart';
+import '../providers/locale_provider.dart';
 import '../utils/reservation_status_helper.dart';
 import '../widgets/reservation_qr_widget.dart';
 import 'payment_screen.dart';
@@ -25,6 +26,17 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
   Reservation? _reservation;
   bool _isLoading = true;
   String? _errorMessage;
+  String? _lastLocaleCode;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final currentLoc = context.watch<LocaleProvider>().currentLocaleCode;
+    if (_lastLocaleCode != currentLoc) {
+      _lastLocaleCode = currentLoc;
+      _loadReservationDetail();
+    }
+  }
 
   @override
   void initState() {
@@ -241,13 +253,14 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
                       height: 48.0,
                       child: ElevatedButton.icon(
                         onPressed: () {
+                          final locCode = context.read<LocaleProvider>().currentLocaleCode;
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (_) => PaymentScreen(
                                 amount: 15000,
                                 targetType: 'RESERVATION_DEPOSIT',
                                 targetId: res.id,
-                                targetName: '${res.store.name} 예약 보증금 결제',
+                                targetName: '${res.store.localizedName(locCode)} 예약 보증금 결제',
                               ),
                             ),
                           );
@@ -378,6 +391,7 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
 
   Widget _buildTicketCard(Reservation res, String timeStr) {
     final formattedCode = ReservationStatusHelper.formatReservationCode(res.id);
+    final localeCode = context.watch<LocaleProvider>().currentLocaleCode;
 
     return Container(
       width: double.infinity,
@@ -403,7 +417,7 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
                       ),
                     ),
                     Text(
-                      res.store.name,
+                      res.store.localizedName(localeCode),
                       style: const TextStyle(
                         fontSize: 14.0,
                         fontWeight: FontWeight.bold,
@@ -521,6 +535,7 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
   }
 
   Widget _buildAddressCard(Reservation res) {
+    final localeCode = context.watch<LocaleProvider>().currentLocaleCode;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16.0),
@@ -542,7 +557,7 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
               const SizedBox(width: 8.0),
               Expanded(
                 child: Text(
-                  res.store.address,
+                  res.store.localizedAddress(localeCode),
                   style: const TextStyle(
                     fontSize: 13.0,
                     fontWeight: FontWeight.w500,

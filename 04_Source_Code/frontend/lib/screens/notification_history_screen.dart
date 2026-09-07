@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/notification_provider.dart';
 import '../providers/auth_provider.dart';
+import '../l10n/app_localizations.dart';
 import 'notification_router.dart';
 
 class NotificationHistoryScreen extends StatefulWidget {
@@ -13,6 +14,8 @@ class NotificationHistoryScreen extends StatefulWidget {
 }
 
 class _NotificationHistoryScreenState extends State<NotificationHistoryScreen> {
+  AppLocalizations? get l10n => AppLocalizations.of(context);
+
   @override
   void initState() {
     super.initState();
@@ -33,9 +36,9 @@ class _NotificationHistoryScreenState extends State<NotificationHistoryScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF6F9FC),
       appBar: AppBar(
-        title: const Text(
-          '알림 센터',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
+        title: Text(
+          l10n?.notificationPushTitle ?? '알림 센터',
+          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
         ),
         backgroundColor: Colors.white,
         elevation: 0.5,
@@ -71,9 +74,9 @@ class _NotificationHistoryScreenState extends State<NotificationHistoryScreen> {
                     color: Colors.grey[400],
                   ),
                   const SizedBox(height: 16),
-                  Text(
+                  const Text(
                     '새로운 알림이 없습니다.',
-                    style: TextStyle(color: Colors.grey[600], fontSize: 15),
+                    style: TextStyle(color: Color(0xFF757575), fontSize: 15),
                   ),
                 ],
               ),
@@ -143,7 +146,7 @@ class _NotificationHistoryScreenState extends State<NotificationHistoryScreen> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    _getTypeLabel(item.type),
+                                    _getTypeLabel(item.type, l10n),
                                     style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,
@@ -243,22 +246,22 @@ class _NotificationHistoryScreenState extends State<NotificationHistoryScreen> {
     }
   }
 
-  String _getTypeLabel(String type) {
+  String _getTypeLabel(String type, AppLocalizations? l10n) {
     switch (type) {
       case 'RESERVATION':
-        return '예약';
+        return l10n?.activityReservationTitle ?? '예약';
       case 'MISSION':
-        return '미션';
+        return l10n?.activityMissionTitle ?? '미션';
       case 'POINT':
-        return '포인트';
+        return l10n?.notifPointTitle ?? '포인트';
       case 'COUPON':
-        return '쿠폰';
+        return l10n?.notifCouponTitle ?? '쿠폰';
       case 'AI':
-        return 'AI 추천';
+        return l10n?.notifAiTitle ?? 'AI 추천';
       case 'MARKETING':
-        return '이벤트/마케팅';
+        return l10n?.notifMarketingTitle ?? '이벤트/마케팅';
       default:
-        return '공지';
+        return l10n?.notifSystemTitle ?? '공지';
     }
   }
 

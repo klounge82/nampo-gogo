@@ -51,6 +51,18 @@ class _SavedCoursesListViewState extends State<SavedCoursesListView> {
   bool _isLoading = true;
   String? _errorMessage;
 
+  String? _lastLocaleCode;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final currentLoc = context.watch<LocaleProvider>().currentLocaleCode;
+    if (_lastLocaleCode != currentLoc) {
+      _lastLocaleCode = currentLoc;
+      _loadHistory();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -367,6 +379,7 @@ class _SavedCoursesListViewState extends State<SavedCoursesListView> {
 
   Widget _buildCourseCard(RecommendationModel course) {
     final l10n = AppLocalizations.of(context);
+    final localeCode = context.watch<LocaleProvider>().currentLocaleCode;
     final dateStr =
         '${course.createdAt.year}.${course.createdAt.month.toString().padLeft(2, '0')}.${course.createdAt.day.toString().padLeft(2, '0')}';
 
@@ -396,7 +409,7 @@ class _SavedCoursesListViewState extends State<SavedCoursesListView> {
         ) ??
         '$placeCount개 장소 · ${totalDist.toStringAsFixed(1)}km · 약 ${totalTimeMin}분';
     final placeNames = course.items.isNotEmpty
-        ? course.items.map((i) => i.store.name).join(' → ')
+        ? course.items.map((i) => i.store.localizedName(localeCode)).join(' → ')
         : (l10n?.recommendedPlaceCourse ?? '추천 장소 구성 코스');
 
     return Container(

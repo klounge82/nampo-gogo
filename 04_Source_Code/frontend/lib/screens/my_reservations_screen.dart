@@ -4,6 +4,7 @@ import '../constants/colors.dart';
 import '../models/reservation.dart';
 import '../repositories/reservation_repository.dart';
 import '../providers/auth_provider.dart';
+import '../providers/locale_provider.dart';
 import '../utils/reservation_status_helper.dart';
 import '../l10n/app_localizations.dart';
 import 'reservation_detail_screen.dart';
@@ -24,6 +25,17 @@ class _MyReservationsScreenState extends State<MyReservationsScreen>
   List<Reservation> _pastReservations = [];
   bool _isLoading = true;
   String? _errorMessage;
+  String? _lastLocaleCode;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final currentLoc = context.watch<LocaleProvider>().currentLocaleCode;
+    if (_lastLocaleCode != currentLoc) {
+      _lastLocaleCode = currentLoc;
+      _loadReservations();
+    }
+  }
 
   @override
   void initState() {
@@ -173,6 +185,7 @@ class _MyReservationsScreenState extends State<MyReservationsScreen>
 
   Widget _buildReservationCard(Reservation res) {
     final l10n = AppLocalizations.of(context);
+    final localeCode = context.watch<LocaleProvider>().currentLocaleCode;
     final timeStr =
         '${res.reservationTime.year}.${res.reservationTime.month.toString().padLeft(2, '0')}.${res.reservationTime.day.toString().padLeft(2, '0')} ${res.reservationTime.hour.toString().padLeft(2, '0')}:${res.reservationTime.minute.toString().padLeft(2, '0')}';
 
@@ -226,7 +239,7 @@ class _MyReservationsScreenState extends State<MyReservationsScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      res.store.name,
+                      res.store.localizedName(localeCode),
                       style: const TextStyle(
                         fontSize: 15.0,
                         fontWeight: FontWeight.bold,

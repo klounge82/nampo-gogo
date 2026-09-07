@@ -105,7 +105,9 @@ class MissionRepository {
     String? dJa = m.descriptionJa;
 
     if (loc.contains('zh')) {
-      if (isMis1) {
+      if (tZh != null && tZh.trim().isNotEmpty) {
+        title = tZh;
+      } else if (isMis1) {
         title = 'BIFF广场糖饼认证！';
         description = '购买BIFF广场坚果糖饼并拍照认证打卡。';
         reward = '坚果糖饼9折优惠券';
@@ -130,10 +132,15 @@ class MissionRepository {
         description = '在甘浦路 100m 范围内验证 GPS 位置。';
         reward = '100P';
       }
+      if (dZh != null && dZh.trim().isNotEmpty) {
+        description = dZh;
+      }
       tZh = title;
       dZh = description;
     } else if (loc.contains('en')) {
-      if (isMis1) {
+      if (tEn != null && tEn.trim().isNotEmpty) {
+        title = tEn;
+      } else if (isMis1) {
         title = 'BIFF Square Ssiat Hotteok Verification!';
         description = 'Buy Ssiat Hotteok at BIFF Square and upload a photo to verify.';
         reward = '10% Off Hotteok Coupon';
@@ -158,10 +165,15 @@ class MissionRepository {
         description = 'Verify your GPS location within 100m of Gampo-ro.';
         reward = '100P';
       }
+      if (dEn != null && dEn.trim().isNotEmpty) {
+        description = dEn;
+      }
       tEn = title;
       dEn = description;
     } else if (loc.contains('ja')) {
-      if (isMis1) {
+      if (tJa != null && tJa.trim().isNotEmpty) {
+        title = tJa;
+      } else if (isMis1) {
         title = 'BIFF広場ホットク認証！';
         description = 'BIFF広場でシアホットクを購入し写真を撮影して認証してください。';
         reward = 'ホットク10%割引クーポン';
@@ -185,6 +197,9 @@ class MissionRepository {
         title = '[QA] 甘浦路 GPS テストポイント';
         description = '甘浦路の 100m 以内で GPS 位置を検証します。';
         reward = '100P';
+      }
+      if (dJa != null && dJa.trim().isNotEmpty) {
+        description = dJa;
       }
       tJa = title;
       dJa = description;

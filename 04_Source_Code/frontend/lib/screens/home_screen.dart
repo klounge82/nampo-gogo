@@ -41,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final currentLoc = context.read<LocaleProvider>().currentLocaleCode;
+    final currentLoc = context.watch<LocaleProvider>().currentLocaleCode;
     if (_lastLocaleCode != currentLoc) {
       _lastLocaleCode = currentLoc;
       _loadDynamicData();

@@ -17,6 +17,7 @@ import 'package:frontend/providers/auth_provider.dart';
 import 'package:frontend/providers/favorite_provider.dart';
 import 'package:frontend/providers/notification_provider.dart';
 import 'package:frontend/providers/app_mode_provider.dart';
+import 'package:frontend/models/notification_model.dart';
 import 'package:frontend/utils/l10n_mappers.dart';
 
 void main() {

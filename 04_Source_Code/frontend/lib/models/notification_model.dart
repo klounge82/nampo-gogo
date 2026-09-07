@@ -65,7 +65,7 @@ class NotificationPreferenceModel {
   final bool eventEnabled;
   final bool marketingConsent;
 
-  NotificationPreferenceModel({
+  const NotificationPreferenceModel({
     required this.userId,
     required this.reservationEnabled,
     required this.missionEnabled,
