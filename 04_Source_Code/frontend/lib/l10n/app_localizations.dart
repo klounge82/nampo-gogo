@@ -586,7 +586,7 @@ abstract class AppLocalizations {
   /// No description provided for @errorNetwork.
   ///
   /// In ko, this message translates to:
-  /// **'네트워크 연결이 불안정합니다. 다시 시도해 주세요.'**
+  /// **'네트워크 연결 상태를 확인해주세요.'**
   String get errorNetwork;
 
   /// No description provided for @estTime.
@@ -2800,13 +2800,13 @@ abstract class AppLocalizations {
   /// No description provided for @couponStatusUsed.
   ///
   /// In ko, this message translates to:
-  /// **'사용완료'**
+  /// **'사용 완료'**
   String get couponStatusUsed;
 
   /// No description provided for @couponStatusExpired.
   ///
   /// In ko, this message translates to:
-  /// **'기간만료'**
+  /// **'기간 만료'**
   String get couponStatusExpired;
 
   /// No description provided for @couponExchangeAvailable.
@@ -2988,6 +2988,420 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'인기 명소'**
   String get popularPlaceTag;
+
+  /// No description provided for @activitySignupTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'회원가입 완료'**
+  String get activitySignupTitle;
+
+  /// No description provided for @activitySignupDescription.
+  ///
+  /// In ko, this message translates to:
+  /// **'남포 GoGo 가입을 진심으로 축하드립니다!'**
+  String get activitySignupDescription;
+
+  /// No description provided for @activityMissionTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'미션 완료'**
+  String get activityMissionTitle;
+
+  /// No description provided for @activityMissionDescription.
+  ///
+  /// In ko, this message translates to:
+  /// **'탐방 인증 미션을 성공적으로 완료하셨습니다.'**
+  String get activityMissionDescription;
+
+  /// No description provided for @activityCouponTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'쿠폰 발급 및 사용'**
+  String get activityCouponTitle;
+
+  /// No description provided for @activityCouponDescription.
+  ///
+  /// In ko, this message translates to:
+  /// **'제휴 가맹점 쿠폰 혜택이 적용되었습니다.'**
+  String get activityCouponDescription;
+
+  /// No description provided for @activityPointTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'포인트 변동'**
+  String get activityPointTitle;
+
+  /// No description provided for @activityPointDescription.
+  ///
+  /// In ko, this message translates to:
+  /// **'남포 GoGo 포인트가 변동되었습니다.'**
+  String get activityPointDescription;
+
+  /// No description provided for @activityReviewTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'리뷰 작성'**
+  String get activityReviewTitle;
+
+  /// No description provided for @activityReviewDescription.
+  ///
+  /// In ko, this message translates to:
+  /// **'소중한 방문 후기를 작성해주셨습니다.'**
+  String get activityReviewDescription;
+
+  /// No description provided for @activityReservationTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'예약 알림'**
+  String get activityReservationTitle;
+
+  /// No description provided for @activityReservationDescription.
+  ///
+  /// In ko, this message translates to:
+  /// **'매장 예약 상태가 변경되었습니다.'**
+  String get activityReservationDescription;
+
+  /// No description provided for @activityFavoriteTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'즐겨찾기'**
+  String get activityFavoriteTitle;
+
+  /// No description provided for @activityFavoriteDescription.
+  ///
+  /// In ko, this message translates to:
+  /// **'관심 거점을 즐겨찾기에 등록하셨습니다.'**
+  String get activityFavoriteDescription;
+
+  /// No description provided for @pointTxSignupBonus.
+  ///
+  /// In ko, this message translates to:
+  /// **'신규 회원가입 축하 포인트'**
+  String get pointTxSignupBonus;
+
+  /// No description provided for @pointTxMissionReward.
+  ///
+  /// In ko, this message translates to:
+  /// **'미션 완료 보상'**
+  String get pointTxMissionReward;
+
+  /// No description provided for @pointTxCouponExchange.
+  ///
+  /// In ko, this message translates to:
+  /// **'쿠폰 교환 차감'**
+  String get pointTxCouponExchange;
+
+  /// No description provided for @pointTxCouponUse.
+  ///
+  /// In ko, this message translates to:
+  /// **'쿠폰 사용'**
+  String get pointTxCouponUse;
+
+  /// No description provided for @pointTxGiftSend.
+  ///
+  /// In ko, this message translates to:
+  /// **'포인트 선물 보내기'**
+  String get pointTxGiftSend;
+
+  /// No description provided for @pointTxGiftReceive.
+  ///
+  /// In ko, this message translates to:
+  /// **'포인트 선물 수령'**
+  String get pointTxGiftReceive;
+
+  /// No description provided for @pointTxGiftCancel.
+  ///
+  /// In ko, this message translates to:
+  /// **'포인트 선물 취소 환급'**
+  String get pointTxGiftCancel;
+
+  /// No description provided for @pointTxAttendance.
+  ///
+  /// In ko, this message translates to:
+  /// **'출석 체크 보상'**
+  String get pointTxAttendance;
+
+  /// No description provided for @pointTxReviewReward.
+  ///
+  /// In ko, this message translates to:
+  /// **'방문 리뷰 작성 보상'**
+  String get pointTxReviewReward;
+
+  /// No description provided for @pointTxAdminAdjustment.
+  ///
+  /// In ko, this message translates to:
+  /// **'관리자 지급/조정'**
+  String get pointTxAdminAdjustment;
+
+  /// No description provided for @pointTxCharge.
+  ///
+  /// In ko, this message translates to:
+  /// **'포인트 충전'**
+  String get pointTxCharge;
+
+  /// No description provided for @pointTxSpend.
+  ///
+  /// In ko, this message translates to:
+  /// **'포인트 사용'**
+  String get pointTxSpend;
+
+  /// No description provided for @pointTxEarn.
+  ///
+  /// In ko, this message translates to:
+  /// **'포인트 적립'**
+  String get pointTxEarn;
+
+  /// No description provided for @pointTxGeneral.
+  ///
+  /// In ko, this message translates to:
+  /// **'포인트 거래 내역'**
+  String get pointTxGeneral;
+
+  /// No description provided for @couponBiffHotteokTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'BIFF 광장 씨앗호떡 1개 교환권'**
+  String get couponBiffHotteokTitle;
+
+  /// No description provided for @couponBiffHotteokDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'남포동 BIFF 광장 협약 포장마차에서 맛있는 씨앗호떡 1개로 교환 가능합니다.'**
+  String get couponBiffHotteokDesc;
+
+  /// No description provided for @couponCafeAmericanoTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'남포동 명가 아메리카노 1잔 교환권'**
+  String get couponCafeAmericanoTitle;
+
+  /// No description provided for @couponCafeAmericanoDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'남포동 골목 안쪽에 위치한 분위기 좋은 명가 카페에서 아메리카노(HOT/ICE) 1잔과 교환 가능합니다.'**
+  String get couponCafeAmericanoDesc;
+
+  /// No description provided for @couponJagalchiDiscountTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'자갈치시장 신선횟집 10% 식사 할인권'**
+  String get couponJagalchiDiscountTitle;
+
+  /// No description provided for @couponJagalchiDiscountDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'자갈치시장 지정 협약 식당에서 식사류 및 활어회 메뉴 주문 시 결제 금액의 10%를 즉시 할인받을 수 있습니다.'**
+  String get couponJagalchiDiscountDesc;
+
+  /// No description provided for @couponStatusUnused.
+  ///
+  /// In ko, this message translates to:
+  /// **'사용 가능'**
+  String get couponStatusUnused;
+
+  /// No description provided for @couponUseAction.
+  ///
+  /// In ko, this message translates to:
+  /// **'쿠폰 사용하기'**
+  String get couponUseAction;
+
+  /// No description provided for @couponUsedDate.
+  ///
+  /// In ko, this message translates to:
+  /// **'사용일시: {date}'**
+  String couponUsedDate(String date);
+
+  /// No description provided for @couponExpiryDate.
+  ///
+  /// In ko, this message translates to:
+  /// **'유효기간: {date} 까지'**
+  String couponExpiryDate(String date);
+
+  /// No description provided for @couponCostPoints.
+  ///
+  /// In ko, this message translates to:
+  /// **'{points}P 교환'**
+  String couponCostPoints(String points);
+
+  /// No description provided for @couponExchangeConfirm.
+  ///
+  /// In ko, this message translates to:
+  /// **'이 쿠폰을 교환하시겠습니까?'**
+  String get couponExchangeConfirm;
+
+  /// No description provided for @couponExchangeSuccess.
+  ///
+  /// In ko, this message translates to:
+  /// **'쿠폰이 성공적으로 발급되었습니다.'**
+  String get couponExchangeSuccess;
+
+  /// No description provided for @couponDetailTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'쿠폰 상세 정보'**
+  String get couponDetailTitle;
+
+  /// No description provided for @couponNoCoupons.
+  ///
+  /// In ko, this message translates to:
+  /// **'보유하신 쿠폰이 없습니다.'**
+  String get couponNoCoupons;
+
+  /// No description provided for @couponAvailableTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'사용 가능한 쿠폰'**
+  String get couponAvailableTitle;
+
+  /// No description provided for @couponUsedTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'사용 완료 및 만료'**
+  String get couponUsedTitle;
+
+  /// No description provided for @savedPlacesTab.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장한 장소'**
+  String get savedPlacesTab;
+
+  /// No description provided for @savedCoursesTab.
+  ///
+  /// In ko, this message translates to:
+  /// **'추천 코스'**
+  String get savedCoursesTab;
+
+  /// No description provided for @favoritesEmptyTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장된 장소가 없습니다.'**
+  String get favoritesEmptyTitle;
+
+  /// No description provided for @favoritesEmptySubtitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'마음에 드는 남포동 명소를 즐겨찾기에 추가해보세요!'**
+  String get favoritesEmptySubtitle;
+
+  /// No description provided for @savedCoursesEmptyTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장된 코스가 없습니다.'**
+  String get savedCoursesEmptyTitle;
+
+  /// No description provided for @savedCoursesEmptySubtitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'나만의 여행 코스를 탐색하고 저장해보세요!'**
+  String get savedCoursesEmptySubtitle;
+
+  /// No description provided for @reservationDetailTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'예약 상세 내역'**
+  String get reservationDetailTitle;
+
+  /// No description provided for @reservationNumber.
+  ///
+  /// In ko, this message translates to:
+  /// **'예약 번호'**
+  String get reservationNumber;
+
+  /// No description provided for @reservationDate.
+  ///
+  /// In ko, this message translates to:
+  /// **'예약 일시'**
+  String get reservationDate;
+
+  /// No description provided for @reservationPartySize.
+  ///
+  /// In ko, this message translates to:
+  /// **'방문 인원'**
+  String get reservationPartySize;
+
+  /// No description provided for @reservationCancelAction.
+  ///
+  /// In ko, this message translates to:
+  /// **'예약 취소'**
+  String get reservationCancelAction;
+
+  /// No description provided for @reservationCancelSuccess.
+  ///
+  /// In ko, this message translates to:
+  /// **'예약이 성공적으로 취소되었습니다.'**
+  String get reservationCancelSuccess;
+
+  /// No description provided for @reservationEmptyTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'예약 내역이 없습니다.'**
+  String get reservationEmptyTitle;
+
+  /// No description provided for @notificationPushTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'푸시 알림'**
+  String get notificationPushTitle;
+
+  /// No description provided for @notificationMarketingTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'마케팅 혜택 알림'**
+  String get notificationMarketingTitle;
+
+  /// No description provided for @notificationMissionTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'주변 미션 알림'**
+  String get notificationMissionTitle;
+
+  /// No description provided for @notificationEmpty.
+  ///
+  /// In ko, this message translates to:
+  /// **'새로운 알림이 없습니다.'**
+  String get notificationEmpty;
+
+  /// No description provided for @errorServer.
+  ///
+  /// In ko, this message translates to:
+  /// **'서버 통신 중 오류가 발생했습니다.'**
+  String get errorServer;
+
+  /// No description provided for @errorAuthFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'로그인 정보가 올바르지 않거나 만료되었습니다.'**
+  String get errorAuthFailed;
+
+  /// No description provided for @retryAction.
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 시도'**
+  String get retryAction;
+
+  /// No description provided for @confirmAction.
+  ///
+  /// In ko, this message translates to:
+  /// **'확인'**
+  String get confirmAction;
+
+  /// No description provided for @cancelAction.
+  ///
+  /// In ko, this message translates to:
+  /// **'취소'**
+  String get cancelAction;
+
+  /// No description provided for @deleteAction.
+  ///
+  /// In ko, this message translates to:
+  /// **'삭제'**
+  String get deleteAction;
+
+  /// No description provided for @saveAction.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장'**
+  String get saveAction;
 }
 
 class _AppLocalizationsDelegate

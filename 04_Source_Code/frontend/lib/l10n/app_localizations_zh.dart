@@ -249,7 +249,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get emptySearch => '未找到搜索结果。';
 
   @override
-  String get errorNetwork => '网络连接失败，请稍后再试。';
+  String get errorNetwork => '请检查您的网络连接。';
 
   @override
   String get estTime => '预计所需时间';
@@ -1496,6 +1496,219 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get popularPlaceTag => '热门名胜';
+
+  @override
+  String get activitySignupTitle => '注册完成';
+
+  @override
+  String get activitySignupDescription => '衷心欢迎您加入南浦GoGo！';
+
+  @override
+  String get activityMissionTitle => '任务完成';
+
+  @override
+  String get activityMissionDescription => '您已成功完成探访打卡任务。';
+
+  @override
+  String get activityCouponTitle => '优惠券发放与使用';
+
+  @override
+  String get activityCouponDescription => '合作商家优惠券优惠已成功生效。';
+
+  @override
+  String get activityPointTitle => '积分变动';
+
+  @override
+  String get activityPointDescription => '您的南浦GoGo积分已更新。';
+
+  @override
+  String get activityReviewTitle => '发布评价';
+
+  @override
+  String get activityReviewDescription => '感谢您提交宝贵的探店评价。';
+
+  @override
+  String get activityReservationTitle => '预约通知';
+
+  @override
+  String get activityReservationDescription => '您的店铺预约状态已更新。';
+
+  @override
+  String get activityFavoriteTitle => '收藏夹';
+
+  @override
+  String get activityFavoriteDescription => '您已成功收藏关注的名胜地点。';
+
+  @override
+  String get pointTxSignupBonus => '新用户注册欢迎积分';
+
+  @override
+  String get pointTxMissionReward => '打卡任务完成奖励';
+
+  @override
+  String get pointTxCouponExchange => '兑换优惠券积分扣除';
+
+  @override
+  String get pointTxCouponUse => '优惠券核销使用';
+
+  @override
+  String get pointTxGiftSend => '赠送积分礼品';
+
+  @override
+  String get pointTxGiftReceive => '收到积分礼品';
+
+  @override
+  String get pointTxGiftCancel => '取消赠送积分退回';
+
+  @override
+  String get pointTxAttendance => '每日签到奖励';
+
+  @override
+  String get pointTxReviewReward => '到店评价奖励';
+
+  @override
+  String get pointTxAdminAdjustment => '管理员调整/发放';
+
+  @override
+  String get pointTxCharge => '积分充值';
+
+  @override
+  String get pointTxSpend => '积分消费';
+
+  @override
+  String get pointTxEarn => '积分获得';
+
+  @override
+  String get pointTxGeneral => '积分交易记录';
+
+  @override
+  String get couponBiffHotteokTitle => 'BIFF广场 葵花籽糖饼 1个 兑换券';
+
+  @override
+  String get couponBiffHotteokDesc => '可在南浦洞BIFF广场合作摊位兑换美味香酥的葵花籽糖饼1个。';
+
+  @override
+  String get couponCafeAmericanoTitle => '南浦名家 美式咖啡 1杯 兑换券';
+
+  @override
+  String get couponCafeAmericanoDesc => '可在南浦洞胡同特色优质合作咖啡厅兑换美式咖啡(冷/热)1杯。';
+
+  @override
+  String get couponJagalchiDiscountTitle => '札嘎其市场 新鲜海鲜 10% 就餐折扣券';
+
+  @override
+  String get couponJagalchiDiscountDesc => '在札嘎其市场指定合作餐厅点餐就餐或品尝活鱼刺身时可立享9折优惠。';
+
+  @override
+  String get couponStatusUnused => '可使用';
+
+  @override
+  String get couponUseAction => '立即使用优惠券';
+
+  @override
+  String couponUsedDate(String date) {
+    return '使用时间: $date';
+  }
+
+  @override
+  String couponExpiryDate(String date) {
+    return '有效期至: $date';
+  }
+
+  @override
+  String couponCostPoints(String points) {
+    return '${points}P 兑换';
+  }
+
+  @override
+  String get couponExchangeConfirm => '确认兑换此优惠券吗？';
+
+  @override
+  String get couponExchangeSuccess => '优惠券兑换成功。';
+
+  @override
+  String get couponDetailTitle => '优惠券详情';
+
+  @override
+  String get couponNoCoupons => '暂无可用优惠券。';
+
+  @override
+  String get couponAvailableTitle => '可用优惠券';
+
+  @override
+  String get couponUsedTitle => '已使用及已过期';
+
+  @override
+  String get savedPlacesTab => '已收藏地点';
+
+  @override
+  String get savedCoursesTab => '推荐路线';
+
+  @override
+  String get favoritesEmptyTitle => '暂无收藏地点。';
+
+  @override
+  String get favoritesEmptySubtitle => '探索南浦洞精彩景点并加入您的收藏夹吧！';
+
+  @override
+  String get savedCoursesEmptyTitle => '暂无收藏路线。';
+
+  @override
+  String get savedCoursesEmptySubtitle => '发现并保存专属于您的个性化旅行路线！';
+
+  @override
+  String get reservationDetailTitle => '预约详情';
+
+  @override
+  String get reservationNumber => '预约编号';
+
+  @override
+  String get reservationDate => '预约时间';
+
+  @override
+  String get reservationPartySize => '预约人数';
+
+  @override
+  String get reservationCancelAction => '取消预约';
+
+  @override
+  String get reservationCancelSuccess => '预约已成功取消。';
+
+  @override
+  String get reservationEmptyTitle => '暂无预约记录。';
+
+  @override
+  String get notificationPushTitle => '推送通知';
+
+  @override
+  String get notificationMarketingTitle => '优惠活动与福利通知';
+
+  @override
+  String get notificationMissionTitle => '附近打卡任务提醒';
+
+  @override
+  String get notificationEmpty => '暂无新通知。';
+
+  @override
+  String get errorServer => '服务器通信异常，请稍后重试。';
+
+  @override
+  String get errorAuthFailed => '登录凭证无效或已过期，请重新登录。';
+
+  @override
+  String get retryAction => '重试';
+
+  @override
+  String get confirmAction => '确认';
+
+  @override
+  String get cancelAction => '取消';
+
+  @override
+  String get deleteAction => '删除';
+
+  @override
+  String get saveAction => '保存';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1743,7 +1956,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get emptySearch => '未找到搜索结果。';
 
   @override
-  String get errorNetwork => '网络连接失败，请稍后再试。';
+  String get errorNetwork => '请检查您的网络连接。';
 
   @override
   String get estTime => '预计所需时间';
@@ -2990,4 +3203,217 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get popularPlaceTag => '热门名胜';
+
+  @override
+  String get activitySignupTitle => '注册完成';
+
+  @override
+  String get activitySignupDescription => '衷心欢迎您加入南浦GoGo！';
+
+  @override
+  String get activityMissionTitle => '任务完成';
+
+  @override
+  String get activityMissionDescription => '您已成功完成探访打卡任务。';
+
+  @override
+  String get activityCouponTitle => '优惠券发放与使用';
+
+  @override
+  String get activityCouponDescription => '合作商家优惠券优惠已成功生效。';
+
+  @override
+  String get activityPointTitle => '积分变动';
+
+  @override
+  String get activityPointDescription => '您的南浦GoGo积分已更新。';
+
+  @override
+  String get activityReviewTitle => '发布评价';
+
+  @override
+  String get activityReviewDescription => '感谢您提交宝贵的探店评价。';
+
+  @override
+  String get activityReservationTitle => '预约通知';
+
+  @override
+  String get activityReservationDescription => '您的店铺预约状态已更新。';
+
+  @override
+  String get activityFavoriteTitle => '收藏夹';
+
+  @override
+  String get activityFavoriteDescription => '您已成功收藏关注的名胜地点。';
+
+  @override
+  String get pointTxSignupBonus => '新用户注册欢迎积分';
+
+  @override
+  String get pointTxMissionReward => '打卡任务完成奖励';
+
+  @override
+  String get pointTxCouponExchange => '兑换优惠券积分扣除';
+
+  @override
+  String get pointTxCouponUse => '优惠券核销使用';
+
+  @override
+  String get pointTxGiftSend => '赠送积分礼品';
+
+  @override
+  String get pointTxGiftReceive => '收到积分礼品';
+
+  @override
+  String get pointTxGiftCancel => '取消赠送积分退回';
+
+  @override
+  String get pointTxAttendance => '每日签到奖励';
+
+  @override
+  String get pointTxReviewReward => '到店评价奖励';
+
+  @override
+  String get pointTxAdminAdjustment => '管理员调整/发放';
+
+  @override
+  String get pointTxCharge => '积分充值';
+
+  @override
+  String get pointTxSpend => '积分消费';
+
+  @override
+  String get pointTxEarn => '积分获得';
+
+  @override
+  String get pointTxGeneral => '积分交易记录';
+
+  @override
+  String get couponBiffHotteokTitle => 'BIFF广场 葵花籽糖饼 1个 兑换券';
+
+  @override
+  String get couponBiffHotteokDesc => '可在南浦洞BIFF广场合作摊位兑换美味香酥的葵花籽糖饼1个。';
+
+  @override
+  String get couponCafeAmericanoTitle => '南浦名家 美式咖啡 1杯 兑换券';
+
+  @override
+  String get couponCafeAmericanoDesc => '可在南浦洞胡同特色优质合作咖啡厅兑换美式咖啡(冷/热)1杯。';
+
+  @override
+  String get couponJagalchiDiscountTitle => '札嘎其市场 新鲜海鲜 10% 就餐折扣券';
+
+  @override
+  String get couponJagalchiDiscountDesc => '在札嘎其市场指定合作餐厅点餐就餐或品尝活鱼刺身时可立享9折优惠。';
+
+  @override
+  String get couponStatusUnused => '可使用';
+
+  @override
+  String get couponUseAction => '立即使用优惠券';
+
+  @override
+  String couponUsedDate(String date) {
+    return '使用时间: $date';
+  }
+
+  @override
+  String couponExpiryDate(String date) {
+    return '有效期至: $date';
+  }
+
+  @override
+  String couponCostPoints(String points) {
+    return '${points}P 兑换';
+  }
+
+  @override
+  String get couponExchangeConfirm => '确认兑换此优惠券吗？';
+
+  @override
+  String get couponExchangeSuccess => '优惠券兑换成功。';
+
+  @override
+  String get couponDetailTitle => '优惠券详情';
+
+  @override
+  String get couponNoCoupons => '暂无可用优惠券。';
+
+  @override
+  String get couponAvailableTitle => '可用优惠券';
+
+  @override
+  String get couponUsedTitle => '已使用及已过期';
+
+  @override
+  String get savedPlacesTab => '已收藏地点';
+
+  @override
+  String get savedCoursesTab => '推荐路线';
+
+  @override
+  String get favoritesEmptyTitle => '暂无收藏地点。';
+
+  @override
+  String get favoritesEmptySubtitle => '探索南浦洞精彩景点并加入您的收藏夹吧！';
+
+  @override
+  String get savedCoursesEmptyTitle => '暂无收藏路线。';
+
+  @override
+  String get savedCoursesEmptySubtitle => '发现并保存专属于您的个性化旅行路线！';
+
+  @override
+  String get reservationDetailTitle => '预约详情';
+
+  @override
+  String get reservationNumber => '预约编号';
+
+  @override
+  String get reservationDate => '预约时间';
+
+  @override
+  String get reservationPartySize => '预约人数';
+
+  @override
+  String get reservationCancelAction => '取消预约';
+
+  @override
+  String get reservationCancelSuccess => '预约已成功取消。';
+
+  @override
+  String get reservationEmptyTitle => '暂无预约记录。';
+
+  @override
+  String get notificationPushTitle => '推送通知';
+
+  @override
+  String get notificationMarketingTitle => '优惠活动与福利通知';
+
+  @override
+  String get notificationMissionTitle => '附近打卡任务提醒';
+
+  @override
+  String get notificationEmpty => '暂无新通知。';
+
+  @override
+  String get errorServer => '服务器通信异常，请稍后重试。';
+
+  @override
+  String get errorAuthFailed => '登录凭证无效或已过期，请重新登录。';
+
+  @override
+  String get retryAction => '重试';
+
+  @override
+  String get confirmAction => '确认';
+
+  @override
+  String get cancelAction => '取消';
+
+  @override
+  String get deleteAction => '删除';
+
+  @override
+  String get saveAction => '保存';
 }

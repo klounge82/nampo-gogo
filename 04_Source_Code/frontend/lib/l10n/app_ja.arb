@@ -80,7 +80,7 @@
   "emailInquiry": "メールでお問い合わせ",
   "emptyNoData": "表示するデータがありません。",
   "emptySearch": "検索結果がありません。",
-  "errorNetwork": "ネットワークエラーが発生しました。もう一度お試しください。",
+  "errorNetwork": "ネットワーク接続をご確認ください。",
   "estTime": "予想所要時間",
   "exchangeStore": "ポイント交換所",
   "exploreTitle": "探索",
@@ -504,8 +504,8 @@
   "activityThisMonth": "今月",
   "activityOlder": "過去のアクティビティ",
   "couponStatusAvailable": "使用する",
-  "couponStatusUsed": "使用済み",
-  "couponStatusExpired": "有効期限切れ",
+  "couponStatusUsed": "利用済み",
+  "couponStatusExpired": "期限切れ",
   "couponExchangeAvailable": "交換可能",
   "couponPointsShort": "ポイント不足",
   "noActivityLogs": "アクティビティ履歴がありません。",
@@ -535,5 +535,95 @@
   "retryButton": "再試行",
   "errorOccurred": "エラーが発生しました",
   "aiRecommendTag": "AIおすすめ",
-  "popularPlaceTag": "人気スポット"
+  "popularPlaceTag": "人気スポット",
+  "activitySignupTitle": "会員登録完了",
+  "activitySignupDescription": "南浦GoGoへのご登録を心より歓迎いたします！",
+  "activityMissionTitle": "ミッション完了",
+  "activityMissionDescription": "探訪認証ミッションを達成しました。",
+  "activityCouponTitle": "クーポン発行・使用",
+  "activityCouponDescription": "提携店のクーポン特典が適用されました。",
+  "activityPointTitle": "ポイント履歴変動",
+  "activityPointDescription": "南浦GoGoポイントが変動しました。",
+  "activityReviewTitle": "レビュー投稿",
+  "activityReviewDescription": "訪問レビューのご投稿ありがとうございます。",
+  "activityReservationTitle": "予約案内",
+  "activityReservationDescription": "店舗の予約状況が更新されました。",
+  "activityFavoriteTitle": "お気に入り",
+  "activityFavoriteDescription": "お気に入りの拠点が登録されました。",
+  "pointTxSignupBonus": "新規会員登録お祝いポイント",
+  "pointTxMissionReward": "ミッション完了報酬",
+  "pointTxCouponExchange": "クーポン交換によるポイント利用",
+  "pointTxCouponUse": "クーポン利用",
+  "pointTxGiftSend": "ポイントギフト送信",
+  "pointTxGiftReceive": "ポイントギフト受領",
+  "pointTxGiftCancel": "キャンセルギフトポイント返還",
+  "pointTxAttendance": "ログインボーナス報酬",
+  "pointTxReviewReward": "訪問レビュー投稿報酬",
+  "pointTxAdminAdjustment": "管理者による付与・調整",
+  "pointTxCharge": "ポイントチャージ",
+  "pointTxSpend": "ポイント利用",
+  "pointTxEarn": "ポイント獲得",
+  "pointTxGeneral": "ポイント取引履歴",
+  "couponBiffHotteokTitle": "BIFF広場 シアホットク 1個 引換券",
+  "couponBiffHotteokDesc": "南浦洞BIFF広場の提携屋台でおいしいシアホットク1個と交換できます。",
+  "couponCafeAmericanoTitle": "南浦洞名家 アメリカーノ 1杯 引換券",
+  "couponCafeAmericanoDesc": "南浦洞の路地裏にある落ち着いた雰囲気の提携カフェでアメリカーノ1杯と交換できます。",
+  "couponJagalchiDiscountTitle": "チャガルチ市場 新鮮鮮魚 10% お食事割引券",
+  "couponJagalchiDiscountDesc": "チャガルチ市場の提携店舗にてお食事および鮮魚料理のご注文時に10%割引が適用されます。",
+  "couponStatusUnused": "利用可能",
+  "couponUseAction": "クーポンを利用する",
+  "couponUsedDate": "利用日時: {date}",
+  "@couponUsedDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "couponExpiryDate": "有効期限: {date} まで",
+  "@couponExpiryDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "couponCostPoints": "{points}P 交換",
+  "@couponCostPoints": {
+    "placeholders": {
+      "points": {
+        "type": "String"
+      }
+    }
+  },
+  "couponExchangeConfirm": "このクーポンを交換しますか？",
+  "couponExchangeSuccess": "クーポンが正常に発行されました。",
+  "couponDetailTitle": "クーポン詳細情報",
+  "couponNoCoupons": "所持しているクーポンはありません。",
+  "couponAvailableTitle": "利用可能クーポン",
+  "couponUsedTitle": "利用済み・期限切れ",
+  "savedPlacesTab": "保存した場所",
+  "savedCoursesTab": "おすすめコース",
+  "favoritesEmptyTitle": "保存された場所がありません。",
+  "favoritesEmptySubtitle": "お気に入りの南浦洞スポットを見つけて登録してみましょう！",
+  "savedCoursesEmptyTitle": "保存されたコースがありません。",
+  "savedCoursesEmptySubtitle": "自分だけのおすすめ旅行コースを探してみましょう！",
+  "reservationDetailTitle": "予約詳細",
+  "reservationNumber": "予約番号",
+  "reservationDate": "予約日時",
+  "reservationPartySize": "利用人数",
+  "reservationCancelAction": "予約キャンセル",
+  "reservationCancelSuccess": "予約が正常にキャンセルされました。",
+  "reservationEmptyTitle": "予約履歴がありません。",
+  "notificationPushTitle": "プッシュ通知",
+  "notificationMarketingTitle": "お得なイベント・特典情報",
+  "notificationMissionTitle": "周辺ミッション通知",
+  "notificationEmpty": "新しい通知はありません。",
+  "errorServer": "サーバー通信中にエラーが発生しました。",
+  "errorAuthFailed": "ログイン情報が無効または期限切れです。",
+  "retryAction": "再試行",
+  "confirmAction": "確認",
+  "cancelAction": "キャンセル",
+  "deleteAction": "削除",
+  "saveAction": "保存"
 }

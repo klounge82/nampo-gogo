@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../l10n/app_localizations.dart';
+import '../utils/l10n_mappers.dart';
 import '../screens/place_detail_screen.dart';
 import '../screens/mission_detail_screen.dart';
 import '../screens/user_coupon_screen.dart';
@@ -77,8 +79,17 @@ class ActivityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String title = activity['title'] as String;
-    final String description = activity['description'] as String;
+    final l10n = AppLocalizations.of(context);
+    final String rawTitle = activity['title'] as String? ?? '';
+    final String rawDescription = activity['description'] as String? ?? '';
+    final String? activityType = activity['activity_type'] as String? ?? activity['type'] as String?;
+
+    final String title = l10n != null
+        ? L10nMappers.mapActivityLogTitle(l10n, activityType, rawTitle)
+        : rawTitle;
+    final String description = l10n != null
+        ? L10nMappers.mapActivityLogDescription(l10n, activityType, rawDescription)
+        : rawDescription;
     final String iconStr = activity['icon'] as String? ?? 'info';
     final String colorStr = activity['color'] as String? ?? 'grey';
     final String createdAtStr = activity['created_at'] as String;

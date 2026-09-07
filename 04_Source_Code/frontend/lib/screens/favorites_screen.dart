@@ -1,3 +1,4 @@
+import '../l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/favorite_provider.dart';
@@ -16,6 +17,7 @@ class FavoritesScreen extends StatefulWidget {
 
 class _FavoritesScreenState extends State<FavoritesScreen>
     with SingleTickerProviderStateMixin {
+  AppLocalizations? get l10n => AppLocalizations.of(context);
   late TabController _tabController;
 
   @override
@@ -47,14 +49,14 @@ class _FavoritesScreenState extends State<FavoritesScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           '즐겨찾기 보관함',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(text: '저장한 장소'),
+          tabs: [
+            Tab(text: l10n?.savedPlacesTab ?? '저장한 장소'),
             Tab(text: '저장한 코스'),
           ],
         ),
@@ -85,7 +87,7 @@ class _FavoritesScreenState extends State<FavoritesScreen>
             ),
             const SizedBox(height: 16),
             Text(
-              isPlace ? '저장된 장소가 없습니다.' : '아직 저장한 코스가 없습니다.',
+              isPlace ? l10n?.favoritesEmptyTitle ?? '저장된 장소가 없습니다.' : '아직 저장한 코스가 없습니다.',
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,

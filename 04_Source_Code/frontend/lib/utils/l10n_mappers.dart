@@ -448,4 +448,105 @@ class L10nMappers {
     }
     return place.description;
   }
+
+  /// Maps Activity Log Title to localized string based on activity type and content
+  static String mapActivityLogTitle(AppLocalizations l10n, String? type, String rawTitle) {
+    final t = (type ?? '').toUpperCase();
+    if (t == 'SIGNUP' || rawTitle.contains('회원가입')) {
+      return l10n.activitySignupTitle;
+    } else if (t.contains('MISSION') || rawTitle.contains('미션')) {
+      return l10n.activityMissionTitle;
+    } else if (t.contains('COUPON') || rawTitle.contains('쿠폰')) {
+      return l10n.activityCouponTitle;
+    } else if (t.contains('POINT') || rawTitle.contains('포인트')) {
+      return l10n.activityPointTitle;
+    } else if (t.contains('REVIEW') || rawTitle.contains('리뷰')) {
+      return l10n.activityReviewTitle;
+    } else if (t.contains('RESERVATION') || rawTitle.contains('예약')) {
+      return l10n.activityReservationTitle;
+    } else if (t.contains('FAVORITE') || rawTitle.contains('즐겨찾기')) {
+      return l10n.activityFavoriteTitle;
+    }
+    return rawTitle;
+  }
+
+  /// Maps Activity Log Description to localized string based on activity type and content
+  static String mapActivityLogDescription(AppLocalizations l10n, String? type, String rawDescription) {
+    final t = (type ?? '').toUpperCase();
+    if (t == 'SIGNUP' || rawDescription.contains('가입을 축하') || rawDescription.contains('가입을 진심')) {
+      return l10n.activitySignupDescription;
+    } else if (t.contains('MISSION') || rawDescription.contains('미션을 완수') || rawDescription.contains('미션 완료')) {
+      return l10n.activityMissionDescription;
+    } else if (t.contains('COUPON') || rawDescription.contains('쿠폰')) {
+      return l10n.activityCouponDescription;
+    } else if (t.contains('POINT') || rawDescription.contains('포인트')) {
+      return l10n.activityPointDescription;
+    } else if (t.contains('REVIEW') || rawDescription.contains('후기') || rawDescription.contains('리뷰')) {
+      return l10n.activityReviewDescription;
+    } else if (t.contains('RESERVATION') || rawDescription.contains('예약')) {
+      return l10n.activityReservationDescription;
+    } else if (t.contains('FAVORITE') || rawDescription.contains('즐겨찾기')) {
+      return l10n.activityFavoriteDescription;
+    }
+    return rawDescription;
+  }
+
+  /// Maps Point History activity description string to localized label
+  static String mapPointHistoryActivity(AppLocalizations l10n, String rawActivity) {
+    final a = rawActivity.trim();
+    if (a.contains('회원가입') || a.contains('가입 축하') || a.contains('신규 회원')) {
+      return l10n.pointTxSignupBonus;
+    } else if (a.contains('미션') || a.contains('탐방')) {
+      return l10n.pointTxMissionReward;
+    } else if (a.contains('쿠폰 교환') || a.contains('교환 차감')) {
+      return l10n.pointTxCouponExchange;
+    } else if (a.contains('쿠폰 사용') || a.contains('쿠폰')) {
+      return l10n.pointTxCouponUse;
+    } else if (a.contains('선물 보내기') || a.contains('선물 발송')) {
+      return l10n.pointTxGiftSend;
+    } else if (a.contains('선물 받기') || a.contains('선물 수령')) {
+      return l10n.pointTxGiftReceive;
+    } else if (a.contains('선물 취소') || a.contains('환급')) {
+      return l10n.pointTxGiftCancel;
+    } else if (a.contains('출석') || a.contains('로그인')) {
+      return l10n.pointTxAttendance;
+    } else if (a.contains('리뷰') || a.contains('후기')) {
+      return l10n.pointTxReviewReward;
+    } else if (a.contains('관리자') || a.contains('조정') || a.contains('지급')) {
+      return l10n.pointTxAdminAdjustment;
+    } else if (a.contains('충전')) {
+      return l10n.pointTxCharge;
+    } else if (a.contains('사용') || a.contains('차감')) {
+      return l10n.pointTxSpend;
+    } else if (a.contains('적립') || a.contains('획득')) {
+      return l10n.pointTxEarn;
+    }
+    return a.isEmpty ? l10n.pointTxGeneral : a;
+  }
+
+  /// Maps Coupon Title to localized string
+  static String mapCouponTitle(AppLocalizations l10n, String rawTitle) {
+    final t = rawTitle.trim();
+    if (t.contains('씨앗호떡') || t.contains('BIFF')) {
+      return l10n.couponBiffHotteokTitle;
+    } else if (t.contains('아메리카노') || t.contains('카페') || t.contains('명가')) {
+      return l10n.couponCafeAmericanoTitle;
+    } else if (t.contains('자갈치') || t.contains('신선횟집') || t.contains('할인권')) {
+      return l10n.couponJagalchiDiscountTitle;
+    }
+    return rawTitle;
+  }
+
+  /// Maps Coupon Description to localized string
+  static String mapCouponDescription(AppLocalizations l10n, String rawDescription) {
+    final d = rawDescription.trim();
+    if (d.contains('씨앗호떡') || d.contains('BIFF') || d.contains('포장마차')) {
+      return l10n.couponBiffHotteokDesc;
+    } else if (d.contains('아메리카노') || d.contains('카페') || d.contains('명가')) {
+      return l10n.couponCafeAmericanoDesc;
+    } else if (d.contains('자갈치') || d.contains('신선횟집') || d.contains('할인')) {
+      return l10n.couponJagalchiDiscountDesc;
+    }
+    return rawDescription;
+  }
 }

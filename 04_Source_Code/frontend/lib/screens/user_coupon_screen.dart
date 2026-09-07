@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../constants/colors.dart';
 import '../l10n/app_localizations.dart';
+import '../utils/l10n_mappers.dart';
 import '../models/coupon.dart';
 import '../repositories/coupon_repository.dart';
 import '../providers/auth_provider.dart';
@@ -15,6 +16,7 @@ class UserCouponScreen extends StatefulWidget {
 
 class _UserCouponScreenState extends State<UserCouponScreen>
     with SingleTickerProviderStateMixin {
+  AppLocalizations? get l10n => AppLocalizations.of(context);
   final CouponRepository _couponRepository = CouponRepository();
   late TabController _tabController;
 
@@ -147,7 +149,7 @@ class _UserCouponScreenState extends State<UserCouponScreen>
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              userCoupon.coupon.title,
+              l10n != null ? L10nMappers.mapCouponTitle(l10n!, userCoupon.coupon.title) : userCoupon.coupon.title,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16.0,
@@ -204,8 +206,8 @@ class _UserCouponScreenState extends State<UserCouponScreen>
             ),
             const SizedBox(height: 24.0),
 
-            const Text(
-              '매장 직원에게 위 바코드를 보여주세요.',
+            Text(
+              l10n?.couponUseAction ?? '매장 직원에게 위 바코드를 보여주세요.',
               style: TextStyle(fontSize: 11.0, color: AppColors.textSecondary),
               textAlign: TextAlign.center,
             ),
@@ -221,7 +223,7 @@ class _UserCouponScreenState extends State<UserCouponScreen>
                   _useCoupon(userCoupon);
                 },
                 icon: const Icon(Icons.check_circle_outline, size: 18.0),
-                label: const Text('사용 완료 처리하기 (직원전용)'),
+                label: Text(l10n?.couponUseAction ?? '사용 완료 처리'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.secondary,
                   foregroundColor: Colors.white,
@@ -242,8 +244,8 @@ class _UserCouponScreenState extends State<UserCouponScreen>
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
-          '내 쿠폰함',
+        title: Text(
+          AppLocalizations.of(context)?.couponDetailTitle ?? '내 쿠폰함',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: AppColors.surface,
@@ -255,9 +257,9 @@ class _UserCouponScreenState extends State<UserCouponScreen>
           unselectedLabelColor: AppColors.textSecondary,
           indicatorColor: AppColors.primary,
           indicatorSize: TabBarIndicatorSize.tab,
-          tabs: const [
-            Tab(text: '사용 가능한 쿠폰'),
-            Tab(text: '사용 완료 / 만료'),
+          tabs: [
+            Tab(text: AppLocalizations.of(context)?.couponAvailableTitle ?? '사용 가능한 쿠폰'),
+            Tab(text: AppLocalizations.of(context)?.couponUsedTitle ?? '사용 완료 / 만료'),
           ],
         ),
       ),
@@ -274,7 +276,7 @@ class _UserCouponScreenState extends State<UserCouponScreen>
                   const SizedBox(height: 16.0),
                   ElevatedButton(
                     onPressed: _loadUserCoupons,
-                    child: const Text('다시 시도'),
+                    child: Text('다시 시도'),
                   ),
                 ],
               ),
@@ -293,7 +295,7 @@ class _UserCouponScreenState extends State<UserCouponScreen>
     if (list.isEmpty) {
       return Center(
         child: Text(
-          isUnused ? '사용 가능한 쿠폰이 없습니다.' : '지난 쿠폰 내역이 없습니다.',
+          isUnused ? (AppLocalizations.of(context)?.couponNoCoupons ?? '사용 가능한 쿠폰이 없습니다.') : (AppLocalizations.of(context)?.couponUsedTitle ?? '지난 쿠폰 내역이 없습니다.'),
           style: const TextStyle(color: AppColors.textSecondary),
         ),
       );
@@ -369,7 +371,7 @@ class _UserCouponScreenState extends State<UserCouponScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      userCoupon.coupon.title,
+                      l10n != null ? L10nMappers.mapCouponTitle(l10n!, userCoupon.coupon.title) : userCoupon.coupon.title,
                       style: TextStyle(
                         fontSize: 13.0,
                         fontWeight: FontWeight.bold,
@@ -383,7 +385,7 @@ class _UserCouponScreenState extends State<UserCouponScreen>
                     ),
                     const SizedBox(height: 4.0),
                     Text(
-                      '만료일: ~ $expStr',
+                      l10n?.couponExpiryDate(expStr) ?? '만료일: ~ $expStr',
                       style: TextStyle(
                         fontSize: 11.0,
                         color: isUnused

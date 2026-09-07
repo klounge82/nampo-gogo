@@ -250,7 +250,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get emptySearch => '検索結果がありません。';
 
   @override
-  String get errorNetwork => 'ネットワークエラーが発生しました。もう一度お試しください。';
+  String get errorNetwork => 'ネットワーク接続をご確認ください。';
 
   @override
   String get estTime => '予想所要時間';
@@ -1411,10 +1411,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get couponStatusAvailable => '使用する';
 
   @override
-  String get couponStatusUsed => '使用済み';
+  String get couponStatusUsed => '利用済み';
 
   @override
-  String get couponStatusExpired => '有効期限切れ';
+  String get couponStatusExpired => '期限切れ';
 
   @override
   String get couponExchangeAvailable => '交換可能';
@@ -1506,4 +1506,219 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get popularPlaceTag => '人気スポット';
+
+  @override
+  String get activitySignupTitle => '会員登録完了';
+
+  @override
+  String get activitySignupDescription => '南浦GoGoへのご登録を心より歓迎いたします！';
+
+  @override
+  String get activityMissionTitle => 'ミッション完了';
+
+  @override
+  String get activityMissionDescription => '探訪認証ミッションを達成しました。';
+
+  @override
+  String get activityCouponTitle => 'クーポン発行・使用';
+
+  @override
+  String get activityCouponDescription => '提携店のクーポン特典が適用されました。';
+
+  @override
+  String get activityPointTitle => 'ポイント履歴変動';
+
+  @override
+  String get activityPointDescription => '南浦GoGoポイントが変動しました。';
+
+  @override
+  String get activityReviewTitle => 'レビュー投稿';
+
+  @override
+  String get activityReviewDescription => '訪問レビューのご投稿ありがとうございます。';
+
+  @override
+  String get activityReservationTitle => '予約案内';
+
+  @override
+  String get activityReservationDescription => '店舗の予約状況が更新されました。';
+
+  @override
+  String get activityFavoriteTitle => 'お気に入り';
+
+  @override
+  String get activityFavoriteDescription => 'お気に入りの拠点が登録されました。';
+
+  @override
+  String get pointTxSignupBonus => '新規会員登録お祝いポイント';
+
+  @override
+  String get pointTxMissionReward => 'ミッション完了報酬';
+
+  @override
+  String get pointTxCouponExchange => 'クーポン交換によるポイント利用';
+
+  @override
+  String get pointTxCouponUse => 'クーポン利用';
+
+  @override
+  String get pointTxGiftSend => 'ポイントギフト送信';
+
+  @override
+  String get pointTxGiftReceive => 'ポイントギフト受領';
+
+  @override
+  String get pointTxGiftCancel => 'キャンセルギフトポイント返還';
+
+  @override
+  String get pointTxAttendance => 'ログインボーナス報酬';
+
+  @override
+  String get pointTxReviewReward => '訪問レビュー投稿報酬';
+
+  @override
+  String get pointTxAdminAdjustment => '管理者による付与・調整';
+
+  @override
+  String get pointTxCharge => 'ポイントチャージ';
+
+  @override
+  String get pointTxSpend => 'ポイント利用';
+
+  @override
+  String get pointTxEarn => 'ポイント獲得';
+
+  @override
+  String get pointTxGeneral => 'ポイント取引履歴';
+
+  @override
+  String get couponBiffHotteokTitle => 'BIFF広場 シアホットク 1個 引換券';
+
+  @override
+  String get couponBiffHotteokDesc => '南浦洞BIFF広場の提携屋台でおいしいシアホットク1個と交換できます。';
+
+  @override
+  String get couponCafeAmericanoTitle => '南浦洞名家 アメリカーノ 1杯 引換券';
+
+  @override
+  String get couponCafeAmericanoDesc =>
+      '南浦洞の路地裏にある落ち着いた雰囲気の提携カフェでアメリカーノ1杯と交換できます。';
+
+  @override
+  String get couponJagalchiDiscountTitle => 'チャガルチ市場 新鮮鮮魚 10% お食事割引券';
+
+  @override
+  String get couponJagalchiDiscountDesc =>
+      'チャガルチ市場の提携店舗にてお食事および鮮魚料理のご注文時に10%割引が適用されます。';
+
+  @override
+  String get couponStatusUnused => '利用可能';
+
+  @override
+  String get couponUseAction => 'クーポンを利用する';
+
+  @override
+  String couponUsedDate(String date) {
+    return '利用日時: $date';
+  }
+
+  @override
+  String couponExpiryDate(String date) {
+    return '有効期限: $date まで';
+  }
+
+  @override
+  String couponCostPoints(String points) {
+    return '${points}P 交換';
+  }
+
+  @override
+  String get couponExchangeConfirm => 'このクーポンを交換しますか？';
+
+  @override
+  String get couponExchangeSuccess => 'クーポンが正常に発行されました。';
+
+  @override
+  String get couponDetailTitle => 'クーポン詳細情報';
+
+  @override
+  String get couponNoCoupons => '所持しているクーポンはありません。';
+
+  @override
+  String get couponAvailableTitle => '利用可能クーポン';
+
+  @override
+  String get couponUsedTitle => '利用済み・期限切れ';
+
+  @override
+  String get savedPlacesTab => '保存した場所';
+
+  @override
+  String get savedCoursesTab => 'おすすめコース';
+
+  @override
+  String get favoritesEmptyTitle => '保存された場所がありません。';
+
+  @override
+  String get favoritesEmptySubtitle => 'お気に入りの南浦洞スポットを見つけて登録してみましょう！';
+
+  @override
+  String get savedCoursesEmptyTitle => '保存されたコースがありません。';
+
+  @override
+  String get savedCoursesEmptySubtitle => '自分だけのおすすめ旅行コースを探してみましょう！';
+
+  @override
+  String get reservationDetailTitle => '予約詳細';
+
+  @override
+  String get reservationNumber => '予約番号';
+
+  @override
+  String get reservationDate => '予約日時';
+
+  @override
+  String get reservationPartySize => '利用人数';
+
+  @override
+  String get reservationCancelAction => '予約キャンセル';
+
+  @override
+  String get reservationCancelSuccess => '予約が正常にキャンセルされました。';
+
+  @override
+  String get reservationEmptyTitle => '予約履歴がありません。';
+
+  @override
+  String get notificationPushTitle => 'プッシュ通知';
+
+  @override
+  String get notificationMarketingTitle => 'お得なイベント・特典情報';
+
+  @override
+  String get notificationMissionTitle => '周辺ミッション通知';
+
+  @override
+  String get notificationEmpty => '新しい通知はありません。';
+
+  @override
+  String get errorServer => 'サーバー通信中にエラーが発生しました。';
+
+  @override
+  String get errorAuthFailed => 'ログイン情報が無効または期限切れです。';
+
+  @override
+  String get retryAction => '再試行';
+
+  @override
+  String get confirmAction => '確認';
+
+  @override
+  String get cancelAction => 'キャンセル';
+
+  @override
+  String get deleteAction => '削除';
+
+  @override
+  String get saveAction => '保存';
 }

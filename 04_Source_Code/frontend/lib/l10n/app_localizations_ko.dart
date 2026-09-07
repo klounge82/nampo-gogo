@@ -251,7 +251,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get emptySearch => '검색 결과가 없습니다.';
 
   @override
-  String get errorNetwork => '네트워크 연결이 불안정합니다. 다시 시도해 주세요.';
+  String get errorNetwork => '네트워크 연결 상태를 확인해주세요.';
 
   @override
   String get estTime => '예상 소요시간';
@@ -1418,10 +1418,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get couponStatusAvailable => '사용하기';
 
   @override
-  String get couponStatusUsed => '사용완료';
+  String get couponStatusUsed => '사용 완료';
 
   @override
-  String get couponStatusExpired => '기간만료';
+  String get couponStatusExpired => '기간 만료';
 
   @override
   String get couponExchangeAvailable => '교환가능';
@@ -1513,4 +1513,220 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get popularPlaceTag => '인기 명소';
+
+  @override
+  String get activitySignupTitle => '회원가입 완료';
+
+  @override
+  String get activitySignupDescription => '남포 GoGo 가입을 진심으로 축하드립니다!';
+
+  @override
+  String get activityMissionTitle => '미션 완료';
+
+  @override
+  String get activityMissionDescription => '탐방 인증 미션을 성공적으로 완료하셨습니다.';
+
+  @override
+  String get activityCouponTitle => '쿠폰 발급 및 사용';
+
+  @override
+  String get activityCouponDescription => '제휴 가맹점 쿠폰 혜택이 적용되었습니다.';
+
+  @override
+  String get activityPointTitle => '포인트 변동';
+
+  @override
+  String get activityPointDescription => '남포 GoGo 포인트가 변동되었습니다.';
+
+  @override
+  String get activityReviewTitle => '리뷰 작성';
+
+  @override
+  String get activityReviewDescription => '소중한 방문 후기를 작성해주셨습니다.';
+
+  @override
+  String get activityReservationTitle => '예약 알림';
+
+  @override
+  String get activityReservationDescription => '매장 예약 상태가 변경되었습니다.';
+
+  @override
+  String get activityFavoriteTitle => '즐겨찾기';
+
+  @override
+  String get activityFavoriteDescription => '관심 거점을 즐겨찾기에 등록하셨습니다.';
+
+  @override
+  String get pointTxSignupBonus => '신규 회원가입 축하 포인트';
+
+  @override
+  String get pointTxMissionReward => '미션 완료 보상';
+
+  @override
+  String get pointTxCouponExchange => '쿠폰 교환 차감';
+
+  @override
+  String get pointTxCouponUse => '쿠폰 사용';
+
+  @override
+  String get pointTxGiftSend => '포인트 선물 보내기';
+
+  @override
+  String get pointTxGiftReceive => '포인트 선물 수령';
+
+  @override
+  String get pointTxGiftCancel => '포인트 선물 취소 환급';
+
+  @override
+  String get pointTxAttendance => '출석 체크 보상';
+
+  @override
+  String get pointTxReviewReward => '방문 리뷰 작성 보상';
+
+  @override
+  String get pointTxAdminAdjustment => '관리자 지급/조정';
+
+  @override
+  String get pointTxCharge => '포인트 충전';
+
+  @override
+  String get pointTxSpend => '포인트 사용';
+
+  @override
+  String get pointTxEarn => '포인트 적립';
+
+  @override
+  String get pointTxGeneral => '포인트 거래 내역';
+
+  @override
+  String get couponBiffHotteokTitle => 'BIFF 광장 씨앗호떡 1개 교환권';
+
+  @override
+  String get couponBiffHotteokDesc =>
+      '남포동 BIFF 광장 협약 포장마차에서 맛있는 씨앗호떡 1개로 교환 가능합니다.';
+
+  @override
+  String get couponCafeAmericanoTitle => '남포동 명가 아메리카노 1잔 교환권';
+
+  @override
+  String get couponCafeAmericanoDesc =>
+      '남포동 골목 안쪽에 위치한 분위기 좋은 명가 카페에서 아메리카노(HOT/ICE) 1잔과 교환 가능합니다.';
+
+  @override
+  String get couponJagalchiDiscountTitle => '자갈치시장 신선횟집 10% 식사 할인권';
+
+  @override
+  String get couponJagalchiDiscountDesc =>
+      '자갈치시장 지정 협약 식당에서 식사류 및 활어회 메뉴 주문 시 결제 금액의 10%를 즉시 할인받을 수 있습니다.';
+
+  @override
+  String get couponStatusUnused => '사용 가능';
+
+  @override
+  String get couponUseAction => '쿠폰 사용하기';
+
+  @override
+  String couponUsedDate(String date) {
+    return '사용일시: $date';
+  }
+
+  @override
+  String couponExpiryDate(String date) {
+    return '유효기간: $date 까지';
+  }
+
+  @override
+  String couponCostPoints(String points) {
+    return '${points}P 교환';
+  }
+
+  @override
+  String get couponExchangeConfirm => '이 쿠폰을 교환하시겠습니까?';
+
+  @override
+  String get couponExchangeSuccess => '쿠폰이 성공적으로 발급되었습니다.';
+
+  @override
+  String get couponDetailTitle => '쿠폰 상세 정보';
+
+  @override
+  String get couponNoCoupons => '보유하신 쿠폰이 없습니다.';
+
+  @override
+  String get couponAvailableTitle => '사용 가능한 쿠폰';
+
+  @override
+  String get couponUsedTitle => '사용 완료 및 만료';
+
+  @override
+  String get savedPlacesTab => '저장한 장소';
+
+  @override
+  String get savedCoursesTab => '추천 코스';
+
+  @override
+  String get favoritesEmptyTitle => '저장된 장소가 없습니다.';
+
+  @override
+  String get favoritesEmptySubtitle => '마음에 드는 남포동 명소를 즐겨찾기에 추가해보세요!';
+
+  @override
+  String get savedCoursesEmptyTitle => '저장된 코스가 없습니다.';
+
+  @override
+  String get savedCoursesEmptySubtitle => '나만의 여행 코스를 탐색하고 저장해보세요!';
+
+  @override
+  String get reservationDetailTitle => '예약 상세 내역';
+
+  @override
+  String get reservationNumber => '예약 번호';
+
+  @override
+  String get reservationDate => '예약 일시';
+
+  @override
+  String get reservationPartySize => '방문 인원';
+
+  @override
+  String get reservationCancelAction => '예약 취소';
+
+  @override
+  String get reservationCancelSuccess => '예약이 성공적으로 취소되었습니다.';
+
+  @override
+  String get reservationEmptyTitle => '예약 내역이 없습니다.';
+
+  @override
+  String get notificationPushTitle => '푸시 알림';
+
+  @override
+  String get notificationMarketingTitle => '마케팅 혜택 알림';
+
+  @override
+  String get notificationMissionTitle => '주변 미션 알림';
+
+  @override
+  String get notificationEmpty => '새로운 알림이 없습니다.';
+
+  @override
+  String get errorServer => '서버 통신 중 오류가 발생했습니다.';
+
+  @override
+  String get errorAuthFailed => '로그인 정보가 올바르지 않거나 만료되었습니다.';
+
+  @override
+  String get retryAction => '다시 시도';
+
+  @override
+  String get confirmAction => '확인';
+
+  @override
+  String get cancelAction => '취소';
+
+  @override
+  String get deleteAction => '삭제';
+
+  @override
+  String get saveAction => '저장';
 }

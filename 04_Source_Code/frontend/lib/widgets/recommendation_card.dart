@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../constants/colors.dart';
 import '../models/recommendation.dart';
+import '../models/place.dart';
 import '../l10n/app_localizations.dart';
 import '../utils/l10n_mappers.dart';
 
@@ -16,6 +17,8 @@ class RecommendationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final locCode = l10n?.localeName ?? 'ko';
     return Container(
       width: 220.0,
       margin: const EdgeInsets.only(right: 16.0),
@@ -118,7 +121,7 @@ class RecommendationCard extends StatelessWidget {
                       const SizedBox(height: 8.0),
                       // Name
                       Text(
-                        recommendation.name,
+                        L10nMappers.mapPlaceName(Place(id: recommendation.id, name: recommendation.name, category: recommendation.category, address: recommendation.address, description: recommendation.description, rating: recommendation.rating, createdAt: DateTime.now()), locCode),
                         style: const TextStyle(
                           fontSize: 15.0,
                           fontWeight: FontWeight.bold,
@@ -130,7 +133,7 @@ class RecommendationCard extends StatelessWidget {
                       const SizedBox(height: 4.0),
                       // Description
                       Text(
-                        recommendation.description,
+                        L10nMappers.mapPlaceDescription(Place(id: recommendation.id, name: recommendation.name, category: recommendation.category, address: recommendation.address, description: recommendation.description, rating: recommendation.rating, createdAt: DateTime.now()), locCode),
                         style: const TextStyle(
                           fontSize: 11.0,
                           color: AppColors.textSecondary,

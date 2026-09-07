@@ -1,3 +1,4 @@
+import '../l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../constants/colors.dart';
@@ -19,6 +20,7 @@ class ReservationDetailScreen extends StatefulWidget {
 }
 
 class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
+  AppLocalizations? get l10n => AppLocalizations.of(context);
   final ReservationRepository _reservationRepository = ReservationRepository();
   Reservation? _reservation;
   bool _isLoading = true;
@@ -98,18 +100,18 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text(
-          '예약 취소',
+        title: Text(
+          l10n?.reservationCancelAction ?? '예약 취소',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: AppColors.secondary,
           ),
         ),
-        content: const Text('예약을 취소하시겠습니까?'),
+        content: Text('예약을 취소하시겠습니까?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('돌아가기', style: TextStyle(color: Colors.grey)),
+            child: Text('돌아가기', style: TextStyle(color: Colors.grey)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -120,7 +122,7 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
               backgroundColor: AppColors.secondary,
               foregroundColor: Colors.white,
             ),
-            child: const Text(
+            child: Text(
               '확인',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
@@ -145,7 +147,7 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('확인', style: TextStyle(color: AppColors.primary)),
+            child: Text('확인', style: TextStyle(color: AppColors.primary)),
           ),
         ],
       ),
@@ -166,7 +168,7 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           '예약 상세 정보',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
@@ -183,14 +185,14 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
+                  Text(
                     '예약 정보를 불러오지 못했습니다.\n잠시 후 다시 시도해 주세요.',
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16.0),
                   ElevatedButton(
                     onPressed: _loadReservationDetail,
-                    child: const Text('다시 시도'),
+                    child: Text('다시 시도'),
                   ),
                 ],
               ),
@@ -207,7 +209,7 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
                   const SizedBox(height: 20.0),
 
                   // Reservation Ticket Info
-                  const Text(
+                  Text(
                     '예약 명세서',
                     style: TextStyle(
                       fontSize: 15.0,
@@ -220,7 +222,7 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
                   const SizedBox(height: 24.0),
 
                   // Store Address Card
-                  const Text(
+                  Text(
                     '오시는 길',
                     style: TextStyle(
                       fontSize: 15.0,
@@ -251,7 +253,7 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
                           );
                         },
                         icon: const Icon(Icons.payment, size: 18.0),
-                        label: const Text('보증금 ₩15,000 결제하고 예약 확정'),
+                        label: Text('보증금 ₩15,000 결제하고 예약 확정'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
@@ -273,7 +275,7 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
                       child: ElevatedButton.icon(
                         onPressed: _confirmCancel,
                         icon: const Icon(Icons.cancel_outlined, size: 18.0),
-                        label: const Text('예약 신청 취소하기'),
+                        label: Text('예약 신청 취소하기'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: AppColors.secondary,
@@ -393,7 +395,7 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       '매장명',
                       style: TextStyle(
                         fontSize: 12.0,
@@ -414,8 +416,8 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      '예약 일시',
+                    Text(
+                      l10n?.reservationDate ?? '예약 일시',
                       style: TextStyle(
                         fontSize: 12.0,
                         color: AppColors.textSecondary,
@@ -435,7 +437,7 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       '예약 인원',
                       style: TextStyle(
                         fontSize: 12.0,
@@ -456,7 +458,7 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       '예약번호',
                       style: TextStyle(
                         fontSize: 12.0,
@@ -501,7 +503,7 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
               children: [
                 ReservationQrWidget(qrData: res.id, size: 140.0),
                 const SizedBox(height: 12.0),
-                const Text(
+                Text(
                   '예약 확인용 QR',
                   style: TextStyle(
                     fontSize: 11.0,
@@ -551,7 +553,7 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
             ],
           ),
           const SizedBox(height: 12.0),
-          const Text(
+          Text(
             '지하철 자갈치역 5번 출구에서 도보 약 3분 거리에 위치하고 있습니다. 방문 시 예약을 확인해 주세요.',
             style: TextStyle(
               fontSize: 11.0,

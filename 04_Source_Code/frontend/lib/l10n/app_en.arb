@@ -80,7 +80,7 @@
   "emailInquiry": "Email Inquiry",
   "emptyNoData": "No data to display.",
   "emptySearch": "No search results found.",
-  "errorNetwork": "Network connection error. Please try again.",
+  "errorNetwork": "Please check your network connection.",
   "estTime": "Est. Duration",
   "exchangeStore": "Point Exchange",
   "exploreTitle": "Explore",
@@ -535,5 +535,95 @@
   "retryButton": "Retry",
   "errorOccurred": "An error occurred",
   "aiRecommendTag": "AI Recommended",
-  "popularPlaceTag": "Popular Spot"
+  "popularPlaceTag": "Popular Spot",
+  "activitySignupTitle": "Welcome to Nampo GoGo",
+  "activitySignupDescription": "Welcome! Thank you for joining Nampo GoGo!",
+  "activityMissionTitle": "Mission Completed",
+  "activityMissionDescription": "You have successfully completed a verification mission.",
+  "activityCouponTitle": "Coupon Issued & Used",
+  "activityCouponDescription": "Your partner merchant discount has been applied.",
+  "activityPointTitle": "Point History Update",
+  "activityPointDescription": "Your Nampo GoGo points balance has been updated.",
+  "activityReviewTitle": "Review Submitted",
+  "activityReviewDescription": "Thank you for sharing your visit review.",
+  "activityReservationTitle": "Reservation Notice",
+  "activityReservationDescription": "Your store reservation status has been updated.",
+  "activityFavoriteTitle": "Saved to Favorites",
+  "activityFavoriteDescription": "You have saved a new spot to your favorites list.",
+  "pointTxSignupBonus": "New Member Welcome Bonus Points",
+  "pointTxMissionReward": "Mission Completion Reward",
+  "pointTxCouponExchange": "Coupon Exchange Points Deduction",
+  "pointTxCouponUse": "Coupon Redemption",
+  "pointTxGiftSend": "Send Point Gift",
+  "pointTxGiftReceive": "Receive Point Gift",
+  "pointTxGiftCancel": "Cancelled Gift Point Refund",
+  "pointTxAttendance": "Daily Check-in Reward",
+  "pointTxReviewReward": "Visit Review Reward",
+  "pointTxAdminAdjustment": "Admin Adjustment / Grant",
+  "pointTxCharge": "Point Charge",
+  "pointTxSpend": "Point Used",
+  "pointTxEarn": "Point Earned",
+  "pointTxGeneral": "Point Transaction",
+  "couponBiffHotteokTitle": "BIFF Square Seed Hotteok Coupon",
+  "couponBiffHotteokDesc": "Redeemable for 1 delicious seed hotteok at participating food stalls in BIFF Square.",
+  "couponCafeAmericanoTitle": "Nampo Cafe Americano (1 Cup) Coupon",
+  "couponCafeAmericanoDesc": "Redeemable for 1 Americano (HOT/ICE) at cozy partner cafes in Nampo-dong alleys.",
+  "couponJagalchiDiscountTitle": "Jagalchi Fresh Seafood 10% Discount Voucher",
+  "couponJagalchiDiscountDesc": "Enjoy an instant 10% discount on meals and fresh sashimi at partner restaurants in Jagalchi Market.",
+  "couponStatusUnused": "Available",
+  "couponUseAction": "Use Coupon",
+  "couponUsedDate": "Used at: {date}",
+  "@couponUsedDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "couponExpiryDate": "Valid until: {date}",
+  "@couponExpiryDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "couponCostPoints": "{points}P Exchange",
+  "@couponCostPoints": {
+    "placeholders": {
+      "points": {
+        "type": "String"
+      }
+    }
+  },
+  "couponExchangeConfirm": "Would you like to exchange points for this coupon?",
+  "couponExchangeSuccess": "Coupon issued successfully.",
+  "couponDetailTitle": "Coupon Details",
+  "couponNoCoupons": "You have no coupons yet.",
+  "couponAvailableTitle": "Available Coupons",
+  "couponUsedTitle": "Used & Expired",
+  "savedPlacesTab": "Saved Places",
+  "savedCoursesTab": "Recommended Courses",
+  "favoritesEmptyTitle": "No saved places yet.",
+  "favoritesEmptySubtitle": "Explore and add your favorite Nampo spots to your list!",
+  "savedCoursesEmptyTitle": "No saved courses yet.",
+  "savedCoursesEmptySubtitle": "Discover and save personalized travel itineraries!",
+  "reservationDetailTitle": "Reservation Details",
+  "reservationNumber": "Reservation No.",
+  "reservationDate": "Date & Time",
+  "reservationPartySize": "Party Size",
+  "reservationCancelAction": "Cancel Reservation",
+  "reservationCancelSuccess": "Reservation cancelled successfully.",
+  "reservationEmptyTitle": "No reservation history.",
+  "notificationPushTitle": "Push Notifications",
+  "notificationMarketingTitle": "Promotions & Events",
+  "notificationMissionTitle": "Nearby Mission Alerts",
+  "notificationEmpty": "No new notifications.",
+  "errorServer": "A server error occurred. Please try again.",
+  "errorAuthFailed": "Invalid or expired credentials. Please log in again.",
+  "retryAction": "Retry",
+  "confirmAction": "Confirm",
+  "cancelAction": "Cancel",
+  "deleteAction": "Delete",
+  "saveAction": "Save"
 }

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/notification_provider.dart';
 import '../providers/auth_provider.dart';
 import '../models/notification_model.dart';
+import '../l10n/app_localizations.dart';
 
 class NotificationSettingsScreen extends StatefulWidget {
   const NotificationSettingsScreen({super.key});
@@ -27,15 +28,16 @@ class _NotificationSettingsScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final notifProvider = context.watch<NotificationProvider>();
     final pref = notifProvider.preferences;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF6F9FC),
       appBar: AppBar(
-        title: const Text(
-          '알림 설정',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
+        title: Text(
+          l10n?.notificationPushTitle ?? '알림 설정',
+          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
         ),
         backgroundColor: Colors.white,
         elevation: 0.5,
@@ -46,15 +48,15 @@ class _NotificationSettingsScreenState
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                _buildSectionHeader('기본 서비스 알림'),
+                _buildSectionHeader(l10n?.notificationPushTitle ?? '기본 서비스 알림'),
                 _buildToggleItem(
-                  title: '예약 알림',
+                  title: l10n?.activityReservationTitle ?? '예약 알림',
                   subtitle: '예약 확인, 취소 및 리마인더 푸시를 전송합니다.',
                   value: pref.reservationEnabled,
                   onChanged: (val) => _updatePref(pref, 'reservation', val),
                 ),
                 _buildToggleItem(
-                  title: '미션 알림',
+                  title: l10n?.activityMissionTitle ?? '미션 알림',
                   subtitle: '미션 완료 및 리워드 획득 성공을 안내합니다.',
                   value: pref.missionEnabled,
                   onChanged: (val) => _updatePref(pref, 'mission', val),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../constants/colors.dart';
 import '../l10n/app_localizations.dart';
+import '../utils/l10n_mappers.dart';
 import '../models/coupon.dart';
 import '../repositories/coupon_repository.dart';
 import '../providers/auth_provider.dart';
@@ -14,6 +15,7 @@ class CouponListScreen extends StatefulWidget {
 }
 
 class _CouponListScreenState extends State<CouponListScreen> {
+  AppLocalizations? get l10n => AppLocalizations.of(context);
   final CouponRepository _couponRepository = CouponRepository();
   List<Coupon> _coupons = [];
   bool _isLoading = true;
@@ -102,7 +104,7 @@ class _CouponListScreenState extends State<CouponListScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              '${coupon.title}',
+              '${l10n != null ? L10nMappers.mapCouponTitle(l10n!, coupon.title) : coupon.title}',
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 color: AppColors.primary,
@@ -183,7 +185,7 @@ class _CouponListScreenState extends State<CouponListScreen> {
               children: [
                 Expanded(
                   child: Text(
-                    coupon.title,
+                    l10n != null ? L10nMappers.mapCouponTitle(l10n!, coupon.title) : coupon.title,
                     style: const TextStyle(
                       fontSize: 18.0,
                       fontWeight: FontWeight.bold,
@@ -203,7 +205,7 @@ class _CouponListScreenState extends State<CouponListScreen> {
             ),
             const SizedBox(height: 12.0),
             Text(
-              coupon.description,
+              l10n != null ? L10nMappers.mapCouponDescription(l10n!, coupon.description) : coupon.description,
               style: const TextStyle(
                 fontSize: 13.0,
                 color: AppColors.textSecondary,
@@ -261,8 +263,8 @@ class _CouponListScreenState extends State<CouponListScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
-          '포인트 교환소',
+        title: Text(
+          l10n?.profilePointStore ?? '포인트 교환소',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: AppColors.surface,
@@ -282,7 +284,7 @@ class _CouponListScreenState extends State<CouponListScreen> {
                   const SizedBox(height: 16.0),
                   ElevatedButton(
                     onPressed: _loadShopCoupons,
-                    child: const Text('다시 시도'),
+                    child: Text('다시 시도'),
                   ),
                 ],
               ),
@@ -299,7 +301,7 @@ class _CouponListScreenState extends State<CouponListScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      Text(
                         '보유 중인 포인트',
                         style: TextStyle(
                           fontSize: 14.0,
@@ -381,9 +383,9 @@ class _CouponListScreenState extends State<CouponListScreen> {
                 ),
                 child: Center(
                   child: Text(
-                    coupon.title.contains('호떡')
+                    l10n != null ? L10nMappers.mapCouponTitle(l10n!, coupon.title) : coupon.title.contains('호떡')
                         ? '🥞'
-                        : coupon.title.contains('커피')
+                        : l10n != null ? L10nMappers.mapCouponTitle(l10n!, coupon.title) : coupon.title.contains('커피')
                         ? '☕'
                         : '🐟',
                     style: const TextStyle(fontSize: 48.0),
@@ -399,7 +401,7 @@ class _CouponListScreenState extends State<CouponListScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    coupon.title,
+                    l10n != null ? L10nMappers.mapCouponTitle(l10n!, coupon.title) : coupon.title,
                     style: const TextStyle(
                       fontSize: 13.0,
                       fontWeight: FontWeight.bold,

@@ -80,7 +80,7 @@
   "emailInquiry": "邮件咨询",
   "emptyNoData": "暂无数据。",
   "emptySearch": "未找到搜索结果。",
-  "errorNetwork": "网络连接失败，请稍后再试。",
+  "errorNetwork": "请检查您的网络连接。",
   "estTime": "预计所需时间",
   "exchangeStore": "积分兑换",
   "exploreTitle": "探索",
@@ -535,5 +535,95 @@
   "retryButton": "重试",
   "errorOccurred": "发生错误",
   "aiRecommendTag": "AI推荐",
-  "popularPlaceTag": "热门名胜"
+  "popularPlaceTag": "热门名胜",
+  "activitySignupTitle": "注册完成",
+  "activitySignupDescription": "衷心欢迎您加入南浦GoGo！",
+  "activityMissionTitle": "任务完成",
+  "activityMissionDescription": "您已成功完成探访打卡任务。",
+  "activityCouponTitle": "优惠券发放与使用",
+  "activityCouponDescription": "合作商家优惠券优惠已成功生效。",
+  "activityPointTitle": "积分变动",
+  "activityPointDescription": "您的南浦GoGo积分已更新。",
+  "activityReviewTitle": "发布评价",
+  "activityReviewDescription": "感谢您提交宝贵的探店评价。",
+  "activityReservationTitle": "预约通知",
+  "activityReservationDescription": "您的店铺预约状态已更新。",
+  "activityFavoriteTitle": "收藏夹",
+  "activityFavoriteDescription": "您已成功收藏关注的名胜地点。",
+  "pointTxSignupBonus": "新用户注册欢迎积分",
+  "pointTxMissionReward": "打卡任务完成奖励",
+  "pointTxCouponExchange": "兑换优惠券积分扣除",
+  "pointTxCouponUse": "优惠券核销使用",
+  "pointTxGiftSend": "赠送积分礼品",
+  "pointTxGiftReceive": "收到积分礼品",
+  "pointTxGiftCancel": "取消赠送积分退回",
+  "pointTxAttendance": "每日签到奖励",
+  "pointTxReviewReward": "到店评价奖励",
+  "pointTxAdminAdjustment": "管理员调整/发放",
+  "pointTxCharge": "积分充值",
+  "pointTxSpend": "积分消费",
+  "pointTxEarn": "积分获得",
+  "pointTxGeneral": "积分交易记录",
+  "couponBiffHotteokTitle": "BIFF广场 葵花籽糖饼 1个 兑换券",
+  "couponBiffHotteokDesc": "可在南浦洞BIFF广场合作摊位兑换美味香酥的葵花籽糖饼1个。",
+  "couponCafeAmericanoTitle": "南浦名家 美式咖啡 1杯 兑换券",
+  "couponCafeAmericanoDesc": "可在南浦洞胡同特色优质合作咖啡厅兑换美式咖啡(冷/热)1杯。",
+  "couponJagalchiDiscountTitle": "札嘎其市场 新鲜海鲜 10% 就餐折扣券",
+  "couponJagalchiDiscountDesc": "在札嘎其市场指定合作餐厅点餐就餐或品尝活鱼刺身时可立享9折优惠。",
+  "couponStatusUnused": "可使用",
+  "couponUseAction": "立即使用优惠券",
+  "couponUsedDate": "使用时间: {date}",
+  "@couponUsedDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "couponExpiryDate": "有效期至: {date}",
+  "@couponExpiryDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "couponCostPoints": "{points}P 兑换",
+  "@couponCostPoints": {
+    "placeholders": {
+      "points": {
+        "type": "String"
+      }
+    }
+  },
+  "couponExchangeConfirm": "确认兑换此优惠券吗？",
+  "couponExchangeSuccess": "优惠券兑换成功。",
+  "couponDetailTitle": "优惠券详情",
+  "couponNoCoupons": "暂无可用优惠券。",
+  "couponAvailableTitle": "可用优惠券",
+  "couponUsedTitle": "已使用及已过期",
+  "savedPlacesTab": "已收藏地点",
+  "savedCoursesTab": "推荐路线",
+  "favoritesEmptyTitle": "暂无收藏地点。",
+  "favoritesEmptySubtitle": "探索南浦洞精彩景点并加入您的收藏夹吧！",
+  "savedCoursesEmptyTitle": "暂无收藏路线。",
+  "savedCoursesEmptySubtitle": "发现并保存专属于您的个性化旅行路线！",
+  "reservationDetailTitle": "预约详情",
+  "reservationNumber": "预约编号",
+  "reservationDate": "预约时间",
+  "reservationPartySize": "预约人数",
+  "reservationCancelAction": "取消预约",
+  "reservationCancelSuccess": "预约已成功取消。",
+  "reservationEmptyTitle": "暂无预约记录。",
+  "notificationPushTitle": "推送通知",
+  "notificationMarketingTitle": "优惠活动与福利通知",
+  "notificationMissionTitle": "附近打卡任务提醒",
+  "notificationEmpty": "暂无新通知。",
+  "errorServer": "服务器通信异常，请稍后重试。",
+  "errorAuthFailed": "登录凭证无效或已过期，请重新登录。",
+  "retryAction": "重试",
+  "confirmAction": "确认",
+  "cancelAction": "取消",
+  "deleteAction": "删除",
+  "saveAction": "保存"
 }

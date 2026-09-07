@@ -5,6 +5,7 @@ import '../models/point_history.dart';
 import '../repositories/point_repository.dart';
 import '../providers/auth_provider.dart';
 import '../l10n/app_localizations.dart';
+import '../utils/l10n_mappers.dart';
 import 'payment_screen.dart';
 import 'point_gift_screen.dart';
 import 'coupon_list_screen.dart';
@@ -35,62 +36,59 @@ class _PointHistoryScreenState extends State<PointHistoryScreen> {
       _errorMessage = null;
     });
 
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final userId = authProvider.currentUser?.id;
+    final authProvider = context.read<AuthProvider>();
+    final user = authProvider.currentUser;
+
+    if (user == null) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = '로그인이 필요한 서비스입니다.';
+      });
+      return;
+    }
 
     try {
-      final pointsData = await _pointRepository.getUserPointsData(userId: userId);
-      final history = await _pointRepository.getPointHistory(userId: userId);
-
-      final currentPts = pointsData['current_points'] ?? 0;
-      final lifetimePts = pointsData['lifetime_earned_points'] ?? 0;
-
-      // Sync AuthProvider status with both current and lifetime earned points
-      authProvider.updatePoints(currentPts, newLifetimeEarnedPoints: lifetimePts);
+      final points = await _pointRepository.getUserPoints(userId: user.id);
+      final histories = await _pointRepository.getPointHistory(userId: user.id);
 
       setState(() {
-        _currentPoints = currentPts;
-        _histories = history;
+        _currentPoints = points;
+        _histories = histories;
+        _isLoading = false;
       });
     } catch (e) {
       setState(() {
-        _errorMessage = e.toString();
+        _isLoading = false;
+        _errorMessage = '포인트 내역을 불러오는데 실패했습니다.';
       });
-    } finally {
-      setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(
           l10n?.pointHistoryTitle ?? '포인트 이용 내역',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        backgroundColor: AppColors.surface,
+        backgroundColor: AppColors.background,
+        elevation: 0,
         foregroundColor: AppColors.textPrimary,
-        elevation: 0.5,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadPointsAndHistory,
-          ),
-        ],
       ),
       body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            )
+          ? const Center(child: CircularProgressIndicator())
           : _errorMessage != null
           ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('에러가 발생했습니다: $_errorMessage'),
+                  Text(
+                    _errorMessage!,
+                    style: const TextStyle(color: AppColors.textSecondary),
+                  ),
                   const SizedBox(height: 16.0),
                   ElevatedButton(
                     onPressed: _loadPointsAndHistory,
@@ -99,14 +97,12 @@ class _PointHistoryScreenState extends State<PointHistoryScreen> {
                 ],
               ),
             )
-          : RefreshIndicator(
-              onRefresh: _loadPointsAndHistory,
-              color: AppColors.primary,
-              child: ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(16.0),
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 1. Current Points Card Dashboard
+                  // 1. Point Summary Card
                   _buildPointsCard(l10n),
                   const SizedBox(height: 24.0),
 
@@ -133,7 +129,7 @@ class _PointHistoryScreenState extends State<PointHistoryScreen> {
                       ),
                     )
                   else
-                    ..._histories.map((item) => _buildHistoryItem(item)),
+                    ..._histories.map((item) => _buildHistoryItem(item, l10n)),
                 ],
               ),
             ),
@@ -296,7 +292,7 @@ class _PointHistoryScreenState extends State<PointHistoryScreen> {
     );
   }
 
-  Widget _buildHistoryItem(PointHistory item) {
+  Widget _buildHistoryItem(PointHistory item, AppLocalizations? l10n) {
     final isEarn = item.points > 0;
 
     // Formatting date
@@ -304,6 +300,10 @@ class _PointHistoryScreenState extends State<PointHistoryScreen> {
         '${item.createdAt.year}.${item.createdAt.month.toString().padLeft(2, '0')}.${item.createdAt.day.toString().padLeft(2, '0')}';
     final timeStr =
         '${item.createdAt.hour.toString().padLeft(2, '0')}:${item.createdAt.minute.toString().padLeft(2, '0')}';
+
+    final localizedActivity = l10n != null
+        ? L10nMappers.mapPointHistoryActivity(l10n, item.activity)
+        : item.activity;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12.0),
@@ -338,7 +338,7 @@ class _PointHistoryScreenState extends State<PointHistoryScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  item.activity,
+                  localizedActivity,
                   style: const TextStyle(
                     fontSize: 13.0,
                     fontWeight: FontWeight.w600,

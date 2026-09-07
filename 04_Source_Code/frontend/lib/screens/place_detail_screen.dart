@@ -344,11 +344,12 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final localeCode = context.watch<LocaleProvider>().currentLocaleCode;
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(
-          _place?.name ?? l10n?.mapViewDetail ?? '장소 상세',
+          _place?.localizedName(localeCode) ?? l10n?.mapViewDetail ?? '장소 상세',
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: AppColors.surface,
@@ -414,6 +415,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
 
   Widget _buildContent(BuildContext context, Place place) {
     final l10n = AppLocalizations.of(context);
+    final localeCode = context.watch<LocaleProvider>().currentLocaleCode;
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.only(bottom: 24.0),
@@ -456,7 +458,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                       borderRadius: BorderRadius.circular(8.0),
                     ),
                     child: Text(
-                      place.address,
+                      place.localizedAddress(localeCode),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 12.0,
@@ -551,7 +553,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
 
                 // Name
                 Text(
-                  place.name,
+                  place.localizedName(localeCode),
                   style: const TextStyle(
                     fontSize: 22.0,
                     fontWeight: FontWeight.bold,
@@ -571,7 +573,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                 ),
                 const SizedBox(height: 6.0),
                 Text(
-                  place.description,
+                  place.localizedDescription(localeCode),
                   style: const TextStyle(
                     fontSize: 13.0,
                     color: AppColors.textSecondary,

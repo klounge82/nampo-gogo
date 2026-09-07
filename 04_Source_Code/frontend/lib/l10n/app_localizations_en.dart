@@ -254,7 +254,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emptySearch => 'No search results found.';
 
   @override
-  String get errorNetwork => 'Network connection error. Please try again.';
+  String get errorNetwork => 'Please check your network connection.';
 
   @override
   String get estTime => 'Est. Duration';
@@ -1561,4 +1561,232 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get popularPlaceTag => 'Popular Spot';
+
+  @override
+  String get activitySignupTitle => 'Welcome to Nampo GoGo';
+
+  @override
+  String get activitySignupDescription =>
+      'Welcome! Thank you for joining Nampo GoGo!';
+
+  @override
+  String get activityMissionTitle => 'Mission Completed';
+
+  @override
+  String get activityMissionDescription =>
+      'You have successfully completed a verification mission.';
+
+  @override
+  String get activityCouponTitle => 'Coupon Issued & Used';
+
+  @override
+  String get activityCouponDescription =>
+      'Your partner merchant discount has been applied.';
+
+  @override
+  String get activityPointTitle => 'Point History Update';
+
+  @override
+  String get activityPointDescription =>
+      'Your Nampo GoGo points balance has been updated.';
+
+  @override
+  String get activityReviewTitle => 'Review Submitted';
+
+  @override
+  String get activityReviewDescription =>
+      'Thank you for sharing your visit review.';
+
+  @override
+  String get activityReservationTitle => 'Reservation Notice';
+
+  @override
+  String get activityReservationDescription =>
+      'Your store reservation status has been updated.';
+
+  @override
+  String get activityFavoriteTitle => 'Saved to Favorites';
+
+  @override
+  String get activityFavoriteDescription =>
+      'You have saved a new spot to your favorites list.';
+
+  @override
+  String get pointTxSignupBonus => 'New Member Welcome Bonus Points';
+
+  @override
+  String get pointTxMissionReward => 'Mission Completion Reward';
+
+  @override
+  String get pointTxCouponExchange => 'Coupon Exchange Points Deduction';
+
+  @override
+  String get pointTxCouponUse => 'Coupon Redemption';
+
+  @override
+  String get pointTxGiftSend => 'Send Point Gift';
+
+  @override
+  String get pointTxGiftReceive => 'Receive Point Gift';
+
+  @override
+  String get pointTxGiftCancel => 'Cancelled Gift Point Refund';
+
+  @override
+  String get pointTxAttendance => 'Daily Check-in Reward';
+
+  @override
+  String get pointTxReviewReward => 'Visit Review Reward';
+
+  @override
+  String get pointTxAdminAdjustment => 'Admin Adjustment / Grant';
+
+  @override
+  String get pointTxCharge => 'Point Charge';
+
+  @override
+  String get pointTxSpend => 'Point Used';
+
+  @override
+  String get pointTxEarn => 'Point Earned';
+
+  @override
+  String get pointTxGeneral => 'Point Transaction';
+
+  @override
+  String get couponBiffHotteokTitle => 'BIFF Square Seed Hotteok Coupon';
+
+  @override
+  String get couponBiffHotteokDesc =>
+      'Redeemable for 1 delicious seed hotteok at participating food stalls in BIFF Square.';
+
+  @override
+  String get couponCafeAmericanoTitle => 'Nampo Cafe Americano (1 Cup) Coupon';
+
+  @override
+  String get couponCafeAmericanoDesc =>
+      'Redeemable for 1 Americano (HOT/ICE) at cozy partner cafes in Nampo-dong alleys.';
+
+  @override
+  String get couponJagalchiDiscountTitle =>
+      'Jagalchi Fresh Seafood 10% Discount Voucher';
+
+  @override
+  String get couponJagalchiDiscountDesc =>
+      'Enjoy an instant 10% discount on meals and fresh sashimi at partner restaurants in Jagalchi Market.';
+
+  @override
+  String get couponStatusUnused => 'Available';
+
+  @override
+  String get couponUseAction => 'Use Coupon';
+
+  @override
+  String couponUsedDate(String date) {
+    return 'Used at: $date';
+  }
+
+  @override
+  String couponExpiryDate(String date) {
+    return 'Valid until: $date';
+  }
+
+  @override
+  String couponCostPoints(String points) {
+    return '${points}P Exchange';
+  }
+
+  @override
+  String get couponExchangeConfirm =>
+      'Would you like to exchange points for this coupon?';
+
+  @override
+  String get couponExchangeSuccess => 'Coupon issued successfully.';
+
+  @override
+  String get couponDetailTitle => 'Coupon Details';
+
+  @override
+  String get couponNoCoupons => 'You have no coupons yet.';
+
+  @override
+  String get couponAvailableTitle => 'Available Coupons';
+
+  @override
+  String get couponUsedTitle => 'Used & Expired';
+
+  @override
+  String get savedPlacesTab => 'Saved Places';
+
+  @override
+  String get savedCoursesTab => 'Recommended Courses';
+
+  @override
+  String get favoritesEmptyTitle => 'No saved places yet.';
+
+  @override
+  String get favoritesEmptySubtitle =>
+      'Explore and add your favorite Nampo spots to your list!';
+
+  @override
+  String get savedCoursesEmptyTitle => 'No saved courses yet.';
+
+  @override
+  String get savedCoursesEmptySubtitle =>
+      'Discover and save personalized travel itineraries!';
+
+  @override
+  String get reservationDetailTitle => 'Reservation Details';
+
+  @override
+  String get reservationNumber => 'Reservation No.';
+
+  @override
+  String get reservationDate => 'Date & Time';
+
+  @override
+  String get reservationPartySize => 'Party Size';
+
+  @override
+  String get reservationCancelAction => 'Cancel Reservation';
+
+  @override
+  String get reservationCancelSuccess => 'Reservation cancelled successfully.';
+
+  @override
+  String get reservationEmptyTitle => 'No reservation history.';
+
+  @override
+  String get notificationPushTitle => 'Push Notifications';
+
+  @override
+  String get notificationMarketingTitle => 'Promotions & Events';
+
+  @override
+  String get notificationMissionTitle => 'Nearby Mission Alerts';
+
+  @override
+  String get notificationEmpty => 'No new notifications.';
+
+  @override
+  String get errorServer => 'A server error occurred. Please try again.';
+
+  @override
+  String get errorAuthFailed =>
+      'Invalid or expired credentials. Please log in again.';
+
+  @override
+  String get retryAction => 'Retry';
+
+  @override
+  String get confirmAction => 'Confirm';
+
+  @override
+  String get cancelAction => 'Cancel';
+
+  @override
+  String get deleteAction => 'Delete';
+
+  @override
+  String get saveAction => 'Save';
 }

@@ -5,6 +5,8 @@ import '../repositories/recommendation_repository.dart';
 import '../providers/auth_provider.dart';
 import '../providers/favorite_provider.dart';
 import '../l10n/app_localizations.dart';
+import '../utils/l10n_mappers.dart';
+import '../providers/locale_provider.dart';
 import 'recommendation_result_screen.dart';
 
 class SavedCoursesScreen extends StatefulWidget {
