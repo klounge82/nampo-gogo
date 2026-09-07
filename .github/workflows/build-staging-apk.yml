@@ -40,12 +40,15 @@ jobs:
         working-directory: 04_Source_Code/frontend/android
         run: |
           mkdir -p app
-          keytool -genkey -v -keystore app/upload-keystore.jks \
+          keytool -genkeypair -v \
+            -keystore app/upload-keystore.jks \
+            -storetype PKCS12 \
             -storepass nampogogostaging2026 \
             -alias nampogogostaging \
             -keypass nampogogostaging2026 \
             -keyalg RSA -keysize 2048 -validity 10000 \
-            -dname "CN=NampoGoGo Staging, OU=Field Test, O=NampoGoGo, L=Busan, C=KR"
+            -dname "CN=NampoGoGo Staging, OU=Field Test, O=NampoGoGo, L=Busan, C=KR" \
+            -noprompt
           cp app/upload-keystore.jks upload-keystore.jks
           cat <<EOF > key.properties
           MAPS_API_KEY=AIzaSyCmSL87cU8vAyD-hUpgw_Tz0a8mRQzKmao
@@ -54,6 +57,7 @@ jobs:
           keyAlias=nampogogostaging
           storeFile=upload-keystore.jks
           EOF
+          keytool -list -v -keystore app/upload-keystore.jks -storepass nampogogostaging2026
 
       - name: Install dependencies
         working-directory: 04_Source_Code/frontend
@@ -62,19 +66,9 @@ jobs:
       - name: Build Staging APK
         working-directory: 04_Source_Code/frontend
         run: |
-          if ! flutter build apk --release --verbose \
+          flutter build apk --release \
             --dart-define=APP_ENV=staging \
-            --dart-define=API_BASE_URL=https://backend-staging-f18f.up.railway.app > /tmp/flutter_build.log 2>&1; then
-              echo "## ❌ Build Failed" >> $GITHUB_STEP_SUMMARY
-              echo '```' >> $GITHUB_STEP_SUMMARY
-              tail -n 250 /tmp/flutter_build.log >> $GITHUB_STEP_SUMMARY
-              echo '```' >> $GITHUB_STEP_SUMMARY
-              cat /tmp/flutter_build.log
-              exit 1
-          else
-              echo "## ✅ Staging APK Build Succeeded!" >> $GITHUB_STEP_SUMMARY
-              ls -lh build/app/outputs/flutter-apk/ >> $GITHUB_STEP_SUMMARY
-          fi
+            --dart-define=API_BASE_URL=https://backend-staging-f18f.up.railway.app
 
       - name: Upload APK Artifact
         if: success()
