@@ -51,6 +51,21 @@ android {
             ?: System.getenv("MAPS_API_KEY")
             ?: ""
         manifestPlaceholders["MAPS_API_KEY"] = mapsKey
+        manifestPlaceholders["appLabel"] = "Nampo GoGo"
+    }
+
+    flavorDimensions += "environment"
+    productFlavors {
+        create("production") {
+            dimension = "environment"
+            applicationId = "com.nampogogo.app"
+            manifestPlaceholders["appLabel"] = "Nampo GoGo"
+        }
+        create("staging") {
+            dimension = "environment"
+            applicationIdSuffix = ".staging"
+            manifestPlaceholders["appLabel"] = "NAMPO GOGO STAGING"
+        }
     }
 
     signingConfigs {

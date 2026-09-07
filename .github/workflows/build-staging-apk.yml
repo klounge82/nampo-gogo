@@ -17,8 +17,6 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Set up Java 17
         uses: actions/setup-java@v4
@@ -70,6 +68,25 @@ jobs:
                     "other_platform_oauth_client": []
                   }
                 }
+              },
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:802989300624:android:466bf72465ed7605b3f116",
+                  "android_client_info": {
+                    "package_name": "com.nampogogo.app.staging"
+                  }
+                },
+                "oauth_client": [],
+                "api_key": [
+                  {
+                    "current_key": "AIzaSyBoW7vZbRQh6BzVw5nWb5Su-NOxDlDuBAw"
+                  }
+                ],
+                "services": {
+                  "appinvite_service": {
+                    "other_platform_oauth_client": []
+                  }
+                }
               }
             ],
             "configuration_version": "1"
@@ -106,7 +123,7 @@ jobs:
       - name: Build Staging APK
         working-directory: 04_Source_Code/frontend
         run: |
-          flutter build apk --release \
+          flutter build apk --release --flavor staging \
             --dart-define=APP_ENV=staging \
             --dart-define=API_BASE_URL=https://backend-staging-f18f.up.railway.app
 
@@ -115,16 +132,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: nampo-gogo-staging-c420ddd
-          path: 04_Source_Code/frontend/build/app/outputs/flutter-apk/app-release.apk
+          path: 04_Source_Code/frontend/build/app/outputs/flutter-apk/app-staging-release.apk
           if-no-files-found: error
           retention-days: 14
-
-      - name: Push APK to Staging Branch
-        if: success()
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          cp 04_Source_Code/frontend/build/app/outputs/flutter-apk/app-release.apk nampo-gogo-staging-c420ddd.apk
-          git add nampo-gogo-staging-c420ddd.apk
-          git commit -m "ci: [skip ci] publish staging apk artifact"
-          git push origin HEAD:staging/field-c420ddd
