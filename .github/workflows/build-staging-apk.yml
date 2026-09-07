@@ -31,8 +31,10 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Accept Android Licenses
-        run: yes | sdkmanager --licenses || true
+      - name: Install Android Platforms and Accept Licenses
+        run: |
+          yes | sdkmanager --licenses || true
+          sdkmanager "platforms;android-36" "build-tools;36.0.0" "platforms;android-35" "build-tools;35.0.0" || true
 
       - name: Configure Staging Android Keystore
         working-directory: 04_Source_Code/frontend/android
@@ -60,9 +62,15 @@ jobs:
       - name: Build Staging APK
         working-directory: 04_Source_Code/frontend
         run: |
+          set -o pipefail
           flutter build apk --release \
             --dart-define=APP_ENV=staging \
-            --dart-define=API_BASE_URL=https://backend-staging-f18f.up.railway.app
+            --dart-define=API_BASE_URL=https://backend-staging-f18f.up.railway.app 2>&1 | tee /tmp/flutter_build.log || {
+              echo "=== FLUTTER BUILD ERROR SNIPPET ==="
+              tail -n 100 /tmp/flutter_build.log > /tmp/error_summary.txt
+              cat /tmp/error_summary.txt
+              exit 1
+            }
 
       - name: Upload APK Artifact
         if: success()
@@ -73,12 +81,10 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-      - name: Upload Build Failure Logs
+      - name: Upload Error Summary Artifact
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: build-failure-logs
-          path: |
-            04_Source_Code/frontend/build/
-            ~/.gradle/daemon/
+          name: build-error-summary
+          path: /tmp/error_summary.txt
           retention-days: 3
