@@ -28,6 +28,12 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Accept Android Licenses
+        run: yes | sdkmanager --licenses || true
+
       - name: Configure Staging Android Keystore
         working-directory: 04_Source_Code/frontend/android
         run: |
@@ -54,14 +60,25 @@ jobs:
       - name: Build Staging APK
         working-directory: 04_Source_Code/frontend
         run: |
-          flutter build apk --release --verbose \
+          flutter build apk --release \
             --dart-define=APP_ENV=staging \
             --dart-define=API_BASE_URL=https://backend-staging-f18f.up.railway.app
 
       - name: Upload APK Artifact
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: nampo-gogo-staging-c420ddd
           path: 04_Source_Code/frontend/build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
           retention-days: 14
+
+      - name: Upload Build Failure Logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-failure-logs
+          path: |
+            04_Source_Code/frontend/build/
+            ~/.gradle/daemon/
+          retention-days: 3
